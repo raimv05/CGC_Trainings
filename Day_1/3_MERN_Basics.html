@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hour 3 – First HTML Page</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f4f5f7;
+    color: #1a1a1a;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem 1rem;
+  }
+  .wrapper {
+    width: 100%; max-width: 900px;
+    background: #fff; border-radius: 16px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.08); overflow: hidden;
+  }
+  .top-bar {
+    background: #1a0533; color: #fff;
+    padding: 14px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .top-bar-title { font-size: 15px; font-weight: 600; }
+  .top-bar-sub   { font-size: 12px; opacity: .55; margin-top: 2px; }
+  .slide-counter { font-size: 13px; opacity: .6; }
+
+  .slide { display: none; padding: 1.75rem 2rem; min-height: 500px; flex-direction: column; gap: 1.2rem; }
+  .slide.active { display: flex; }
+
+  .slide-header { display: flex; align-items: center; gap: 10px; padding-bottom: 1rem; border-bottom: 1px solid #e8e8e8; }
+  .slide-title    { font-size: 20px; font-weight: 700; color: #111; }
+  .slide-subtitle { font-size: 13px; color: #666; margin-top: 2px; }
+
+  .topic-badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+  .badge-blue   { background: #dbeafe; color: #1d4ed8; }
+  .badge-teal   { background: #d1fae5; color: #065f46; }
+  .badge-purple { background: #ede9fe; color: #5b21b6; }
+  .badge-amber  { background: #fef3c7; color: #92400e; }
+  .badge-coral  { background: #fee2e2; color: #991b1b; }
+  .badge-green  { background: #dcfce7; color: #166534; }
+  .badge-slate  { background: #e2e8f0; color: #334155; }
+  .badge-rose   { background: #ffe4e6; color: #9f1239; }
+  .badge-orange { background: #ffedd5; color: #9a3412; }
+
+  .section-label { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 8px; }
+  .card { background: #fff; border: 1px solid #e8e8e8; border-radius: 12px; padding: 1rem 1.25rem; }
+  .card-gray { background: #f8f9fa; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+  /* ── Code editor ── */
+  .editor {
+    background: #1e1e2e; border-radius: 12px; overflow: hidden;
+    font-family: 'SFMono-Regular', Consolas, 'Courier New', monospace;
+  }
+  .editor-bar {
+    background: #13131f; padding: 9px 14px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .e-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .e-red    { background: #ff5f57; }
+  .e-yellow { background: #febc2e; }
+  .e-green  { background: #28c840; }
+  .e-label  { font-size: 12px; color: #6272a4; margin-left: 4px; font-family: -apple-system, sans-serif; }
+  .editor-body { padding: 16px 20px; font-size: 13px; line-height: 1.75; }
+  .e-ln  { color: #44475a; font-size: 11px; display: inline-block; width: 22px; user-select: none; }
+  .e-tag { color: #ff79c6; }
+  .e-att { color: #50fa7b; }
+  .e-val { color: #f1fa8c; }
+  .e-txt { color: #f8f8f2; }
+  .e-cmt { color: #6272a4; font-style: italic; }
+  .e-row { display: flex; gap: 8px; }
+
+  /* ── Terminal ── */
+  .terminal { background: #0f172a; border-radius: 10px; overflow: hidden; font-family: 'SFMono-Regular', Consolas, monospace; }
+  .terminal-bar { background: #1e293b; padding: 8px 14px; display: flex; align-items: center; gap: 6px; }
+  .t-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .t-red { background: #ef4444; } .t-yellow { background: #f59e0b; } .t-green { background: #22c55e; }
+  .t-label  { font-size: 11px; color: #64748b; margin-left: 4px; font-family: -apple-system, sans-serif; }
+  .terminal-body { padding: 14px 18px; }
+  .t-prompt  { color: #22c55e; font-size: 13px; }
+  .t-cmd     { color: #e2e8f0; font-size: 13px; }
+  .t-output  { color: #94a3b8; font-size: 13px; margin-top: 2px; display: block; }
+  .t-line    { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+
+  /* ── Browser preview ── */
+  .browser-frame { border-radius: 12px; overflow: hidden; border: 1px solid #e8e8e8; }
+  .browser-bar {
+    background: #f1f3f4; padding: 10px 14px;
+    display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #e0e0e0;
+  }
+  .b-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .b-red { background: #ff5f57; } .b-yellow { background: #febc2e; } .b-green { background: #28c840; }
+  .b-url {
+    flex: 1; background: #fff; border: 1px solid #dadce0; border-radius: 20px;
+    padding: 4px 14px; font-size: 12px; color: #555; margin: 0 6px;
+  }
+  .browser-body { background: #fff; padding: 18px 22px; font-family: Georgia, serif; }
+  .preview-h1 { font-size: 22px; font-weight: 700; color: #000; margin-bottom: 10px; }
+  .preview-h2 { font-size: 17px; font-weight: 700; color: #000; margin: 14px 0 6px; }
+  .preview-p  { font-size: 14px; color: #333; line-height: 1.7; margin-bottom: 8px; }
+  .preview-ul { margin-left: 22px; }
+  .preview-li { font-size: 14px; color: #333; margin-bottom: 3px; list-style: disc; }
+
+  /* ── Tag explainer ── */
+  .tag-card {
+    border: 1px solid #e8e8e8; border-radius: 10px; padding: 12px 16px;
+    display: flex; gap: 12px; align-items: flex-start;
+  }
+  .tag-pill {
+    font-family: 'SFMono-Regular', Consolas, monospace;
+    font-size: 13px; font-weight: 700; padding: 4px 12px;
+    border-radius: 6px; white-space: nowrap; flex-shrink: 0;
+  }
+  .tag-content .tag-name { font-size: 13px; font-weight: 700; color: #111; }
+  .tag-content .tag-desc { font-size: 12px; color: #666; margin-top: 2px; line-height: 1.55; }
+
+  /* ── Activity / Assignment ── */
+  .activity-box {
+    border: 2px dashed #a5b4fc; background: #eef2ff;
+    border-radius: 12px; padding: 14px 18px;
+  }
+  .activity-title { font-size: 13px; font-weight: 700; color: #3730a3; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+  .assign-req {
+    display: flex; align-items: center; gap: 8px;
+    padding: 7px 0; border-bottom: 1px solid #e0e7ff;
+    font-size: 13px; color: #3730a3;
+  }
+  .assign-req:last-child { border-bottom: none; }
+
+  /* ── Quiz ── */
+  .quiz-option {
+    border: 1px solid #dee2e6; border-radius: 8px; padding: 10px 14px;
+    font-size: 13px; cursor: pointer; margin-bottom: 6px;
+    transition: all .15s; background: transparent; width: 100%; text-align: left; color: #1a1a1a;
+  }
+  .quiz-option:hover:not(:disabled) { background: #f8f9fa; }
+  .quiz-option.correct { background: #d1fae5; border-color: #059669; color: #065f46; }
+  .quiz-option.wrong   { background: #fee2e2; border-color: #dc2626; color: #991b1b; }
+  .quiz-feedback { display: none; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-top: 4px; }
+  .quiz-feedback.correct { background: #d1fae5; color: #065f46; display: block; }
+  .quiz-feedback.wrong   { background: #fee2e2; color: #991b1b; display: block; }
+
+  /* ── Folder tree ── */
+  .folder-tree {
+    background: #0f172a; border-radius: 10px; padding: 16px 20px;
+    font-family: 'SFMono-Regular', Consolas, monospace; font-size: 13px;
+  }
+  .ft-root { color: #fbbf24; font-weight: 700; }
+  .ft-dir  { color: #60a5fa; }
+  .ft-file { color: #a3e635; }
+  .ft-line { color: #475569; }
+  .ft-row  { display: flex; align-items: center; gap: 6px; margin: 4px 0; }
+
+  /* ── Checklist ── */
+  .check-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px; border-radius: 10px; border: 1px solid #e8e8e8;
+    font-size: 13px; cursor: pointer; transition: all .15s; user-select: none;
+  }
+  .check-item:hover { background: #f8f9fa; }
+  .check-item.done { background: #f0fdf4; border-color: #86efac; }
+  .check-circle {
+    width: 22px; height: 22px; border-radius: 50%; border: 2px solid #dee2e6;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; flex-shrink: 0; transition: all .2s;
+    color: transparent;
+  }
+  .check-item.done .check-circle { background: #22c55e; border-color: #22c55e; color: #fff; }
+
+  /* ── Code highlighter (interactive) ── */
+  .line-explain {
+    border: 1px solid #e8e8e8; border-radius: 10px; overflow: hidden;
+  }
+  .lex-row {
+    display: flex; align-items: stretch; cursor: pointer;
+    transition: background .12s; border-bottom: 1px solid #f0f0f0;
+  }
+  .lex-row:last-child { border-bottom: none; }
+  .lex-row:hover { background: #f8f9fa; }
+  .lex-row.active { background: #eff6ff; border-left: 3px solid #1d4ed8; }
+  .lex-code {
+    background: #1e1e2e; padding: 10px 16px; font-family: 'SFMono-Regular', Consolas, monospace;
+    font-size: 12px; min-width: 260px; flex-shrink: 0; display: flex; align-items: center;
+  }
+  .lex-info { padding: 10px 14px; flex: 1; }
+  .lex-name { font-size: 13px; font-weight: 700; color: #1d4ed8; margin-bottom: 2px; }
+  .lex-desc { font-size: 12px; color: #555; line-height: 1.55; }
+  .lex-detail { display: none; font-size: 12px; color: #1d4ed8; margin-top: 4px; }
+  .lex-row.active .lex-detail { display: block; }
+
+  /* ── Tips ── */
+  .tip-box { display: flex; gap: 10px; align-items: flex-start; background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; padding: 10px 14px; }
+  .tip-icon { color: #d97706; font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .tip-text { font-size: 13px; color: #92400e; line-height: 1.6; }
+  .info-box { display: flex; gap: 10px; align-items: flex-start; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px; padding: 10px 14px; }
+  .info-icon { color: #2563eb; font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .info-text { font-size: 13px; color: #1e40af; line-height: 1.6; }
+
+  /* ── Nav ── */
+  .nav-row {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: auto; padding-top: 1rem; border-top: 1px solid #f0f0f0;
+  }
+  .nav-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 9px 18px; border: 1px solid #dee2e6;
+    border-radius: 8px; background: transparent;
+    font-size: 13px; cursor: pointer; color: #333; transition: background .15s;
+  }
+  .nav-btn:hover:not(:disabled) { background: #f1f3f5; }
+  .nav-btn:disabled { opacity: .35; cursor: default; }
+  .nav-btn.primary { background: #1d4ed8; border-color: transparent; color: #fff; }
+  .nav-btn.primary:hover { background: #1e40af; }
+
+  .progress-dots { display: flex; gap: 6px; align-items: center; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: #dee2e6; transition: all .2s; }
+  .dot.active { width: 20px; border-radius: 4px; background: #1d4ed8; }
+
+  /* ── Home ── */
+  .home-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .home-card {
+    background: #fff; border: 1px solid #e8e8e8; border-radius: 12px;
+    padding: 1rem 1.25rem; cursor: pointer; transition: all .15s;
+  }
+  .home-card:hover { border-color: #1d4ed8; box-shadow: 0 2px 8px rgba(29,78,216,.1); }
+  .home-card-title { font-size: 15px; font-weight: 700; margin: 6px 0 2px; }
+  .home-card-sub   { font-size: 12px; color: #666; }
+
+  .tag { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; padding: 3px 9px; border-radius: 20px; font-weight: 600; }
+  .tag-blue   { background: #dbeafe; color: #1e40af; }
+  .tag-teal   { background: #d1fae5; color: #065f46; }
+  .tag-amber  { background: #fef3c7; color: #92400e; }
+  .tag-green  { background: #dcfce7; color: #166534; }
+  .tag-slate  { background: #e2e8f0; color: #334155; }
+  .tag-purple { background: #ede9fe; color: #5b21b6; }
+  .tag-rose   { background: #ffe4e6; color: #9f1239; }
+
+  code { font-family: 'SFMono-Regular', Consolas, monospace; font-size: 12px; background: #f1f3f5; padding: 1px 6px; border-radius: 4px; border: 1px solid #dee2e6; }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <div>
+      <div class="top-bar-title">MERN Stack Training · Hour 3</div>
+      <div class="top-bar-sub">First HTML Page — SkillHub LMS</div>
+    </div>
+    <div class="slide-counter" id="slide-counter">1 / 11</div>
+  </div>
+
+  <!-- ═══════════════════════════════════ SLIDE 0 HOME ════════════════════════════════════ -->
+  <div class="slide active" id="slide-0">
+    <div class="slide-header">
+      <span class="topic-badge badge-orange">Hour 3</span>
+      <div>
+        <div class="slide-title">First HTML Page</div>
+        <div class="slide-subtitle">Students write their first real code for SkillHub LMS</div>
+      </div>
+    </div>
+    <div class="home-grid">
+      <div class="home-card" onclick="goSlide(1)">
+        <span class="topic-badge badge-teal">Setup</span>
+        <div class="home-card-title">Folder Structure</div>
+        <div class="home-card-sub">frontend/ with index.html and assets/</div>
+      </div>
+      <div class="home-card" onclick="goSlide(2)">
+        <span class="topic-badge badge-blue">Code</span>
+        <div class="home-card-title">Write index.html</div>
+        <div class="home-card-sub">The starter HTML file for SkillHub</div>
+      </div>
+      <div class="home-card" onclick="goSlide(3)">
+        <span class="topic-badge badge-purple">Learn</span>
+        <div class="home-card-title">Line-by-Line Explanation</div>
+        <div class="home-card-sub">Click each tag to understand what it does</div>
+      </div>
+      <div class="home-card" onclick="goSlide(4)">
+        <span class="topic-badge badge-amber">Preview</span>
+        <div class="home-card-title">Browser Preview</div>
+        <div class="home-card-sub">See exactly what the browser renders</div>
+      </div>
+      <div class="home-card" onclick="goSlide(5)">
+        <span class="topic-badge badge-green">Activity 1</span>
+        <div class="home-card-title">Add Our Courses Section</div>
+        <div class="home-card-sub">h2 heading + unordered list of courses</div>
+      </div>
+      <div class="home-card" onclick="goSlide(6)">
+        <span class="topic-badge badge-green">Activity 2</span>
+        <div class="home-card-title">Add Contact Section</div>
+        <div class="home-card-sub">h2 heading + email paragraph</div>
+      </div>
+      <div class="home-card" onclick="goSlide(7)">
+        <span class="topic-badge badge-teal">Final</span>
+        <div class="home-card-title">Final HTML Output</div>
+        <div class="home-card-sub">Complete index.html with all sections</div>
+      </div>
+      <div class="home-card" onclick="goSlide(8)">
+        <span class="topic-badge badge-slate">Tags</span>
+        <div class="home-card-title">HTML Tags Reference</div>
+        <div class="home-card-sub">All tags used today with examples</div>
+      </div>
+    </div>
+    <div class="grid-2" style="gap:10px">
+      <div class="home-card" onclick="goSlide(9)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="topic-badge badge-rose">Assignment</span>
+          <span style="font-size:14px;font-weight:700">My Portfolio — 30 min task</span>
+          <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+        </div>
+      </div>
+      <div class="home-card" onclick="goSlide(10)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="topic-badge badge-green">Quiz</span>
+          <span style="font-size:14px;font-weight:700">Quick Check — 5 questions</span>
+          <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <div></div>
+      <div class="progress-dots" id="dots-0"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Start <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════ SLIDE 1  FOLDER STRUCTURE ═══════════════════════════ -->
+  <div class="slide" id="slide-1">
+    <div class="slide-header">
+      <span class="topic-badge badge-teal">Setup</span>
+      <div>
+        <div class="slide-title">Folder Structure</div>
+        <div class="slide-subtitle">Create the frontend folder and files</div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="section-label">terminal commands</div>
+        <div class="terminal">
+          <div class="terminal-bar">
+            <div class="t-dot t-red"></div><div class="t-dot t-yellow"></div><div class="t-dot t-green"></div>
+            <span class="t-label">Terminal — SkillHub-LMS/</span>
+          </div>
+          <div class="terminal-body">
+            <div class="t-line"><span class="t-prompt">$</span><span class="t-cmd">cd frontend</span></div>
+            <div class="t-line"><span class="t-prompt">$</span><span class="t-cmd">mkdir assets</span></div>
+            <div class="t-line"><span class="t-prompt">$</span><span class="t-cmd">touch index.html</span></div>
+            <div class="t-line"><span class="t-prompt">$</span><span class="t-cmd">code index.html</span></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">folder structure</div>
+        <div class="folder-tree">
+          <div class="ft-row"><span class="ft-root"><i class="ti ti-folder-filled"></i> SkillHub-LMS/</span></div>
+          <div class="ft-row" style="margin-left:16px"><span class="ft-line">├──</span><span class="ft-dir"><i class="ti ti-folder"></i> frontend/</span></div>
+          <div class="ft-row" style="margin-left:36px"><span class="ft-line">├──</span><span class="ft-file"><i class="ti ti-file-code"></i> index.html</span><span style="color:#22c55e;font-size:11px;margin-left:6px">← NEW</span></div>
+          <div class="ft-row" style="margin-left:36px"><span class="ft-line">└──</span><span class="ft-dir"><i class="ti ti-folder"></i> assets/</span><span style="color:#22c55e;font-size:11px;margin-left:6px">← NEW</span></div>
+          <div class="ft-row" style="margin-left:16px"><span class="ft-line">├──</span><span class="ft-dir"><i class="ti ti-folder"></i> backend/</span></div>
+          <div class="ft-row" style="margin-left:16px"><span class="ft-line">├──</span><span class="ft-dir"><i class="ti ti-folder"></i> docs/</span></div>
+          <div class="ft-row" style="margin-left:16px"><span class="ft-line">└──</span><span class="ft-file"><i class="ti ti-markdown"></i> README.md</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-label">purpose of each item</div>
+      <div style="display:flex;flex-direction:column;gap:0">
+        <div style="display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid #f0f0f0">
+          <i class="ti ti-file-code" style="font-size:18px;color:#f59e0b;flex-shrink:0"></i>
+          <div><span style="font-weight:700;font-size:13px">index.html</span> — <span style="font-size:13px;color:#555">The homepage of SkillHub. Every website starts with an <code>index.html</code>. The browser opens this file first.</span></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;padding:9px 0">
+          <i class="ti ti-folder" style="font-size:18px;color:#60a5fa;flex-shrink:0"></i>
+          <div><span style="font-weight:700;font-size:13px">assets/</span> — <span style="font-size:13px;color:#555">Where we'll store images, CSS files, and JavaScript files used by the frontend.</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="tip-box">
+      <i class="ti ti-bulb tip-icon"></i>
+      <div class="tip-text"><strong>Why index.html?</strong> Web servers look for a file named <code>index.html</code> by default. When you visit <code>www.skillhub.com</code>, the server automatically sends <code>index.html</code> to the browser.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-1"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════ SLIDE 2  WRITE index.html ══════════════════════════ -->
+  <div class="slide" id="slide-2">
+    <div class="slide-header">
+      <span class="topic-badge badge-blue">Code</span>
+      <div>
+        <div class="slide-title">Write index.html</div>
+        <div class="slide-subtitle">Type this code into your editor — every character matters</div>
+      </div>
+    </div>
+    <div class="editor">
+      <div class="editor-bar">
+        <div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div>
+        <span class="e-label">frontend/index.html</span>
+      </div>
+      <div class="editor-body">
+        <div class="e-row"><span class="e-ln">1</span><span class="e-tag">&lt;!DOCTYPE html&gt;</span></div>
+        <div class="e-row"><span class="e-ln">2</span><span class="e-tag">&lt;html</span> <span class="e-att">lang</span><span class="e-txt">=</span><span class="e-val">"en"</span><span class="e-tag">&gt;</span></div>
+        <div class="e-row"><span class="e-ln">3</span><span class="e-tag">&lt;head&gt;</span></div>
+        <div class="e-row"><span class="e-ln">4</span><span style="display:inline-block;width:24px"></span><span class="e-tag">&lt;meta</span> <span class="e-att">charset</span><span class="e-txt">=</span><span class="e-val">"UTF-8"</span><span class="e-tag">&gt;</span></div>
+        <div class="e-row"><span class="e-ln">5</span><span style="display:inline-block;width:24px"></span><span class="e-tag">&lt;meta</span> <span class="e-att">name</span><span class="e-txt">=</span><span class="e-val">"viewport"</span> <span class="e-att">content</span><span class="e-txt">=</span><span class="e-val">"width=device-width, initial-scale=1.0"</span><span class="e-tag">&gt;</span></div>
+        <div class="e-row"><span class="e-ln">6</span><span style="display:inline-block;width:24px"></span><span class="e-tag">&lt;title&gt;</span><span class="e-txt">SkillHub LMS</span><span class="e-tag">&lt;/title&gt;</span></div>
+        <div class="e-row"><span class="e-ln">7</span><span class="e-tag">&lt;/head&gt;</span></div>
+        <div class="e-row"><span class="e-ln">8</span><span class="e-tag">&lt;body&gt;</span></div>
+        <div class="e-row"><span class="e-ln">9</span><span style="display:inline-block;width:24px"></span><span class="e-tag">&lt;h1&gt;</span><span class="e-txt">Welcome to SkillHub LMS</span><span class="e-tag">&lt;/h1&gt;</span></div>
+        <div class="e-row"><span class="e-ln">10</span><span style="display:inline-block;width:24px"></span><span class="e-tag">&lt;p&gt;</span></div>
+        <div class="e-row"><span class="e-ln">11</span><span style="display:inline-block;width:48px"></span><span class="e-txt">Learn Web Development, MERN Stack,</span></div>
+        <div class="e-row"><span class="e-ln">12</span><span style="display:inline-block;width:48px"></span><span class="e-txt">and Full Stack Development.</span></div>
+        <div class="e-row"><span class="e-ln">13</span><span style="display:inline-block;width:24px"></span><span class="e-tag">&lt;/p&gt;</span></div>
+        <div class="e-row"><span class="e-ln">14</span><span class="e-tag">&lt;/body&gt;</span></div>
+        <div class="e-row"><span class="e-ln">15</span><span class="e-tag">&lt;/html&gt;</span></div>
+      </div>
+    </div>
+    <div class="info-box">
+      <i class="ti ti-info-circle info-icon"></i>
+      <div class="info-text"><strong>Open in browser:</strong> After saving, right-click <code>index.html</code> in VS Code → <strong>Open with Live Server</strong> (or drag the file into Chrome). You should see your page!</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-2"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Explain it <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════ SLIDE 3  LINE-BY-LINE ══════════════════════════════ -->
+  <div class="slide" id="slide-3">
+    <div class="slide-header">
+      <span class="topic-badge badge-purple">Learn</span>
+      <div>
+        <div class="slide-title">Line-by-Line Explanation</div>
+        <div class="slide-subtitle">Click any row to expand the explanation</div>
+      </div>
+    </div>
+    <div class="line-explain">
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="e-tag">&lt;!DOCTYPE html&gt;</span></div>
+        <div class="lex-info">
+          <div class="lex-name">DOCTYPE Declaration</div>
+          <div class="lex-desc">Tells the browser this is an HTML5 document</div>
+          <div class="lex-detail">Without this, older browsers may go into "quirks mode" and render your page incorrectly. Always the very first line.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="e-tag">&lt;html</span> <span class="e-att">lang</span><span class="e-txt">=</span><span class="e-val">"en"</span><span class="e-tag">&gt;</span></div>
+        <div class="lex-info">
+          <div class="lex-name">Root Element</div>
+          <div class="lex-desc">The container for the entire webpage</div>
+          <div class="lex-detail"><code>lang="en"</code> tells browsers and screen readers the language is English. Everything in your page lives inside this tag.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="e-tag">&lt;head&gt;</span></div>
+        <div class="lex-info">
+          <div class="lex-name">Head Section</div>
+          <div class="lex-desc">Contains metadata — not visible on the page</div>
+          <div class="lex-detail">Holds the title, charset, viewport settings, and links to CSS files. Think of it as the "brain" of the page — invisible but important.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code" style="font-size:11px"><span class="e-tag">&lt;meta</span> <span class="e-att">charset</span><span class="e-txt">=</span><span class="e-val">"UTF-8"</span><span class="e-tag">&gt;</span></div>
+        <div class="lex-info">
+          <div class="lex-name">Character Encoding</div>
+          <div class="lex-desc">Supports all languages including Hindi, Arabic, emoji</div>
+          <div class="lex-detail">UTF-8 covers over 1 million characters. Without this, special characters may show as ??? or garbled symbols.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code" style="font-size:10px"><span class="e-tag">&lt;meta</span> <span class="e-att">name</span><span class="e-txt">=</span><span class="e-val">"viewport"</span><span class="e-tag">&gt;</span></div>
+        <div class="lex-info">
+          <div class="lex-name">Viewport Meta Tag</div>
+          <div class="lex-desc">Makes the page responsive on mobile devices</div>
+          <div class="lex-detail"><code>width=device-width</code> means "use the screen's actual width." <code>initial-scale=1</code> means "no zoom by default." Essential for mobile-friendly pages.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="e-tag">&lt;title&gt;</span><span class="e-txt">SkillHub</span><span class="e-tag">&lt;/title&gt;</span></div>
+        <div class="lex-info">
+          <div class="lex-name">Page Title</div>
+          <div class="lex-desc">Text shown in the browser tab</div>
+          <div class="lex-detail">This is also what Google shows as the link title in search results. Type something meaningful like your project name.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="e-tag">&lt;body&gt;</span></div>
+        <div class="lex-info">
+          <div class="lex-name">Body Section</div>
+          <div class="lex-desc">Everything visible on the webpage lives here</div>
+          <div class="lex-detail">Headings, paragraphs, images, buttons, lists — all visible content goes inside <code>&lt;body&gt;</code>. This is what users actually see.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="e-tag">&lt;h1&gt;</span><span class="e-txt">Welcome…</span><span class="e-tag">&lt;/h1&gt;</span></div>
+        <div class="lex-info">
+          <div class="lex-name">Heading 1</div>
+          <div class="lex-desc">The biggest, most important heading on the page</div>
+          <div class="lex-detail">There should be only <strong>one &lt;h1&gt;</strong> per page. Search engines treat it as the main topic. Shown in large bold text.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="e-tag">&lt;p&gt;</span><span class="e-txt">Learn…</span><span class="e-tag">&lt;/p&gt;</span></div>
+        <div class="lex-info">
+          <div class="lex-name">Paragraph</div>
+          <div class="lex-desc">A block of text with spacing above and below</div>
+          <div class="lex-detail">Use <code>&lt;p&gt;</code> for body text, descriptions, and any prose content. The browser adds automatic top and bottom margin.</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-3"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">See Preview <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════ SLIDE 4  BROWSER PREVIEW ═══════════════════════════ -->
+  <div class="slide" id="slide-4">
+    <div class="slide-header">
+      <span class="topic-badge badge-amber">Preview</span>
+      <div>
+        <div class="slide-title">Browser Preview</div>
+        <div class="slide-subtitle">This is what your index.html looks like in Chrome</div>
+      </div>
+    </div>
+    <div class="browser-frame">
+      <div class="browser-bar">
+        <div class="b-dot b-red"></div><div class="b-dot b-yellow"></div><div class="b-dot b-green"></div>
+        <i class="ti ti-chevron-left" style="color:#888;font-size:16px"></i>
+        <i class="ti ti-chevron-right" style="color:#ccc;font-size:16px"></i>
+        <i class="ti ti-refresh" style="color:#888;font-size:16px"></i>
+        <div class="b-url">📄 frontend/index.html</div>
+      </div>
+      <div class="browser-body">
+        <p class="preview-h1">Welcome to SkillHub LMS</p>
+        <p class="preview-p">Learn Web Development, MERN Stack, and Full Stack Development.</p>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="card card-gray">
+        <div style="font-size:13px;font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:6px"><i class="ti ti-circle-check" style="color:#16a34a"></i> What you see</div>
+        <div style="font-size:13px;color:#555;line-height:1.65">A big bold heading and a paragraph of text — no colour, no styling yet. That's HTML alone, zero CSS.</div>
+      </div>
+      <div class="card card-gray">
+        <div style="font-size:13px;font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:6px"><i class="ti ti-paint" style="color:#1d4ed8"></i> Coming next</div>
+        <div style="font-size:13px;color:#555;line-height:1.65">In Hour 4 we'll add CSS to style colours, fonts, layouts, and spacing — transforming this plain page into a real UI.</div>
+      </div>
+    </div>
+    <div class="tip-box">
+      <i class="ti ti-bulb tip-icon"></i>
+      <div class="tip-text"><strong>Remember:</strong> HTML = <strong>Structure</strong> (skeleton) · CSS = <strong>Style</strong> (skin) · JavaScript = <strong>Behaviour</strong> (muscles). Today we're just building the skeleton!</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-4"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Activity 1 <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════ SLIDE 5  ACTIVITY 1 ════════════════════════════════ -->
+  <div class="slide" id="slide-5">
+    <div class="slide-header">
+      <span class="topic-badge badge-green">Activity 1</span>
+      <div>
+        <div class="slide-title">Add "Our Courses" Section</div>
+        <div class="slide-subtitle">Add this code inside &lt;body&gt;, after your &lt;p&gt; tag</div>
+      </div>
+    </div>
+    <div class="activity-box">
+      <div class="activity-title"><i class="ti ti-keyboard"></i> Type this code now</div>
+      <div class="editor" style="border-radius:8px">
+        <div class="editor-bar">
+          <div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div>
+          <span class="e-label">Add inside &lt;body&gt;</span>
+        </div>
+        <div class="editor-body">
+          <div class="e-row"><span class="e-ln">1</span><span class="e-tag">&lt;h2&gt;</span><span class="e-txt">Our Courses</span><span class="e-tag">&lt;/h2&gt;</span></div>
+          <div class="e-row"><span class="e-ln">2</span></div>
+          <div class="e-row"><span class="e-ln">3</span><span class="e-tag">&lt;ul&gt;</span></div>
+          <div class="e-row"><span class="e-ln">4</span><span style="display:inline-block;width:24px"></span><span class="e-tag">&lt;li&gt;</span><span class="e-txt">MERN Stack</span><span class="e-tag">&lt;/li&gt;</span></div>
+          <div class="e-row"><span class="e-ln">5</span><span style="display:inline-block;width:24px"></span><span class="e-tag">&lt;li&gt;</span><span class="e-txt">Python</span><span class="e-tag">&lt;/li&gt;</span></div>
+          <div class="e-row"><span class="e-ln">6</span><span style="display:inline-block;width:24px"></span><span class="e-tag">&lt;li&gt;</span><span class="e-txt">Java</span><span class="e-tag">&lt;/li&gt;</span></div>
+          <div class="e-row"><span class="e-ln">7</span><span class="e-tag">&lt;/ul&gt;</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="section-label">tag breakdown</div>
+        <div style="display:flex;flex-direction:column;gap:6px;margin-top:2px">
+          <div class="tag-card">
+            <span class="tag-pill" style="background:#dbeafe;color:#1e40af">&lt;h2&gt;</span>
+            <div class="tag-content">
+              <div class="tag-name">Heading 2</div>
+              <div class="tag-desc">Sub-section title. Smaller than h1. Use for section headings.</div>
+            </div>
+          </div>
+          <div class="tag-card">
+            <span class="tag-pill" style="background:#dcfce7;color:#166534">&lt;ul&gt;</span>
+            <div class="tag-content">
+              <div class="tag-name">Unordered List</div>
+              <div class="tag-desc">A list with bullet points (•). Use when order doesn't matter.</div>
+            </div>
+          </div>
+          <div class="tag-card">
+            <span class="tag-pill" style="background:#fef3c7;color:#92400e">&lt;li&gt;</span>
+            <div class="tag-content">
+              <div class="tag-name">List Item</div>
+              <div class="tag-desc">Each item inside &lt;ul&gt; or &lt;ol&gt;. Always wraps the item text.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">browser preview</div>
+        <div class="browser-frame">
+          <div class="browser-bar" style="padding:7px 12px">
+            <div class="b-dot b-red"></div><div class="b-dot b-yellow"></div><div class="b-dot b-green"></div>
+            <div class="b-url" style="font-size:11px">index.html</div>
+          </div>
+          <div class="browser-body" style="padding:14px 18px">
+            <p class="preview-h1" style="font-size:18px">Welcome to SkillHub LMS</p>
+            <p class="preview-p">Learn Web Development, MERN Stack…</p>
+            <p class="preview-h2">Our Courses</p>
+            <ul class="preview-ul">
+              <li class="preview-li">MERN Stack</li>
+              <li class="preview-li">Python</li>
+              <li class="preview-li">Java</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-5"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Activity 2 <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════ SLIDE 6  ACTIVITY 2 ════════════════════════════════ -->
+  <div class="slide" id="slide-6">
+    <div class="slide-header">
+      <span class="topic-badge badge-green">Activity 2</span>
+      <div>
+        <div class="slide-title">Add "Contact Us" Section</div>
+        <div class="slide-subtitle">Add this code below the course list, still inside &lt;body&gt;</div>
+      </div>
+    </div>
+    <div class="activity-box">
+      <div class="activity-title"><i class="ti ti-keyboard"></i> Type this code now</div>
+      <div class="editor" style="border-radius:8px">
+        <div class="editor-bar">
+          <div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div>
+          <span class="e-label">Add after &lt;/ul&gt;</span>
+        </div>
+        <div class="editor-body">
+          <div class="e-row"><span class="e-ln">1</span><span class="e-tag">&lt;h2&gt;</span><span class="e-txt">Contact Us</span><span class="e-tag">&lt;/h2&gt;</span></div>
+          <div class="e-row"><span class="e-ln">2</span></div>
+          <div class="e-row"><span class="e-ln">3</span><span class="e-tag">&lt;p&gt;</span><span class="e-txt">Email: skillhub@gmail.com</span><span class="e-tag">&lt;/p&gt;</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="section-label">what we learned today</div>
+        <div style="display:flex;flex-direction:column;gap:6px;margin-top:2px">
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;padding:7px 0;border-bottom:1px solid #f0f0f0"><span class="tag-pill" style="background:#dbeafe;color:#1e40af;font-family:monospace;font-size:12px;padding:2px 8px;border-radius:4px">&lt;h1&gt;</span> Main page heading — one per page</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;padding:7px 0;border-bottom:1px solid #f0f0f0"><span class="tag-pill" style="background:#ede9fe;color:#5b21b6;font-family:monospace;font-size:12px;padding:2px 8px;border-radius:4px">&lt;h2&gt;</span> Section headings</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;padding:7px 0;border-bottom:1px solid #f0f0f0"><span class="tag-pill" style="background:#fef3c7;color:#92400e;font-family:monospace;font-size:12px;padding:2px 8px;border-radius:4px">&lt;p&gt;</span> Paragraphs of text</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;padding:7px 0;border-bottom:1px solid #f0f0f0"><span class="tag-pill" style="background:#dcfce7;color:#166534;font-family:monospace;font-size:12px;padding:2px 8px;border-radius:4px">&lt;ul&gt;</span> Bullet point list</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;padding:7px 0"><span class="tag-pill" style="background:#ffedd5;color:#9a3412;font-family:monospace;font-size:12px;padding:2px 8px;border-radius:4px">&lt;li&gt;</span> Each list item</div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">browser preview</div>
+        <div class="browser-frame">
+          <div class="browser-bar" style="padding:7px 12px">
+            <div class="b-dot b-red"></div><div class="b-dot b-yellow"></div><div class="b-dot b-green"></div>
+            <div class="b-url" style="font-size:11px">index.html</div>
+          </div>
+          <div class="browser-body" style="padding:14px 18px">
+            <p class="preview-h1" style="font-size:18px">Welcome to SkillHub LMS</p>
+            <p class="preview-p">Learn Web Development, MERN Stack…</p>
+            <p class="preview-h2">Our Courses</p>
+            <ul class="preview-ul">
+              <li class="preview-li">MERN Stack</li>
+              <li class="preview-li">Python</li>
+              <li class="preview-li">Java</li>
+            </ul>
+            <p class="preview-h2">Contact Us</p>
+            <p class="preview-p">Email: skillhub@gmail.com</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-6"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Final Code <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════ SLIDE 7  FINAL CODE ════════════════════════════════ -->
+  <div class="slide" id="slide-7">
+    <div class="slide-header">
+      <span class="topic-badge badge-teal">Final</span>
+      <div>
+        <div class="slide-title">Final index.html</div>
+        <div class="slide-subtitle">The complete file — your end-of-day deliverable</div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="editor">
+        <div class="editor-bar">
+          <div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div>
+          <span class="e-label">frontend/index.html — complete</span>
+        </div>
+        <div class="editor-body" style="font-size:12px;line-height:1.65">
+          <div class="e-row"><span class="e-ln">1</span><span class="e-tag">&lt;!DOCTYPE html&gt;</span></div>
+          <div class="e-row"><span class="e-ln">2</span><span class="e-tag">&lt;html</span> <span class="e-att">lang</span><span class="e-txt">=</span><span class="e-val">"en"</span><span class="e-tag">&gt;</span></div>
+          <div class="e-row"><span class="e-ln">3</span><span class="e-tag">&lt;head&gt;</span></div>
+          <div class="e-row"><span class="e-ln">4</span><span style="width:20px;display:inline-block"></span><span class="e-tag">&lt;meta</span> <span class="e-att">charset</span><span class="e-txt">=</span><span class="e-val">"UTF-8"</span><span class="e-tag">&gt;</span></div>
+          <div class="e-row"><span class="e-ln">5</span><span style="width:20px;display:inline-block"></span><span class="e-tag">&lt;meta</span> <span class="e-att">name</span><span class="e-txt">=</span><span class="e-val">"viewport"</span></div>
+          <div class="e-row"><span class="e-ln">6</span><span style="width:38px;display:inline-block"></span><span class="e-att">content</span><span class="e-txt">=</span><span class="e-val">"width=device-width,</span></div>
+          <div class="e-row"><span class="e-ln">7</span><span style="width:52px;display:inline-block"></span><span class="e-val">initial-scale=1.0"</span><span class="e-tag">&gt;</span></div>
+          <div class="e-row"><span class="e-ln">8</span><span style="width:20px;display:inline-block"></span><span class="e-tag">&lt;title&gt;</span><span class="e-txt">SkillHub LMS</span><span class="e-tag">&lt;/title&gt;</span></div>
+          <div class="e-row"><span class="e-ln">9</span><span class="e-tag">&lt;/head&gt;</span></div>
+          <div class="e-row"><span class="e-ln">10</span><span class="e-tag">&lt;body&gt;</span></div>
+          <div class="e-row"><span class="e-ln">11</span><span style="width:20px;display:inline-block"></span><span class="e-tag">&lt;h1&gt;</span><span class="e-txt">Welcome to SkillHub LMS</span><span class="e-tag">&lt;/h1&gt;</span></div>
+          <div class="e-row"><span class="e-ln">12</span><span style="width:20px;display:inline-block"></span><span class="e-tag">&lt;p&gt;</span><span class="e-txt">Learn Web Development,</span></div>
+          <div class="e-row"><span class="e-ln">13</span><span style="width:36px;display:inline-block"></span><span class="e-txt">MERN Stack and Full Stack.</span><span class="e-tag">&lt;/p&gt;</span></div>
+          <div class="e-row"><span class="e-ln">14</span><span style="width:20px;display:inline-block"></span><span class="e-tag">&lt;h2&gt;</span><span class="e-txt">Our Courses</span><span class="e-tag">&lt;/h2&gt;</span></div>
+          <div class="e-row"><span class="e-ln">15</span><span style="width:20px;display:inline-block"></span><span class="e-tag">&lt;ul&gt;</span></div>
+          <div class="e-row"><span class="e-ln">16</span><span style="width:36px;display:inline-block"></span><span class="e-tag">&lt;li&gt;</span><span class="e-txt">MERN Stack</span><span class="e-tag">&lt;/li&gt;</span></div>
+          <div class="e-row"><span class="e-ln">17</span><span style="width:36px;display:inline-block"></span><span class="e-tag">&lt;li&gt;</span><span class="e-txt">Python</span><span class="e-tag">&lt;/li&gt;</span></div>
+          <div class="e-row"><span class="e-ln">18</span><span style="width:36px;display:inline-block"></span><span class="e-tag">&lt;li&gt;</span><span class="e-txt">Java</span><span class="e-tag">&lt;/li&gt;</span></div>
+          <div class="e-row"><span class="e-ln">19</span><span style="width:20px;display:inline-block"></span><span class="e-tag">&lt;/ul&gt;</span></div>
+          <div class="e-row"><span class="e-ln">20</span><span style="width:20px;display:inline-block"></span><span class="e-tag">&lt;h2&gt;</span><span class="e-txt">Contact Us</span><span class="e-tag">&lt;/h2&gt;</span></div>
+          <div class="e-row"><span class="e-ln">21</span><span style="width:20px;display:inline-block"></span><span class="e-tag">&lt;p&gt;</span><span class="e-txt">Email: skillhub@gmail.com</span><span class="e-tag">&lt;/p&gt;</span></div>
+          <div class="e-row"><span class="e-ln">22</span><span class="e-tag">&lt;/body&gt;</span></div>
+          <div class="e-row"><span class="e-ln">23</span><span class="e-tag">&lt;/html&gt;</span></div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">final browser output</div>
+        <div class="browser-frame">
+          <div class="browser-bar" style="padding:8px 12px">
+            <div class="b-dot b-red"></div><div class="b-dot b-yellow"></div><div class="b-dot b-green"></div>
+            <div class="b-url" style="font-size:11px">SkillHub LMS</div>
+          </div>
+          <div class="browser-body">
+            <p class="preview-h1">Welcome to SkillHub LMS</p>
+            <p class="preview-p">Learn Web Development, MERN Stack and Full Stack Development.</p>
+            <p class="preview-h2">Our Courses</p>
+            <ul class="preview-ul">
+              <li class="preview-li">MERN Stack</li>
+              <li class="preview-li">Python</li>
+              <li class="preview-li">Java</li>
+            </ul>
+            <p class="preview-h2">Contact Us</p>
+            <p class="preview-p">Email: skillhub@gmail.com</p>
+          </div>
+        </div>
+        <div class="card card-gray" style="margin-top:10px">
+          <div class="section-label">deliverable checklist</div>
+          <div style="font-size:13px;color:#555;display:flex;flex-direction:column;gap:4px">
+            <div style="display:flex;align-items:center;gap:6px"><i class="ti ti-circle-check" style="color:#16a34a"></i> frontend/index.html created</div>
+            <div style="display:flex;align-items:center;gap:6px"><i class="ti ti-circle-check" style="color:#16a34a"></i> h1 heading added</div>
+            <div style="display:flex;align-items:center;gap:6px"><i class="ti ti-circle-check" style="color:#16a34a"></i> Courses section with ul + li</div>
+            <div style="display:flex;align-items:center;gap:6px"><i class="ti ti-circle-check" style="color:#16a34a"></i> Contact section added</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-7"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Tags Ref <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════ SLIDE 8  TAGS REFERENCE ════════════════════════════ -->
+  <div class="slide" id="slide-8">
+    <div class="slide-header">
+      <span class="topic-badge badge-slate">Tags</span>
+      <div>
+        <div class="slide-title">HTML Tags Reference</div>
+        <div class="slide-subtitle">Every tag used today — keep this open while you code</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div class="tag-card">
+        <span class="tag-pill" style="background:#dbeafe;color:#1e40af;font-family:monospace">&lt;h1&gt;–&lt;h6&gt;</span>
+        <div class="tag-content">
+          <div class="tag-name">Headings</div>
+          <div class="tag-desc">H1 is the biggest (page title). H2 for sections. H3 for sub-sections. H4–H6 go smaller. H1 should appear only once per page.</div>
+        </div>
+      </div>
+      <div class="tag-card">
+        <span class="tag-pill" style="background:#ede9fe;color:#5b21b6;font-family:monospace">&lt;p&gt;</span>
+        <div class="tag-content">
+          <div class="tag-name">Paragraph</div>
+          <div class="tag-desc">A block of text. Browsers automatically add spacing before and after each paragraph. Use for all body text.</div>
+        </div>
+      </div>
+      <div class="tag-card">
+        <span class="tag-pill" style="background:#dcfce7;color:#166534;font-family:monospace">&lt;ul&gt;</span>
+        <div class="tag-content">
+          <div class="tag-name">Unordered List</div>
+          <div class="tag-desc">Creates a bullet-point list. Contains &lt;li&gt; items. Use when the order of items doesn't matter (e.g. skills, features).</div>
+        </div>
+      </div>
+      <div class="tag-card">
+        <span class="tag-pill" style="background:#fef3c7;color:#92400e;font-family:monospace">&lt;ol&gt;</span>
+        <div class="tag-content">
+          <div class="tag-name">Ordered List</div>
+          <div class="tag-desc">Creates a numbered list (1, 2, 3…). Contains &lt;li&gt; items. Use when order matters (e.g. steps, rankings).</div>
+        </div>
+      </div>
+      <div class="tag-card">
+        <span class="tag-pill" style="background:#ffedd5;color:#9a3412;font-family:monospace">&lt;li&gt;</span>
+        <div class="tag-content">
+          <div class="tag-name">List Item</div>
+          <div class="tag-desc">Always goes inside &lt;ul&gt; or &lt;ol&gt;. Each item gets its own &lt;li&gt; tag. Example: &lt;li&gt;MERN Stack&lt;/li&gt;</div>
+        </div>
+      </div>
+      <div class="tag-card">
+        <span class="tag-pill" style="background:#fee2e2;color:#991b1b;font-family:monospace">&lt;img&gt;</span>
+        <div class="tag-content">
+          <div class="tag-name">Image</div>
+          <div class="tag-desc">Displays an image. Self-closing — no &lt;/img&gt; needed. Example: &lt;img src="photo.jpg" alt="My photo"&gt; · Always include an alt attribute for accessibility.</div>
+        </div>
+      </div>
+      <div class="tag-card">
+        <span class="tag-pill" style="background:#e0e7ff;color:#3730a3;font-family:monospace">&lt;a&gt;</span>
+        <div class="tag-content">
+          <div class="tag-name">Anchor / Link</div>
+          <div class="tag-desc">Creates a clickable hyperlink. Example: &lt;a href="https://skillhub.com"&gt;Visit Us&lt;/a&gt; · href sets the destination URL.</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-8"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Assignment <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════ SLIDE 9  ASSIGNMENT ════════════════════════════════ -->
+  <div class="slide" id="slide-9">
+    <div class="slide-header">
+      <span class="topic-badge badge-rose">Assignment</span>
+      <div>
+        <div class="slide-title">My Portfolio — 30 Minutes</div>
+        <div class="slide-subtitle">Create a new file: <code>frontend/portfolio.html</code></div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="section-label">requirements — include all 6</div>
+        <div class="activity-box" style="border-color:#fda4af;background:#fff1f2">
+          <div class="activity-title" style="color:#9f1239"><i class="ti ti-target"></i> Your page must have:</div>
+          <div class="assign-req"><i class="ti ti-user" style="color:#9f1239"></i> Your <strong>Name</strong> (use &lt;h1&gt;)</div>
+          <div class="assign-req"><i class="ti ti-photo" style="color:#9f1239"></i> A <strong>Photo</strong> (use &lt;img&gt;)</div>
+          <div class="assign-req"><i class="ti ti-info-circle" style="color:#9f1239"></i> <strong>About Me</strong> paragraph (use &lt;p&gt;)</div>
+          <div class="assign-req"><i class="ti ti-code" style="color:#9f1239"></i> <strong>Skills</strong> list (use &lt;ul&gt; + &lt;li&gt;)</div>
+          <div class="assign-req"><i class="ti ti-school" style="color:#9f1239"></i> <strong>Education</strong> section (use &lt;h2&gt; + &lt;p&gt;)</div>
+          <div class="assign-req"><i class="ti ti-mail" style="color:#9f1239"></i> <strong>Contact Info</strong> (use &lt;p&gt; with email)</div>
+        </div>
+        <div style="margin-top:10px">
+          <div class="section-label">tags to use</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px">
+            <span class="tag tag-blue">&lt;h1&gt;</span>
+            <span class="tag tag-purple">&lt;h2&gt;</span>
+            <span class="tag tag-slate">&lt;p&gt;</span>
+            <span class="tag tag-amber">&lt;img&gt;</span>
+            <span class="tag tag-green">&lt;ul&gt;</span>
+            <span class="tag tag-teal">&lt;li&gt;</span>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">starter template</div>
+        <div class="editor">
+          <div class="editor-bar">
+            <div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div>
+            <span class="e-label">portfolio.html — starter</span>
+          </div>
+          <div class="editor-body" style="font-size:12px;line-height:1.7">
+            <div class="e-row"><span class="e-ln">1</span><span class="e-tag">&lt;!DOCTYPE html&gt;</span></div>
+            <div class="e-row"><span class="e-ln">2</span><span class="e-tag">&lt;html</span> <span class="e-att">lang</span><span class="e-txt">=</span><span class="e-val">"en"</span><span class="e-tag">&gt;</span></div>
+            <div class="e-row"><span class="e-ln">3</span><span class="e-tag">&lt;head&gt;</span></div>
+            <div class="e-row"><span class="e-ln">4</span><span style="width:18px;display:inline-block"></span><span class="e-tag">&lt;title&gt;</span><span class="e-txt">My Portfolio</span><span class="e-tag">&lt;/title&gt;</span></div>
+            <div class="e-row"><span class="e-ln">5</span><span class="e-tag">&lt;/head&gt;</span></div>
+            <div class="e-row"><span class="e-ln">6</span><span class="e-tag">&lt;body&gt;</span></div>
+            <div class="e-row"><span class="e-ln">7</span></div>
+            <div class="e-row"><span class="e-ln">8</span><span style="width:18px;display:inline-block"></span><span class="e-cmt">&lt;!-- Your Name --&gt;</span></div>
+            <div class="e-row"><span class="e-ln">9</span><span style="width:18px;display:inline-block"></span><span class="e-tag">&lt;h1&gt;</span><span class="e-txt">Your Name Here</span><span class="e-tag">&lt;/h1&gt;</span></div>
+            <div class="e-row"><span class="e-ln">10</span></div>
+            <div class="e-row"><span class="e-ln">11</span><span style="width:18px;display:inline-block"></span><span class="e-cmt">&lt;!-- Your Photo --&gt;</span></div>
+            <div class="e-row"><span class="e-ln">12</span><span style="width:18px;display:inline-block"></span><span class="e-tag">&lt;img</span> <span class="e-att">src</span><span class="e-txt">=</span><span class="e-val">"assets/photo.jpg"</span></div>
+            <div class="e-row"><span class="e-ln">13</span><span style="width:32px;display:inline-block"></span><span class="e-att">alt</span><span class="e-txt">=</span><span class="e-val">"My Photo"</span><span class="e-tag">&gt;</span></div>
+            <div class="e-row"><span class="e-ln">14</span></div>
+            <div class="e-row"><span class="e-ln">15</span><span style="width:18px;display:inline-block"></span><span class="e-cmt">&lt;!-- Continue below… --&gt;</span></div>
+            <div class="e-row"><span class="e-ln">16</span></div>
+            <div class="e-row"><span class="e-ln">17</span><span class="e-tag">&lt;/body&gt;</span></div>
+            <div class="e-row"><span class="e-ln">18</span><span class="e-tag">&lt;/html&gt;</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="background:#f0fdf4;border-color:#86efac">
+      <div style="font-size:13px;font-weight:700;color:#166534;margin-bottom:4px;display:flex;align-items:center;gap:6px"><i class="ti ti-send"></i> End-of-Day Deliverable</div>
+      <div style="font-size:13px;color:#166534;line-height:1.65">Submit your <strong>SkillHub-LMS/</strong> folder with <code>frontend/index.html</code> and your <code>portfolio.html</code> both completed and working in the browser.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-9"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Quiz <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════ SLIDE 10 QUIZ ══════════════════════════════════════ -->
+  <div class="slide" id="slide-10">
+    <div class="slide-header">
+      <span class="topic-badge badge-green">Quiz</span>
+      <div>
+        <div class="slide-title">Quick Check</div>
+        <div class="slide-subtitle">5 questions — tap the correct answer</div>
+      </div>
+    </div>
+    <div id="quiz-container"></div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-10"></div>
+      <button class="nav-btn" onclick="goSlide(0)"><i class="ti ti-home"></i> Home</button>
+    </div>
+  </div>
+
+</div><!-- /.wrapper -->
+
+<script>
+  var current = 0, total = 11, quizInit = false;
+
+  var quizData = [
+    {
+      q: "What does <code>&lt;!DOCTYPE html&gt;</code> do?",
+      opts: ["Adds a title to the page", "Tells the browser this is an HTML5 document", "Creates the page heading", "Links a CSS file"],
+      ans: 1,
+      exp: "DOCTYPE tells the browser which version of HTML to use. Without it, the browser may not render the page correctly."
+    },
+    {
+      q: "Which tag should be used for the MAIN heading of the page?",
+      opts: ["&lt;head&gt;", "&lt;h2&gt;", "&lt;h1&gt;", "&lt;p&gt;"],
+      ans: 2,
+      exp: "&lt;h1&gt; is the most important heading. There should only be ONE &lt;h1&gt; per page. Sub-sections use &lt;h2&gt;, &lt;h3&gt;, etc."
+    },
+    {
+      q: "Where does visible page content (text, headings, images) go?",
+      opts: ["&lt;head&gt;", "&lt;title&gt;", "&lt;meta&gt;", "&lt;body&gt;"],
+      ans: 3,
+      exp: "Everything the user sees must go inside &lt;body&gt;. The &lt;head&gt; contains invisible metadata like title and CSS links."
+    },
+    {
+      q: "Which tag creates a bullet-point list?",
+      opts: ["&lt;bl&gt;", "&lt;ol&gt;", "&lt;ul&gt;", "&lt;list&gt;"],
+      ans: 2,
+      exp: "&lt;ul&gt; = Unordered List (bullets). &lt;ol&gt; = Ordered List (numbers). Both contain &lt;li&gt; items inside."
+    },
+    {
+      q: "Why is <code>index.html</code> the standard filename for a homepage?",
+      opts: [
+        "It's the only filename HTML supports",
+        "Web servers automatically serve index.html when no filename is given in the URL",
+        "VS Code creates it automatically",
+        "It loads faster than other filenames"
+      ],
+      ans: 1,
+      exp: "Servers like Apache and Nginx look for index.html by default. Visiting www.skillhub.com serves SkillHub-LMS/frontend/index.html automatically."
+    }
+  ];
+  var quizAnswered = [];
+
+  function renderQuiz() {
+    var c = document.getElementById('quiz-container');
+    c.innerHTML = '';
+    quizData.forEach(function(q, i) {
+      var d = document.createElement('div');
+      d.style.cssText = 'margin-bottom:18px';
+      d.innerHTML = '<div style="font-size:13px;font-weight:600;margin-bottom:6px">' + (i+1) + '. ' + q.q + '</div>';
+      q.opts.forEach(function(opt, j) {
+        var btn = document.createElement('button');
+        btn.className = 'quiz-option';
+        btn.innerHTML = String.fromCharCode(65+j) + '. ' + opt;
+        btn.onclick = function() {
+          if (quizAnswered[i]) return;
+          quizAnswered[i] = true;
+          var btns = d.querySelectorAll('.quiz-option');
+          btns.forEach(function(b, k) {
+            b.disabled = true;
+            if (k === q.ans) b.classList.add('correct');
+            else if (k === j) b.classList.add('wrong');
+          });
+          var fb = d.querySelector('.quiz-feedback');
+          fb.innerHTML = (j === q.ans ? '✅ Correct! ' : '❌ Not quite. ') + q.exp;
+          fb.className = 'quiz-feedback ' + (j === q.ans ? 'correct' : 'wrong');
+        };
+        d.appendChild(btn);
+      });
+      var fb = document.createElement('div');
+      fb.className = 'quiz-feedback';
+      d.appendChild(fb);
+      c.appendChild(d);
+    });
+  }
+
+  function toggleLex(row) {
+    var wasActive = row.classList.contains('active');
+    document.querySelectorAll('.lex-row.active').forEach(function(r) { r.classList.remove('active'); });
+    if (!wasActive) row.classList.add('active');
+  }
+
+  function goSlide(n) {
+    document.getElementById('slide-' + current).classList.remove('active');
+    current = n;
+    document.getElementById('slide-' + current).classList.add('active');
+    updateDots();
+    document.getElementById('slide-counter').textContent = (current + 1) + ' / ' + total;
+    if (n === 10 && !quizInit) { renderQuiz(); quizInit = true; }
+    window.scrollTo(0, 0);
+  }
+  function nextSlide() { if (current < total - 1) goSlide(current + 1); }
+  function prevSlide() { if (current > 0) goSlide(current - 1); }
+
+  function updateDots() {
+    for (var s = 0; s < total; s++) {
+      var el = document.getElementById('dots-' + s);
+      if (!el) continue;
+      el.innerHTML = '';
+      for (var d = 0; d < total; d++) {
+        var dot = document.createElement('div');
+        dot.className = 'dot' + (d === current ? ' active' : '');
+        el.appendChild(dot);
+      }
+    }
+  }
+  updateDots();
+</script>
+</body>
+</html>

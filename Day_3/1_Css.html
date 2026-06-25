@@ -1,0 +1,1234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Day 3 · Hour 1 – Introduction to CSS</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f4f5f7; color: #1a1a1a;
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; padding: 2rem 1rem;
+  }
+  .wrapper {
+    width: 100%; max-width: 920px; background: #fff;
+    border-radius: 16px; box-shadow: 0 2px 20px rgba(0,0,0,0.09); overflow: hidden;
+  }
+  .top-bar {
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    color: #fff; padding: 14px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .top-bar-title { font-size: 15px; font-weight: 600; }
+  .top-bar-sub   { font-size: 12px; opacity: .55; margin-top: 2px; }
+  .slide-counter { font-size: 13px; opacity: .6; font-variant-numeric: tabular-nums; }
+  .slide { display: none; padding: 1.75rem 2rem; min-height: 500px; flex-direction: column; gap: 1.2rem; }
+  .slide.active { display: flex; }
+  .slide-header { display: flex; align-items: center; gap: 10px; padding-bottom: 1rem; border-bottom: 1px solid #e8e8e8; }
+  .slide-title    { font-size: 20px; font-weight: 700; color: #111; }
+  .slide-subtitle { font-size: 13px; color: #666; margin-top: 2px; }
+
+  .badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+  .b-blue   { background:#dbeafe; color:#1d4ed8; }
+  .b-teal   { background:#d1fae5; color:#065f46; }
+  .b-purple { background:#ede9fe; color:#5b21b6; }
+  .b-amber  { background:#fef3c7; color:#92400e; }
+  .b-coral  { background:#fee2e2; color:#991b1b; }
+  .b-green  { background:#dcfce7; color:#166534; }
+  .b-slate  { background:#e2e8f0; color:#334155; }
+  .b-rose   { background:#ffe4e6; color:#9f1239; }
+  .b-orange { background:#ffedd5; color:#9a3412; }
+  .b-indigo { background:#e0e7ff; color:#3730a3; }
+  .b-cyan   { background:#cffafe; color:#164e63; }
+  .b-yellow { background:#fef9c3; color:#854d0e; }
+
+  .section-label { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 8px; }
+  .card { background: #fff; border: 1px solid #e8e8e8; border-radius: 12px; padding: 1rem 1.25rem; }
+  .card-gray { background: #f8f9fa; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+  /* ── Editor ── */
+  .editor { background: #1e1e2e; border-radius: 12px; overflow: hidden; font-family: 'SFMono-Regular', Consolas, 'Courier New', monospace; }
+  .editor-bar { background: #13131f; padding: 9px 14px; display: flex; align-items: center; gap: 6px; }
+  .e-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .e-red { background:#ff5f57; } .e-yellow { background:#febc2e; } .e-green { background:#28c840; }
+  .e-label { font-size: 12px; color: #6272a4; margin-left: 4px; font-family: -apple-system, sans-serif; }
+  .editor-body { padding: 14px 18px; font-size: 12.5px; line-height: 1.8; }
+  .e-ln   { color: #44475a; font-size: 11px; display: inline-block; width: 22px; user-select: none; }
+  .e-tag  { color: #ff79c6; }
+  .e-att  { color: #50fa7b; }
+  .e-val  { color: #f1fa8c; }
+  .e-txt  { color: #f8f8f2; }
+  .e-cmt  { color: #6272a4; font-style: italic; }
+  .e-new  { color: #80ffea; }
+  .e-h1   { color: #f1fa8c; font-weight: 700; }
+  .e-h2   { color: #ffb86c; font-weight: 700; }
+  .e-p    { color: #8be9fd; }
+  .e-li   { color: #a4e400; }
+  /* CSS-specific token colours */
+  .c-sel  { color: #ff79c6; font-weight: 700; }   /* selector  */
+  .c-prop { color: #50fa7b; }                      /* property  */
+  .c-val  { color: #f1fa8c; }                      /* value     */
+  .c-punc { color: #f8f8f2; }                      /* : ; { }   */
+  .c-hex  { color: #bd93f9; }                      /* hex color */
+  .c-str  { color: #ffb86c; }                      /* string    */
+  .c-num  { color: #ff79c6; }                      /* number    */
+  .e-row  { display: flex; gap: 8px; }
+  .e-ind1 { display: inline-block; width: 20px; }
+  .e-ind2 { display: inline-block; width: 40px; }
+  .e-ind3 { display: inline-block; width: 60px; }
+
+  /* ── Browser frame ── */
+  .browser { border-radius: 12px; overflow: hidden; border: 1px solid #e0e0e0; }
+  .browser-bar { background: #f1f3f4; padding: 9px 14px; display: flex; align-items: center; gap: 7px; border-bottom: 1px solid #e0e0e0; }
+  .b-dot2 { width: 10px; height: 10px; border-radius: 50%; }
+  .b-r { background:#ff5f57; } .b-y { background:#febc2e; } .b-g { background:#28c840; }
+  .b-url { flex:1; background:#fff; border:1px solid #dadce0; border-radius:20px; padding:4px 14px; font-size:12px; color:#555; }
+
+  /* ── Tag / CSS table ── */
+  .tag-table { border-collapse: collapse; width: 100%; }
+  .tag-table th { background: #f1f5f9; font-size: 12px; font-weight: 700; text-align: left; padding: 10px 14px; color: #475569; border-bottom: 2px solid #e2e8f0; }
+  .tag-table td { font-size: 13px; padding: 10px 14px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+  .tag-table tr:last-child td { border-bottom: none; }
+  .tag-table tr:hover td { background: #f8f9fa; }
+  .tag-mono { font-family: 'SFMono-Regular', Consolas, monospace; font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 5px; }
+
+  /* ── Quiz ── */
+  .quiz-option { border: 1px solid #dee2e6; border-radius: 8px; padding: 10px 14px; font-size: 13px; cursor: pointer; margin-bottom: 6px; transition: all .15s; background: transparent; width: 100%; text-align: left; color: #1a1a1a; }
+  .quiz-option:hover:not(:disabled) { background: #f8f9fa; }
+  .quiz-option.correct { background: #d1fae5; border-color: #059669; color: #065f46; }
+  .quiz-option.wrong   { background: #fee2e2; border-color: #dc2626; color: #991b1b; }
+  .quiz-feedback { display: none; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-top: 4px; }
+  .quiz-feedback.correct { background: #d1fae5; color: #065f46; display: block; }
+  .quiz-feedback.wrong   { background: #fee2e2; color: #991b1b; display: block; }
+
+  /* ── Activity / challenge boxes ── */
+  .activity-box { border: 2px dashed #a5b4fc; background: #eef2ff; border-radius: 12px; padding: 14px 18px; }
+  .activity-title { font-size: 13px; font-weight: 700; color: #3730a3; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .challenge-box { border: 2px dashed #f9a8d4; background: #fdf2f8; border-radius: 12px; padding: 14px 18px; }
+  .challenge-title { font-size: 13px; font-weight: 700; color: #9f1239; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+
+  /* ── Tip / info / warn / success boxes ── */
+  .tip-box   { display:flex; gap:10px; align-items:flex-start; background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:10px 14px; }
+  .tip-icon  { color:#d97706; font-size:18px; flex-shrink:0; margin-top:1px; }
+  .tip-text  { font-size:13px; color:#92400e; line-height:1.6; }
+  .info-box  { display:flex; gap:10px; align-items:flex-start; background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:10px 14px; }
+  .info-icon { color:#2563eb; font-size:18px; flex-shrink:0; margin-top:1px; }
+  .info-text { font-size:13px; color:#1e40af; line-height:1.6; }
+  .warn-box  { display:flex; gap:10px; align-items:flex-start; background:#fef9ee; border:1px solid #fcd34d; border-radius:10px; padding:10px 14px; }
+  .success-box { display:flex; gap:10px; align-items:flex-start; background:#f0fdf4; border:1px solid #86efac; border-radius:10px; padding:10px 14px; }
+
+  /* ── Line explainer ── */
+  .lex-row { display:flex; align-items:stretch; cursor:pointer; transition:background .12s; border-bottom:1px solid #f0f0f0; }
+  .lex-row:last-child { border-bottom:none; }
+  .lex-row:hover { background:#f8f9fa; }
+  .lex-row.active { background:#eff6ff; border-left:3px solid #1d4ed8; }
+  .lex-code { background:#1e1e2e; padding:10px 14px; font-family:'SFMono-Regular',Consolas,monospace; font-size:12px; min-width:220px; flex-shrink:0; display:flex; align-items:center; }
+  .lex-info { padding:10px 14px; flex:1; }
+  .lex-name   { font-size:13px; font-weight:700; color:#1d4ed8; margin-bottom:2px; }
+  .lex-desc   { font-size:12px; color:#555; line-height:1.55; }
+  .lex-detail { display:none; font-size:12px; color:#1d4ed8; margin-top:4px; padding-top:4px; border-top:1px dashed #bfdbfe; }
+  .lex-row.active .lex-detail { display:block; }
+  .line-explain { border:1px solid #e8e8e8; border-radius:10px; overflow:hidden; }
+
+  /* ── Navigation ── */
+  .nav-row { display:flex; align-items:center; justify-content:space-between; margin-top:auto; padding-top:1rem; border-top:1px solid #f0f0f0; }
+  .nav-btn { display:inline-flex; align-items:center; gap:6px; padding:9px 18px; border:1px solid #dee2e6; border-radius:8px; background:transparent; font-size:13px; cursor:pointer; color:#333; transition:background .15s; }
+  .nav-btn:hover:not(:disabled) { background:#f1f3f5; }
+  .nav-btn:disabled { opacity:.35; cursor:default; }
+  .nav-btn.primary { background:#1d4ed8; border-color:transparent; color:#fff; }
+  .nav-btn.primary:hover { background:#1e40af; }
+  .progress-dots { display:flex; gap:6px; align-items:center; }
+  .dot { width:7px; height:7px; border-radius:50%; background:#dee2e6; transition:all .2s; }
+  .dot.active { width:20px; border-radius:4px; background:#1d4ed8; }
+
+  /* ── Home grid ── */
+  .home-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .home-card { background:#fff; border:1px solid #e8e8e8; border-radius:12px; padding:1rem 1.25rem; cursor:pointer; transition:all .15s; }
+  .home-card:hover { border-color:#1d4ed8; box-shadow:0 2px 8px rgba(29,78,216,.1); }
+  .home-card-title { font-size:15px; font-weight:700; margin:6px 0 2px; }
+  .home-card-sub   { font-size:12px; color:#666; }
+
+  /* ── Reveal ── */
+  .reveal-btn { background:#f1f3f5; border:1px solid #dee2e6; border-radius:8px; padding:7px 14px; font-size:13px; cursor:pointer; color:#333; transition:background .15s; }
+  .reveal-btn:hover { background:#e9ecef; }
+  .reveal-content { display:none; margin-top:8px; }
+  .reveal-content.open { display:block; }
+
+  code { font-family:'SFMono-Regular',Consolas,monospace; font-size:12px; background:#f1f3f5; padding:1px 6px; border-radius:4px; border:1px solid #dee2e6; }
+  .tag-chip { font-family:'SFMono-Regular',Consolas,monospace; font-size:12px; font-weight:700; padding:3px 9px; border-radius:6px; }
+
+  /* ── LMS live preview (continuing from Day 2) ── */
+  .lms-page { font-family: Georgia, serif; border: 1px solid #cbd5e1; border-radius: 10px; overflow: hidden; font-size: 13px; }
+  .lms-header  { background: #1e293b; color: #fff; padding: 10px 16px; font-size: 15px; font-weight: 700; }
+  .lms-nav     { background: #334155; color: #cbd5e1; padding: 7px 16px; display: flex; gap: 14px; font-size: 12px; }
+  .lms-hero    { background: #1d4ed8; color: #fff; padding: 14px 16px; }
+  .lms-hero-h  { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+  .lms-hero-p  { font-size: 12px; opacity: .85; }
+  .lms-about   { background: #fff; padding: 12px 16px; border-bottom: 1px solid #f0f0f0; }
+  .lms-courses { background: #f8fafc; padding: 12px 16px; border-bottom: 1px solid #f0f0f0; }
+  .lms-section-h { font-size: 14px; font-weight: 700; margin-bottom: 6px; color: #111; font-family: Georgia, serif; }
+  .lms-p  { font-size: 12px; color: #555; line-height: 1.6; }
+  .lms-ul { margin-left: 18px; }
+  .lms-li { font-size: 12px; color: #444; margin-bottom: 3px; list-style: disc; }
+  .lms-footer  { background: #1e293b; color: #94a3b8; padding: 10px 16px; font-size: 12px; text-align: center; }
+
+  /* CSS-styled LMS previews — what it looks like WITH css */
+  .lms-css-header  { background: #2563eb; color: #fff; padding: 20px; text-align: center; font-family: Arial, sans-serif; font-size: 15px; font-weight: 700; }
+  .lms-css-body    { background: #f4f6f9; padding: 14px 16px; font-family: Arial, sans-serif; }
+
+  /* ── CSS Syntax anatomy diagram ── */
+  .anatomy { background: #1e1e2e; border-radius: 12px; padding: 20px 24px; font-family: 'SFMono-Regular', Consolas, monospace; font-size: 14px; position: relative; }
+  .anatomy-line { display: flex; align-items: center; gap: 0; flex-wrap: wrap; }
+  .anat-sel  { color: #ff79c6; font-weight: 700; }
+  .anat-brace{ color: #f8f8f2; }
+  .anat-prop { color: #50fa7b; }
+  .anat-col  { color: #f8f8f2; }
+  .anat-val  { color: #f1fa8c; }
+  .anat-semi { color: #f8f8f2; }
+  .anat-label{ font-family: -apple-system, sans-serif; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px; }
+
+  /* ── Colour swatch ── */
+  .swatch { width: 28px; height: 28px; border-radius: 6px; display: inline-block; border: 1px solid rgba(0,0,0,.1); flex-shrink: 0; }
+
+  /* ── Property card ── */
+  .prop-card { border: 1px solid #e8e8e8; border-radius: 10px; overflow: hidden; }
+  .prop-card-head { padding: 9px 14px; font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+  .prop-card-body { padding: 10px 14px; font-size: 13px; color: #555; line-height: 1.6; }
+
+  /* ── Before/After toggle ── */
+  .ba-tab { display: inline-flex; border: 1px solid #dee2e6; border-radius: 8px; overflow: hidden; margin-bottom: 10px; }
+  .ba-btn { padding: 6px 16px; font-size: 12px; font-weight: 700; cursor: pointer; border: none; background: transparent; color: #666; transition: all .15s; }
+  .ba-btn.active { background: #1d4ed8; color: #fff; }
+
+  /* ── Folder tree ── */
+  .folder-tree { background: #0f172a; border-radius: 10px; padding: 16px 20px; font-family: 'SFMono-Regular', Consolas, monospace; font-size: 13px; }
+  .ft-root { color: #fbbf24; font-weight: 700; }
+  .ft-dir  { color: #60a5fa; }
+  .ft-file { color: #a3e635; }
+  .ft-css  { color: #f472b6; }
+  .ft-line { color: #475569; }
+  .ft-row  { display: flex; align-items: center; gap: 6px; margin: 4px 0; }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <div>
+      <div class="top-bar-title">MERN Stack Training · Day 3 · Hour 1</div>
+      <div class="top-bar-sub">Introduction to CSS — SkillHub LMS</div>
+    </div>
+    <div class="slide-counter" id="slide-counter">1 / 12</div>
+  </div>
+
+  <!-- ══════════════════════════════ SLIDE 0  HOME ══════════════════════════════════════ -->
+  <div class="slide active" id="slide-0">
+    <div class="slide-header">
+      <span class="badge b-purple">Day 3 · Hour 1</span>
+      <div>
+        <div class="slide-title">Introduction to CSS</div>
+        <div class="slide-subtitle">HTML gives structure. CSS gives beauty. Today the transformation begins.</div>
+      </div>
+    </div>
+
+    <!-- Session goal banner -->
+    <div style="background:#ede9fe;border:1px solid #c4b5fd;border-radius:12px;padding:12px 16px;display:flex;gap:12px;align-items:flex-start">
+      <i class="ti ti-sparkles" style="color:#7c3aed;font-size:22px;flex-shrink:0;margin-top:1px"></i>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#4c1d95;margin-bottom:4px">End Deliverable — Transform the SkillHub page</div>
+        <div style="display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:#5b21b6">
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Styled background</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Styled header</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Font family applied</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Colors changed</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Padding added</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="home-grid">
+      <div class="home-card" onclick="goSlide(1)">
+        <span class="badge b-green">Recap</span>
+        <div class="home-card-title">Where We Left Off</div>
+        <div class="home-card-sub">Day 2 index.html structure + new folder setup</div>
+      </div>
+      <div class="home-card" onclick="goSlide(2)">
+        <span class="badge b-amber">Question</span>
+        <div class="home-card-title">Why Doesn't It Look Like Netflix?</div>
+        <div class="home-card-sub">HTML vs CSS — the big reveal</div>
+      </div>
+      <div class="home-card" onclick="goSlide(3)">
+        <span class="badge b-blue">Connect</span>
+        <div class="home-card-title">Link CSS to HTML</div>
+        <div class="home-card-sub">Create style.css + add &lt;link&gt; in &lt;head&gt;</div>
+      </div>
+      <div class="home-card" onclick="goSlide(4)">
+        <span class="badge b-purple">Syntax</span>
+        <div class="home-card-title">CSS Syntax — Anatomy</div>
+        <div class="home-card-sub">selector · property · value · semicolon</div>
+      </div>
+      <div class="home-card" onclick="goSlide(5)">
+        <span class="badge b-teal">Style 1</span>
+        <div class="home-card-title">Style the Body</div>
+        <div class="home-card-sub">background-color + font-family</div>
+      </div>
+      <div class="home-card" onclick="goSlide(6)">
+        <span class="badge b-coral">Style 2</span>
+        <div class="home-card-title">Style the Header</div>
+        <div class="home-card-sub">background · color · padding · text-align</div>
+      </div>
+      <div class="home-card" onclick="goSlide(7)">
+        <span class="badge b-blue">Explain</span>
+        <div class="home-card-title">Property-by-Property</div>
+        <div class="home-card-sub">Click each property to expand its explanation</div>
+      </div>
+      <div class="home-card" onclick="goSlide(8)">
+        <span class="badge b-yellow">Before / After</span>
+        <div class="home-card-title">See the Transformation</div>
+        <div class="home-card-sub">Plain HTML → Styled page side by side</div>
+      </div>
+    </div>
+    <div class="grid-2" style="gap:10px">
+      <div class="home-card" onclick="goSlide(9)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge b-orange">Activity</span>
+          <span style="font-size:14px;font-weight:700">Change colours, fonts, backgrounds</span>
+          <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+        </div>
+      </div>
+      <div class="home-card" onclick="goSlide(10)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge b-slate">Ref</span>
+          <span style="font-size:14px;font-weight:700">CSS Properties Reference</span>
+          <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+        </div>
+      </div>
+    </div>
+    <div class="home-card" onclick="goSlide(11)" style="cursor:pointer">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="badge b-green">Quiz</span>
+        <span style="font-size:14px;font-weight:700">Quick Check — 5 Questions</span>
+        <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+      </div>
+    </div>
+    <div class="nav-row">
+      <div></div>
+      <div class="progress-dots" id="dots-0"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Start <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ SLIDE 1  RECAP ════════════════════════════════════ -->
+  <div class="slide" id="slide-1">
+    <div class="slide-header">
+      <span class="badge b-green">Recap</span>
+      <div>
+        <div class="slide-title">Where We Left Off</div>
+        <div class="slide-subtitle">Day 2 deliverable + today's new folder structure</div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="section-label">day 2 final structure</div>
+        <div style="display:flex;flex-direction:column;gap:6px;margin-top:2px">
+          <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:#dbeafe;border-radius:8px;font-size:13px;font-weight:600;color:#1e40af"><span style="font-family:monospace">&lt;header&gt;</span> SkillHub LMS</div>
+          <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:#d1fae5;border-radius:8px;font-size:13px;font-weight:600;color:#065f46"><span style="font-family:monospace">&lt;nav&gt;</span> Home · Courses · Blog · Projects</div>
+          <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:#ede9fe;border-radius:8px;font-size:13px;font-weight:600;color:#5b21b6"><span style="font-family:monospace">&lt;section&gt;</span> Hero</div>
+          <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:#fef9c3;border-radius:8px;font-size:13px;font-weight:600;color:#854d0e"><span style="font-family:monospace">&lt;section&gt;</span> About Us</div>
+          <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:#dcfce7;border-radius:8px;font-size:13px;font-weight:600;color:#166534"><span style="font-family:monospace">&lt;section&gt;</span> Courses</div>
+          <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:#e2e8f0;border-radius:8px;font-size:13px;font-weight:600;color:#334155"><span style="font-family:monospace">&lt;footer&gt;</span> © 2026 SkillHub LMS</div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">updated project folder — add today</div>
+        <div class="folder-tree">
+          <div class="ft-row"><span class="ft-root"><i class="ti ti-folder-filled"></i> SkillHub-LMS/</span></div>
+          <div class="ft-row" style="margin-left:16px"><span class="ft-line">├──</span><span class="ft-dir"><i class="ti ti-folder"></i> frontend/</span></div>
+          <div class="ft-row" style="margin-left:36px"><span class="ft-line">├──</span><span style="color:#a3e635"><i class="ti ti-file-code"></i> index.html</span></div>
+          <div class="ft-row" style="margin-left:36px"><span class="ft-line">├──</span><span class="ft-dir"><i class="ti ti-folder"></i> css/</span> <span style="color:#22c55e;font-size:11px">← NEW</span></div>
+          <div class="ft-row" style="margin-left:56px"><span class="ft-line">└──</span><span class="ft-css"><i class="ti ti-file-code"></i> style.css</span> <span style="color:#22c55e;font-size:11px">← CREATE</span></div>
+          <div class="ft-row" style="margin-left:36px"><span class="ft-line">└──</span><span class="ft-dir"><i class="ti ti-folder"></i> images/</span> <span style="color:#22c55e;font-size:11px">← NEW</span></div>
+          <div class="ft-row" style="margin-left:16px"><span class="ft-line">├──</span><span class="ft-dir"><i class="ti ti-folder"></i> backend/</span></div>
+          <div class="ft-row" style="margin-left:16px"><span class="ft-line">├──</span><span class="ft-dir"><i class="ti ti-folder"></i> docs/</span></div>
+          <div class="ft-row" style="margin-left:16px"><span class="ft-line">└──</span><span style="color:#a3e635"><i class="ti ti-markdown"></i> README.md</span></div>
+        </div>
+        <div class="info-box" style="margin-top:10px">
+          <i class="ti ti-info-circle info-icon"></i>
+          <div class="info-text"><strong>Today:</strong> We create <code>css/style.css</code> and link it to <code>index.html</code>. The HTML doesn't change — only style changes.</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-1"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ SLIDE 2  BIG QUESTION ═════════════════════════════ -->
+  <div class="slide" id="slide-2">
+    <div class="slide-header">
+      <span class="badge b-amber">Question</span>
+      <div>
+        <div class="slide-title">Why Doesn't It Look Like Netflix?</div>
+        <div class="slide-subtitle">Show students their Day 2 page — then ask this question</div>
+      </div>
+    </div>
+
+    <div class="card card-gray">
+      <div style="font-size:14px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:8px">
+        <i class="ti ti-message-question" style="color:#d97706;font-size:18px"></i>
+        ❓ Ask the class: "Your page has a header, nav, sections, footer — so does Netflix. Why does yours look different?"
+      </div>
+      <button class="reveal-btn" onclick="toggle('netflix-ans')">Reveal the answer</button>
+      <div class="reveal-content" id="netflix-ans">
+        <div style="margin-top:10px;padding:16px 20px;background:#fff;border-radius:10px;border:1px solid #e8e8e8">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+            <div style="text-align:center;padding:16px;background:#f8f9fa;border-radius:10px">
+              <i class="ti ti-code" style="font-size:28px;color:#64748b;margin-bottom:8px;display:block"></i>
+              <div style="font-size:14px;font-weight:700;color:#334155;margin-bottom:4px">HTML</div>
+              <div style="font-size:13px;color:#555;line-height:1.6">Gives your page <strong>structure</strong> — like the skeleton of a building. Headings, paragraphs, lists, sections. No colours, no spacing, no fonts.</div>
+            </div>
+            <div style="text-align:center;padding:16px;background:#ede9fe;border-radius:10px">
+              <i class="ti ti-paint" style="font-size:28px;color:#7c3aed;margin-bottom:8px;display:block"></i>
+              <div style="font-size:14px;font-weight:700;color:#4c1d95;margin-bottom:4px">CSS</div>
+              <div style="font-size:13px;color:#5b21b6;line-height:1.6">Gives your page <strong>beauty</strong> — like the paint, furniture, and decoration. Colours, fonts, spacing, layout, animations.</div>
+            </div>
+          </div>
+          <div style="margin-top:14px;text-align:center;padding:12px;background:#fef9c3;border-radius:8px;font-size:14px;font-weight:700;color:#854d0e">
+            Netflix is also HTML + CSS. Their CSS file is just very, very detailed. 🎨
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-3">
+      <div class="card" style="text-align:center;border-color:#fca5a5">
+        <div style="width:44px;height:44px;background:#fee2e2;border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 10px">
+          <i class="ti ti-building" style="font-size:22px;color:#dc2626"></i>
+        </div>
+        <div style="font-size:13px;font-weight:700;margin-bottom:4px">HTML = Skeleton</div>
+        <div style="font-size:12px;color:#555;line-height:1.55">Bones &amp; structure. Without it the page has no content at all.</div>
+      </div>
+      <div class="card" style="text-align:center;border-color:#c4b5fd">
+        <div style="width:44px;height:44px;background:#ede9fe;border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 10px">
+          <i class="ti ti-palette" style="font-size:22px;color:#7c3aed"></i>
+        </div>
+        <div style="font-size:13px;font-weight:700;margin-bottom:4px">CSS = Skin &amp; Clothes</div>
+        <div style="font-size:12px;color:#555;line-height:1.55">Colours, fonts, spacing, layout. Makes it look professional.</div>
+      </div>
+      <div class="card" style="text-align:center;border-color:#86efac">
+        <div style="width:44px;height:44px;background:#dcfce7;border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 10px">
+          <i class="ti ti-bolt" style="font-size:22px;color:#16a34a"></i>
+        </div>
+        <div style="font-size:13px;font-weight:700;margin-bottom:4px">JS = Muscles</div>
+        <div style="font-size:12px;color:#555;line-height:1.55">Interactivity &amp; logic. We'll add this in Week 2 with React.</div>
+      </div>
+    </div>
+
+    <div class="tip-box">
+      <i class="ti ti-bulb tip-icon"></i>
+      <div class="tip-text"><strong>Key insight:</strong> You can apply completely different CSS files to the same HTML and get wildly different results. The structure stays — only the appearance changes. This is the power of separation of concerns.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-2"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ SLIDE 3  LINK CSS ═════════════════════════════════ -->
+  <div class="slide" id="slide-3">
+    <div class="slide-header">
+      <span class="badge b-blue">Connect</span>
+      <div>
+        <div class="slide-title">Link CSS to HTML</div>
+        <div class="slide-subtitle">Two steps: create the file, then connect it — do both now</div>
+      </div>
+    </div>
+
+    <div class="activity-box">
+      <div class="activity-title"><i class="ti ti-keyboard"></i> Step 1 — Create the CSS file in VS Code</div>
+      <div style="display:flex;flex-direction:column;gap:6px;font-size:13px;color:#3730a3">
+        <div style="display:flex;align-items:center;gap:8px"><span style="width:22px;height:22px;background:#4f46e5;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">1</span> Right-click the <code>frontend/</code> folder in VS Code → <strong>New Folder</strong> → name it <code>css</code></div>
+        <div style="display:flex;align-items:center;gap:8px"><span style="width:22px;height:22px;background:#4f46e5;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">2</span> Right-click the <code>css/</code> folder → <strong>New File</strong> → name it <code>style.css</code></div>
+        <div style="display:flex;align-items:center;gap:8px"><span style="width:22px;height:22px;background:#4f46e5;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">3</span> The file is empty for now — we'll fill it in the next steps</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">step 2 — add &lt;link&gt; inside index.html &lt;head&gt;</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">frontend/index.html — &lt;head&gt; section</span></div>
+          <div class="editor-body">
+            <div class="e-row"><span class="e-ln">1</span><span class="e-tag">&lt;head&gt;</span></div>
+            <div class="e-row"><span class="e-ln">2</span><span class="e-ind1"></span><span class="e-tag">&lt;title&gt;</span><span class="e-txt">SkillHub LMS</span><span class="e-tag">&lt;/title&gt;</span></div>
+            <div class="e-row" style="background:#1a2a1a"><span class="e-ln">3</span><span class="e-ind1"></span><span class="e-new">&lt;link</span> <span class="e-att">rel</span><span class="e-txt">=</span><span class="e-val">"stylesheet"</span></div>
+            <div class="e-row" style="background:#1a2a1a"><span class="e-ln">4</span><span class="e-ind2"></span><span class="e-att">href</span><span class="e-txt">=</span><span class="e-val">"css/style.css"</span><span class="e-new">&gt;</span></div>
+            <div class="e-row"><span class="e-ln">5</span><span class="e-tag">&lt;/head&gt;</span></div>
+          </div>
+        </div>
+        <div class="tip-box" style="margin-top:10px">
+          <i class="ti ti-bulb tip-icon"></i>
+          <div class="tip-text"><strong>Path:</strong> <code>css/style.css</code> means "look inside the <code>css</code> folder, find <code>style.css</code>." The path is relative to <code>index.html</code>.</div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">step 3 — write first css rule to test</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">frontend/css/style.css</span></div>
+          <div class="editor-body">
+            <div class="e-row"><span class="e-ln">1</span><span class="c-sel">body</span><span class="c-punc">{</span></div>
+            <div class="e-row"><span class="e-ln">2</span><span class="e-ind1"></span><span class="c-prop">background-color</span><span class="c-punc">:</span><span class="c-hex">#f4f4f4</span><span class="c-punc">;</span></div>
+            <div class="e-row"><span class="e-ln">3</span><span class="c-punc">}</span></div>
+          </div>
+        </div>
+        <div style="margin-top:10px;padding:12px 14px;background:#f0fdf4;border:1px solid #86efac;border-radius:10px;font-size:13px;color:#166534">
+          <strong>Now save both files and refresh the browser.</strong><br>
+          The page background turns from white to a very light grey — CSS is working! 🎉
+        </div>
+        <div class="line-explain" style="margin-top:10px">
+          <div class="lex-row" onclick="toggleLex(this)" style="cursor:pointer">
+            <div class="lex-code"><span class="c-att">rel</span><span class="c-punc">=</span><span class="c-val">"stylesheet"</span></div>
+            <div class="lex-info">
+              <div class="lex-name">rel attribute</div>
+              <div class="lex-desc">Tells browser: "this link is a stylesheet" — not an icon or other resource</div>
+              <div class="lex-detail">Without <code>rel="stylesheet"</code> the browser loads the file but doesn't apply it as CSS. Always required with &lt;link&gt;.</div>
+            </div>
+          </div>
+          <div class="lex-row" onclick="toggleLex(this)" style="cursor:pointer">
+            <div class="lex-code"><span class="c-att">href</span><span class="c-punc">=</span><span class="c-val">"css/style.css"</span></div>
+            <div class="lex-info">
+              <div class="lex-name">href attribute</div>
+              <div class="lex-desc">The path to the CSS file — relative to index.html</div>
+              <div class="lex-detail"><code>css/style.css</code> = look in the css folder, open style.css. If you rename or move the file without updating href, styles will stop loading.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-3"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">CSS Syntax <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ SLIDE 4  CSS SYNTAX ═══════════════════════════════ -->
+  <div class="slide" id="slide-4">
+    <div class="slide-header">
+      <span class="badge b-purple">Syntax</span>
+      <div>
+        <div class="slide-title">CSS Syntax — Anatomy of a Rule</div>
+        <div class="slide-subtitle">Every CSS rule follows the same pattern — learn it once, use it forever</div>
+      </div>
+    </div>
+
+    <div class="anatomy">
+      <div style="font-size:11px;color:#6272a4;margin-bottom:12px;font-family:-apple-system,sans-serif">CSS Rule Anatomy — click labels for details</div>
+      <div class="anatomy-line" style="font-size:18px;line-height:2.2;gap:0">
+        <span class="anat-sel" id="anat-sel" onclick="highlightAnat('sel')" style="cursor:pointer;text-decoration:underline dotted">h1</span>
+        <span class="anat-brace"> {</span>
+        <br>
+        <span style="display:inline-block;width:28px"></span>
+        <span class="anat-prop" id="anat-prop" onclick="highlightAnat('prop')" style="cursor:pointer;text-decoration:underline dotted">color</span>
+        <span class="anat-col" id="anat-col">:</span>
+        <span> </span>
+        <span class="anat-val" id="anat-val" onclick="highlightAnat('val')" style="cursor:pointer;text-decoration:underline dotted">blue</span>
+        <span class="anat-semi" id="anat-semi">;</span>
+        <br>
+        <span class="anat-brace">}</span>
+      </div>
+      <div id="anat-explain" style="margin-top:14px;padding:10px 14px;background:#2d2d3f;border-radius:8px;font-family:-apple-system,sans-serif;font-size:13px;color:#94a3b8;display:none"></div>
+    </div>
+
+    <div class="grid-3">
+      <div class="prop-card">
+        <div class="prop-card-head" style="background:#ffe4e6;color:#9f1239"><i class="ti ti-cursor-text" style="font-size:16px"></i> Selector</div>
+        <div class="prop-card-body"><strong>Which HTML element</strong> to style.<br><br>Examples: <code>body</code> <code>h1</code> <code>header</code> <code>p</code> <code>.class</code> <code>#id</code><br><br>Targets every matching element on the page.</div>
+      </div>
+      <div class="prop-card">
+        <div class="prop-card-head" style="background:#d1fae5;color:#065f46"><i class="ti ti-settings" style="font-size:16px"></i> Property</div>
+        <div class="prop-card-body"><strong>What to change</strong> about the element.<br><br>Examples: <code>color</code> <code>background</code> <code>font-size</code> <code>padding</code> <code>margin</code><br><br>Always written in lowercase with hyphens.</div>
+      </div>
+      <div class="prop-card">
+        <div class="prop-card-head" style="background:#fef3c7;color:#92400e"><i class="ti ti-hash" style="font-size:16px"></i> Value</div>
+        <div class="prop-card-body"><strong>What to set</strong> the property to.<br><br>Examples: <code>blue</code> <code>#2563eb</code> <code>Arial</code> <code>20px</code> <code>center</code><br><br>Always followed by a semicolon <code>;</code></div>
+      </div>
+    </div>
+
+    <div class="card card-gray">
+      <div class="section-label">real example — h1 styling</div>
+      <div class="grid-2" style="margin-top:4px">
+        <div class="editor" style="border-radius:8px">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">style.css</span></div>
+          <div class="editor-body" style="font-size:12.5px">
+            <div class="e-row"><span class="e-ln">1</span><span class="c-sel">h1</span><span class="c-punc"> {</span></div>
+            <div class="e-row"><span class="e-ln">2</span><span class="e-ind1"></span><span class="c-prop">color</span><span class="c-punc">:</span> <span class="c-str">blue</span><span class="c-punc">;</span></div>
+            <div class="e-row"><span class="e-ln">3</span><span class="c-punc">}</span></div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:center;padding:16px;background:#fff;border-radius:8px;border:1px solid #e8e8e8">
+          <div style="text-align:center">
+            <div style="font-size:22px;font-weight:700;color:blue;font-family:serif">SkillHub LMS</div>
+            <div style="font-size:11px;color:#888;margin-top:6px">Browser renders this</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="warn-box">
+      <i class="ti ti-alert-triangle" style="color:#d97706;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+      <div style="font-size:13px;color:#92400e;line-height:1.6"><strong>Common mistakes:</strong> Missing semicolon <code>;</code> after a value (styles below it may break) · Missing closing brace <code>}</code> · Typo in property name (e.g. <code>colour</code> instead of <code>color</code>). If CSS isn't working, check these first.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-4"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Style Body <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ SLIDE 5  STYLE BODY ═══════════════════════════════ -->
+  <div class="slide" id="slide-5">
+    <div class="slide-header">
+      <span class="badge b-teal">Style 1</span>
+      <div>
+        <div class="slide-title">Style the Body</div>
+        <div class="slide-subtitle">background and font-family — affects the entire page</div>
+      </div>
+    </div>
+
+    <div class="activity-box">
+      <div class="activity-title"><i class="ti ti-keyboard"></i> Add this to style.css — update what you already wrote</div>
+      <div class="editor" style="border-radius:8px">
+        <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">frontend/css/style.css</span></div>
+        <div class="editor-body">
+          <div class="e-row"><span class="e-ln">1</span><span class="c-sel">body</span><span class="c-punc"> {</span></div>
+          <div class="e-row"><span class="e-ln">2</span><span class="e-ind1"></span><span class="c-prop">background</span><span class="c-punc">:</span> <span class="c-hex">#f4f6f9</span><span class="c-punc">;</span></div>
+          <div class="e-row"><span class="e-ln">3</span><span class="e-ind1"></span><span class="c-prop">font-family</span><span class="c-punc">:</span> <span class="c-str">Arial, sans-serif</span><span class="c-punc">;</span></div>
+          <div class="e-row"><span class="e-ln">4</span><span class="c-punc">}</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="prop-card">
+          <div class="prop-card-head" style="background:#d1fae5;color:#065f46"><span style="font-family:monospace;font-size:13px">background</span></div>
+          <div class="prop-card-body">
+            Sets the background colour of the element. <code>#f4f6f9</code> is a very light blue-grey — professional and easy on the eyes. Try these alternatives:
+            <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+              <span style="display:flex;align-items:center;gap:5px;font-size:12px"><span class="swatch" style="background:#f4f6f9"></span>#f4f6f9</span>
+              <span style="display:flex;align-items:center;gap:5px;font-size:12px"><span class="swatch" style="background:#ffffff"></span>#ffffff</span>
+              <span style="display:flex;align-items:center;gap:5px;font-size:12px"><span class="swatch" style="background:#141414"></span>#141414</span>
+              <span style="display:flex;align-items:center;gap:5px;font-size:12px"><span class="swatch" style="background:#f0f9ff"></span>#f0f9ff</span>
+            </div>
+          </div>
+        </div>
+        <div class="prop-card">
+          <div class="prop-card-head" style="background:#dbeafe;color:#1e40af"><span style="font-family:monospace;font-size:13px">font-family</span></div>
+          <div class="prop-card-body">
+            Sets the font for all text. <code>Arial, sans-serif</code> means: "use Arial; if not available, use any sans-serif font." The fallback ensures text is always readable.
+            <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+              <span style="font-size:12px;font-family:Arial;padding:3px 8px;background:#f1f3f5;border-radius:4px">Arial</span>
+              <span style="font-size:12px;font-family:'Times New Roman';padding:3px 8px;background:#f1f3f5;border-radius:4px">Times New Roman</span>
+              <span style="font-size:12px;font-family:Georgia;padding:3px 8px;background:#f1f3f5;border-radius:4px">Georgia</span>
+              <span style="font-size:12px;font-family:Courier;padding:3px 8px;background:#f1f3f5;border-radius:4px">Courier</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">browser output</div>
+        <div class="browser">
+          <div class="browser-bar"><div class="b-dot2 b-r"></div><div class="b-dot2 b-y"></div><div class="b-dot2 b-g"></div><div class="b-url">index.html</div></div>
+          <div style="background:#f4f6f9;font-family:Arial,sans-serif;padding:0">
+            <div class="lms-header">SkillHub LMS</div>
+            <div class="lms-nav"><span>Home</span><span>Courses</span><span>Blog</span><span>Projects</span></div>
+            <div style="padding:14px 16px">
+              <div style="font-size:15px;font-weight:700;font-family:Arial,sans-serif;margin-bottom:4px">Become a Full Stack Developer</div>
+              <div style="font-size:13px;font-family:Arial,sans-serif;color:#555">Learn industry-level MERN Stack from scratch.</div>
+            </div>
+            <div style="padding:12px 16px;font-family:Arial,sans-serif">
+              <div style="font-size:14px;font-weight:700;margin-bottom:4px">About SkillHub LMS</div>
+              <div style="font-size:12px;color:#555">SkillHub LMS helps students learn modern web development…</div>
+            </div>
+            <div style="font-size:10px;color:#7c3aed;padding:6px 16px;font-family:monospace;background:rgba(124,58,237,.05)">← background:#f4f6f9 + font-family:Arial applied</div>
+          </div>
+        </div>
+        <div class="tip-box" style="margin-top:10px">
+          <i class="ti ti-bulb tip-icon"></i>
+          <div class="tip-text"><strong>Why body?</strong> Styles on <code>body</code> cascade down to all child elements. Setting <code>font-family</code> on body means every heading, paragraph, and list inherits that font automatically.</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-5"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Style Header <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ SLIDE 6  STYLE HEADER ═════════════════════════════ -->
+  <div class="slide" id="slide-6">
+    <div class="slide-header">
+      <span class="badge b-coral">Style 2</span>
+      <div>
+        <div class="slide-title">Style the Header</div>
+        <div class="slide-subtitle">background · color · padding · text-align — four new properties</div>
+      </div>
+    </div>
+
+    <div class="activity-box">
+      <div class="activity-title"><i class="ti ti-keyboard"></i> Add this below the body rule in style.css</div>
+      <div class="editor" style="border-radius:8px">
+        <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">frontend/css/style.css — add below body { }</span></div>
+        <div class="editor-body">
+          <div class="e-row"><span class="e-ln">6</span><span class="c-sel">header</span><span class="c-punc"> {</span></div>
+          <div class="e-row"><span class="e-ln">7</span><span class="e-ind1"></span><span class="c-prop">background</span><span class="c-punc">:</span> <span class="c-hex">#2563eb</span><span class="c-punc">;</span></div>
+          <div class="e-row"><span class="e-ln">8</span><span class="e-ind1"></span><span class="c-prop">color</span><span class="c-punc">:</span> <span class="c-str">white</span><span class="c-punc">;</span></div>
+          <div class="e-row"><span class="e-ln">9</span><span class="e-ind1"></span><span class="c-prop">text-align</span><span class="c-punc">:</span> <span class="c-str">center</span><span class="c-punc">;</span></div>
+          <div class="e-row"><span class="e-ln">10</span><span class="e-ind1"></span><span class="c-prop">padding</span><span class="c-punc">:</span> <span class="c-num">20px</span><span class="c-punc">;</span></div>
+          <div class="e-row"><span class="e-ln">11</span><span class="c-punc">}</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="prop-card">
+          <div class="prop-card-head" style="background:#dbeafe;color:#1e40af"><span style="font-family:monospace">background: #2563eb</span></div>
+          <div class="prop-card-body">Sets a vivid blue background. <code>#2563eb</code> is Tailwind's blue-600 — widely used in modern UIs. Change this to try other colours: <code>#dc2626</code> (red) · <code>#059669</code> (green) · <code>#7c3aed</code> (purple)</div>
+        </div>
+        <div class="prop-card">
+          <div class="prop-card-head" style="background:#ede9fe;color:#5b21b6"><span style="font-family:monospace">color: white</span></div>
+          <div class="prop-card-body">Sets the <strong>text</strong> colour to white. Without this, dark text on a blue background is still readable — but white looks professional. Named colours like <code>white</code>, <code>black</code>, <code>red</code> work. So does <code>#ffffff</code>.</div>
+        </div>
+        <div class="prop-card">
+          <div class="prop-card-head" style="background:#d1fae5;color:#065f46"><span style="font-family:monospace">text-align: center</span></div>
+          <div class="prop-card-body">Centers all text horizontally. Values: <code>left</code> (default) · <code>center</code> · <code>right</code> · <code>justify</code>.</div>
+        </div>
+        <div class="prop-card">
+          <div class="prop-card-head" style="background:#fef3c7;color:#92400e"><span style="font-family:monospace">padding: 20px</span></div>
+          <div class="prop-card-body">Adds <strong>inner spacing</strong> — 20px of space between the edge of the header and its content. Without padding, the text sits flush against the edge. Always makes things look more polished.</div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">browser output — before vs after</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div>
+            <div style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px">Before CSS</div>
+            <div class="browser">
+              <div class="browser-bar" style="padding:7px 12px"><div class="b-dot2 b-r"></div><div class="b-dot2 b-y"></div><div class="b-dot2 b-g"></div><div class="b-url" style="font-size:11px">index.html</div></div>
+              <div style="background:#fff;padding:4px 8px;font-family:serif;font-size:14px;font-weight:700">SkillHub LMS</div>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px">After CSS ✅</div>
+            <div class="browser">
+              <div class="browser-bar" style="padding:7px 12px"><div class="b-dot2 b-r"></div><div class="b-dot2 b-y"></div><div class="b-dot2 b-g"></div><div class="b-url" style="font-size:11px">index.html</div></div>
+              <div style="background:#2563eb;color:#fff;text-align:center;padding:20px;font-family:Arial,sans-serif;font-size:18px;font-weight:700">SkillHub LMS</div>
+            </div>
+          </div>
+        </div>
+        <div class="success-box" style="margin-top:10px">
+          <i class="ti ti-sparkles" style="color:#16a34a;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+          <div style="font-size:13px;color:#166534;line-height:1.65">4 CSS properties — <strong>massive visual difference</strong>. This is why developers love CSS. Small changes, big impact.</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-6"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Explain All <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ SLIDE 7  PROPERTY EXPLAINER ═══════════════════════ -->
+  <div class="slide" id="slide-7">
+    <div class="slide-header">
+      <span class="badge b-blue">Explain</span>
+      <div>
+        <div class="slide-title">Property-by-Property Explanation</div>
+        <div class="slide-subtitle">Click any row to expand — cover all 6 properties from today</div>
+      </div>
+    </div>
+    <div class="line-explain">
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="c-prop">background</span><span class="c-punc">:</span> <span class="c-hex">#f4f6f9</span></div>
+        <div class="lex-info">
+          <div class="lex-name">background — body</div>
+          <div class="lex-desc">Sets the page background to a soft blue-grey</div>
+          <div class="lex-detail">Can be a hex colour (<code>#f4f6f9</code>), a named colour (<code>lightgrey</code>), or even an image (<code>url('bg.jpg')</code>). The <code>background</code> shorthand covers both <code>background-color</code> and more.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="c-prop">font-family</span><span class="c-punc">:</span> <span class="c-str">Arial</span></div>
+        <div class="lex-info">
+          <div class="lex-name">font-family — body</div>
+          <div class="lex-desc">Changes all text to the Arial typeface</div>
+          <div class="lex-detail">Always provide a fallback: <code>Arial, sans-serif</code>. If Arial isn't on a device, the browser picks any available sans-serif font. System fonts (Arial, Georgia, Courier) are safe — they exist on every device.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="c-prop">background</span><span class="c-punc">:</span> <span class="c-hex">#2563eb</span></div>
+        <div class="lex-info">
+          <div class="lex-name">background — header</div>
+          <div class="lex-desc">Fills the header with a vivid blue colour</div>
+          <div class="lex-detail">Hex colour codes: <code>#</code> followed by 6 characters (0–9, A–F). First two = Red, middle two = Green, last two = Blue. <code>#2563eb</code> = low red, medium green, high blue = blue. Try <code>#dc2626</code> for Netflix red.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="c-prop">color</span><span class="c-punc">:</span> <span class="c-str">white</span></div>
+        <div class="lex-info">
+          <div class="lex-name">color — header</div>
+          <div class="lex-desc">Sets the text colour inside the header to white</div>
+          <div class="lex-detail"><strong>colour vs background:</strong> <code>color</code> = text colour. <code>background</code> = background fill. These are the two most commonly confused properties. Remember: text = <code>color</code>.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="c-prop">text-align</span><span class="c-punc">:</span> <span class="c-str">center</span></div>
+        <div class="lex-info">
+          <div class="lex-name">text-align — header</div>
+          <div class="lex-desc">Centers the "SkillHub LMS" text horizontally</div>
+          <div class="lex-detail">Values: <code>left</code> (default — text hugs the left edge) · <code>center</code> (centred in the container) · <code>right</code> (hugs the right edge) · <code>justify</code> (spreads to fill the full width like newspaper columns).</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="c-prop">padding</span><span class="c-punc">:</span> <span class="c-num">20px</span></div>
+        <div class="lex-info">
+          <div class="lex-name">padding — header</div>
+          <div class="lex-desc">Adds 20px of inner space on all four sides</div>
+          <div class="lex-detail">Padding = <strong>inside</strong> the element (between content and border). Margin = <strong>outside</strong> the element (space around it). Without padding, the "SkillHub LMS" text sits flush against the edge of the blue header — looks cramped. 20px gives it room to breathe.</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-7"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Before / After <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ SLIDE 8  BEFORE AFTER ═════════════════════════════ -->
+  <div class="slide" id="slide-8">
+    <div class="slide-header">
+      <span class="badge b-yellow">Before / After</span>
+      <div>
+        <div class="slide-title">See the Transformation</div>
+        <div class="slide-subtitle">Same HTML — completely different appearance with only 11 lines of CSS</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">❌ Before — Day 2 (HTML only)</div>
+        <div class="browser">
+          <div class="browser-bar"><div class="b-dot2 b-r"></div><div class="b-dot2 b-y"></div><div class="b-dot2 b-g"></div><div class="b-url">index.html (no CSS)</div></div>
+          <div class="lms-page" style="border-radius:0;border:none;font-family:serif">
+            <div style="padding:4px 8px;font-size:16px;font-weight:700;background:#fff">SkillHub LMS</div>
+            <div style="padding:4px 8px;font-size:13px;background:#fff">Home Courses Blog Projects</div>
+            <div style="padding:8px;background:#fff">
+              <div style="font-size:15px;font-weight:700">Become a Full Stack Developer</div>
+              <div style="font-size:13px">Learn industry-level MERN Stack from scratch.</div>
+              <div style="margin-top:4px"><button style="font-size:12px;padding:4px 10px">Get Started</button></div>
+            </div>
+            <div style="padding:8px;background:#fff">
+              <div style="font-size:13px;font-weight:700">About SkillHub LMS</div>
+              <div style="font-size:12px">SkillHub LMS helps students learn modern web development…</div>
+            </div>
+            <div style="padding:8px;background:#fff">
+              <div style="font-size:13px;font-weight:700">Our Courses</div>
+              <ul style="margin-left:18px;font-size:12px"><li>HTML &amp; CSS</li><li>JavaScript</li><li>React.js</li></ul>
+            </div>
+            <div style="padding:4px 8px;font-size:11px;background:#fff">© 2026 SkillHub LMS</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">✅ After — Hour 1 CSS applied</div>
+        <div class="browser">
+          <div class="browser-bar"><div class="b-dot2 b-r"></div><div class="b-dot2 b-y"></div><div class="b-dot2 b-g"></div><div class="b-url">index.html (with CSS)</div></div>
+          <div style="background:#f4f6f9;font-family:Arial,sans-serif;font-size:13px">
+            <div style="background:#2563eb;color:#fff;text-align:center;padding:20px;font-size:17px;font-weight:700">SkillHub LMS</div>
+            <div style="background:#334155;color:#cbd5e1;padding:7px 14px;font-size:12px;display:flex;gap:14px">
+              <span>Home</span><span>Courses</span><span>Blog</span><span>Projects</span>
+            </div>
+            <div style="background:#1d4ed8;color:#fff;padding:14px;">
+              <div style="font-size:15px;font-weight:700;margin-bottom:4px">Become a Full Stack Developer</div>
+              <div style="font-size:12px;opacity:.85">Learn industry-level MERN Stack from scratch.</div>
+            </div>
+            <div style="padding:12px 14px;border-bottom:1px solid #e8e8e8">
+              <div style="font-size:13px;font-weight:700;margin-bottom:4px">About SkillHub LMS</div>
+              <div style="font-size:12px;color:#555">SkillHub LMS helps students learn modern web development…</div>
+            </div>
+            <div style="padding:12px 14px;background:#f0f4f8;border-bottom:1px solid #e8e8e8">
+              <div style="font-size:13px;font-weight:700;margin-bottom:4px">Our Courses</div>
+              <ul style="margin-left:18px;font-size:12px;color:#444"><li>HTML &amp; CSS</li><li>JavaScript</li><li>React.js</li></ul>
+            </div>
+            <div style="background:#1e293b;color:#94a3b8;padding:10px 14px;font-size:11px;text-align:center">© 2026 SkillHub LMS</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card card-gray" style="margin-top:.25rem">
+      <div style="font-size:13px;font-weight:700;margin-bottom:6px">Just 11 lines of CSS changed everything:</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <span style="background:#dbeafe;color:#1e40af;font-size:12px;padding:3px 10px;border-radius:20px;font-weight:600">background:#f4f6f9</span>
+        <span style="background:#d1fae5;color:#065f46;font-size:12px;padding:3px 10px;border-radius:20px;font-weight:600">font-family:Arial</span>
+        <span style="background:#ede9fe;color:#5b21b6;font-size:12px;padding:3px 10px;border-radius:20px;font-weight:600">background:#2563eb</span>
+        <span style="background:#fef3c7;color:#92400e;font-size:12px;padding:3px 10px;border-radius:20px;font-weight:600">color:white</span>
+        <span style="background:#dcfce7;color:#166534;font-size:12px;padding:3px 10px;border-radius:20px;font-weight:600">text-align:center</span>
+        <span style="background:#fee2e2;color:#991b1b;font-size:12px;padding:3px 10px;border-radius:20px;font-weight:600">padding:20px</span>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-8"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Activity <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ SLIDE 9  ACTIVITY ═════════════════════════════════ -->
+  <div class="slide" id="slide-9">
+    <div class="slide-header">
+      <span class="badge b-orange">Activity</span>
+      <div>
+        <div class="slide-title">Experiment — Change It Yourself</div>
+        <div class="slide-subtitle">Students modify the CSS and observe the results in real time</div>
+      </div>
+    </div>
+
+    <div class="activity-box">
+      <div class="activity-title"><i class="ti ti-flask"></i> Three experiments — try all three then show the class your version</div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+
+        <div style="background:#fff;border-radius:10px;padding:14px 16px;border:1px solid #c7d2fe">
+          <div style="font-size:13px;font-weight:700;color:#3730a3;margin-bottom:8px;display:flex;align-items:center;gap:6px"><span style="width:22px;height:22px;background:#4f46e5;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700">1</span> Change the background colour</div>
+          <div class="editor" style="border-radius:8px">
+            <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div></div>
+            <div class="editor-body" style="font-size:12px">
+              <div class="e-row"><span class="c-sel">body</span><span class="c-punc"> { </span><span class="c-prop">background</span><span class="c-punc">:</span> <span class="c-hex" id="bg-val">#f4f6f9</span><span class="c-punc">; }</span></div>
+            </div>
+          </div>
+          <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
+            <span style="font-size:12px;color:#555;align-self:center">Try:</span>
+            <span onclick="tryColour('bg','#fff9e6','#fff9e6')" style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:12px;padding:4px 10px;border-radius:6px;background:#fff9e6;border:1px solid #fde68a"><span class="swatch" style="background:#fff9e6;width:16px;height:16px"></span>#fff9e6</span>
+            <span onclick="tryColour('bg','#141414','#141414')" style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:12px;padding:4px 10px;border-radius:6px;background:#e2e8f0;border:1px solid #cbd5e1"><span class="swatch" style="background:#141414;width:16px;height:16px"></span>#141414</span>
+            <span onclick="tryColour('bg','#f0fdf4','#f0fdf4')" style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:12px;padding:4px 10px;border-radius:6px;background:#f0fdf4;border:1px solid #86efac"><span class="swatch" style="background:#f0fdf4;width:16px;height:16px"></span>#f0fdf4</span>
+            <span onclick="tryColour('bg','#f4f6f9','#f4f6f9')" style="cursor:pointer;font-size:12px;padding:4px 10px;border-radius:6px;background:#e2e8f0;border:1px solid #cbd5e1;color:#334155">Reset</span>
+          </div>
+        </div>
+
+        <div style="background:#fff;border-radius:10px;padding:14px 16px;border:1px solid #c7d2fe">
+          <div style="font-size:13px;font-weight:700;color:#3730a3;margin-bottom:8px;display:flex;align-items:center;gap:6px"><span style="width:22px;height:22px;background:#4f46e5;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700">2</span> Change the header colour</div>
+          <div class="editor" style="border-radius:8px">
+            <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div></div>
+            <div class="editor-body" style="font-size:12px">
+              <div class="e-row"><span class="c-sel">header</span><span class="c-punc"> { </span><span class="c-prop">background</span><span class="c-punc">:</span> <span class="c-hex" id="hdr-val">#2563eb</span><span class="c-punc">; </span><span class="c-prop">color</span><span class="c-punc">:</span> <span class="c-str">white</span><span class="c-punc">; }</span></div>
+            </div>
+          </div>
+          <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
+            <span style="font-size:12px;color:#555;align-self:center">Try:</span>
+            <span onclick="tryColour('hdr','#dc2626','#dc2626')" style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:12px;padding:4px 10px;border-radius:6px;background:#fee2e2;border:1px solid #fca5a5"><span class="swatch" style="background:#dc2626;width:16px;height:16px"></span>#dc2626 Netflix</span>
+            <span onclick="tryColour('hdr','#059669','#059669')" style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:12px;padding:4px 10px;border-radius:6px;background:#d1fae5;border:1px solid #6ee7b7"><span class="swatch" style="background:#059669;width:16px;height:16px"></span>#059669</span>
+            <span onclick="tryColour('hdr','#7c3aed','#7c3aed')" style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:12px;padding:4px 10px;border-radius:6px;background:#ede9fe;border:1px solid #c4b5fd"><span class="swatch" style="background:#7c3aed;width:16px;height:16px"></span>#7c3aed</span>
+            <span onclick="tryColour('hdr','#2563eb','#2563eb')" style="cursor:pointer;font-size:12px;padding:4px 10px;border-radius:6px;background:#e2e8f0;border:1px solid #cbd5e1;color:#334155">Reset</span>
+          </div>
+        </div>
+
+        <div style="background:#fff;border-radius:10px;padding:14px 16px;border:1px solid #c7d2fe">
+          <div style="font-size:13px;font-weight:700;color:#3730a3;margin-bottom:8px;display:flex;align-items:center;gap:6px"><span style="width:22px;height:22px;background:#4f46e5;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700">3</span> Change the font</div>
+          <div class="editor" style="border-radius:8px">
+            <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div></div>
+            <div class="editor-body" style="font-size:12px">
+              <div class="e-row"><span class="c-sel">body</span><span class="c-punc"> { </span><span class="c-prop">font-family</span><span class="c-punc">:</span> <span class="c-str" id="font-val">Arial, sans-serif</span><span class="c-punc">; }</span></div>
+            </div>
+          </div>
+          <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
+            <span style="font-size:12px;color:#555;align-self:center">Try:</span>
+            <span onclick="tryColour('font','Georgia, serif','Georgia, serif')" style="cursor:pointer;font-size:12px;padding:4px 10px;border-radius:6px;background:#fef9c3;border:1px solid #fde047;font-family:Georgia">Georgia</span>
+            <span onclick="tryColour('font','Courier New, monospace','Courier New, monospace')" style="cursor:pointer;font-size:12px;padding:4px 10px;border-radius:6px;background:#f1f3f5;border:1px solid #dee2e6;font-family:Courier">Courier New</span>
+            <span onclick="tryColour('font','Impact, fantasy','Impact, fantasy')" style="cursor:pointer;font-size:12px;padding:4px 10px;border-radius:6px;background:#ffe4e6;border:1px solid #fca5a5;font-family:Impact">Impact</span>
+            <span onclick="tryColour('font','Arial, sans-serif','Arial, sans-serif')" style="cursor:pointer;font-size:12px;padding:4px 10px;border-radius:6px;background:#e2e8f0;border:1px solid #cbd5e1;color:#334155">Reset</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Live mini-preview -->
+    <div>
+      <div class="section-label">live mini-preview of your choices</div>
+      <div class="browser">
+        <div class="browser-bar"><div class="b-dot2 b-r"></div><div class="b-dot2 b-y"></div><div class="b-dot2 b-g"></div><div class="b-url">index.html</div></div>
+        <div id="live-bg" style="background:#f4f6f9;font-family:Arial,sans-serif;transition:all .3s">
+          <div id="live-hdr" style="background:#2563eb;color:white;text-align:center;padding:20px;font-size:17px;font-weight:700;transition:all .3s">SkillHub LMS</div>
+          <div style="padding:12px 14px;font-size:13px;color:#555">Welcome to SkillHub LMS — Learn Full Stack Development from scratch.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-9"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Reference <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ SLIDE 10 REFERENCE ════════════════════════════════ -->
+  <div class="slide" id="slide-10">
+    <div class="slide-header">
+      <span class="badge b-slate">Reference</span>
+      <div>
+        <div class="slide-title">CSS Properties Reference</div>
+        <div class="slide-subtitle">All properties covered today — keep this open while coding</div>
+      </div>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <table class="tag-table">
+        <thead>
+          <tr><th>Property</th><th>What it controls</th><th>Example value</th><th>Used on</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="tag-mono" style="background:#d1fae5;color:#065f46">background</span></td>
+            <td>Background colour (or image) of an element</td>
+            <td><code>#f4f6f9</code> · <code>white</code> · <code>red</code></td>
+            <td>body, header, section, any</td>
+          </tr>
+          <tr>
+            <td><span class="tag-mono" style="background:#ede9fe;color:#5b21b6">color</span></td>
+            <td>Text colour</td>
+            <td><code>white</code> · <code>#1a1a1a</code> · <code>blue</code></td>
+            <td>header, p, h1, any</td>
+          </tr>
+          <tr>
+            <td><span class="tag-mono" style="background:#dbeafe;color:#1e40af">font-family</span></td>
+            <td>Typeface / font used for text</td>
+            <td><code>Arial, sans-serif</code> · <code>Georgia, serif</code></td>
+            <td>body (cascades down)</td>
+          </tr>
+          <tr>
+            <td><span class="tag-mono" style="background:#fef3c7;color:#92400e">padding</span></td>
+            <td>Inner spacing (between content and border)</td>
+            <td><code>20px</code> · <code>10px 20px</code></td>
+            <td>header, section, nav</td>
+          </tr>
+          <tr>
+            <td><span class="tag-mono" style="background:#ffedd5;color:#9a3412">text-align</span></td>
+            <td>Horizontal alignment of text</td>
+            <td><code>center</code> · <code>left</code> · <code>right</code></td>
+            <td>header, section, p</td>
+          </tr>
+          <tr>
+            <td><span class="tag-mono" style="background:#cffafe;color:#164e63">font-size</span></td>
+            <td>Size of text</td>
+            <td><code>16px</code> · <code>2rem</code> · <code>1.5em</code></td>
+            <td>h1, h2, p, any</td>
+          </tr>
+          <tr>
+            <td><span class="tag-mono" style="background:#dcfce7;color:#166534">margin</span></td>
+            <td>Outer spacing (space around the element)</td>
+            <td><code>10px</code> · <code>0 auto</code> · <code>20px 0</code></td>
+            <td>section, h2, p</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="grid-2" style="margin-top:.25rem">
+      <div class="tip-box">
+        <i class="ti ti-bulb tip-icon"></i>
+        <div class="tip-text"><strong>Padding vs Margin:</strong> Padding = space <em>inside</em> (between content and edge). Margin = space <em>outside</em> (between this element and others). Remember: Padding is a Pillow (inside), Margin is Moat (outside).</div>
+      </div>
+      <div class="info-box">
+        <i class="ti ti-info-circle info-icon"></i>
+        <div class="info-text"><strong>Hours 2 &amp; 3 preview:</strong> We'll add more properties — <code>display:flex</code>, <code>border-radius</code>, <code>box-shadow</code> — to style the nav, hero, course cards, and footer.</div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-10"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Quiz <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ SLIDE 11 QUIZ ═════════════════════════════════════ -->
+  <div class="slide" id="slide-11">
+    <div class="slide-header">
+      <span class="badge b-green">Quiz</span>
+      <div>
+        <div class="slide-title">Quick Check — Hour 1 CSS</div>
+        <div class="slide-subtitle">5 questions covering CSS syntax, properties, and linking</div>
+      </div>
+    </div>
+    <div id="quiz-container"></div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-11"></div>
+      <button class="nav-btn" onclick="goSlide(0)"><i class="ti ti-home"></i> Home</button>
+    </div>
+  </div>
+
+</div><!-- /.wrapper -->
+<script>
+  var current = 0, total = 12, quizInit = false;
+
+  /* ── Quiz data ── */
+  var quizData = [
+    {
+      q: "What does <code>&lt;link rel=\"stylesheet\" href=\"css/style.css\"&gt;</code> do?",
+      opts: [
+        "Creates a new CSS file inside the html folder",
+        "Tells the browser to load and apply style.css to this HTML page",
+        "Links to an external website's stylesheet",
+        "Only works inside &lt;body&gt; not &lt;head&gt;"
+      ],
+      ans: 1,
+      exp: "The &lt;link&gt; tag inside &lt;head&gt; connects the HTML file to the CSS file. rel='stylesheet' tells the browser this is a stylesheet; href='css/style.css' tells it where to find the file."
+    },
+    {
+      q: "In CSS, what is the correct order of a rule? Pick the right structure.",
+      opts: [
+        "value: property { selector; }",
+        "property { selector: value; }",
+        "selector { property: value; }",
+        "selector: { value property; }"
+      ],
+      ans: 2,
+      exp: "CSS rule = selector { property: value; } — always in this order. Selector = which element. Property = what to change. Value = what to set it to. The semicolon ends each declaration."
+    },
+    {
+      q: "What is the difference between the CSS properties <code>color</code> and <code>background</code>?",
+      opts: [
+        "They do the same thing — both change text colour",
+        "color changes text colour; background changes the element's fill colour",
+        "background changes text colour; color changes the element fill",
+        "color only works on &lt;p&gt; tags; background works on all tags"
+      ],
+      ans: 1,
+      exp: "color = text colour. background = background fill of the element. These are the two most commonly confused CSS properties. Always remember: color = text, background = box fill."
+    },
+    {
+      q: "We added <code>padding: 20px</code> to the header. What does this do?",
+      opts: [
+        "Adds 20px of space OUTSIDE the header, pushing other elements away",
+        "Sets the header height to 20 pixels",
+        "Adds 20px of inner space between the header's text and its edges",
+        "Increases the font size inside the header by 20 pixels"
+      ],
+      ans: 2,
+      exp: "Padding = inner space (between content and the element's border). Margin = outer space (between the element and other elements). 20px padding gives the 'SkillHub LMS' text room to breathe inside the blue bar."
+    },
+    {
+      q: "Why do we write <code>font-family: Arial, sans-serif</code> instead of just <code>font-family: Arial</code>?",
+      opts: [
+        "The comma is required CSS syntax — it won't work without it",
+        "sans-serif overrides Arial — only sans-serif is used",
+        "Arial is a fallback for sans-serif — the browser tries sans-serif first",
+        "sans-serif is a fallback — if Arial isn't available, the browser picks any sans-serif font"
+      ],
+      ans: 3,
+      exp: "Font stacks work left to right: try Arial first. If not available (unlikely but possible), use any sans-serif font. Always include a generic fallback (serif, sans-serif, monospace) as the last item in the list."
+    }
+  ];
+  var quizAnswered = [];
+
+  function renderQuiz() {
+    var c = document.getElementById('quiz-container'); c.innerHTML = '';
+    quizData.forEach(function(q, i) {
+      var d = document.createElement('div'); d.style.cssText = 'margin-bottom:18px';
+      d.innerHTML = '<div style="font-size:13px;font-weight:600;margin-bottom:6px">'+(i+1)+'. '+q.q+'</div>';
+      q.opts.forEach(function(opt, j) {
+        var btn = document.createElement('button'); btn.className = 'quiz-option';
+        btn.innerHTML = String.fromCharCode(65+j)+'. '+opt;
+        btn.onclick = function() {
+          if (quizAnswered[i]) return; quizAnswered[i] = true;
+          var btns = d.querySelectorAll('.quiz-option');
+          btns.forEach(function(b,k){ b.disabled=true; if(k===q.ans) b.classList.add('correct'); else if(k===j) b.classList.add('wrong'); });
+          var fb = d.querySelector('.quiz-feedback');
+          fb.innerHTML = (j===q.ans?'✅ Correct! ':'❌ Not quite. ')+q.exp;
+          fb.className = 'quiz-feedback '+(j===q.ans?'correct':'wrong');
+        };
+        d.appendChild(btn);
+      });
+      var fb = document.createElement('div'); fb.className = 'quiz-feedback'; d.appendChild(fb);
+      c.appendChild(d);
+    });
+  }
+
+  function toggleLex(row) {
+    var was = row.classList.contains('active');
+    document.querySelectorAll('.lex-row.active').forEach(function(r){ r.classList.remove('active'); });
+    if (!was) row.classList.add('active');
+  }
+
+  function toggle(id) {
+    var el = document.getElementById(id); el.classList.toggle('open');
+    el.previousElementSibling.textContent = el.classList.contains('open') ? 'Hide the answer' : 'Reveal the answer';
+  }
+
+  /* ── Anatomy highlight ── */
+  var anatExplain = {
+    sel:  { text: '🎯 Selector — <strong>h1</strong> targets every &lt;h1&gt; element on the page. Whatever CSS rules are inside the braces will apply to ALL h1 tags. You can also use class selectors (.btn) or id selectors (#header).', bg: '#ffe4e6' },
+    prop: { text: '⚙️ Property — <strong>color</strong> is the property we want to change. Properties are always lowercase with hyphens for spaces (e.g. font-family, text-align, background-color). Never use camelCase in CSS.', bg: '#d1fae5' },
+    val:  { text: '🎨 Value — <strong>blue</strong> is what we set color to. Values depend on the property: color accepts colour names and hex codes; font-size accepts px/rem/em; text-align accepts left/center/right.', bg: '#fef3c7' }
+  };
+  function highlightAnat(part) {
+    var box = document.getElementById('anat-explain');
+    var data = anatExplain[part];
+    box.innerHTML = data.text;
+    box.style.background = data.bg;
+    box.style.color = '#1a1a1a';
+    box.style.display = 'block';
+  }
+
+  /* ── Activity colour swapper ── */
+  function tryColour(target, valText, cssVal) {
+    if (target === 'bg') {
+      document.getElementById('bg-val').textContent = valText;
+      document.getElementById('live-bg').style.background = cssVal;
+    } else if (target === 'hdr') {
+      document.getElementById('hdr-val').textContent = valText;
+      document.getElementById('live-hdr').style.background = cssVal;
+    } else if (target === 'font') {
+      document.getElementById('font-val').textContent = valText;
+      document.getElementById('live-bg').style.fontFamily = cssVal;
+      document.getElementById('live-hdr').style.fontFamily = cssVal;
+    }
+  }
+
+  function goSlide(n) {
+    document.getElementById('slide-'+current).classList.remove('active');
+    current = n;
+    document.getElementById('slide-'+current).classList.add('active');
+    updateDots();
+    document.getElementById('slide-counter').textContent = (current+1)+' / '+total;
+    if (n===11 && !quizInit) { renderQuiz(); quizInit=true; }
+    window.scrollTo(0,0);
+  }
+  function nextSlide() { if (current < total-1) goSlide(current+1); }
+  function prevSlide() { if (current > 0) goSlide(current-1); }
+
+  function updateDots() {
+    for (var s=0; s<total; s++) {
+      var el = document.getElementById('dots-'+s); if (!el) continue;
+      el.innerHTML = '';
+      for (var d=0; d<total; d++) {
+        var dot = document.createElement('div');
+        dot.className = 'dot'+(d===current?' active':'');
+        el.appendChild(dot);
+      }
+    }
+  }
+  updateDots();
+</script>
+</body>
+</html>

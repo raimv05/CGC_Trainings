@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Day 4 · Hour 3 – Building Professional Sections</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f4f5f7; color: #1a1a1a;
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; padding: 2rem 1rem;
+  }
+  .wrapper {
+    width: 100%; max-width: 920px; background: #fff;
+    border-radius: 16px; box-shadow: 0 2px 20px rgba(0,0,0,0.09); overflow: hidden;
+  }
+  .top-bar {
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    color: #fff; padding: 14px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .top-bar-title { font-size: 15px; font-weight: 600; }
+  .top-bar-sub   { font-size: 12px; opacity: .55; margin-top: 2px; }
+  .slide-counter { font-size: 13px; opacity: .6; font-variant-numeric: tabular-nums; }
+  .slide { display: none; padding: 1.75rem 2rem; min-height: 500px; flex-direction: column; gap: 1.2rem; }
+  .slide.active { display: flex; }
+  .slide-header { display: flex; align-items: center; gap: 10px; padding-bottom: 1rem; border-bottom: 1px solid #e8e8e8; }
+  .slide-title    { font-size: 20px; font-weight: 700; color: #111; }
+  .slide-subtitle { font-size: 13px; color: #666; margin-top: 2px; }
+
+  /* ── Badges ── */
+  .badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+  .b-blue   { background:#dbeafe; color:#1d4ed8; }
+  .b-teal   { background:#d1fae5; color:#065f46; }
+  .b-purple { background:#ede9fe; color:#5b21b6; }
+  .b-amber  { background:#fef3c7; color:#92400e; }
+  .b-green  { background:#dcfce7; color:#166534; }
+  .b-slate  { background:#e2e8f0; color:#334155; }
+  .b-rose   { background:#ffe4e6; color:#9f1239; }
+  .b-orange { background:#ffedd5; color:#9a3412; }
+  .b-indigo { background:#e0e7ff; color:#3730a3; }
+  .b-cyan   { background:#cffafe; color:#164e63; }
+  .b-pink   { background:#fce7f3; color:#9d174d; }
+
+  /* ── Layout ── */
+  .section-label { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 8px; }
+  .card { background: #fff; border: 1px solid #e8e8e8; border-radius: 12px; padding: 1rem 1.25rem; }
+  .card-gray { background: #f8f9fa; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+  /* ── Code Editor (Dracula) ── */
+  .editor { background: #1e1e2e; border-radius: 12px; overflow: hidden; font-family: 'SFMono-Regular', Consolas, 'Courier New', monospace; }
+  .editor-bar { background: #13131f; padding: 9px 14px; display: flex; align-items: center; gap: 6px; }
+  .e-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .e-red { background:#ff5f57; } .e-yellow { background:#febc2e; } .e-green { background:#28c840; }
+  .e-label { font-size: 12px; color: #6272a4; margin-left: 4px; font-family: -apple-system, sans-serif; }
+  .editor-body { padding: 14px 18px; font-size: 12.5px; line-height: 1.8; }
+  .e-ln   { color: #44475a; font-size: 11px; display: inline-block; width: 22px; user-select: none; }
+  .e-tag  { color: #ff79c6; }
+  .e-att  { color: #50fa7b; }
+  .e-val  { color: #f1fa8c; }
+  .e-txt  { color: #f8f8f2; }
+  .e-cmt  { color: #6272a4; font-style: italic; }
+  .e-new  { color: #80ffea; }
+  .e-h2   { color: #ffb86c; font-weight: 700; }
+  .e-p    { color: #8be9fd; }
+  .c-sel  { color: #ff79c6; font-weight: 700; }
+  .c-prop { color: #50fa7b; }
+  .c-val  { color: #f1fa8c; }
+  .c-punc { color: #f8f8f2; }
+  .c-hex  { color: #bd93f9; }
+  .c-str  { color: #ffb86c; }
+  .c-num  { color: #ff79c6; }
+  .c-cmt  { color: #6272a4; font-style: italic; }
+  .e-row  { display: flex; gap: 8px; }
+  .e-ind1 { display: inline-block; width: 20px; }
+  .e-ind2 { display: inline-block; width: 40px; }
+  .e-ind3 { display: inline-block; width: 60px; }
+
+  /* ── Browser frame ── */
+  .browser { border-radius: 12px; overflow: hidden; border: 1px solid #e0e0e0; }
+  .browser-bar { background: #f1f3f4; padding: 9px 14px; display: flex; align-items: center; gap: 7px; border-bottom: 1px solid #e0e0e0; }
+  .b-dot2 { width: 10px; height: 10px; border-radius: 50%; }
+  .b-r { background:#ff5f57; } .b-y { background:#febc2e; } .b-g { background:#28c840; }
+  .b-url { flex:1; background:#fff; border:1px solid #dadce0; border-radius:20px; padding:4px 14px; font-size:12px; color:#555; }
+
+  /* ── Tables ── */
+  .tag-table { border-collapse: collapse; width: 100%; }
+  .tag-table th { background: #f1f5f9; font-size: 12px; font-weight: 700; text-align: left; padding: 10px 14px; color: #475569; border-bottom: 2px solid #e2e8f0; }
+  .tag-table td { font-size: 13px; padding: 10px 14px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+  .tag-table tr:last-child td { border-bottom: none; }
+  .tag-table tr:hover td { background: #f8f9fa; }
+
+  /* ── Quiz ── */
+  .quiz-option { border: 1px solid #dee2e6; border-radius: 8px; padding: 10px 14px; font-size: 13px; cursor: pointer; margin-bottom: 6px; transition: all .15s; background: transparent; width: 100%; text-align: left; color: #1a1a1a; }
+  .quiz-option:hover:not(:disabled) { background: #f8f9fa; }
+  .quiz-option.correct { background: #d1fae5; border-color: #059669; color: #065f46; }
+  .quiz-option.wrong   { background: #fee2e2; border-color: #dc2626; color: #991b1b; }
+  .quiz-feedback { display: none; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-top: 4px; }
+  .quiz-feedback.correct { background: #d1fae5; color: #065f46; display: block; }
+  .quiz-feedback.wrong   { background: #fee2e2; color: #991b1b; display: block; }
+
+  /* ── Activity / challenge ── */
+  .activity-box { border: 2px dashed #a5b4fc; background: #eef2ff; border-radius: 12px; padding: 14px 18px; }
+  .activity-title { font-size: 13px; font-weight: 700; color: #3730a3; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .challenge-box { border: 2px dashed #f9a8d4; background: #fdf2f8; border-radius: 12px; padding: 14px 18px; }
+  .challenge-title { font-size: 13px; font-weight: 700; color: #9f1239; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+
+  /* ── Tip / info / warn / success ── */
+  .tip-box   { display:flex; gap:10px; align-items:flex-start; background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:10px 14px; }
+  .tip-icon  { color:#d97706; font-size:18px; flex-shrink:0; margin-top:1px; }
+  .tip-text  { font-size:13px; color:#92400e; line-height:1.6; }
+  .info-box  { display:flex; gap:10px; align-items:flex-start; background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:10px 14px; }
+  .info-icon { color:#2563eb; font-size:18px; flex-shrink:0; margin-top:1px; }
+  .info-text { font-size:13px; color:#1e40af; line-height:1.6; }
+  .warn-box  { display:flex; gap:10px; align-items:flex-start; background:#fef9ee; border:1px solid #fcd34d; border-radius:10px; padding:10px 14px; }
+  .success-box { display:flex; gap:10px; align-items:flex-start; background:#f0fdf4; border:1px solid #86efac; border-radius:10px; padding:10px 14px; }
+
+  /* ── Line explainer ── */
+  .lex-row { display:flex; align-items:stretch; cursor:pointer; transition:background .12s; border-bottom:1px solid #f0f0f0; }
+  .lex-row:last-child { border-bottom:none; }
+  .lex-row:hover { background:#f8f9fa; }
+  .lex-row.active { background:#eff6ff; border-left:3px solid #1d4ed8; }
+  .lex-code { background:#1e1e2e; padding:10px 14px; font-family:'SFMono-Regular',Consolas,monospace; font-size:12px; min-width:220px; flex-shrink:0; display:flex; align-items:center; }
+  .lex-info { padding:10px 14px; flex:1; }
+  .lex-name   { font-size:13px; font-weight:700; color:#1d4ed8; margin-bottom:2px; }
+  .lex-desc   { font-size:12px; color:#555; line-height:1.55; }
+  .lex-detail { display:none; font-size:12px; color:#1d4ed8; margin-top:4px; padding-top:4px; border-top:1px dashed #bfdbfe; }
+  .lex-row.active .lex-detail { display:block; }
+  .line-explain { border:1px solid #e8e8e8; border-radius:10px; overflow:hidden; }
+
+  /* ── Reveal ── */
+  .reveal-btn { background:#f1f3f5; border:1px solid #dee2e6; border-radius:8px; padding:7px 14px; font-size:13px; cursor:pointer; color:#333; transition:background .15s; }
+  .reveal-btn:hover { background:#e9ecef; }
+  .reveal-content { display:none; margin-top:8px; }
+  .reveal-content.open { display:block; }
+
+  /* ── Nav ── */
+  .nav-row { display:flex; align-items:center; justify-content:space-between; margin-top:auto; padding-top:1rem; border-top:1px solid #f0f0f0; }
+  .nav-btn { display:inline-flex; align-items:center; gap:6px; padding:9px 18px; border:1px solid #dee2e6; border-radius:8px; background:transparent; font-size:13px; cursor:pointer; color:#333; transition:background .15s; }
+  .nav-btn:hover:not(:disabled) { background:#f1f3f5; }
+  .nav-btn:disabled { opacity:.35; cursor:default; }
+  .nav-btn.primary { background:#1d4ed8; border-color:transparent; color:#fff; }
+  .nav-btn.primary:hover { background:#1e40af; }
+  .progress-dots { display:flex; gap:6px; align-items:center; }
+  .dot { width:7px; height:7px; border-radius:50%; background:#dee2e6; transition:all .2s; }
+  .dot.active { width:20px; border-radius:4px; background:#1d4ed8; }
+
+  /* ── Home grid ── */
+  .home-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .home-card { background:#fff; border:1px solid #e8e8e8; border-radius:12px; padding:1rem 1.25rem; cursor:pointer; transition:all .15s; }
+  .home-card:hover { border-color:#1d4ed8; box-shadow:0 2px 8px rgba(29,78,216,.1); }
+  .home-card-title { font-size:15px; font-weight:700; margin:6px 0 2px; }
+  .home-card-sub   { font-size:12px; color:#666; }
+
+  code { font-family:'SFMono-Regular',Consolas,monospace; font-size:12px; background:#f1f3f5; padding:1px 6px; border-radius:4px; border:1px solid #dee2e6; }
+
+  /* ── Checklist ── */
+  .check-item { display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:10px; border:1px solid #e8e8e8; font-size:13px; cursor:pointer; transition:all .15s; user-select:none; }
+  .check-item:hover { background:#f8f9fa; }
+  .check-item.done { background:#f0fdf4; border-color:#86efac; }
+  .check-circle { width:22px; height:22px; border-radius:50%; border:2px solid #dee2e6; display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0; transition:all .2s; color:transparent; }
+  .check-item.done .check-circle { background:#22c55e; border-color:#22c55e; color:#fff; }
+
+  /* ── Property pill buttons ── */
+  .val-pill { padding:5px 12px; border-radius:20px; border:1px solid #dee2e6; font-size:12px; cursor:pointer; transition:all .15s; background:white; color:#555; font-family:'SFMono-Regular',Consolas,monospace; }
+  .val-pill:hover { border-color:#2563eb; color:#1d4ed8; }
+  .val-pill.active { background:#2563eb; border-color:#2563eb; color:white; }
+
+  /* ══ HOUR 3 — SkillHub Live Preview Styles ══ */
+  .sh-preview { font-family: Arial, sans-serif; font-size: 13px; border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden; }
+  .sh-nav { background: #1e293b; color: #fff; padding: 10px 16px; text-align: center; font-size: 13px; font-weight: 700; }
+  .sh-hero { background: linear-gradient(135deg, #1e293b, #2563eb); color: #fff; padding: 20px 16px; text-align: center; }
+  .sh-hero h1 { font-size: 16px; font-weight: 800; margin-bottom: 4px; }
+  .sh-hero p  { font-size: 11px; opacity: .8; margin-bottom: 10px; }
+  .sh-hero-btn { background: white; color: #2563eb; border: none; padding: 6px 16px; border-radius: 20px; font-size: 11px; font-weight: 700; cursor: pointer; }
+  /* Features section */
+  .sh-features { background: #eef4ff; padding: 16px; text-align: center; }
+  .sh-features h2 { font-size: 13px; margin-bottom: 12px; }
+  .sh-feat-container { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+  .sh-feat-card { width: 130px; padding: 12px 10px; background: white; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,.12); transition: transform .3s; }
+  .sh-feat-card:hover { transform: scale(1.05); }
+  .sh-feat-card h3 { font-size: 11px; margin-bottom: 3px; }
+  .sh-feat-card p  { font-size: 10px; color: #666; }
+  /* CTA section */
+  .sh-cta { background: #2563eb; color: white; padding: 18px 16px; text-align: center; }
+  .sh-cta h2 { font-size: 13px; margin-bottom: 10px; }
+  .sh-cta-btn { background: white; color: #2563eb; border: none; padding: 7px 20px; border-radius: 20px; font-size: 12px; font-weight: 700; cursor: pointer; }
+
+  /* ── Hover demo toggle ── */
+  .hover-demo-card { width: 150px; padding: 16px 12px; background: white; border-radius: 8px; box-shadow: 0 0 12px rgba(0,0,0,.15); text-align: center; font-size: 12px; font-weight: 700; cursor: pointer; transition: transform .3s; }
+  .hover-demo-card.scaled { transform: scale(1.08); box-shadow: 0 4px 20px rgba(0,0,0,.2); }
+
+  /* ── Section anatomy diagram ── */
+  .anatomy-row { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; font-size: 12px; margin-bottom: 6px; border: 1px solid transparent; }
+  .anatomy-row:hover { background: #f8f9fa; }
+  .anatomy-swatch { width: 32px; height: 32px; border-radius: 6px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: white; }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <div>
+      <div class="top-bar-title">MERN Stack Training · Day 4 · Hour 3</div>
+      <div class="top-bar-sub">Building Professional Sections — SkillHub LMS</div>
+    </div>
+    <div class="slide-counter" id="slide-counter">1 / 13</div>
+  </div>
+
+  <!-- ═══════════ SLIDE 0  HOME ═══════════ -->
+  <div class="slide active" id="slide-0">
+    <div class="slide-header">
+      <span class="badge b-blue">Day 4 · Hour 3</span>
+      <div>
+        <div class="slide-title">Building Professional Sections</div>
+        <div class="slide-subtitle">Give SkillHub the look of a real company website — Features section, CTA, and your own section assignment.</div>
+      </div>
+    </div>
+
+    <div style="background:#ede9fe;border:1px solid #c4b5fd;border-radius:12px;padding:12px 16px;display:flex;gap:12px;align-items:flex-start">
+      <i class="ti ti-layout-bottombar" style="color:#7c3aed;font-size:22px;flex-shrink:0;margin-top:1px"></i>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#4c1d95;margin-bottom:4px">Hour 3 Goal — Make SkillHub Look Like a Company Website</div>
+        <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:#5b21b6">
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Build a "Why Choose Us" features section</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Add scale() hover effects</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Create a CTA (Call-To-Action) section</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Build a Testimonials or Team section</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="home-grid">
+      <div class="home-card" onclick="goSlide(1)">
+        <span class="badge b-green">Recap</span>
+        <div class="home-card-title">Where We Are Now</div>
+        <div class="home-card-sub">What the SkillHub site looks like after Hour 2</div>
+      </div>
+      <div class="home-card" onclick="goSlide(2)">
+        <span class="badge b-amber">Hook</span>
+        <div class="home-card-title">What Makes a Site Look "Professional"?</div>
+        <div class="home-card-sub">Opening question for the class</div>
+      </div>
+      <div class="home-card" onclick="goSlide(3)">
+        <span class="badge b-blue">Concept</span>
+        <div class="home-card-title">Anatomy of a Company Website</div>
+        <div class="home-card-sub">Nav → Hero → Features → CTA → Footer</div>
+      </div>
+      <div class="home-card" onclick="goSlide(4)">
+        <span class="badge b-blue">HTML</span>
+        <div class="home-card-title">Features Section HTML</div>
+        <div class="home-card-sub">section.features with three feature cards</div>
+      </div>
+      <div class="home-card" onclick="goSlide(5)">
+        <span class="badge b-teal">CSS</span>
+        <div class="home-card-title">Features Section CSS</div>
+        <div class="home-card-sub">Flex layout + card styling + hover scale</div>
+      </div>
+      <div class="home-card" onclick="goSlide(6)">
+        <span class="badge b-orange">Live Preview</span>
+        <div class="home-card-title">Hover Effect Demo</div>
+        <div class="home-card-sub">Interactive transform:scale() demo</div>
+      </div>
+      <div class="home-card" onclick="goSlide(7)">
+        <span class="badge b-blue">HTML + CSS</span>
+        <div class="home-card-title">CTA Section</div>
+        <div class="home-card-sub">Call-to-action with blue background</div>
+      </div>
+      <div class="home-card" onclick="goSlide(8)">
+        <span class="badge b-orange">Preview</span>
+        <div class="home-card-title">SkillHub Live Preview</div>
+        <div class="home-card-sub">See the full page with new sections</div>
+      </div>
+      <div class="home-card" onclick="goSlide(9)">
+        <span class="badge b-purple">Deep Dive</span>
+        <div class="home-card-title">CSS Properties Explained</div>
+        <div class="home-card-sub">Click each property to learn what it does</div>
+      </div>
+      <div class="home-card" onclick="goSlide(10)">
+        <span class="badge b-rose">Assignment</span>
+        <div class="home-card-title">Build Testimonials or Team Section</div>
+        <div class="home-card-sub">Students apply Flexbox independently</div>
+      </div>
+      <div class="home-card" onclick="goSlide(11)">
+        <span class="badge b-slate">Quiz</span>
+        <div class="home-card-title">Quick-Fire Quiz</div>
+        <div class="home-card-sub">4 questions — test what you just learned</div>
+      </div>
+      <div class="home-card" onclick="goSlide(12)">
+        <span class="badge b-green">Wrap-Up</span>
+        <div class="home-card-title">Hour 3 Complete!</div>
+        <div class="home-card-sub">What you built + Day 5 preview</div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" disabled><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-0"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Start <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 1  RECAP ═══════════ -->
+  <div class="slide" id="slide-1">
+    <div class="slide-header">
+      <span class="badge b-green">Recap</span>
+      <div>
+        <div class="slide-title">Where We Are Now</div>
+        <div class="slide-subtitle">Hour 2 gave your cards layout — Hour 3 adds professional page sections</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="section-label">what we've built so far</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#dcfce7;border-radius:8px;font-size:12px;font-weight:700;color:#166534"><span><i class="ti ti-box" style="margin-right:5px"></i>Box Model &amp; Card Styling</span><span class="badge b-green" style="font-size:10px">✓ done</span></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#dcfce7;border-radius:8px;font-size:12px;font-weight:700;color:#166534"><span><i class="ti ti-layout-columns" style="margin-right:5px"></i>Flexbox Course Cards</span><span class="badge b-green" style="font-size:10px">✓ done</span></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#dcfce7;border-radius:8px;font-size:12px;font-weight:700;color:#166534"><span><i class="ti ti-arrows-horizontal" style="margin-right:5px"></i>justify-content, gap, flex-wrap</span><span class="badge b-green" style="font-size:10px">✓ done</span></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#ede9fe;border-radius:8px;font-size:12px;font-weight:700;color:#5b21b6;border:2px dashed #a78bfa"><span><i class="ti ti-layout-bottombar" style="margin-right:5px"></i>Professional Page Sections</span><span class="badge b-purple" style="font-size:10px">← NOW</span></div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">the site right now</div>
+        <div class="browser">
+          <div class="browser-bar"><div class="b-dot2 b-r"></div><div class="b-dot2 b-y"></div><div class="b-dot2 b-g"></div><div class="b-url">skillhub.html — after Hour 2</div></div>
+          <div style="background:#f8f9fa;padding:10px;font-family:Arial,sans-serif;font-size:11px">
+            <div style="background:#1e293b;color:white;padding:7px 10px;text-align:center;font-weight:700;border-radius:4px;margin-bottom:6px">SkillHub — Learn Smarter</div>
+            <div style="background:#f4f4f4;padding:8px;border-radius:4px;margin-bottom:6px;text-align:center">
+              <div style="font-weight:700;margin-bottom:6px">Our Courses</div>
+              <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap">
+                <div style="background:white;border-radius:5px;box-shadow:0 1px 4px rgba(0,0,0,.1);padding:6px 8px;font-size:10px;font-weight:700;width:70px">HTML &amp; CSS</div>
+                <div style="background:white;border-radius:5px;box-shadow:0 1px 4px rgba(0,0,0,.1);padding:6px 8px;font-size:10px;font-weight:700;width:70px">JavaScript</div>
+                <div style="background:white;border-radius:5px;box-shadow:0 1px 4px rgba(0,0,0,.1);padding:6px 8px;font-size:10px;font-weight:700;width:70px">React</div>
+              </div>
+            </div>
+            <div style="color:#888;font-size:10px;text-align:center;padding:4px 0">← missing: features section, CTA, more content →</div>
+          </div>
+        </div>
+        <div class="warn-box" style="margin-top:8px">
+          <i class="ti ti-alert-triangle" style="color:#d97706;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+          <div style="font-size:13px;color:#92400e;line-height:1.6">The page has cards but <strong>no reason to trust the brand</strong>. Real company sites have social proof, benefits, and a call to action.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-1"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Opening Hook <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 2  HOOK ═══════════ -->
+  <div class="slide" id="slide-2">
+    <div class="slide-header">
+      <span class="badge b-amber">Hook</span>
+      <div>
+        <div class="slide-title">Opening Question</div>
+        <div class="slide-subtitle">Ask the class before revealing the answer</div>
+      </div>
+    </div>
+
+    <div style="background:linear-gradient(135deg,#1e1b4b,#312e81);border-radius:16px;padding:32px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:16px">
+      <div style="font-size:13px;font-weight:700;color:#a5b4fc;letter-spacing:.08em;text-transform:uppercase">Ask The Class</div>
+      <div style="font-size:26px;font-weight:800;color:#fff;line-height:1.3">What makes a website look<br>like a <em style="color:#818cf8">company</em> website?</div>
+      <div style="font-size:13px;color:#818cf8">Wait for students to answer…</div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">student answers (expected)</div>
+        <div style="background:#fef3c7;border:1px solid #fde68a;border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px">
+          <i class="ti ti-message" style="color:#d97706;font-size:24px;flex-shrink:0"></i>
+          <div>
+            <div style="font-size:13px;font-weight:700;color:#92400e">"Colours", "Logo", "Nice design"</div>
+            <div style="font-size:12px;color:#a16207;margin-top:2px">All true — but which <em>sections</em> are always there?</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">the real answer</div>
+        <div style="background:#ede9fe;border:2px solid #7c3aed;border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px">
+          <i class="ti ti-layout-bottombar" style="color:#7c3aed;font-size:24px;flex-shrink:0"></i>
+          <div>
+            <div style="font-size:13px;font-weight:700;color:#4c1d95">Consistent sections every site uses</div>
+            <div style="font-size:12px;color:#5b21b6;margin-top:4px">Hero → Features / Why Us → Testimonials → CTA → Footer.<br>That structure is what makes a page feel <strong>trustworthy</strong>.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <i class="ti ti-bulb info-icon"></i>
+      <div class="info-text">Today we add <strong>two of these sections</strong> — "Why Choose Us" (Features) and a CTA — and you'll build a third one yourself as the assignment.</div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-2"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Anatomy <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 3  ANATOMY ═══════════ -->
+  <div class="slide" id="slide-3">
+    <div class="slide-header">
+      <span class="badge b-blue">Concept</span>
+      <div>
+        <div class="slide-title">Anatomy of a Company Website</div>
+        <div class="slide-subtitle">Every section has a job — learn the pattern once, use it forever</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">standard section order</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div class="anatomy-row" style="background:#1e293b;color:#fff;border-radius:8px;">
+            <div class="anatomy-swatch" style="background:#0f172a"><i class="ti ti-layout-navbar" style="font-size:14px"></i></div>
+            <div><div style="font-weight:700;font-size:13px">Navigation Bar</div><div style="font-size:11px;opacity:.7">Logo + links + CTA button</div></div>
+          </div>
+          <div class="anatomy-row" style="background:linear-gradient(90deg,#2563eb,#1d4ed8);color:#fff;border-radius:8px;">
+            <div class="anatomy-swatch" style="background:rgba(255,255,255,.15)"><i class="ti ti-speakerphone" style="font-size:14px"></i></div>
+            <div><div style="font-weight:700;font-size:13px">Hero Section</div><div style="font-size:11px;opacity:.7">Headline + sub-text + button</div></div>
+          </div>
+          <div class="anatomy-row" style="background:#eef4ff;border-radius:8px;border:1px solid #bfdbfe;">
+            <div class="anatomy-swatch" style="background:#2563eb"><i class="ti ti-stars" style="font-size:14px"></i></div>
+            <div><div style="font-weight:700;font-size:13px;color:#1d4ed8">Features / Why Choose Us</div><div style="font-size:11px;color:#2563eb">3 benefit cards in a flex row ← building now</div></div>
+          </div>
+          <div class="anatomy-row" style="background:#f8f9fa;border-radius:8px;border:1px solid #e8e8e8;">
+            <div class="anatomy-swatch" style="background:#6366f1"><i class="ti ti-quote" style="font-size:14px"></i></div>
+            <div><div style="font-weight:700;font-size:13px">Testimonials / Team</div><div style="font-size:11px;color:#666">Social proof — your assignment today</div></div>
+          </div>
+          <div class="anatomy-row" style="background:#2563eb;color:#fff;border-radius:8px;">
+            <div class="anatomy-swatch" style="background:rgba(255,255,255,.2)"><i class="ti ti-hand-click" style="font-size:14px"></i></div>
+            <div><div style="font-weight:700;font-size:13px">CTA Section</div><div style="font-size:11px;opacity:.7">Call-to-action ← building now</div></div>
+          </div>
+          <div class="anatomy-row" style="background:#1e293b;color:#fff;border-radius:8px;">
+            <div class="anatomy-swatch" style="background:#0f172a"><i class="ti ti-layout-bottombar" style="font-size:14px"></i></div>
+            <div><div style="font-weight:700;font-size:13px">Footer</div><div style="font-size:11px;opacity:.7">Links, copyright, socials</div></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">why this order matters</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div class="card" style="border-left:4px solid #2563eb">
+            <div style="font-size:13px;font-weight:700;color:#1d4ed8;margin-bottom:3px"><i class="ti ti-eye" style="margin-right:5px"></i>Attention</div>
+            <div style="font-size:12px;color:#555">Hero grabs attention in the first 3 seconds. If you lose them here, the rest doesn't matter.</div>
+          </div>
+          <div class="card" style="border-left:4px solid #059669">
+            <div style="font-size:13px;font-weight:700;color:#065f46;margin-bottom:3px"><i class="ti ti-shield-check" style="margin-right:5px"></i>Trust</div>
+            <div style="font-size:12px;color:#555">Features + Testimonials build <em>why</em> they should choose you over competitors.</div>
+          </div>
+          <div class="card" style="border-left:4px solid #d97706">
+            <div style="font-size:13px;font-weight:700;color:#92400e;margin-bottom:3px"><i class="ti ti-hand-click" style="margin-right:5px"></i>Action</div>
+            <div style="font-size:12px;color:#555">CTA closes the deal — a clear, single action with high contrast design.</div>
+          </div>
+        </div>
+        <div class="tip-box" style="margin-top:10px">
+          <i class="ti ti-bulb tip-icon"></i>
+          <div class="tip-text">Every major company site (Coursera, Udemy, LinkedIn Learning) follows this exact pattern. Learning it once means you can build any landing page.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-3"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Features HTML <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 4  FEATURES HTML ═══════════ -->
+  <div class="slide" id="slide-4">
+    <div class="slide-header">
+      <span class="badge b-blue">HTML</span>
+      <div>
+        <div class="slide-title">Features Section — HTML</div>
+        <div class="slide-subtitle">Add this below your existing course cards section in index.html</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">code to write</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><div class="e-label">index.html — features section</div></div>
+          <div class="editor-body">
+            <div><span class="e-ln">1</span><span class="e-cmt">&lt;!-- Add below courses section --&gt;</span></div>
+            <div><span class="e-ln">2</span><span class="e-tag">&lt;section</span> <span class="e-att">class=</span><span class="e-val">"features"</span><span class="e-tag">&gt;</span></div>
+            <div><span class="e-ln">3</span><span class="e-ind1"></span><span class="e-tag">&lt;h2&gt;</span><span class="e-h2">Why Choose SkillHub?</span><span class="e-tag">&lt;/h2&gt;</span></div>
+            <div><span class="e-ln">4</span></div>
+            <div><span class="e-ln">5</span><span class="e-ind1"></span><span class="e-tag">&lt;div</span> <span class="e-att">class=</span><span class="e-val">"feature-container"</span><span class="e-tag">&gt;</span></div>
+            <div><span class="e-ln">6</span></div>
+            <div><span class="e-ln">7</span><span class="e-ind2"></span><span class="e-tag">&lt;div</span> <span class="e-att">class=</span><span class="e-val">"feature"</span><span class="e-tag">&gt;</span></div>
+            <div><span class="e-ln">8</span><span class="e-ind3"></span><span class="e-tag">&lt;h3&gt;</span><span class="e-new">💻 Practical Learning</span><span class="e-tag">&lt;/h3&gt;</span></div>
+            <div><span class="e-ln">9</span><span class="e-ind3"></span><span class="e-tag">&lt;p&gt;</span><span class="e-p">Build projects every day.</span><span class="e-tag">&lt;/p&gt;</span></div>
+            <div><span class="e-ln">10</span><span class="e-ind2"></span><span class="e-tag">&lt;/div&gt;</span></div>
+            <div><span class="e-ln">11</span></div>
+            <div><span class="e-ln">12</span><span class="e-ind2"></span><span class="e-tag">&lt;div</span> <span class="e-att">class=</span><span class="e-val">"feature"</span><span class="e-tag">&gt;</span></div>
+            <div><span class="e-ln">13</span><span class="e-ind3"></span><span class="e-tag">&lt;h3&gt;</span><span class="e-new">👨‍🏫 Expert Trainers</span><span class="e-tag">&lt;/h3&gt;</span></div>
+            <div><span class="e-ln">14</span><span class="e-ind3"></span><span class="e-tag">&lt;p&gt;</span><span class="e-p">Industry-oriented teaching.</span><span class="e-tag">&lt;/p&gt;</span></div>
+            <div><span class="e-ln">15</span><span class="e-ind2"></span><span class="e-tag">&lt;/div&gt;</span></div>
+            <div><span class="e-ln">16</span></div>
+            <div><span class="e-ln">17</span><span class="e-ind2"></span><span class="e-tag">&lt;div</span> <span class="e-att">class=</span><span class="e-val">"feature"</span><span class="e-tag">&gt;</span></div>
+            <div><span class="e-ln">18</span><span class="e-ind3"></span><span class="e-tag">&lt;h3&gt;</span><span class="e-new">🚀 Placement Support</span><span class="e-tag">&lt;/h3&gt;</span></div>
+            <div><span class="e-ln">19</span><span class="e-ind3"></span><span class="e-tag">&lt;p&gt;</span><span class="e-p">Resume &amp; Interview Prep.</span><span class="e-tag">&lt;/p&gt;</span></div>
+            <div><span class="e-ln">20</span><span class="e-ind2"></span><span class="e-tag">&lt;/div&gt;</span></div>
+            <div><span class="e-ln">21</span></div>
+            <div><span class="e-ln">22</span><span class="e-ind1"></span><span class="e-tag">&lt;/div&gt;</span><span class="e-cmt"> &lt;!-- .feature-container --&gt;</span></div>
+            <div><span class="e-ln">23</span><span class="e-tag">&lt;/section&gt;</span></div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="section-label">key points to explain</div>
+        <div class="line-explain">
+          <div class="lex-row" onclick="toggleLex(this)">
+            <div class="lex-code"><span style="color:#ff79c6">&lt;section&gt;</span></div>
+            <div class="lex-info">
+              <div class="lex-name">Semantic Sectioning</div>
+              <div class="lex-desc">Use <code>&lt;section&gt;</code> for distinct page regions — better than <code>&lt;div&gt;</code> for accessibility and SEO.</div>
+              <div class="lex-detail">Screen readers announce section boundaries. Google uses sections to understand page structure.</div>
+            </div>
+          </div>
+          <div class="lex-row" onclick="toggleLex(this)">
+            <div class="lex-code"><span style="color:#50fa7b">class="features"</span></div>
+            <div class="lex-info">
+              <div class="lex-name">Section Container</div>
+              <div class="lex-desc">Wraps the whole section so we can add <code>padding</code>, <code>background</code>, and <code>text-align</code> to the entire block.</div>
+              <div class="lex-detail">Think of it as the "room" — everything inside inherits its background colour and padding.</div>
+            </div>
+          </div>
+          <div class="lex-row" onclick="toggleLex(this)">
+            <div class="lex-code"><span style="color:#50fa7b">class="feature-container"</span></div>
+            <div class="lex-info">
+              <div class="lex-name">Flex Parent</div>
+              <div class="lex-desc">This div becomes the Flex Container. CSS will set <code>display:flex</code> on it to arrange the three cards side-by-side.</div>
+              <div class="lex-detail">Exactly the same pattern as .course-container from Hour 2!</div>
+            </div>
+          </div>
+          <div class="lex-row" onclick="toggleLex(this)">
+            <div class="lex-code"><span style="color:#50fa7b">class="feature"</span></div>
+            <div class="lex-info">
+              <div class="lex-name">Flex Child (Card)</div>
+              <div class="lex-desc">Each <code>.feature</code> div is one card — it gets its own width, padding, background, and hover effect in CSS.</div>
+              <div class="lex-detail">Three siblings → three cards side by side when the parent has display:flex.</div>
+            </div>
+          </div>
+        </div>
+        <div class="tip-box">
+          <i class="ti ti-bulb tip-icon"></i>
+          <div class="tip-text"><strong>Pattern recognition:</strong> Notice the container → cards pattern is identical to .course-container → .course-card. This is the most common Flexbox pattern on the web.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-4"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Features CSS <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 5  FEATURES CSS ═══════════ -->
+  <div class="slide" id="slide-5">
+    <div class="slide-header">
+      <span class="badge b-teal">CSS</span>
+      <div>
+        <div class="slide-title">Features Section — CSS</div>
+        <div class="slide-subtitle">Add these rules to style.css after your existing card styles</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="section-label">section wrapper</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><div class="e-label">style.css</div></div>
+          <div class="editor-body">
+            <div><span class="e-ln">1</span><span class="c-sel">.features</span> <span class="c-punc">{</span></div>
+            <div><span class="e-ln">2</span><span class="e-ind1"></span><span class="c-prop">padding</span><span class="c-punc">:</span> <span class="c-num">60px</span><span class="c-punc">;</span></div>
+            <div><span class="e-ln">3</span><span class="e-ind1"></span><span class="c-prop">text-align</span><span class="c-punc">:</span> <span class="c-val">center</span><span class="c-punc">;</span></div>
+            <div><span class="e-ln">4</span><span class="e-ind1"></span><span class="c-prop">background</span><span class="c-punc">:</span> <span class="c-hex">#eef4ff</span><span class="c-punc">;</span></div>
+            <div><span class="e-ln">5</span><span class="c-punc">}</span></div>
+            <div><span class="e-ln">6</span></div>
+            <div><span class="e-ln">7</span><span class="c-sel">.feature-container</span> <span class="c-punc">{</span></div>
+            <div><span class="e-ln">8</span><span class="e-ind1"></span><span class="c-prop">display</span><span class="c-punc">:</span> <span class="c-val">flex</span><span class="c-punc">;</span></div>
+            <div><span class="e-ln">9</span><span class="e-ind1"></span><span class="c-prop">justify-content</span><span class="c-punc">:</span> <span class="c-val">center</span><span class="c-punc">;</span></div>
+            <div><span class="e-ln">10</span><span class="e-ind1"></span><span class="c-prop">gap</span><span class="c-punc">:</span> <span class="c-num">30px</span><span class="c-punc">;</span></div>
+            <div><span class="e-ln">11</span><span class="e-ind1"></span><span class="c-prop">flex-wrap</span><span class="c-punc">:</span> <span class="c-val">wrap</span><span class="c-punc">;</span></div>
+            <div><span class="e-ln">12</span><span class="c-punc">}</span></div>
+            <div><span class="e-ln">13</span></div>
+            <div><span class="e-ln">14</span><span class="c-sel">.feature</span> <span class="c-punc">{</span></div>
+            <div><span class="e-ln">15</span><span class="e-ind1"></span><span class="c-prop">width</span><span class="c-punc">:</span> <span class="c-num">300px</span><span class="c-punc">;</span></div>
+            <div><span class="e-ln">16</span><span class="e-ind1"></span><span class="c-prop">padding</span><span class="c-punc">:</span> <span class="c-num">25px</span><span class="c-punc">;</span></div>
+            <div><span class="e-ln">17</span><span class="e-ind1"></span><span class="c-prop">background</span><span class="c-punc">:</span> <span class="c-val">white</span><span class="c-punc">;</span></div>
+            <div><span class="e-ln">18</span><span class="e-ind1"></span><span class="c-prop">border-radius</span><span class="c-punc">:</span> <span class="c-num">10px</span><span class="c-punc">;</span></div>
+            <div><span class="e-ln">19</span><span class="e-ind1"></span><span class="c-prop">box-shadow</span><span class="c-punc">:</span> <span class="c-num">0 0 15px</span> <span class="c-hex">rgba(0,0,0,.15)</span><span class="c-punc">;</span></div>
+            <div><span class="e-ln">20</span><span class="e-ind1"></span><span class="c-prop">transition</span><span class="c-punc">:</span> <span class="c-num">.3s</span><span class="c-punc">;</span></div>
+            <div><span class="e-ln">21</span><span class="c-punc">}</span></div>
+            <div><span class="e-ln">22</span></div>
+            <div><span class="e-ln">23</span><span class="c-cmt">/* Hover — zoom effect */</span></div>
+            <div><span class="e-ln">24</span><span class="c-sel">.feature:hover</span> <span class="c-punc">{</span></div>
+            <div><span class="e-ln">25</span><span class="e-ind1"></span><span class="c-prop">transform</span><span class="c-punc">:</span> <span class="c-val">scale</span><span class="c-punc">(</span><span class="c-num">1.05</span><span class="c-punc">);</span></div>
+            <div><span class="e-ln">26</span><span class="c-punc">}</span></div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="section-label">what each new property does</div>
+        <div class="line-explain">
+          <div class="lex-row" onclick="toggleLex(this)">
+            <div class="lex-code" style="min-width:180px"><span style="color:#50fa7b">background: #eef4ff</span></div>
+            <div class="lex-info">
+              <div class="lex-name">Section Background</div>
+              <div class="lex-desc">A very light blue — visually separates this section from the white courses area above it.</div>
+              <div class="lex-detail">Alternating light backgrounds (white → light blue → white) is a standard landing-page technique to guide the eye.</div>
+            </div>
+          </div>
+          <div class="lex-row" onclick="toggleLex(this)">
+            <div class="lex-code" style="min-width:180px"><span style="color:#50fa7b">width: 300px</span></div>
+            <div class="lex-info">
+              <div class="lex-name">Fixed Card Width</div>
+              <div class="lex-desc">Sets each feature card to exactly 300px. Combined with flex-wrap, cards drop to new lines on smaller screens.</div>
+              <div class="lex-detail">Could also use flex: 1 1 280px for a more fluid layout.</div>
+            </div>
+          </div>
+          <div class="lex-row" onclick="toggleLex(this)">
+            <div class="lex-code" style="min-width:180px"><span style="color:#50fa7b">transition: .3s</span></div>
+            <div class="lex-info">
+              <div class="lex-name">Smooth Animation</div>
+              <div class="lex-desc">Makes the scale() hover animate smoothly over 0.3 seconds instead of jumping instantly.</div>
+              <div class="lex-detail">Full form: transition: all 0.3s ease. The shorthand .3s applies to all animatable properties.</div>
+            </div>
+          </div>
+          <div class="lex-row" onclick="toggleLex(this)">
+            <div class="lex-code" style="min-width:180px"><span style="color:#ff79c6">transform: scale(1.05)</span></div>
+            <div class="lex-info">
+              <div class="lex-name">Scale on Hover ⭐</div>
+              <div class="lex-desc">Enlarges the card to 105% of its size on hover. <code>1</code> = 100%, <code>1.05</code> = 105%. Does NOT affect surrounding layout.</div>
+              <div class="lex-detail">Unlike width/margin changes, transform:scale() doesn't shift other elements — the card "floats" larger while neighbours stay put.</div>
+            </div>
+          </div>
+        </div>
+        <div class="tip-box">
+          <i class="ti ti-bulb tip-icon"></i>
+          <div class="tip-text"><strong>Always pair transform with transition.</strong> Without <code>transition</code>, the hover snaps instantly and looks glitchy. The <code>.3s</code> is the magic that makes it feel polished.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-5"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Hover Demo <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 6  HOVER DEMO ═══════════ -->
+  <div class="slide" id="slide-6">
+    <div class="slide-header">
+      <span class="badge b-orange">Live Demo</span>
+      <div>
+        <div class="slide-title">Interactive Hover Demo</div>
+        <div class="slide-subtitle">See how transform:scale() and transition work together</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">hover the card below</div>
+        <div style="background:#eef4ff;border-radius:12px;padding:30px;display:flex;justify-content:center;align-items:center;min-height:160px;border:1px solid #bfdbfe">
+          <div class="hover-demo-card" id="hover-card">
+            <div style="font-size:28px;margin-bottom:6px">💻</div>
+            <div style="font-size:13px;font-weight:700">Practical Learning</div>
+            <div style="font-size:11px;color:#666;margin-top:3px">Build projects every day.</div>
+          </div>
+        </div>
+        <div style="margin-top:10px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+          <button class="val-pill active" onclick="setScale('1.05', this)">scale(1.05)</button>
+          <button class="val-pill" onclick="setScale('1.1', this)">scale(1.1)</button>
+          <button class="val-pill" onclick="setScale('1.15', this)">scale(1.15)</button>
+          <button class="val-pill" onclick="setScale('0.95', this)">scale(0.95)</button>
+        </div>
+        <div style="margin-top:8px;background:#1e1e2e;border-radius:8px;padding:10px 14px;font-family:monospace;font-size:12px">
+          <span style="color:#ff79c6">.feature:hover</span> <span style="color:#f8f8f2">{</span><br>
+          &nbsp;&nbsp;<span style="color:#50fa7b">transform</span><span style="color:#f8f8f2">:</span> <span id="scale-label" style="color:#f1fa8c">scale(1.05)</span><span style="color:#f8f8f2">;</span><br>
+          <span style="color:#f8f8f2">}</span>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="section-label">what's happening</div>
+        <div class="card">
+          <div style="font-size:13px;font-weight:700;margin-bottom:6px"><i class="ti ti-math" style="margin-right:5px;color:#6366f1"></i>Understanding scale values</div>
+          <table class="tag-table" style="margin-top:4px">
+            <thead><tr><th>Value</th><th>Result</th><th>Use when…</th></tr></thead>
+            <tbody>
+              <tr><td><code>scale(1)</code></td><td>No change</td><td>Default state</td></tr>
+              <tr><td><code>scale(1.05)</code></td><td>+5% bigger</td><td>Subtle, polished</td></tr>
+              <tr><td><code>scale(1.1)</code></td><td>+10% bigger</td><td>More noticeable</td></tr>
+              <tr><td><code>scale(0.95)</code></td><td>Shrinks 5%</td><td>Press/click effect</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="success-box">
+          <i class="ti ti-check" style="color:#16a34a;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+          <div style="font-size:13px;color:#166534;line-height:1.6"><strong>1.05 is the industry standard</strong> — large enough to feel interactive, small enough to feel professional. Anything above 1.1 can feel like a toy.</div>
+        </div>
+        <div class="info-box">
+          <i class="ti ti-info-circle info-icon"></i>
+          <div class="info-text"><strong>transition: .3s</strong> is the invisible hero here. Remove it and hover snaps instantly — add it and the card smoothly grows. Always add <code>transition</code> when using <code>transform</code>.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-6"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">CTA Section <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 7  CTA SECTION ═══════════ -->
+  <div class="slide" id="slide-7">
+    <div class="slide-header">
+      <span class="badge b-blue">HTML + CSS</span>
+      <div>
+        <div class="slide-title">CTA Section — Call To Action</div>
+        <div class="slide-subtitle">Add this below the features section — it closes the deal</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="section-label">html</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><div class="e-label">index.html — below .features</div></div>
+          <div class="editor-body">
+            <div><span class="e-ln">1</span><span class="e-tag">&lt;section</span> <span class="e-att">class=</span><span class="e-val">"cta"</span><span class="e-tag">&gt;</span></div>
+            <div><span class="e-ln">2</span><span class="e-ind1"></span><span class="e-tag">&lt;h2&gt;</span></div>
+            <div><span class="e-ln">3</span><span class="e-ind2"></span><span class="e-h2">Ready to Become a</span></div>
+            <div><span class="e-ln">4</span><span class="e-ind2"></span><span class="e-h2">Full Stack Developer?</span></div>
+            <div><span class="e-ln">5</span><span class="e-ind1"></span><span class="e-tag">&lt;/h2&gt;</span></div>
+            <div><span class="e-ln">6</span><span class="e-ind1"></span><span class="e-tag">&lt;button</span> <span class="e-att">class=</span><span class="e-val">"btn"</span><span class="e-tag">&gt;</span></div>
+            <div><span class="e-ln">7</span><span class="e-ind2"></span><span class="e-new">Join Today</span></div>
+            <div><span class="e-ln">8</span><span class="e-ind1"></span><span class="e-tag">&lt;/button&gt;</span></div>
+            <div><span class="e-ln">9</span><span class="e-tag">&lt;/section&gt;</span></div>
+          </div>
+        </div>
+
+        <div class="section-label">css</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><div class="e-label">style.css</div></div>
+          <div class="editor-body">
+            <div><span class="e-ln">1</span><span class="c-sel">.cta</span> <span class="c-punc">{</span></div>
+            <div><span class="e-ln">2</span><span class="e-ind1"></span><span class="c-prop">background</span><span class="c-punc">:</span> <span class="c-hex">#2563eb</span><span class="c-punc">;</span></div>
+            <div><span class="e-ln">3</span><span class="e-ind1"></span><span class="c-prop">color</span><span class="c-punc">:</span> <span class="c-val">white</span><span class="c-punc">;</span></div>
+            <div><span class="e-ln">4</span><span class="e-ind1"></span><span class="c-prop">padding</span><span class="c-punc">:</span> <span class="c-num">60px</span><span class="c-punc">;</span></div>
+            <div><span class="e-ln">5</span><span class="e-ind1"></span><span class="c-prop">text-align</span><span class="c-punc">:</span> <span class="c-val">center</span><span class="c-punc">;</span></div>
+            <div><span class="e-ln">6</span><span class="c-punc">}</span></div>
+            <div><span class="e-ln">7</span></div>
+            <div><span class="e-ln">8</span><span class="c-sel">.cta button</span> <span class="c-punc">{</span></div>
+            <div><span class="e-ln">9</span><span class="e-ind1"></span><span class="c-prop">margin-top</span><span class="c-punc">:</span> <span class="c-num">20px</span><span class="c-punc">;</span></div>
+            <div><span class="e-ln">10</span><span class="c-punc">}</span></div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="section-label">live preview</div>
+        <div style="border-radius:12px;overflow:hidden;border:1px solid #e0e0e0">
+          <div style="background:#2563eb;color:white;padding:30px;text-align:center">
+            <div style="font-size:16px;font-weight:800;line-height:1.4;margin-bottom:14px">Ready to Become a Full Stack Developer?</div>
+            <button style="background:white;color:#2563eb;border:none;padding:10px 28px;border-radius:25px;font-size:13px;font-weight:700;cursor:pointer">Join Today</button>
+          </div>
+        </div>
+
+        <div class="section-label">why cta sections use solid colours</div>
+        <div class="card">
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;gap:8px;align-items:flex-start">
+              <div style="background:#dbeafe;border-radius:6px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="ti ti-eye" style="color:#1d4ed8;font-size:13px"></i></div>
+              <div style="font-size:12px;color:#333"><strong>High contrast = attention.</strong> Blue on white header vs <em>white text on blue</em> CTA — the eye is drawn to the most different section.</div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:flex-start">
+              <div style="background:#dcfce7;border-radius:6px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="ti ti-hand-click" style="color:#16a34a;font-size:13px"></i></div>
+              <div style="font-size:12px;color:#333"><strong>One action only.</strong> No nav links, no distractions — just the headline and the button. CTAs have higher conversion when focused.</div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:flex-start">
+              <div style="background:#ede9fe;border-radius:6px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="ti ti-palette" style="color:#7c3aed;font-size:13px"></i></div>
+              <div style="font-size:12px;color:#333"><strong>Brand colour reinforcement.</strong> The same blue used in the nav returns in the CTA — the colour means "SkillHub" to the user.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-7"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Full Preview <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 8  FULL LIVE PREVIEW ═══════════ -->
+  <div class="slide" id="slide-8">
+    <div class="slide-header">
+      <span class="badge b-orange">Live Preview</span>
+      <div>
+        <div class="slide-title">SkillHub — Full Page Preview</div>
+        <div class="slide-subtitle">This is how the site looks with all three sections together</div>
+      </div>
+    </div>
+
+    <div class="browser">
+      <div class="browser-bar"><div class="b-dot2 b-r"></div><div class="b-dot2 b-y"></div><div class="b-dot2 b-g"></div><div class="b-url">skillhub.html — after Hour 3</div></div>
+      <div class="sh-preview">
+        <div class="sh-nav">SkillHub — Learn Smarter</div>
+        <div class="sh-hero">
+          <h1>Master Full Stack Development</h1>
+          <p>Learn HTML, CSS, JavaScript, React, Node.js & MongoDB</p>
+          <button class="sh-hero-btn">Get Started Free</button>
+        </div>
+        <div style="background:#f4f4f4;padding:14px;text-align:center;font-family:Arial,sans-serif">
+          <div style="font-size:13px;font-weight:700;margin-bottom:10px">Our Courses</div>
+          <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+            <div style="background:white;border-radius:7px;box-shadow:0 1px 5px rgba(0,0,0,.1);padding:8px 10px;font-size:10px;font-weight:700;width:85px">💻 HTML &amp; CSS<br><span style="font-weight:400;color:#666">Beginner</span></div>
+            <div style="background:white;border-radius:7px;box-shadow:0 1px 5px rgba(0,0,0,.1);padding:8px 10px;font-size:10px;font-weight:700;width:85px">⚡ JavaScript<br><span style="font-weight:400;color:#666">Intermediate</span></div>
+            <div style="background:white;border-radius:7px;box-shadow:0 1px 5px rgba(0,0,0,.1);padding:8px 10px;font-size:10px;font-weight:700;width:85px">⚛️ React<br><span style="font-weight:400;color:#666">Advanced</span></div>
+          </div>
+        </div>
+        <div class="sh-features">
+          <h2>Why Choose SkillHub?</h2>
+          <div class="sh-feat-container">
+            <div class="sh-feat-card"><h3>💻 Practical Learning</h3><p>Build projects every day.</p></div>
+            <div class="sh-feat-card"><h3>👨‍🏫 Expert Trainers</h3><p>Industry-oriented teaching.</p></div>
+            <div class="sh-feat-card"><h3>🚀 Placement Support</h3><p>Resume &amp; Interview Prep.</p></div>
+          </div>
+        </div>
+        <div class="sh-cta">
+          <h2>Ready to Become a Full Stack Developer?</h2>
+          <button class="sh-cta-btn">Join Today</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top:4px">
+      <div class="success-box">
+        <i class="ti ti-check" style="color:#16a34a;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+        <div style="font-size:13px;color:#166534;line-height:1.6"><strong>Alternating backgrounds</strong> (white → light blue → dark blue) create visual rhythm. The eye naturally flows down the page.</div>
+      </div>
+      <div class="info-box">
+        <i class="ti ti-info-circle info-icon"></i>
+        <div class="info-text">Still missing: a <strong>Testimonials or Team section</strong> between Features and CTA. That's your assignment!</div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-8"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">CSS Deep Dive <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 9  CSS DEEP DIVE ═══════════ -->
+  <div class="slide" id="slide-9">
+    <div class="slide-header">
+      <span class="badge b-purple">Deep Dive</span>
+      <div>
+        <div class="slide-title">CSS Properties — Click to Explore</div>
+        <div class="slide-subtitle">Every property used in Hour 3 — click a row to see the detail</div>
+      </div>
+    </div>
+
+    <div class="line-explain">
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code" style="min-width:200px"><span style="color:#50fa7b">padding: 60px</span></div>
+        <div class="lex-info">
+          <div class="lex-name">Section Breathing Room</div>
+          <div class="lex-desc">60px of space on all four sides makes the section feel spacious, not cramped. Sections need more padding than individual cards.</div>
+          <div class="lex-detail">Rule of thumb: cards use 15–25px padding, sections use 40–80px padding. The difference in scale signals hierarchy.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code" style="min-width:200px"><span style="color:#50fa7b">text-align: center</span></div>
+        <div class="lex-info">
+          <div class="lex-name">Centre Alignment</div>
+          <div class="lex-desc">Applied to .features, it centres the h2 heading and is inherited by child elements unless overridden.</div>
+          <div class="lex-detail">Note: text-align:center on a flex container does NOT centre flex items — you still need justify-content:center for that.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code" style="min-width:200px"><span style="color:#50fa7b">justify-content: center</span></div>
+        <div class="lex-info">
+          <div class="lex-name">Flex Main Axis Alignment</div>
+          <div class="lex-desc">Centres the feature cards horizontally within the .feature-container flex row. Same property you learned in Hour 2!</div>
+          <div class="lex-detail">If you had 4 cards and wanted the first and last touching the edges, you'd use space-between instead.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code" style="min-width:200px"><span style="color:#ff79c6">transform: scale(1.05)</span></div>
+        <div class="lex-info">
+          <div class="lex-name">Scale Transform ⭐ New!</div>
+          <div class="lex-desc">Grows the element to 105% of its original size. Crucially — does NOT shift surrounding elements unlike changing width/margin.</div>
+          <div class="lex-detail">transform happens on the GPU (graphics card), making it the smoothest way to animate. Always prefer transform over animating width, height, or margin.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code" style="min-width:200px"><span style="color:#ff79c6">transition: .3s</span></div>
+        <div class="lex-info">
+          <div class="lex-name">Animation Duration ⭐ New!</div>
+          <div class="lex-desc">Shorthand for transition: all 0.3s ease. Animates ALL property changes over 0.3 seconds with an ease timing curve.</div>
+          <div class="lex-detail">The ease curve starts fast and slows at the end — it feels natural. The full property is: transition: property duration timing-function delay.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code" style="min-width:200px"><span style="color:#50fa7b">box-shadow: 0 0 15px rgba()</span></div>
+        <div class="lex-info">
+          <div class="lex-name">Diffused Shadow</div>
+          <div class="lex-desc">0 0 = no X or Y offset = shadow spreads equally in all directions. 15px blur = soft, glowing shadow. Great for floating card effect.</div>
+          <div class="lex-detail">Contrast with course cards (Hour 2) which used 0 2px 6px — an offset shadow that simulates light from above. This is a design choice.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tip-box">
+      <i class="ti ti-bulb tip-icon"></i>
+      <div class="tip-text"><strong>Always use transform + transition for hover effects</strong> — never animate width, height, margin, or padding directly. Those cause the browser to recalculate the entire layout (reflow) on every frame, which is slow and janky.</div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-9"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Assignment <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 10  ASSIGNMENT ═══════════ -->
+  <div class="slide" id="slide-10">
+    <div class="slide-header">
+      <span class="badge b-rose">Assignment</span>
+      <div>
+        <div class="slide-title">Build Your Own Section Using Flexbox</div>
+        <div class="slide-subtitle">Apply everything from Hours 2 &amp; 3 — choose your section and build it independently</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">choose one option</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div id="opt-testimonials" class="card" style="cursor:pointer;border:2px solid #e8e8e8;transition:.2s" onclick="selectOption('testimonials')">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+              <div style="background:#ede9fe;border-radius:8px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:18px">💬</div>
+              <div>
+                <div style="font-size:14px;font-weight:700">Option A — Testimonials Section</div>
+                <div style="font-size:11px;color:#666">3 student reviews in flex cards</div>
+              </div>
+            </div>
+            <div style="font-size:12px;color:#555;line-height:1.6">A <code>.testimonials</code> section with <code>.testimonial-container</code> (flex) holding 3 <code>.testimonial</code> cards. Each card has a quote, student name, and star rating.</div>
+          </div>
+          <div id="opt-team" class="card" style="cursor:pointer;border:2px solid #e8e8e8;transition:.2s" onclick="selectOption('team')">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+              <div style="background:#d1fae5;border-radius:8px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:18px">👥</div>
+              <div>
+                <div style="font-size:14px;font-weight:700">Option B — Team Section</div>
+                <div style="font-size:11px;color:#666">Meet the trainers — 3 profile cards</div>
+              </div>
+            </div>
+            <div style="font-size:12px;color:#555;line-height:1.6">A <code>.team</code> section with <code>.team-container</code> (flex) holding 3 <code>.team-card</code> elements. Each card has an emoji avatar, trainer name, and specialisation.</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">requirements for both options</div>
+        <div style="display:flex;flex-direction:column;gap:6px" id="checklist-assignment">
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><div><strong>HTML structure</strong> — section → container → 3 cards</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><div><strong>display: flex</strong> on the container</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><div><strong>justify-content</strong> — centre or space-between</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><div><strong>gap</strong> — at least 20px between cards</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><div><strong>flex-wrap: wrap</strong> for mobile support</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><div><strong>box-shadow</strong> on each card</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><div><strong>transform: scale + transition</strong> on hover</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><div><strong>Section background colour</strong> — different from above/below</div></div>
+        </div>
+
+        <div class="tip-box" style="margin-top:10px">
+          <i class="ti ti-bulb tip-icon"></i>
+          <div class="tip-text"><strong>Tip:</strong> Copy the .features / .feature CSS as your starting point, then rename the classes and adjust colours. Good developers reuse patterns!</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-10"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Quiz <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 11  QUIZ ═══════════ -->
+  <div class="slide" id="slide-11">
+    <div class="slide-header">
+      <span class="badge b-slate">Quiz</span>
+      <div>
+        <div class="slide-title">Quick-Fire Quiz</div>
+        <div class="slide-subtitle">4 questions covering Hour 3 — test what you just learned</div>
+      </div>
+    </div>
+    <div id="quiz-container"></div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-11"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Wrap Up <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 12  WRAP UP ═══════════ -->
+  <div class="slide" id="slide-12">
+    <div class="slide-header">
+      <span class="badge b-green">Wrap-Up</span>
+      <div>
+        <div class="slide-title">Hour 3 Complete! 🎉</div>
+        <div class="slide-subtitle">SkillHub now looks like a real company website</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">what you built today</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:#dcfce7;border-radius:8px;font-size:12px;font-weight:700;color:#166534">
+            <span><i class="ti ti-stars" style="margin-right:5px"></i>Features Section (Why Choose Us)</span><span class="badge b-green" style="font-size:10px">✓ done</span>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:#dcfce7;border-radius:8px;font-size:12px;font-weight:700;color:#166534">
+            <span><i class="ti ti-zoom-in" style="margin-right:5px"></i>Hover scale() with transition</span><span class="badge b-green" style="font-size:10px">✓ done</span>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:#dcfce7;border-radius:8px;font-size:12px;font-weight:700;color:#166534">
+            <span><i class="ti ti-hand-click" style="margin-right:5px"></i>CTA Section</span><span class="badge b-green" style="font-size:10px">✓ done</span>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:#dcfce7;border-radius:8px;font-size:12px;font-weight:700;color:#166534">
+            <span><i class="ti ti-layout-list" style="margin-right:5px"></i>Page anatomy pattern learned</span><span class="badge b-green" style="font-size:10px">✓ done</span>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:#ede9fe;border-radius:8px;font-size:12px;font-weight:700;color:#5b21b6;border:2px dashed #a78bfa">
+            <span><i class="ti ti-pencil" style="margin-right:5px"></i>Testimonials or Team Section</span><span class="badge b-purple" style="font-size:10px">← assignment</span>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">skills gained in day 4</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">
+          <span class="badge b-blue">Box Model</span>
+          <span class="badge b-teal">border-radius</span>
+          <span class="badge b-purple">box-shadow</span>
+          <span class="badge b-orange">display:flex</span>
+          <span class="badge b-amber">justify-content</span>
+          <span class="badge b-slate">align-items</span>
+          <span class="badge b-indigo">gap</span>
+          <span class="badge b-cyan">flex-wrap</span>
+          <span class="badge b-rose">transform:scale()</span>
+          <span class="badge b-pink">transition</span>
+        </div>
+
+        <div class="section-label">day 5 preview</div>
+        <div style="background:linear-gradient(135deg,#0f172a,#1e3a5f);border-radius:12px;padding:16px;color:white">
+          <div style="font-size:13px;font-weight:700;margin-bottom:8px">🗓️ Day 5 — CSS Responsive Design</div>
+          <div style="font-size:12px;opacity:.8;line-height:1.7">
+            ✦ Media queries — @media (max-width: 768px)<br>
+            ✦ Mobile-first design strategy<br>
+            ✦ Making SkillHub work on phones<br>
+            ✦ Viewport meta tag deep dive
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="background:linear-gradient(135deg,#059669,#065f46);border-radius:12px;padding:16px;color:white;text-align:center">
+      <div style="font-size:16px;font-weight:800;margin-bottom:4px">🏆 Day 4 Complete!</div>
+      <div style="font-size:13px;opacity:.85">SkillHub has a nav, hero, course cards, features, CTA — and soon your own section. You've built more CSS in one day than most beginners do in a month.</div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-12"></div>
+      <button class="nav-btn" disabled>Done <i class="ti ti-flag"></i></button>
+    </div>
+  </div>
+
+</div><!-- /.wrapper -->
+
+<script>
+  var current = 0;
+  var total   = 13;
+  var quizInit = false;
+
+  /* ── Quiz data ── */
+  var quizData = [
+    {
+      q: "Which CSS property makes a card visually grow on hover without pushing other cards aside?",
+      opts: ["width: 110%", "transform: scale(1.1)", "margin: -10px", "padding: 10px extra"],
+      ans: 1,
+      exp: "transform: scale() enlarges the element visually without affecting the document flow — neighbouring cards stay in place. Changing width or margin would shift everything around it."
+    },
+    {
+      q: "You write transform: scale(1.08) on .feature:hover but nothing animates smoothly — it just snaps. What are you missing?",
+      opts: ["display: flex on the card", "transition: .3s on .feature", "animation: hover 0.3s", "border: 1px solid transparent"],
+      ans: 1,
+      exp: "transition tells the browser to animate property changes over a duration. Without it, any change (including transform) snaps instantly. Add transition: .3s to the base .feature rule, not the :hover rule."
+    },
+    {
+      q: "What is the purpose of the CTA (Call to Action) section on a company website?",
+      opts: [
+        "To list all the company's services in detail",
+        "To show the navigation links in a bigger font",
+        "To prompt a single, focused action after the user has seen the benefits",
+        "To display the footer copyright information"
+      ],
+      ans: 2,
+      exp: "A CTA section has one job: convert interest into action. It appears after the user has seen features/testimonials — their trust is built — so you present one clear button with high contrast design."
+    },
+    {
+      q: "In the features section, .feature-container has display:flex and .features has text-align:center. What does each one centre?",
+      opts: [
+        "Both centre the same things — they are redundant",
+        "text-align centres the h2 text; display:flex with justify-content centres the cards",
+        "display:flex centres the h2; text-align centres the cards",
+        "Neither centres anything without align-items:center"
+      ],
+      ans: 1,
+      exp: "text-align:center on .features centres inline content like the h2 heading text. display:flex with justify-content:center on .feature-container centres the flex items (the cards) horizontally. They solve different centering problems."
+    }
+  ];
+  var quizAnswered = [];
+
+  function renderQuiz() {
+    var c = document.getElementById('quiz-container'); c.innerHTML = '';
+    quizData.forEach(function(q, i) {
+      var d = document.createElement('div'); d.style.cssText = 'margin-bottom:18px';
+      d.innerHTML = '<div style="font-size:13px;font-weight:600;margin-bottom:6px">'+(i+1)+'. '+q.q+'</div>';
+      q.opts.forEach(function(opt, j) {
+        var btn = document.createElement('button'); btn.className = 'quiz-option';
+        btn.innerHTML = String.fromCharCode(65+j)+'. '+opt;
+        btn.onclick = function() {
+          if (quizAnswered[i]) return; quizAnswered[i] = true;
+          var btns = d.querySelectorAll('.quiz-option');
+          btns.forEach(function(b,k){ b.disabled=true; if(k===q.ans) b.classList.add('correct'); else if(k===j) b.classList.add('wrong'); });
+          var fb = d.querySelector('.quiz-feedback');
+          fb.innerHTML = (j===q.ans?'✅ Correct! ':'❌ Not quite. ')+q.exp;
+          fb.className = 'quiz-feedback '+(j===q.ans?'correct':'wrong');
+        };
+        d.appendChild(btn);
+      });
+      var fb = document.createElement('div'); fb.className = 'quiz-feedback'; d.appendChild(fb);
+      c.appendChild(d);
+    });
+  }
+
+  /* ── Hover scale demo ── */
+  var currentScale = '1.05';
+  document.getElementById('hover-card').addEventListener('mouseenter', function() {
+    this.style.transform = 'scale('+currentScale+')';
+  });
+  document.getElementById('hover-card').addEventListener('mouseleave', function() {
+    this.style.transform = 'scale(1)';
+  });
+  document.getElementById('hover-card').style.transition = 'transform .3s';
+
+  function setScale(val, btn) {
+    currentScale = val;
+    document.getElementById('scale-label').textContent = 'scale('+val+')';
+    document.querySelectorAll('#slide-6 .val-pill').forEach(function(b){ b.classList.remove('active'); });
+    btn.classList.add('active');
+  }
+
+  /* ── Assignment option selector ── */
+  function selectOption(opt) {
+    document.getElementById('opt-testimonials').style.borderColor = opt === 'testimonials' ? '#2563eb' : '#e8e8e8';
+    document.getElementById('opt-testimonials').style.background  = opt === 'testimonials' ? '#eff6ff' : '#fff';
+    document.getElementById('opt-team').style.borderColor = opt === 'team' ? '#059669' : '#e8e8e8';
+    document.getElementById('opt-team').style.background  = opt === 'team' ? '#f0fdf4' : '#fff';
+  }
+
+  /* ── Lex rows ── */
+  function toggleLex(row) {
+    var was = row.classList.contains('active');
+    document.querySelectorAll('.lex-row.active').forEach(function(r){ r.classList.remove('active'); });
+    if (!was) row.classList.add('active');
+  }
+
+  /* ── Checklist ── */
+  function toggleCheck(item) { item.classList.toggle('done'); }
+
+  /* ── Navigation ── */
+  function goSlide(n) {
+    document.getElementById('slide-'+current).classList.remove('active');
+    current = n;
+    document.getElementById('slide-'+current).classList.add('active');
+    updateDots();
+    document.getElementById('slide-counter').textContent = (current+1)+' / '+total;
+    if (n===11 && !quizInit) { renderQuiz(); quizInit=true; }
+    window.scrollTo(0,0);
+  }
+  function nextSlide() { if (current < total-1) goSlide(current+1); }
+  function prevSlide() { if (current > 0) goSlide(current-1); }
+
+  function updateDots() {
+    for (var s=0; s<total; s++) {
+      var el = document.getElementById('dots-'+s); if (!el) continue;
+      el.innerHTML = '';
+      for (var d=0; d<total; d++) {
+        var dot = document.createElement('div');
+        dot.className = 'dot'+(d===current?' active':'');
+        el.appendChild(dot);
+      }
+    }
+  }
+  updateDots();
+</script>
+</body>
+</html>

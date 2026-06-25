@@ -1,0 +1,1416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Day 3 · Hour 2 – Navbar + Hero Section CSS</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f4f5f7; color: #1a1a1a;
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; padding: 2rem 1rem;
+  }
+  .wrapper {
+    width: 100%; max-width: 920px; background: #fff;
+    border-radius: 16px; box-shadow: 0 2px 20px rgba(0,0,0,0.09); overflow: hidden;
+  }
+  .top-bar {
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    color: #fff; padding: 14px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .top-bar-title { font-size: 15px; font-weight: 600; }
+  .top-bar-sub   { font-size: 12px; opacity: .55; margin-top: 2px; }
+  .slide-counter { font-size: 13px; opacity: .6; font-variant-numeric: tabular-nums; }
+  .slide { display: none; padding: 1.75rem 2rem; min-height: 500px; flex-direction: column; gap: 1.2rem; }
+  .slide.active { display: flex; }
+  .slide-header { display: flex; align-items: center; gap: 10px; padding-bottom: 1rem; border-bottom: 1px solid #e8e8e8; }
+  .slide-title    { font-size: 20px; font-weight: 700; color: #111; }
+  .slide-subtitle { font-size: 13px; color: #666; margin-top: 2px; }
+
+  /* ── Badges ── */
+  .badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+  .b-blue   { background:#dbeafe; color:#1d4ed8; }
+  .b-teal   { background:#d1fae5; color:#065f46; }
+  .b-purple { background:#ede9fe; color:#5b21b6; }
+  .b-amber  { background:#fef3c7; color:#92400e; }
+  .b-green  { background:#dcfce7; color:#166534; }
+  .b-slate  { background:#e2e8f0; color:#334155; }
+  .b-rose   { background:#ffe4e6; color:#9f1239; }
+  .b-orange { background:#ffedd5; color:#9a3412; }
+  .b-indigo { background:#e0e7ff; color:#3730a3; }
+  .b-cyan   { background:#cffafe; color:#164e63; }
+  .b-yellow { background:#fef9c3; color:#854d0e; }
+  .b-pink   { background:#fce7f3; color:#9d174d; }
+
+  /* ── Layout ── */
+  .section-label { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 8px; }
+  .card { background: #fff; border: 1px solid #e8e8e8; border-radius: 12px; padding: 1rem 1.25rem; }
+  .card-gray { background: #f8f9fa; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+  /* ── Code Editor (Dracula) ── */
+  .editor { background: #1e1e2e; border-radius: 12px; overflow: hidden; font-family: 'SFMono-Regular', Consolas, 'Courier New', monospace; }
+  .editor-bar { background: #13131f; padding: 9px 14px; display: flex; align-items: center; gap: 6px; }
+  .e-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .e-red { background:#ff5f57; } .e-yellow { background:#febc2e; } .e-green { background:#28c840; }
+  .e-label { font-size: 12px; color: #6272a4; margin-left: 4px; font-family: -apple-system, sans-serif; }
+  .editor-body { padding: 14px 18px; font-size: 12.5px; line-height: 1.8; }
+  .e-ln   { color: #44475a; font-size: 11px; display: inline-block; width: 22px; user-select: none; }
+  .e-tag  { color: #ff79c6; }
+  .e-att  { color: #50fa7b; }
+  .e-val  { color: #f1fa8c; }
+  .e-txt  { color: #f8f8f2; }
+  .e-cmt  { color: #6272a4; font-style: italic; }
+  .e-new  { color: #80ffea; }
+  .e-h2   { color: #ffb86c; font-weight: 700; }
+  .e-p    { color: #8be9fd; }
+  /* CSS-specific tokens */
+  .c-sel  { color: #ff79c6; font-weight: 700; }
+  .c-prop { color: #50fa7b; }
+  .c-val  { color: #f1fa8c; }
+  .c-punc { color: #f8f8f2; }
+  .c-hex  { color: #bd93f9; }
+  .c-str  { color: #ffb86c; }
+  .c-num  { color: #ff79c6; }
+  .c-cmt  { color: #6272a4; font-style: italic; }
+  .c-pseudo { color: #80ffea; }
+  .e-row  { display: flex; gap: 8px; }
+  .e-ind1 { display: inline-block; width: 20px; }
+  .e-ind2 { display: inline-block; width: 40px; }
+
+  /* ── Browser frame ── */
+  .browser { border-radius: 12px; overflow: hidden; border: 1px solid #e0e0e0; }
+  .browser-bar { background: #f1f3f4; padding: 9px 14px; display: flex; align-items: center; gap: 7px; border-bottom: 1px solid #e0e0e0; }
+  .b-dot2 { width: 10px; height: 10px; border-radius: 50%; }
+  .b-r { background:#ff5f57; } .b-y { background:#febc2e; } .b-g { background:#28c840; }
+  .b-url { flex:1; background:#fff; border:1px solid #dadce0; border-radius:20px; padding:4px 14px; font-size:12px; color:#555; }
+
+  /* ── Tables ── */
+  .tag-table { border-collapse: collapse; width: 100%; }
+  .tag-table th { background: #f1f5f9; font-size: 12px; font-weight: 700; text-align: left; padding: 10px 14px; color: #475569; border-bottom: 2px solid #e2e8f0; }
+  .tag-table td { font-size: 13px; padding: 10px 14px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+  .tag-table tr:last-child td { border-bottom: none; }
+  .tag-table tr:hover td { background: #f8f9fa; }
+  .tag-mono { font-family: 'SFMono-Regular', Consolas, monospace; font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 5px; }
+
+  /* ── Quiz ── */
+  .quiz-option { border: 1px solid #dee2e6; border-radius: 8px; padding: 10px 14px; font-size: 13px; cursor: pointer; margin-bottom: 6px; transition: all .15s; background: transparent; width: 100%; text-align: left; color: #1a1a1a; }
+  .quiz-option:hover:not(:disabled) { background: #f8f9fa; }
+  .quiz-option.correct { background: #d1fae5; border-color: #059669; color: #065f46; }
+  .quiz-option.wrong   { background: #fee2e2; border-color: #dc2626; color: #991b1b; }
+  .quiz-feedback { display: none; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-top: 4px; }
+  .quiz-feedback.correct { background: #d1fae5; color: #065f46; display: block; }
+  .quiz-feedback.wrong   { background: #fee2e2; color: #991b1b; display: block; }
+
+  /* ── Activity / challenge ── */
+  .activity-box { border: 2px dashed #a5b4fc; background: #eef2ff; border-radius: 12px; padding: 14px 18px; }
+  .activity-title { font-size: 13px; font-weight: 700; color: #3730a3; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .challenge-box { border: 2px dashed #f9a8d4; background: #fdf2f8; border-radius: 12px; padding: 14px 18px; }
+  .challenge-title { font-size: 13px; font-weight: 700; color: #9f1239; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+
+  /* ── Tip / info / warn / success ── */
+  .tip-box   { display:flex; gap:10px; align-items:flex-start; background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:10px 14px; }
+  .tip-icon  { color:#d97706; font-size:18px; flex-shrink:0; margin-top:1px; }
+  .tip-text  { font-size:13px; color:#92400e; line-height:1.6; }
+  .info-box  { display:flex; gap:10px; align-items:flex-start; background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:10px 14px; }
+  .info-icon { color:#2563eb; font-size:18px; flex-shrink:0; margin-top:1px; }
+  .info-text { font-size:13px; color:#1e40af; line-height:1.6; }
+  .warn-box  { display:flex; gap:10px; align-items:flex-start; background:#fef9ee; border:1px solid #fcd34d; border-radius:10px; padding:10px 14px; }
+  .success-box { display:flex; gap:10px; align-items:flex-start; background:#f0fdf4; border:1px solid #86efac; border-radius:10px; padding:10px 14px; }
+
+  /* ── Line explainer ── */
+  .lex-row { display:flex; align-items:stretch; cursor:pointer; transition:background .12s; border-bottom:1px solid #f0f0f0; }
+  .lex-row:last-child { border-bottom:none; }
+  .lex-row:hover { background:#f8f9fa; }
+  .lex-row.active { background:#eff6ff; border-left:3px solid #1d4ed8; }
+  .lex-code { background:#1e1e2e; padding:10px 14px; font-family:'SFMono-Regular',Consolas,monospace; font-size:12px; min-width:220px; flex-shrink:0; display:flex; align-items:center; }
+  .lex-info { padding:10px 14px; flex:1; }
+  .lex-name   { font-size:13px; font-weight:700; color:#1d4ed8; margin-bottom:2px; }
+  .lex-desc   { font-size:12px; color:#555; line-height:1.55; }
+  .lex-detail { display:none; font-size:12px; color:#1d4ed8; margin-top:4px; padding-top:4px; border-top:1px dashed #bfdbfe; }
+  .lex-row.active .lex-detail { display:block; }
+  .line-explain { border:1px solid #e8e8e8; border-radius:10px; overflow:hidden; }
+
+  /* ── Reveal ── */
+  .reveal-btn { background:#f1f3f5; border:1px solid #dee2e6; border-radius:8px; padding:7px 14px; font-size:13px; cursor:pointer; color:#333; transition:background .15s; }
+  .reveal-btn:hover { background:#e9ecef; }
+  .reveal-content { display:none; margin-top:8px; }
+  .reveal-content.open { display:block; }
+
+  /* ── Nav ── */
+  .nav-row { display:flex; align-items:center; justify-content:space-between; margin-top:auto; padding-top:1rem; border-top:1px solid #f0f0f0; }
+  .nav-btn { display:inline-flex; align-items:center; gap:6px; padding:9px 18px; border:1px solid #dee2e6; border-radius:8px; background:transparent; font-size:13px; cursor:pointer; color:#333; transition:background .15s; }
+  .nav-btn:hover:not(:disabled) { background:#f1f3f5; }
+  .nav-btn:disabled { opacity:.35; cursor:default; }
+  .nav-btn.primary { background:#1d4ed8; border-color:transparent; color:#fff; }
+  .nav-btn.primary:hover { background:#1e40af; }
+  .progress-dots { display:flex; gap:6px; align-items:center; }
+  .dot { width:7px; height:7px; border-radius:50%; background:#dee2e6; transition:all .2s; }
+  .dot.active { width:20px; border-radius:4px; background:#1d4ed8; }
+
+  /* ── Home grid ── */
+  .home-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .home-card { background:#fff; border:1px solid #e8e8e8; border-radius:12px; padding:1rem 1.25rem; cursor:pointer; transition:all .15s; }
+  .home-card:hover { border-color:#1d4ed8; box-shadow:0 2px 8px rgba(29,78,216,.1); }
+  .home-card-title { font-size:15px; font-weight:700; margin:6px 0 2px; }
+  .home-card-sub   { font-size:12px; color:#666; }
+
+  code { font-family:'SFMono-Regular',Consolas,monospace; font-size:12px; background:#f1f3f5; padding:1px 6px; border-radius:4px; border:1px solid #dee2e6; }
+  .tag-chip { font-family:'SFMono-Regular',Consolas,monospace; font-size:12px; font-weight:700; padding:3px 9px; border-radius:6px; }
+
+  /* ── SkillHub live preview composites ── */
+  .sh-wrap { font-family: Arial, sans-serif; border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden; font-size: 13px; }
+  .sh-header { background: #1e293b; color: #fff; padding: 20px; text-align: center; font-size: 15px; font-weight: 700; }
+  /* BEFORE nav */
+  .sh-nav-before { background: #f4f4f4; padding: 8px 14px; font-size: 12px; color: #333; display: flex; gap: 14px; }
+  /* AFTER nav */
+  .sh-nav-after  { background: #1e293b; padding: 15px; text-align: center; display: flex; justify-content: center; gap: 0; }
+  .sh-nav-after a { color: white; text-decoration: none; margin: 0 15px; font-size: 13px; }
+  .sh-nav-after a:hover { color: #facc15; }
+  /* hero */
+  .sh-hero-before { background: #fff; padding: 18px 16px; }
+  .sh-hero-after  { background: #fff; padding: 60px 20px; text-align: center; }
+  .sh-hero-after h2 { color: #2563eb; font-size: 28px; margin-bottom: 14px; }
+  .sh-hero-after p  { font-size: 15px; color: #333; margin-top: 20px; }
+  .sh-btn-before { background: #efefef; border: 1px solid #999; padding: 6px 14px; border-radius: 4px; font-size: 12px; cursor: pointer; margin-top: 10px; display: inline-block; }
+  .sh-btn-after  { background: #2563eb; color: white; border: none; padding: 12px 25px; margin-top: 20px; cursor: pointer; font-size: 14px; font-weight: 600; display: inline-block; border-radius: 2px; }
+  .sh-btn-hover  { background: #1d4ed8; color: white; border: none; padding: 12px 25px; margin-top: 20px; cursor: pointer; font-size: 14px; font-weight: 600; display: inline-block; border-radius: 2px; }
+  .sh-footer { background: #1e293b; color: #94a3b8; padding: 10px 16px; font-size: 11px; text-align: center; }
+
+  /* ── Hover demo ── */
+  .hover-demo { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
+  .hd-state { text-align: center; }
+  .hd-label { font-size: 10px; color: #888; margin-bottom: 6px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* ── CSS property cards ── */
+  .prop-card { border: 1px solid #e8e8e8; border-radius: 10px; overflow: hidden; }
+  .prop-card-head { padding: 9px 14px; font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+  .prop-card-body { padding: 10px 14px; font-size: 13px; color: #555; line-height: 1.6; }
+
+  /* ── Before/After toggle ── */
+  .ba-tab { display: inline-flex; border: 1px solid #dee2e6; border-radius: 8px; overflow: hidden; margin-bottom: 10px; }
+  .ba-btn { padding: 6px 16px; font-size: 12px; font-weight: 700; cursor: pointer; border: none; background: transparent; color: #666; transition: all .15s; }
+  .ba-btn.active { background: #1d4ed8; color: #fff; }
+
+  /* ── Interactive live editor ── */
+  .live-editor-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: 1px solid #e0e0e0; border-radius: 12px; overflow: hidden; }
+  .live-editor-panel { display: flex; flex-direction: column; }
+  .live-panel-head { background: #13131f; padding: 9px 14px; display: flex; align-items: center; justify-content: space-between; font-size: 11px; color: #6272a4; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; }
+  .live-run-btn { background: #50fa7b; color: #0d1117; border: none; padding: 3px 12px; border-radius: 5px; font-size: 11px; font-weight: 700; cursor: pointer; }
+  textarea.css-input { flex: 1; background: #1e1e2e; color: #f8f8f2; border: none; padding: 14px; font-family: 'SFMono-Regular', Consolas, monospace; font-size: 12.5px; line-height: 1.8; resize: none; outline: none; min-height: 200px; border-right: 1px solid #2d2d40; }
+  .live-preview-panel { background: #fff; padding: 0; min-height: 200px; }
+  .live-preview-inner { padding: 16px; font-family: Arial, sans-serif; height: 100%; }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <div>
+      <div class="top-bar-title">MERN Stack Training · Day 3 · Hour 2</div>
+      <div class="top-bar-sub">Navbar + Hero Section Styling — SkillHub LMS</div>
+    </div>
+    <div class="slide-counter" id="slide-counter">1 / 13</div>
+  </div>
+
+  <!-- ══════ SLIDE 0  HOME ══════ -->
+  <div class="slide active" id="slide-0">
+    <div class="slide-header">
+      <span class="badge b-purple">Day 3 · Hour 2</span>
+      <div>
+        <div class="slide-title">Navbar + Hero Section Styling</div>
+        <div class="slide-subtitle">Students style the nav and hero — SkillHub starts looking like a real website</div>
+      </div>
+    </div>
+
+    <div style="background:#ede9fe;border:1px solid #c4b5fd;border-radius:12px;padding:12px 16px;display:flex;gap:12px;align-items:flex-start">
+      <i class="ti ti-sparkles" style="color:#7c3aed;font-size:22px;flex-shrink:0;margin-top:1px"></i>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#4c1d95;margin-bottom:4px">End Deliverable — SkillHub with a styled nav + hero</div>
+        <div style="display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:#5b21b6">
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Dark styled navigation bar</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Clickable nav links with hover effect</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Centred hero section with big heading</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Styled blue CTA button + hover</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:12px;padding:12px 16px;display:flex;gap:12px;align-items:flex-start">
+      <i class="ti ti-git-branch" style="color:#166534;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#166534;margin-bottom:3px">Continuing from Hour 1 — css/style.css</div>
+        <div style="font-size:13px;color:#166534;line-height:1.6">In Hour 1 you set up <code>style.css</code>, understood the CSS rule syntax, and styled the <code>body</code> and <code>header</code>. In Hour 2 we continue in the <strong>same style.css file</strong> — adding rules for <code>nav</code>, <code>nav a</code>, <code>.hero</code>, and <code>.btn</code>.</div>
+      </div>
+    </div>
+
+    <div class="home-grid">
+      <div class="home-card" onclick="goSlide(1)">
+        <span class="badge b-amber">Recap</span>
+        <div class="home-card-title">Where We Left Off</div>
+        <div class="home-card-sub">Hour 1 state of style.css + what we build next</div>
+      </div>
+      <div class="home-card" onclick="goSlide(2)">
+        <span class="badge b-blue">HTML</span>
+        <div class="home-card-title">Update Nav HTML</div>
+        <div class="home-card-sub">Replace plain text with &lt;a&gt; anchor links in the nav</div>
+      </div>
+      <div class="home-card" onclick="goSlide(3)">
+        <span class="badge b-teal">CSS</span>
+        <div class="home-card-title">Style the Nav Bar</div>
+        <div class="home-card-sub">nav { background, padding, text-align }</div>
+      </div>
+      <div class="home-card" onclick="goSlide(4)">
+        <span class="badge b-green">CSS</span>
+        <div class="home-card-title">Style the Nav Links</div>
+        <div class="home-card-sub">nav a { color, text-decoration, margin }</div>
+      </div>
+      <div class="home-card" onclick="goSlide(5)">
+        <span class="badge b-pink">Hover</span>
+        <div class="home-card-title">Hover Effect — nav a:hover</div>
+        <div class="home-card-sub">CSS reacting to user actions — the : pseudo-class</div>
+      </div>
+      <div class="home-card" onclick="goSlide(6)">
+        <span class="badge b-indigo">Explain</span>
+        <div class="home-card-title">Property Deep-Dive</div>
+        <div class="home-card-sub">text-decoration · margin · color — click to expand</div>
+      </div>
+      <div class="home-card" onclick="goSlide(7)">
+        <span class="badge b-purple">HTML</span>
+        <div class="home-card-title">Add .hero Class to HTML</div>
+        <div class="home-card-sub">class= attribute — how CSS targets specific elements</div>
+      </div>
+      <div class="home-card" onclick="goSlide(8)">
+        <span class="badge b-blue">CSS</span>
+        <div class="home-card-title">Style the Hero Section</div>
+        <div class="home-card-sub">.hero · .hero h2 · .hero p — text-align, font-size, color</div>
+      </div>
+    </div>
+    <div class="grid-2" style="gap:10px">
+      <div class="home-card" onclick="goSlide(9)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge b-cyan">CSS</span>
+          <span style="font-size:14px;font-weight:700">Style the Button + Hover</span>
+          <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+        </div>
+      </div>
+      <div class="home-card" onclick="goSlide(10)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge b-orange">Activity</span>
+          <span style="font-size:14px;font-weight:700">Student Activity — Two Buttons</span>
+          <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+        </div>
+      </div>
+    </div>
+    <div class="grid-2" style="gap:10px">
+      <div class="home-card" onclick="goSlide(11)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge b-slate">Ref</span>
+          <span style="font-size:14px;font-weight:700">Full style.css Reference</span>
+          <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+        </div>
+      </div>
+      <div class="home-card" onclick="goSlide(12)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge b-green">Quiz</span>
+          <span style="font-size:14px;font-weight:700">Quick Check — 5 Questions</span>
+          <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <div></div>
+      <div class="progress-dots" id="dots-0"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Start <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ══════ SLIDE 1  RECAP ══════ -->
+  <div class="slide" id="slide-1">
+    <div class="slide-header">
+      <span class="badge b-amber">Recap</span>
+      <div>
+        <div class="slide-title">Where We Left Off — Hour 1</div>
+        <div class="slide-subtitle">style.css already has body + header rules — we add to the same file</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">style.css after hour 1</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">frontend/css/style.css — current state</span></div>
+          <div class="editor-body">
+            <div class="e-row"><span class="e-ln">1</span><span class="c-cmt">/* Hour 1 rules — already written */</span></div>
+            <div class="e-row"><span class="e-ln">2</span><span class="c-sel">body</span><span class="c-punc">{</span></div>
+            <div class="e-row"><span class="e-ln">3</span><span class="e-ind1"></span><span class="c-prop">background-color</span><span class="c-punc">:</span> <span class="c-hex">#f4f4f4</span><span class="c-punc">;</span></div>
+            <div class="e-row"><span class="e-ln">4</span><span class="e-ind1"></span><span class="c-prop">font-family</span><span class="c-punc">:</span> <span class="c-str">Arial, sans-serif</span><span class="c-punc">;</span></div>
+            <div class="e-row"><span class="e-ln">5</span><span class="c-punc">}</span></div>
+            <div class="e-row" style="margin-top:6px"><span class="e-ln">6</span><span class="c-sel">header</span><span class="c-punc">{</span></div>
+            <div class="e-row"><span class="e-ln">7</span><span class="e-ind1"></span><span class="c-prop">background</span><span class="c-punc">:</span> <span class="c-hex">#1e293b</span><span class="c-punc">;</span></div>
+            <div class="e-row"><span class="e-ln">8</span><span class="e-ind1"></span><span class="c-prop">color</span><span class="c-punc">:</span> <span class="c-str">white</span><span class="c-punc">;</span></div>
+            <div class="e-row"><span class="e-ln">9</span><span class="e-ind1"></span><span class="c-prop">padding</span><span class="c-punc">:</span> <span class="c-num">20px</span><span class="c-punc">;</span></div>
+            <div class="e-row"><span class="e-ln">10</span><span class="e-ind1"></span><span class="c-prop">text-align</span><span class="c-punc">:</span> <span class="c-str">center</span><span class="c-punc">;</span></div>
+            <div class="e-row"><span class="e-ln">11</span><span class="c-punc">}</span></div>
+            <div class="e-row" style="margin-top:8px"><span class="e-ln">12</span><span class="c-cmt">/* Hour 2: Add nav + hero + button below ↓ */</span></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">what skillhub looks like right now</div>
+        <div class="browser">
+          <div class="browser-bar"><div class="b-dot2 b-r"></div><div class="b-dot2 b-y"></div><div class="b-dot2 b-g"></div><div class="b-url">frontend/index.html</div></div>
+          <div class="sh-wrap" style="border-radius:0;border:none">
+            <div class="sh-header">SkillHub LMS</div>
+            <div class="sh-nav-before"><span>Home</span><span>Courses</span><span>About</span><span>Contact</span></div>
+            <div class="sh-hero-before">
+              <div style="font-size:16px;font-weight:700;margin-bottom:6px">Become a Full Stack Developer</div>
+              <div style="font-size:12px;color:#555;margin-bottom:10px">Learn HTML, CSS, JavaScript, React, Node.js and MongoDB.</div>
+              <span class="sh-btn-before">Explore Courses</span>
+            </div>
+            <div class="sh-footer">Copyright 2026</div>
+          </div>
+        </div>
+        <div style="margin-top:8px;background:#fef9ee;border:1px solid #fcd34d;border-radius:8px;padding:10px 14px;font-size:12px;color:#92400e">
+          ⚠️ The nav is still plain text. The hero has no spacing or colour. The button is unstyled. <strong>All of this changes in Hour 2.</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="card card-gray">
+      <div class="section-label">hour 2 plan — 4 groups of CSS rules to add</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:6px">
+        <div style="text-align:center;padding:12px 8px;background:#fff;border:1px solid #dbeafe;border-radius:8px">
+          <div style="font-size:18px;margin-bottom:5px">🗂️</div>
+          <div style="font-size:11px;font-weight:700;color:#1e40af;font-family:monospace">nav { }</div>
+          <div style="font-size:11px;color:#888;margin-top:3px">Background &amp; padding</div>
+        </div>
+        <div style="text-align:center;padding:12px 8px;background:#fff;border:1px solid #d1fae5;border-radius:8px">
+          <div style="font-size:18px;margin-bottom:5px">🔗</div>
+          <div style="font-size:11px;font-weight:700;color:#065f46;font-family:monospace">nav a { }</div>
+          <div style="font-size:11px;color:#888;margin-top:3px">Links + hover effect</div>
+        </div>
+        <div style="text-align:center;padding:12px 8px;background:#fff;border:1px solid #ede9fe;border-radius:8px">
+          <div style="font-size:18px;margin-bottom:5px">🦸</div>
+          <div style="font-size:11px;font-weight:700;color:#5b21b6;font-family:monospace">.hero { }</div>
+          <div style="font-size:11px;color:#888;margin-top:3px">Section + heading + p</div>
+        </div>
+        <div style="text-align:center;padding:12px 8px;background:#fff;border:1px solid #dcfce7;border-radius:8px">
+          <div style="font-size:18px;margin-bottom:5px">🚀</div>
+          <div style="font-size:11px;font-weight:700;color:#166534;font-family:monospace">.btn { }</div>
+          <div style="font-size:11px;color:#888;margin-top:3px">Button + hover effect</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-1"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Update Nav HTML <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ══════ SLIDE 2  UPDATE NAV HTML ══════ -->
+  <div class="slide" id="slide-2">
+    <div class="slide-header">
+      <span class="badge b-blue">HTML Update</span>
+      <div>
+        <div class="slide-title">Update the Nav — Add &lt;a&gt; Anchor Links</div>
+        <div class="slide-subtitle">Plain text nav items become clickable links — one HTML change</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">before — plain text (day 2, hour 1)</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">before</span></div>
+          <div class="editor-body">
+            <div class="e-row"><span class="e-ln">1</span><span class="e-tag">&lt;nav&gt;</span></div>
+            <div class="e-row"><span class="e-ln">2</span><span class="e-ind1"></span><span class="e-txt">Home</span></div>
+            <div class="e-row"><span class="e-ln">3</span><span class="e-ind1"></span><span class="e-txt">Courses</span></div>
+            <div class="e-row"><span class="e-ln">4</span><span class="e-ind1"></span><span class="e-txt">About</span></div>
+            <div class="e-row"><span class="e-ln">5</span><span class="e-ind1"></span><span class="e-txt">Contact</span></div>
+            <div class="e-row"><span class="e-ln">6</span><span class="e-tag">&lt;/nav&gt;</span></div>
+          </div>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#dc2626;background:#fee2e2;border:1px solid #fca5a5;border-radius:7px;padding:8px 12px">❌ Plain text — not clickable, can't be styled with <code>nav a</code> CSS</div>
+      </div>
+      <div>
+        <div class="section-label">after — anchor links (update now)</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">frontend/index.html — update &lt;nav&gt;</span></div>
+          <div class="editor-body">
+            <div class="e-row"><span class="e-ln">1</span><span class="e-tag">&lt;nav&gt;</span></div>
+            <div class="e-row" style="background:#0d1f0d"><span class="e-ln">2</span><span class="e-ind1"></span><span class="e-new">&lt;a</span> <span class="e-att">href</span><span class="e-txt">=</span><span class="e-val">"#"</span><span class="e-new">&gt;</span><span class="e-txt">Home</span><span class="e-new">&lt;/a&gt;</span></div>
+            <div class="e-row" style="background:#0d1f0d"><span class="e-ln">3</span><span class="e-ind1"></span><span class="e-new">&lt;a</span> <span class="e-att">href</span><span class="e-txt">=</span><span class="e-val">"#"</span><span class="e-new">&gt;</span><span class="e-txt">Courses</span><span class="e-new">&lt;/a&gt;</span></div>
+            <div class="e-row" style="background:#0d1f0d"><span class="e-ln">4</span><span class="e-ind1"></span><span class="e-new">&lt;a</span> <span class="e-att">href</span><span class="e-txt">=</span><span class="e-val">"#"</span><span class="e-new">&gt;</span><span class="e-txt">About</span><span class="e-new">&lt;/a&gt;</span></div>
+            <div class="e-row" style="background:#0d1f0d"><span class="e-ln">5</span><span class="e-ind1"></span><span class="e-new">&lt;a</span> <span class="e-att">href</span><span class="e-txt">=</span><span class="e-val">"#"</span><span class="e-new">&gt;</span><span class="e-txt">Contact</span><span class="e-new">&lt;/a&gt;</span></div>
+            <div class="e-row"><span class="e-ln">6</span><span class="e-tag">&lt;/nav&gt;</span></div>
+          </div>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#166534;background:#f0fdf4;border:1px solid #86efac;border-radius:7px;padding:8px 12px">✅ Now CSS selector <code>nav a</code> can target each link individually</div>
+      </div>
+    </div>
+
+    <div class="line-explain">
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="e-tag">&lt;a</span> <span class="e-att">href</span><span class="e-txt">=</span><span class="e-val">"#"</span><span class="e-tag">&gt;</span></div>
+        <div class="lex-info">
+          <div class="lex-name">Anchor Tag — Hyperlink</div>
+          <div class="lex-desc">Creates a clickable link. <code>href="#"</code> links to the top of the same page (placeholder).</div>
+          <div class="lex-detail">Later we'll replace <code>#</code> with a real URL — <code>href="courses.html"</code> to link to the courses page we built in Day 2 Hour 2. For now, <code>#</code> is a safe placeholder that makes the link clickable without navigating away.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="c-sel">nav a</span></div>
+        <div class="lex-info">
+          <div class="lex-name">Descendant Selector</div>
+          <div class="lex-desc">Targets all &lt;a&gt; tags that are <em>inside</em> a &lt;nav&gt; element.</div>
+          <div class="lex-detail">This is a <strong>descendant selector</strong> — the space between <code>nav</code> and <code>a</code> means "any &lt;a&gt; that is a child of &lt;nav&gt;." It will NOT affect &lt;a&gt; tags elsewhere on the page (e.g. in the footer). Very useful for targeting specific groups of links.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tip-box">
+      <i class="ti ti-bulb tip-icon"></i>
+      <div class="tip-text"><strong>Why href="#"?</strong> The hash symbol links to the current page's top. It makes the element behave like a real link (clickable, cursor changes, keyboard focusable) while we're still building. We'll add real page paths later in the MERN project.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-2"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Style the Nav <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ══════ SLIDE 3  STYLE NAV ══════ -->
+  <div class="slide" id="slide-3">
+    <div class="slide-header">
+      <span class="badge b-teal">CSS</span>
+      <div>
+        <div class="slide-title">Style the Navigation Bar</div>
+        <div class="slide-subtitle">Add the nav rule to style.css — background, padding, text-align</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">add to css/style.css — after header { }</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">css/style.css</span></div>
+          <div class="editor-body">
+            <div class="e-row"><span class="e-ln">12</span><span class="c-cmt">/* ─ Navigation ─ */</span></div>
+            <div class="e-row"><span class="e-ln">13</span><span class="c-sel">nav</span><span class="c-punc">{</span></div>
+            <div class="e-row"><span class="e-ln">14</span><span class="e-ind1"></span><span class="c-prop">background</span><span class="c-punc">:</span> <span class="c-hex">#1e293b</span><span class="c-punc">;</span></div>
+            <div class="e-row"><span class="e-ln">15</span><span class="e-ind1"></span><span class="c-prop">padding</span><span class="c-punc">:</span> <span class="c-num">15px</span><span class="c-punc">;</span></div>
+            <div class="e-row"><span class="e-ln">16</span><span class="e-ind1"></span><span class="c-prop">text-align</span><span class="c-punc">:</span> <span class="c-str">center</span><span class="c-punc">;</span></div>
+            <div class="e-row"><span class="e-ln">17</span><span class="c-punc">}</span></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">result</div>
+        <div class="browser">
+          <div class="browser-bar"><div class="b-dot2 b-r"></div><div class="b-dot2 b-y"></div><div class="b-dot2 b-g"></div><div class="b-url">frontend/index.html</div></div>
+          <div style="background:#f4f4f4">
+            <div style="background:#1e293b;color:#fff;padding:20px;text-align:center;font-family:Arial;font-size:15px;font-weight:700">SkillHub LMS</div>
+            <div style="background:#1e293b;padding:15px;text-align:center;font-family:Arial">
+              <span style="color:#60a5fa;text-decoration:underline;margin:0 8px;font-size:13px">Home</span>
+              <span style="color:#60a5fa;text-decoration:underline;margin:0 8px;font-size:13px">Courses</span>
+              <span style="color:#60a5fa;text-decoration:underline;margin:0 8px;font-size:13px">About</span>
+              <span style="color:#60a5fa;text-decoration:underline;margin:0 8px;font-size:13px">Contact</span>
+            </div>
+            <div style="padding:18px 16px;font-family:Arial">
+              <div style="font-size:16px;font-weight:700;margin-bottom:6px">Become a Full Stack Developer</div>
+              <div style="font-size:12px;color:#555">Learn HTML, CSS, JavaScript, React, Node.js and MongoDB.</div>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:8px;background:#d1fae5;border:1px solid #6ee7b7;border-radius:8px;padding:8px 12px;font-size:12px;color:#065f46">
+          ✅ Nav background is dark. Links are still blue/underlined — we fix that next with <code>nav a { }</code>
+        </div>
+      </div>
+    </div>
+
+    <div class="card card-gray">
+      <div class="section-label">the 3 properties explained</div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px">
+        <div style="display:flex;align-items:flex-start;gap:12px;padding:10px;background:#fff;border:1px solid #e8e8e8;border-radius:8px">
+          <span class="tag-chip" style="background:#dbeafe;color:#1e40af;flex-shrink:0">background</span>
+          <div style="font-size:13px;color:#444;line-height:1.6">Sets the background colour of the nav bar. <code>#1e293b</code> is the same dark colour as the header — creating a consistent dark top section. We could also write <code>background-color</code> — both work for solid colours.</div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px;padding:10px;background:#fff;border:1px solid #e8e8e8;border-radius:8px">
+          <span class="tag-chip" style="background:#d1fae5;color:#065f46;flex-shrink:0">padding</span>
+          <div style="font-size:13px;color:#444;line-height:1.6">Adds <strong>inner space</strong> around the nav content. <code>15px</code> applies to all four sides. Without it the links are squished against the edges. Padding = space <em>inside</em> the element.</div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px;padding:10px;background:#fff;border:1px solid #e8e8e8;border-radius:8px">
+          <span class="tag-chip" style="background:#ede9fe;color:#5b21b6;flex-shrink:0">text-align</span>
+          <div style="font-size:13px;color:#444;line-height:1.6">Controls horizontal alignment of inline content (text, links) inside the element. <code>center</code> places all nav links in the middle. Other values: <code>left</code>, <code>right</code>, <code>justify</code>.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-3"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Style Nav Links <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ══════ SLIDE 4  NAV LINKS ══════ -->
+  <div class="slide" id="slide-4">
+    <div class="slide-header">
+      <span class="badge b-green">CSS</span>
+      <div>
+        <div class="slide-title">Style the Nav Links</div>
+        <div class="slide-subtitle">nav a { } — remove the underline, make them white, add spacing</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">add to css/style.css — after nav { }</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">css/style.css</span></div>
+          <div class="editor-body">
+            <div class="e-row"><span class="e-ln">18</span><span class="c-sel">nav a</span><span class="c-punc">{</span></div>
+            <div class="e-row"><span class="e-ln">19</span><span class="e-ind1"></span><span class="c-prop">color</span><span class="c-punc">:</span> <span class="c-str">white</span><span class="c-punc">;</span></div>
+            <div class="e-row"><span class="e-ln">20</span><span class="e-ind1"></span><span class="c-prop">text-decoration</span><span class="c-punc">:</span> <span class="c-str">none</span><span class="c-punc">;</span></div>
+            <div class="e-row"><span class="e-ln">21</span><span class="e-ind1"></span><span class="c-prop">margin</span><span class="c-punc">:</span> <span class="c-num">15px</span><span class="c-punc">;</span></div>
+            <div class="e-row"><span class="e-ln">22</span><span class="c-punc">}</span></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">result — clean white links with spacing</div>
+        <div class="browser">
+          <div class="browser-bar"><div class="b-dot2 b-r"></div><div class="b-dot2 b-y"></div><div class="b-dot2 b-g"></div><div class="b-url">frontend/index.html</div></div>
+          <div style="background:#f4f4f4">
+            <div style="background:#1e293b;color:#fff;padding:20px;text-align:center;font-family:Arial;font-size:15px;font-weight:700">SkillHub LMS</div>
+            <div style="background:#1e293b;padding:15px;text-align:center;font-family:Arial">
+              <a href="#" style="color:white;text-decoration:none;margin:0 15px;font-size:13px">Home</a>
+              <a href="#" style="color:white;text-decoration:none;margin:0 15px;font-size:13px">Courses</a>
+              <a href="#" style="color:white;text-decoration:none;margin:0 15px;font-size:13px">About</a>
+              <a href="#" style="color:white;text-decoration:none;margin:0 15px;font-size:13px">Contact</a>
+            </div>
+            <div style="padding:18px 16px;font-family:Arial">
+              <div style="font-size:16px;font-weight:700;margin-bottom:6px">Become a Full Stack Developer</div>
+              <div style="font-size:12px;color:#555">Learn HTML, CSS, JavaScript, React, Node.js and MongoDB.</div>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:8px;background:#d1fae5;border:1px solid #6ee7b7;border-radius:8px;padding:8px 12px;font-size:12px;color:#065f46">
+          ✅ Links are now white, no underline, well-spaced — looks professional!
+        </div>
+      </div>
+    </div>
+
+    <div class="line-explain">
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="c-prop">color</span><span class="c-punc">:</span> <span class="c-str">white</span></div>
+        <div class="lex-info">
+          <div class="lex-name">color — Text Colour</div>
+          <div class="lex-desc">Changes the text colour of the links to white</div>
+          <div class="lex-detail">By default, browser links are blue. Setting <code>color: white</code> overrides this. You can use colour names (white, red, blue), hex codes (#ffffff), or rgb values (rgb(255,255,255)). All three mean the same colour: white.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="c-prop">text-decoration</span><span class="c-punc">:</span> <span class="c-str">none</span></div>
+        <div class="lex-info">
+          <div class="lex-name">text-decoration — Remove Underline</div>
+          <div class="lex-desc">Removes the default blue underline that browsers add to all links</div>
+          <div class="lex-detail">Browsers automatically add <code>text-decoration: underline</code> to all <code>&lt;a&gt;</code> tags. Setting it to <code>none</code> removes this. Other values: <code>underline</code>, <code>overline</code>, <code>line-through</code> (for strikethrough text). Most professional navbars remove the underline and handle hover separately.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="c-prop">margin</span><span class="c-punc">:</span> <span class="c-num">15px</span></div>
+        <div class="lex-info">
+          <div class="lex-name">margin — Outer Space</div>
+          <div class="lex-desc">Adds 15px of space OUTSIDE each link — creating gaps between them</div>
+          <div class="lex-detail">Margin = outer space (space around the element, pushing other elements away). <code>margin: 15px</code> applies 15px to all four sides. Compare with padding (inner space): padding pushes content away from the element's own edges; margin pushes the element away from other elements.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-4"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Hover Effect <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ══════ SLIDE 5  HOVER ══════ -->
+  <div class="slide" id="slide-5">
+    <div class="slide-header">
+      <span class="badge b-pink">Hover</span>
+      <div>
+        <div class="slide-title">Hover Effect — CSS Reacts to the User</div>
+        <div class="slide-subtitle">The :hover pseudo-class — CSS that triggers on mouse-over</div>
+      </div>
+    </div>
+
+    <div class="card card-gray">
+      <div style="font-size:14px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:8px">
+        <i class="ti ti-message-question" style="color:#d97706;font-size:18px"></i>
+        ❓ Can CSS react when a user does something?
+      </div>
+      <button class="reveal-btn" onclick="toggle('hover-ans')">Reveal the answer</button>
+      <div class="reveal-content" id="hover-ans">
+        <div style="margin-top:10px;padding:12px 16px;background:#fff;border-radius:10px;border:1px solid #e8e8e8;font-size:13px;color:#444;line-height:1.6">
+          <strong style="color:#1d4ed8">Yes!</strong> CSS has <strong>pseudo-classes</strong> — special selectors that activate based on user interaction. <code>:hover</code> activates when the mouse is on top of an element. No JavaScript needed — this is pure CSS!
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">add to css/style.css — after nav a { }</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">css/style.css</span></div>
+          <div class="editor-body">
+            <div class="e-row"><span class="e-ln">23</span><span class="c-sel">nav a</span><span class="c-punc">:</span><span class="c-pseudo">hover</span><span class="c-punc">{</span></div>
+            <div class="e-row"><span class="e-ln">24</span><span class="e-ind1"></span><span class="c-prop">color</span><span class="c-punc">:</span> <span class="c-hex">#facc15</span><span class="c-punc">;</span></div>
+            <div class="e-row"><span class="e-ln">25</span><span class="c-punc">}</span></div>
+          </div>
+        </div>
+        <div style="margin-top:10px;background:#1e1e2e;border-radius:8px;padding:14px 16px;font-size:12px;font-family:monospace">
+          <div style="color:#6272a4;font-style:italic;margin-bottom:6px">/* Reading this rule: */</div>
+          <div><span style="color:#ff79c6">nav a</span><span style="color:#f8f8f2">:</span><span style="color:#80ffea">hover</span></div>
+          <div style="color:#f8f8f2;margin-top:4px;font-size:11px;font-family:-apple-system,sans-serif;color:#888">↑ selector  ↑ pseudo-class</div>
+          <div style="margin-top:8px;color:#f8f8f2;font-size:11px;font-family:-apple-system,sans-serif">"When a &lt;nav a&gt; link is being hovered — change its colour to yellow."</div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">live demo — move your mouse over the links below</div>
+        <div class="browser">
+          <div class="browser-bar"><div class="b-dot2 b-r"></div><div class="b-dot2 b-y"></div><div class="b-dot2 b-g"></div><div class="b-url">frontend/index.html</div></div>
+          <div style="background:#1e293b;padding:15px;text-align:center;font-family:Arial">
+            <a href="#" style="color:white;text-decoration:none;margin:0 15px;font-size:13px;transition:color 0.2s" onmouseover="this.style.color='#facc15'" onmouseout="this.style.color='white'">Home</a>
+            <a href="#" style="color:white;text-decoration:none;margin:0 15px;font-size:13px;transition:color 0.2s" onmouseover="this.style.color='#facc15'" onmouseout="this.style.color='white'">Courses</a>
+            <a href="#" style="color:white;text-decoration:none;margin:0 15px;font-size:13px;transition:color 0.2s" onmouseover="this.style.color='#facc15'" onmouseout="this.style.color='white'">About</a>
+            <a href="#" style="color:white;text-decoration:none;margin:0 15px;font-size:13px;transition:color 0.2s" onmouseover="this.style.color='#facc15'" onmouseout="this.style.color='white'">Contact</a>
+          </div>
+          <div style="padding:10px 14px;background:#f0fdf4;font-size:12px;color:#166534;text-align:center">⬆ Hover over the links — they turn yellow!</div>
+        </div>
+        <div style="margin-top:10px">
+          <div class="section-label">before vs after hover</div>
+          <div style="display:flex;gap:10px">
+            <div style="flex:1;text-align:center;padding:12px;background:#1e293b;border-radius:8px">
+              <div style="color:white;font-size:13px;text-decoration:none;font-family:Arial">Home</div>
+              <div style="font-size:10px;color:#6272a4;margin-top:4px">Normal state</div>
+            </div>
+            <div style="display:flex;align-items:center;font-size:18px;color:#888">→</div>
+            <div style="flex:1;text-align:center;padding:12px;background:#1e293b;border-radius:8px">
+              <div style="color:#facc15;font-size:13px;text-decoration:none;font-family:Arial">Home</div>
+              <div style="font-size:10px;color:#6272a4;margin-top:4px">:hover state</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <i class="ti ti-info-circle info-icon"></i>
+      <div class="info-text"><strong>Instructor note:</strong> This is a great moment to pause and show students — <em>"CSS can react to what the user does."</em> No JavaScript needed. <code>:hover</code> is the first pseudo-class students learn. Others they'll see later: <code>:focus</code>, <code>:active</code>, <code>:nth-child()</code>.</div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-5"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Property Deep-Dive <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ══════ SLIDE 6  PROPERTY DEEP DIVE ══════ -->
+  <div class="slide" id="slide-6">
+    <div class="slide-header">
+      <span class="badge b-indigo">Explain</span>
+      <div>
+        <div class="slide-title">Property Deep-Dive</div>
+        <div class="slide-subtitle">Click each row to understand text-decoration, margin, and color in depth</div>
+      </div>
+    </div>
+
+    <div class="line-explain">
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="c-prop">text-decoration</span></div>
+        <div class="lex-info">
+          <div class="lex-name">text-decoration — Line Decorations on Text</div>
+          <div class="lex-desc">Controls underlines, overlines, and strikethroughs on text</div>
+          <div class="lex-detail">Values: <code>none</code> (remove underline from links), <code>underline</code> (add underline — default for links), <code>line-through</code> (strikethrough, like a deleted price), <code>overline</code> (line above text). In navbars we always set <code>text-decoration: none</code> to remove the browser's default link underline and get a clean look.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="c-prop">margin</span></div>
+        <div class="lex-info">
+          <div class="lex-name">margin — Outer Space Around an Element</div>
+          <div class="lex-desc">Space outside the element's border — pushes neighbours away</div>
+          <div class="lex-detail"><strong>1 value:</strong> <code>margin: 15px</code> — all 4 sides equal. <strong>2 values:</strong> <code>margin: 10px 20px</code> — top/bottom 10px, left/right 20px. <strong>4 values:</strong> <code>margin: top right bottom left</code> (clockwise). Remember: <strong>Margin = outside</strong>, Padding = inside. On inline elements like &lt;a&gt;, <code>margin</code> adds horizontal breathing room between links.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="c-prop">color</span></div>
+        <div class="lex-info">
+          <div class="lex-name">color — Text Colour</div>
+          <div class="lex-desc">Sets the colour of the text (not the background)</div>
+          <div class="lex-detail">Three ways to write colours in CSS: <code>color: white</code> (named colour — 140+ names available), <code>color: #facc15</code> (hex code — 6 characters after #, pairs of RR GG BB), <code>color: rgb(250, 204, 21)</code> (red, green, blue values 0–255). All three are equivalent. Hex codes are most common in professional code.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="c-pseudo">:hover</span></div>
+        <div class="lex-info">
+          <div class="lex-name">:hover — Pseudo-Class</div>
+          <div class="lex-desc">Activates CSS rules when the mouse is over the element</div>
+          <div class="lex-detail">A <strong>pseudo-class</strong> is a keyword added to a selector that specifies a special state. <code>:hover</code> fires when the user's mouse cursor is positioned over the element. It only changes the element's appearance — it does NOT move or resize it. Other pseudo-classes: <code>:focus</code> (keyboard focus / input active), <code>:active</code> (element is being clicked), <code>:visited</code> (link was already visited).</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card card-gray" style="margin-top:.25rem">
+      <div class="section-label">margin vs padding — the critical difference</div>
+      <div style="display:flex;gap:12px;margin-top:8px;flex-wrap:wrap">
+        <div style="flex:1;min-width:180px">
+          <div style="background:#dbeafe;border:2px solid #3b82f6;border-radius:8px;padding:16px;position:relative;text-align:center;font-size:12px;color:#1e40af">
+            <div style="font-weight:700;margin-bottom:4px">MARGIN = outside</div>
+            <div style="background:#fff;border:1px solid #93c5fd;border-radius:4px;padding:8px;font-size:11px">Element content</div>
+            <div style="position:absolute;top:2px;left:50%;transform:translateX(-50%);font-size:9px;color:#3b82f6;font-weight:700">↕ space pushes others away</div>
+          </div>
+          <div style="font-size:11px;color:#555;margin-top:6px;text-align:center">Use: spacing between elements</div>
+        </div>
+        <div style="flex:1;min-width:180px">
+          <div style="background:#dcfce7;border:2px solid #22c55e;border-radius:8px;padding:16px;position:relative;text-align:center;font-size:12px;color:#166534">
+            <div style="font-weight:700;margin-bottom:4px">PADDING = inside</div>
+            <div style="background:#fff;border:1px solid #86efac;border-radius:4px;padding:16px;font-size:11px">Content has breathing room ↕</div>
+          </div>
+          <div style="font-size:11px;color:#555;margin-top:6px;text-align:center">Use: space between content and border</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-6"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Add .hero Class <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ══════ SLIDE 7  ADD .HERO CLASS ══════ -->
+  <div class="slide" id="slide-7">
+    <div class="slide-header">
+      <span class="badge b-purple">HTML</span>
+      <div>
+        <div class="slide-title">Add the .hero Class to HTML</div>
+        <div class="slide-subtitle">CSS classes — target specific elements, not all sections</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">update index.html — add class to &lt;section&gt;</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">frontend/index.html</span></div>
+          <div class="editor-body">
+            <div class="e-row"><span class="e-ln">1</span><span class="e-cmt">&lt;!-- before: --&gt;</span></div>
+            <div class="e-row"><span class="e-ln">2</span><span class="e-tag">&lt;section&gt;</span></div>
+            <div class="e-row" style="margin-top:10px"><span class="e-ln">3</span><span class="e-cmt">&lt;!-- after: --&gt;</span></div>
+            <div class="e-row" style="background:#1a2a1a"><span class="e-ln">4</span><span class="e-tag">&lt;section</span> <span class="e-att">class</span><span class="e-txt">=</span><span class="e-val">"hero"</span><span class="e-tag">&gt;</span></div>
+          </div>
+        </div>
+        <div style="margin-top:10px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:10px 14px;font-size:13px;color:#1e40af">
+          That's the only HTML change needed. One attribute on one element. CSS does the rest.
+        </div>
+      </div>
+      <div>
+        <div class="section-label">why use a class instead of just section { }?</div>
+        <div class="card card-gray">
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="padding:10px;background:#fee2e2;border:1px solid #fca5a5;border-radius:8px">
+              <div style="font-size:12px;font-weight:700;color:#dc2626;margin-bottom:4px">❌ If we wrote section { }</div>
+              <div style="font-size:12px;color:#555">It would apply to <strong>every</strong> &lt;section&gt; on the page — the courses section, testimonials section, about section. We don't want that!</div>
+            </div>
+            <div style="padding:10px;background:#f0fdf4;border:1px solid #86efac;border-radius:8px">
+              <div style="font-size:12px;font-weight:700;color:#166534;margin-bottom:4px">✅ With class="hero" and .hero { }</div>
+              <div style="font-size:12px;color:#555">Only the section with <code>class="hero"</code> gets these styles. Other sections remain unaffected. <strong>Precision targeting.</strong></div>
+            </div>
+            <div style="padding:10px;background:#f8f9fa;border:1px solid #e8e8e8;border-radius:8px">
+              <div style="font-size:12px;font-weight:700;color:#334155;margin-bottom:4px">📌 Rule</div>
+              <div style="font-size:12px;color:#555">HTML: <code>class="hero"</code> → CSS: <code>.hero { }</code> (dot prefix). The dot in CSS means "target elements with this class name."</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="editor">
+      <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">full updated index.html — complete picture</span></div>
+      <div class="editor-body" style="font-size:12px">
+        <div class="e-row"><span class="e-ln">1</span><span class="e-tag">&lt;header&gt;</span><span class="e-tag">&lt;h1&gt;</span><span class="e-txt">SkillHub LMS</span><span class="e-tag">&lt;/h1&gt;&lt;/header&gt;</span></div>
+        <div class="e-row"><span class="e-ln">2</span><span class="e-tag">&lt;nav&gt;</span></div>
+        <div class="e-row"><span class="e-ln">3</span><span class="e-ind1"></span><span class="e-tag">&lt;a</span> <span class="e-att">href</span><span class="e-txt">=</span><span class="e-val">"#"</span><span class="e-tag">&gt;</span><span class="e-txt">Home</span><span class="e-tag">&lt;/a&gt;</span> <span class="e-tag">&lt;a</span> <span class="e-att">href</span><span class="e-txt">=</span><span class="e-val">"#"</span><span class="e-tag">&gt;</span><span class="e-txt">Courses</span><span class="e-tag">&lt;/a&gt;</span> <span class="e-tag">&lt;a</span> <span class="e-att">href</span><span class="e-txt">=</span><span class="e-val">"#"</span><span class="e-tag">&gt;</span><span class="e-txt">About</span><span class="e-tag">&lt;/a&gt;</span> <span class="e-tag">&lt;a</span> <span class="e-att">href</span><span class="e-txt">=</span><span class="e-val">"#"</span><span class="e-tag">&gt;</span><span class="e-txt">Contact</span><span class="e-tag">&lt;/a&gt;</span></div>
+        <div class="e-row"><span class="e-ln">4</span><span class="e-tag">&lt;/nav&gt;</span></div>
+        <div class="e-row" style="background:#1a2a1a"><span class="e-ln">5</span><span class="e-tag">&lt;section</span> <span class="e-att">class</span><span class="e-txt">=</span><span class="e-val">"hero"</span><span class="e-tag">&gt;</span><span class="e-cmt"> &lt;!-- class added here --&gt;</span></div>
+        <div class="e-row"><span class="e-ln">6</span><span class="e-ind1"></span><span class="e-tag">&lt;h2&gt;</span><span class="e-h2">Become a Full Stack Developer</span><span class="e-tag">&lt;/h2&gt;</span></div>
+        <div class="e-row"><span class="e-ln">7</span><span class="e-ind1"></span><span class="e-tag">&lt;p&gt;</span><span class="e-p">Learn HTML, CSS, JavaScript, React, Node.js and MongoDB.</span><span class="e-tag">&lt;/p&gt;</span></div>
+        <div class="e-row"><span class="e-ln">8</span><span class="e-ind1"></span><span class="e-tag">&lt;button</span> <span class="e-att">class</span><span class="e-txt">=</span><span class="e-val">"btn"</span><span class="e-tag">&gt;</span><span class="e-txt">Explore Courses</span><span class="e-tag">&lt;/button&gt;</span></div>
+        <div class="e-row" style="background:#1a2a1a"><span class="e-ln">9</span><span class="e-tag">&lt;/section&gt;</span></div>
+        <div class="e-row"><span class="e-ln">10</span><span class="e-tag">&lt;footer&gt;</span><span class="e-txt">Copyright 2026</span><span class="e-tag">&lt;/footer&gt;</span></div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-7"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Style Hero Section <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ══════ SLIDE 8  HERO CSS ══════ -->
+  <div class="slide" id="slide-8">
+    <div class="slide-header">
+      <span class="badge b-blue">CSS</span>
+      <div>
+        <div class="slide-title">Style the Hero Section</div>
+        <div class="slide-subtitle">.hero · .hero h2 · .hero p — three rules for a centred, colourful hero</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">add to css/style.css — after nav a:hover { }</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">css/style.css</span></div>
+          <div class="editor-body">
+            <div class="e-row"><span class="e-ln">26</span><span class="c-cmt">/* ─ Hero Section ─ */</span></div>
+            <div class="e-row"><span class="e-ln">27</span><span class="c-sel">.hero</span><span class="c-punc">{</span></div>
+            <div class="e-row"><span class="e-ln">28</span><span class="e-ind1"></span><span class="c-prop">text-align</span><span class="c-punc">:</span> <span class="c-str">center</span><span class="c-punc">;</span></div>
+            <div class="e-row"><span class="e-ln">29</span><span class="e-ind1"></span><span class="c-prop">padding</span><span class="c-punc">:</span> <span class="c-num">60px</span><span class="c-punc">;</span></div>
+            <div class="e-row"><span class="e-ln">30</span><span class="c-punc">}</span></div>
+            <div class="e-row" style="margin-top:6px"><span class="e-ln">31</span><span class="c-sel">.hero h2</span><span class="c-punc">{</span></div>
+            <div class="e-row"><span class="e-ln">32</span><span class="e-ind1"></span><span class="c-prop">color</span><span class="c-punc">:</span> <span class="c-hex">#2563eb</span><span class="c-punc">;</span></div>
+            <div class="e-row"><span class="e-ln">33</span><span class="e-ind1"></span><span class="c-prop">font-size</span><span class="c-punc">:</span> <span class="c-num">40px</span><span class="c-punc">;</span></div>
+            <div class="e-row"><span class="e-ln">34</span><span class="c-punc">}</span></div>
+            <div class="e-row" style="margin-top:6px"><span class="e-ln">35</span><span class="c-sel">.hero p</span><span class="c-punc">{</span></div>
+            <div class="e-row"><span class="e-ln">36</span><span class="e-ind1"></span><span class="c-prop">margin-top</span><span class="c-punc">:</span> <span class="c-num">20px</span><span class="c-punc">;</span></div>
+            <div class="e-row"><span class="e-ln">37</span><span class="e-ind1"></span><span class="c-prop">font-size</span><span class="c-punc">:</span> <span class="c-num">18px</span><span class="c-punc">;</span></div>
+            <div class="e-row"><span class="e-ln">38</span><span class="c-punc">}</span></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">result — hero section comes alive</div>
+        <div class="browser">
+          <div class="browser-bar"><div class="b-dot2 b-r"></div><div class="b-dot2 b-y"></div><div class="b-dot2 b-g"></div><div class="b-url">frontend/index.html</div></div>
+          <div style="background:#f4f4f4;font-family:Arial">
+            <div style="background:#1e293b;color:#fff;padding:20px;text-align:center;font-size:15px;font-weight:700">SkillHub LMS</div>
+            <div style="background:#1e293b;padding:15px;text-align:center">
+              <a href="#" style="color:white;text-decoration:none;margin:0 15px;font-size:13px">Home</a>
+              <a href="#" style="color:white;text-decoration:none;margin:0 15px;font-size:13px">Courses</a>
+              <a href="#" style="color:white;text-decoration:none;margin:0 15px;font-size:13px">About</a>
+              <a href="#" style="color:white;text-decoration:none;margin:0 15px;font-size:13px">Contact</a>
+            </div>
+            <div style="text-align:center;padding:40px 20px">
+              <h2 style="color:#2563eb;font-size:28px;font-weight:700;margin-bottom:12px">Become a Full Stack Developer</h2>
+              <p style="font-size:16px;color:#333;margin-top:14px">Learn HTML, CSS, JavaScript, React, Node.js and MongoDB.</p>
+              <button style="background:#efefef;border:1px solid #999;padding:6px 14px;border-radius:4px;font-size:13px;cursor:pointer;margin-top:14px">Explore Courses</button>
+            </div>
+            <div style="background:#1e293b;color:#94a3b8;padding:10px 16px;font-size:11px;text-align:center">Copyright 2026</div>
+          </div>
+        </div>
+        <div style="margin-top:8px;background:#d1fae5;border:1px solid #6ee7b7;border-radius:8px;padding:8px 12px;font-size:12px;color:#065f46">
+          ✅ Hero is now centred with a big blue heading. Only the button is still unstyled — next slide!
+        </div>
+      </div>
+    </div>
+
+    <div class="line-explain" style="margin-top:.25rem">
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="c-sel">.hero</span></div>
+        <div class="lex-info">
+          <div class="lex-name">Class Selector</div>
+          <div class="lex-desc">The dot (.) targets elements with class="hero" — only that section</div>
+          <div class="lex-detail">A class selector starts with a dot. <code>.hero</code> means "apply these styles to any element that has <code>class="hero"</code> in the HTML." We added that class to the &lt;section&gt; in the previous slide. Classes can be reused — if we add <code>class="hero"</code> to another element, it gets the same styles too.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="c-sel">.hero h2</span></div>
+        <div class="lex-info">
+          <div class="lex-name">Descendant Class Selector</div>
+          <div class="lex-desc">Targets &lt;h2&gt; elements that are INSIDE the .hero section</div>
+          <div class="lex-detail">This is a descendant selector using a class. It reads: "target any &lt;h2&gt; that is a descendant of an element with class hero." This means other h2 tags on the page (in other sections) are NOT affected. Very precise targeting — best practice.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="c-prop">font-size</span><span class="c-punc">:</span> <span class="c-num">40px</span></div>
+        <div class="lex-info">
+          <div class="lex-name">font-size — Control Text Size</div>
+          <div class="lex-desc">Sets how big the text is. 40px for the hero heading makes it dominant and impactful.</div>
+          <div class="lex-detail">px = pixels. The default browser h2 size is around 24px. Setting 40px makes it much larger and creates a strong visual hierarchy. Other units: <code>rem</code> (relative to root font size — scales with user preferences), <code>em</code> (relative to parent font size), <code>%</code> (percentage of parent). For now, px is simplest to understand.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="c-prop">margin-top</span><span class="c-punc">:</span> <span class="c-num">20px</span></div>
+        <div class="lex-info">
+          <div class="lex-name">margin-top — Space Above an Element</div>
+          <div class="lex-desc">Adds 20px of space specifically above the paragraph</div>
+          <div class="lex-detail">You can target individual sides of margin: <code>margin-top</code>, <code>margin-right</code>, <code>margin-bottom</code>, <code>margin-left</code>. This gives finer control than <code>margin</code> which sets all four sides at once. Here, 20px top margin pushes the paragraph down from the heading, creating readable breathing room.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-8"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Style the Button <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ══════ SLIDE 9  BUTTON CSS ══════ -->
+  <div class="slide" id="slide-9">
+    <div class="slide-header">
+      <span class="badge b-cyan">CSS</span>
+      <div>
+        <div class="slide-title">Style the Hero Button</div>
+        <div class="slide-subtitle">.btn { } + .btn:hover { } — the CTA goes from plain grey to professional blue</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">add to css/style.css — final rules</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">css/style.css</span></div>
+          <div class="editor-body">
+            <div class="e-row"><span class="e-ln">39</span><span class="c-cmt">/* ─ CTA Button ─ */</span></div>
+            <div class="e-row"><span class="e-ln">40</span><span class="c-sel">.btn</span><span class="c-punc">{</span></div>
+            <div class="e-row"><span class="e-ln">41</span><span class="e-ind1"></span><span class="c-prop">background</span><span class="c-punc">:</span> <span class="c-hex">#2563eb</span><span class="c-punc">;</span></div>
+            <div class="e-row"><span class="e-ln">42</span><span class="e-ind1"></span><span class="c-prop">color</span><span class="c-punc">:</span> <span class="c-str">white</span><span class="c-punc">;</span></div>
+            <div class="e-row"><span class="e-ln">43</span><span class="e-ind1"></span><span class="c-prop">border</span><span class="c-punc">:</span> <span class="c-str">none</span><span class="c-punc">;</span></div>
+            <div class="e-row"><span class="e-ln">44</span><span class="e-ind1"></span><span class="c-prop">padding</span><span class="c-punc">:</span> <span class="c-num">12px</span> <span class="c-num">25px</span><span class="c-punc">;</span></div>
+            <div class="e-row"><span class="e-ln">45</span><span class="e-ind1"></span><span class="c-prop">margin-top</span><span class="c-punc">:</span> <span class="c-num">20px</span><span class="c-punc">;</span></div>
+            <div class="e-row"><span class="e-ln">46</span><span class="e-ind1"></span><span class="c-prop">cursor</span><span class="c-punc">:</span> <span class="c-str">pointer</span><span class="c-punc">;</span></div>
+            <div class="e-row"><span class="e-ln">47</span><span class="c-punc">}</span></div>
+            <div class="e-row" style="margin-top:6px"><span class="e-ln">48</span><span class="c-sel">.btn</span><span class="c-punc">:</span><span class="c-pseudo">hover</span><span class="c-punc">{</span></div>
+            <div class="e-row"><span class="e-ln">49</span><span class="e-ind1"></span><span class="c-prop">background</span><span class="c-punc">:</span> <span class="c-hex">#1d4ed8</span><span class="c-punc">;</span></div>
+            <div class="e-row"><span class="e-ln">50</span><span class="c-punc">}</span></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">result — before vs after</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div>
+            <div style="font-size:10px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:6px">Before styling</div>
+            <div style="background:#fff;border:1px solid #e0e0e0;border-radius:8px;padding:14px;text-align:center">
+              <button style="background:#efefef;border:1px solid #999;padding:6px 14px;border-radius:4px;font-size:13px;cursor:pointer;font-family:Arial">Explore Courses</button>
+              <div style="font-size:10px;color:#888;margin-top:6px">Plain grey browser default</div>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:10px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:6px">After styling</div>
+            <div style="background:#fff;border:1px solid #e0e0e0;border-radius:8px;padding:14px;text-align:center">
+              <button style="background:#2563eb;color:white;border:none;padding:12px 25px;cursor:pointer;font-size:14px;font-family:Arial;font-weight:600" onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='#2563eb'">Explore Courses</button>
+              <div style="font-size:10px;color:#888;margin-top:6px">Hover over it — it darkens!</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="line-explain" style="margin-top:.25rem">
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="c-prop">border</span><span class="c-punc">:</span> <span class="c-str">none</span></div>
+        <div class="lex-info">
+          <div class="lex-name">border: none — Remove Default Button Border</div>
+          <div class="lex-desc">Browsers add a grey border to &lt;button&gt; elements by default — this removes it</div>
+          <div class="lex-detail">Without <code>border: none</code>, the button would show the browser's default grey border around our blue background — looks messy. Other border values: <code>border: 1px solid #000</code> (width style colour — the three-part shorthand). We'll use borders later when we want outlined/ghost buttons.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="c-prop">padding</span><span class="c-punc">:</span> <span class="c-num">12px 25px</span></div>
+        <div class="lex-info">
+          <div class="lex-name">Two-Value Padding Shorthand</div>
+          <div class="lex-desc">12px top/bottom · 25px left/right — makes the button tall enough to click</div>
+          <div class="lex-detail">Two-value shorthand: first value = top and bottom, second value = left and right. So <code>padding: 12px 25px</code> = 12px padding top and bottom (making the button tall), 25px left and right (making it wide). This is the most common button padding pattern — taller than it is wide.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="c-prop">cursor</span><span class="c-punc">:</span> <span class="c-str">pointer</span></div>
+        <div class="lex-info">
+          <div class="lex-name">cursor: pointer — Show Hand Cursor</div>
+          <div class="lex-desc">Changes the mouse cursor to a pointing hand when hovering over the button</div>
+          <div class="lex-detail">By default &lt;button&gt; elements show a normal arrow cursor in some browsers. <code>cursor: pointer</code> forces the hand cursor — the universal visual signal that something is clickable. Always add this to styled buttons and links. Other cursor values: <code>default</code>, <code>move</code>, <code>not-allowed</code>, <code>crosshair</code>.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="c-sel">.btn</span><span class="c-punc">:</span><span class="c-pseudo">hover</span> <span class="c-hex">#1d4ed8</span></div>
+        <div class="lex-info">
+          <div class="lex-name">Hover State — Slightly Darker Blue</div>
+          <div class="lex-desc">Hover darkens the button to give visual click feedback</div>
+          <div class="lex-detail"><code>#2563eb</code> (normal) vs <code>#1d4ed8</code> (hover) — the hover colour is just a shade darker. This is the standard UX pattern: hover = slightly darker/lighter than the default. It gives the user visual feedback that the button is interactive. No JavaScript — pure CSS.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-9"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Student Activity <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ══════ SLIDE 10  ACTIVITY ══════ -->
+  <div class="slide" id="slide-10">
+    <div class="slide-header">
+      <span class="badge b-orange">Activity</span>
+      <div>
+        <div class="slide-title">Student Activity — Add Two More Buttons</div>
+        <div class="slide-subtitle">Students create "Join Now" and "Learn More" buttons — 5 minutes</div>
+      </div>
+    </div>
+
+    <div class="activity-box">
+      <div class="activity-title"><i class="ti ti-keyboard"></i> Task: Add two more buttons to the hero section</div>
+      <div class="editor" style="border-radius:8px">
+        <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">Add inside &lt;section class="hero"&gt; in index.html</span></div>
+        <div class="editor-body">
+          <div class="e-row"><span class="e-ln">1</span><span class="e-tag">&lt;button</span> <span class="e-att">class</span><span class="e-txt">=</span><span class="e-val">"btn"</span><span class="e-tag">&gt;</span><span class="e-txt">Explore Courses</span><span class="e-tag">&lt;/button&gt;</span><span class="e-cmt"> &lt;!-- already exists --&gt;</span></div>
+          <div class="e-row" style="background:#1a2a1a"><span class="e-ln">2</span><span class="e-tag">&lt;button</span> <span class="e-att">class</span><span class="e-txt">=</span><span class="e-val">"btn"</span><span class="e-tag">&gt;</span><span class="e-new">Join Now</span><span class="e-tag">&lt;/button&gt;</span><span class="e-cmt"> &lt;!-- ADD THIS --&gt;</span></div>
+          <div class="e-row" style="background:#1a2a1a"><span class="e-ln">3</span><span class="e-tag">&lt;button</span> <span class="e-att">class</span><span class="e-txt">=</span><span class="e-val">"btn"</span><span class="e-tag">&gt;</span><span class="e-new">Learn More</span><span class="e-tag">&lt;/button&gt;</span><span class="e-cmt"> &lt;!-- ADD THIS --&gt;</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">before — one button</div>
+        <div style="background:#fff;border:1px solid #e0e0e0;border-radius:10px;padding:20px;text-align:center;font-family:Arial">
+          <h2 style="color:#2563eb;font-size:22px;font-weight:700;margin-bottom:10px">Become a Full Stack Developer</h2>
+          <p style="font-size:14px;color:#555;margin-bottom:14px">Learn HTML, CSS, JavaScript, React...</p>
+          <button style="background:#2563eb;color:white;border:none;padding:10px 22px;cursor:pointer;font-size:13px;font-family:Arial">Explore Courses</button>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">after — three buttons (same .btn class!) ✅</div>
+        <div style="background:#fff;border:1px solid #e0e0e0;border-radius:10px;padding:20px;text-align:center;font-family:Arial">
+          <h2 style="color:#2563eb;font-size:22px;font-weight:700;margin-bottom:10px">Become a Full Stack Developer</h2>
+          <p style="font-size:14px;color:#555;margin-bottom:14px">Learn HTML, CSS, JavaScript, React...</p>
+          <button style="background:#2563eb;color:white;border:none;padding:10px 22px;cursor:pointer;font-size:13px;font-family:Arial;margin:4px" onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='#2563eb'">Explore Courses</button>
+          <button style="background:#2563eb;color:white;border:none;padding:10px 22px;cursor:pointer;font-size:13px;font-family:Arial;margin:4px" onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='#2563eb'">Join Now</button>
+          <button style="background:#2563eb;color:white;border:none;padding:10px 22px;cursor:pointer;font-size:13px;font-family:Arial;margin:4px" onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='#2563eb'">Learn More</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="success-box">
+      <i class="ti ti-circle-check" style="color:#166534;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+      <div style="font-size:13px;color:#166534;line-height:1.6"><strong>Power of CSS classes!</strong> Notice: we wrote <code>.btn { }</code> in CSS exactly ONCE — but all three buttons automatically get the same styles just by adding <code>class="btn"</code> to the HTML. Change the CSS once → all three buttons update. This is the reusability superpower of classes.</div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">bonus: try a second button style</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">css/style.css — bonus</span></div>
+          <div class="editor-body" style="font-size:12px">
+            <div class="e-row"><span class="e-ln">51</span><span class="c-cmt">/* Secondary / outline button */</span></div>
+            <div class="e-row"><span class="e-ln">52</span><span class="c-sel">.btn-outline</span><span class="c-punc">{</span></div>
+            <div class="e-row"><span class="e-ln">53</span><span class="e-ind1"></span><span class="c-prop">background</span><span class="c-punc">:</span> <span class="c-str">transparent</span><span class="c-punc">;</span></div>
+            <div class="e-row"><span class="e-ln">54</span><span class="e-ind1"></span><span class="c-prop">color</span><span class="c-punc">:</span> <span class="c-hex">#2563eb</span><span class="c-punc">;</span></div>
+            <div class="e-row"><span class="e-ln">55</span><span class="e-ind1"></span><span class="c-prop">border</span><span class="c-punc">:</span> <span class="c-num">2px</span> <span class="c-str">solid</span> <span class="c-hex">#2563eb</span><span class="c-punc">;</span></div>
+            <div class="e-row"><span class="e-ln">56</span><span class="e-ind1"></span><span class="c-prop">padding</span><span class="c-punc">:</span> <span class="c-num">12px 25px</span><span class="c-punc">;</span></div>
+            <div class="e-row"><span class="e-ln">57</span><span class="e-ind1"></span><span class="c-prop">margin-top</span><span class="c-punc">:</span> <span class="c-num">20px</span><span class="c-punc">;</span></div>
+            <div class="e-row"><span class="e-ln">58</span><span class="e-ind1"></span><span class="c-prop">cursor</span><span class="c-punc">:</span> <span class="c-str">pointer</span><span class="c-punc">;</span></div>
+            <div class="e-row"><span class="e-ln">59</span><span class="c-punc">}</span></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">result — two distinct button styles</div>
+        <div style="background:#fff;border:1px solid #e0e0e0;border-radius:10px;padding:24px;text-align:center;font-family:Arial">
+          <button style="background:#2563eb;color:white;border:none;padding:12px 25px;cursor:pointer;font-size:14px;margin:6px" onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='#2563eb'">Join Now</button>
+          <button style="background:transparent;color:#2563eb;border:2px solid #2563eb;padding:12px 25px;cursor:pointer;font-size:14px;margin:6px" onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='transparent'">Learn More</button>
+          <div style="font-size:11px;color:#888;margin-top:10px">Primary (.btn) + Outline (.btn-outline) — hover to see effects</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tip-box">
+      <i class="ti ti-bulb tip-icon"></i>
+      <div class="tip-text"><strong>Instructor tip:</strong> Ask students to change the <code>#2563eb</code> blue to any colour they like — try <code>#16a34a</code> (green), <code>#9333ea</code> (purple), <code>#dc2626</code> (red). They instantly see why CSS classes are powerful: change once, updates everywhere.</div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-10"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Full CSS Reference <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ══════ SLIDE 11  FULL CSS REFERENCE ══════ -->
+  <div class="slide" id="slide-11">
+    <div class="slide-header">
+      <span class="badge b-slate">Reference</span>
+      <div>
+        <div class="slide-title">Complete style.css — Hours 1 + 2</div>
+        <div class="slide-subtitle">The full file after both hours — keep this open to compare your work</div>
+      </div>
+    </div>
+
+    <div class="editor">
+      <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">frontend/css/style.css — complete file after Day 3 Hours 1 and 2</span></div>
+      <div class="editor-body" style="font-size:12px">
+        <div class="e-row"><span class="e-ln">1</span><span class="c-cmt">/* ═══════════════════════════════ */</span></div>
+        <div class="e-row"><span class="e-ln">2</span><span class="c-cmt">/*   SkillHub LMS — style.css     */</span></div>
+        <div class="e-row"><span class="e-ln">3</span><span class="c-cmt">/*   Day 3: Hours 1 + 2           */</span></div>
+        <div class="e-row"><span class="e-ln">4</span><span class="c-cmt">/* ═══════════════════════════════ */</span></div>
+        <div class="e-row" style="margin-top:8px"><span class="e-ln">5</span><span class="c-cmt">/* ─ Hour 1: Global styles ─ */</span></div>
+        <div class="e-row"><span class="e-ln">6</span><span class="c-sel">body</span><span class="c-punc">{</span></div>
+        <div class="e-row"><span class="e-ln">7</span><span class="e-ind1"></span><span class="c-prop">background-color</span><span class="c-punc">:</span> <span class="c-hex">#f4f4f4</span><span class="c-punc">;</span></div>
+        <div class="e-row"><span class="e-ln">8</span><span class="e-ind1"></span><span class="c-prop">font-family</span><span class="c-punc">:</span> <span class="c-str">Arial, sans-serif</span><span class="c-punc">;</span></div>
+        <div class="e-row"><span class="e-ln">9</span><span class="c-punc">}</span></div>
+        <div class="e-row" style="margin-top:6px"><span class="e-ln">10</span><span class="c-sel">header</span><span class="c-punc">{</span></div>
+        <div class="e-row"><span class="e-ln">11</span><span class="e-ind1"></span><span class="c-prop">background</span><span class="c-punc">:</span> <span class="c-hex">#1e293b</span><span class="c-punc">;</span></div>
+        <div class="e-row"><span class="e-ln">12</span><span class="e-ind1"></span><span class="c-prop">color</span><span class="c-punc">:</span> <span class="c-str">white</span><span class="c-punc">;</span></div>
+        <div class="e-row"><span class="e-ln">13</span><span class="e-ind1"></span><span class="c-prop">padding</span><span class="c-punc">:</span> <span class="c-num">20px</span><span class="c-punc">;</span></div>
+        <div class="e-row"><span class="e-ln">14</span><span class="e-ind1"></span><span class="c-prop">text-align</span><span class="c-punc">:</span> <span class="c-str">center</span><span class="c-punc">;</span></div>
+        <div class="e-row"><span class="e-ln">15</span><span class="c-punc">}</span></div>
+        <div class="e-row" style="margin-top:8px"><span class="e-ln">16</span><span class="c-cmt">/* ─ Hour 2: Navigation ─ */</span></div>
+        <div class="e-row"><span class="e-ln">17</span><span class="c-sel">nav</span><span class="c-punc">{</span></div>
+        <div class="e-row"><span class="e-ln">18</span><span class="e-ind1"></span><span class="c-prop">background</span><span class="c-punc">:</span> <span class="c-hex">#1e293b</span><span class="c-punc">;</span></div>
+        <div class="e-row"><span class="e-ln">19</span><span class="e-ind1"></span><span class="c-prop">padding</span><span class="c-punc">:</span> <span class="c-num">15px</span><span class="c-punc">;</span></div>
+        <div class="e-row"><span class="e-ln">20</span><span class="e-ind1"></span><span class="c-prop">text-align</span><span class="c-punc">:</span> <span class="c-str">center</span><span class="c-punc">;</span></div>
+        <div class="e-row"><span class="e-ln">21</span><span class="c-punc">}</span></div>
+        <div class="e-row" style="margin-top:6px"><span class="e-ln">22</span><span class="c-sel">nav a</span><span class="c-punc">{</span></div>
+        <div class="e-row"><span class="e-ln">23</span><span class="e-ind1"></span><span class="c-prop">color</span><span class="c-punc">:</span> <span class="c-str">white</span><span class="c-punc">;</span></div>
+        <div class="e-row"><span class="e-ln">24</span><span class="e-ind1"></span><span class="c-prop">text-decoration</span><span class="c-punc">:</span> <span class="c-str">none</span><span class="c-punc">;</span></div>
+        <div class="e-row"><span class="e-ln">25</span><span class="e-ind1"></span><span class="c-prop">margin</span><span class="c-punc">:</span> <span class="c-num">15px</span><span class="c-punc">;</span></div>
+        <div class="e-row"><span class="e-ln">26</span><span class="c-punc">}</span></div>
+        <div class="e-row" style="margin-top:6px"><span class="e-ln">27</span><span class="c-sel">nav a</span><span class="c-punc">:</span><span class="c-pseudo">hover</span><span class="c-punc">{</span></div>
+        <div class="e-row"><span class="e-ln">28</span><span class="e-ind1"></span><span class="c-prop">color</span><span class="c-punc">:</span> <span class="c-hex">#facc15</span><span class="c-punc">;</span></div>
+        <div class="e-row"><span class="e-ln">29</span><span class="c-punc">}</span></div>
+        <div class="e-row" style="margin-top:8px"><span class="e-ln">30</span><span class="c-cmt">/* ─ Hour 2: Hero Section ─ */</span></div>
+        <div class="e-row"><span class="e-ln">31</span><span class="c-sel">.hero</span><span class="c-punc">{</span></div>
+        <div class="e-row"><span class="e-ln">32</span><span class="e-ind1"></span><span class="c-prop">text-align</span><span class="c-punc">:</span> <span class="c-str">center</span><span class="c-punc">;</span></div>
+        <div class="e-row"><span class="e-ln">33</span><span class="e-ind1"></span><span class="c-prop">padding</span><span class="c-punc">:</span> <span class="c-num">60px</span><span class="c-punc">;</span></div>
+        <div class="e-row"><span class="e-ln">34</span><span class="c-punc">}</span></div>
+        <div class="e-row" style="margin-top:6px"><span class="e-ln">35</span><span class="c-sel">.hero h2</span><span class="c-punc">{</span></div>
+        <div class="e-row"><span class="e-ln">36</span><span class="e-ind1"></span><span class="c-prop">color</span><span class="c-punc">:</span> <span class="c-hex">#2563eb</span><span class="c-punc">;</span></div>
+        <div class="e-row"><span class="e-ln">37</span><span class="e-ind1"></span><span class="c-prop">font-size</span><span class="c-punc">:</span> <span class="c-num">40px</span><span class="c-punc">;</span></div>
+        <div class="e-row"><span class="e-ln">38</span><span class="c-punc">}</span></div>
+        <div class="e-row" style="margin-top:6px"><span class="e-ln">39</span><span class="c-sel">.hero p</span><span class="c-punc">{</span></div>
+        <div class="e-row"><span class="e-ln">40</span><span class="e-ind1"></span><span class="c-prop">margin-top</span><span class="c-punc">:</span> <span class="c-num">20px</span><span class="c-punc">;</span></div>
+        <div class="e-row"><span class="e-ln">41</span><span class="e-ind1"></span><span class="c-prop">font-size</span><span class="c-punc">:</span> <span class="c-num">18px</span><span class="c-punc">;</span></div>
+        <div class="e-row"><span class="e-ln">42</span><span class="c-punc">}</span></div>
+        <div class="e-row" style="margin-top:8px"><span class="e-ln">43</span><span class="c-cmt">/* ─ Hour 2: CTA Button ─ */</span></div>
+        <div class="e-row"><span class="e-ln">44</span><span class="c-sel">.btn</span><span class="c-punc">{</span></div>
+        <div class="e-row"><span class="e-ln">45</span><span class="e-ind1"></span><span class="c-prop">background</span><span class="c-punc">:</span> <span class="c-hex">#2563eb</span><span class="c-punc">;</span></div>
+        <div class="e-row"><span class="e-ln">46</span><span class="e-ind1"></span><span class="c-prop">color</span><span class="c-punc">:</span> <span class="c-str">white</span><span class="c-punc">;</span></div>
+        <div class="e-row"><span class="e-ln">47</span><span class="e-ind1"></span><span class="c-prop">border</span><span class="c-punc">:</span> <span class="c-str">none</span><span class="c-punc">;</span></div>
+        <div class="e-row"><span class="e-ln">48</span><span class="e-ind1"></span><span class="c-prop">padding</span><span class="c-punc">:</span> <span class="c-num">12px</span> <span class="c-num">25px</span><span class="c-punc">;</span></div>
+        <div class="e-row"><span class="e-ln">49</span><span class="e-ind1"></span><span class="c-prop">margin-top</span><span class="c-punc">:</span> <span class="c-num">20px</span><span class="c-punc">;</span></div>
+        <div class="e-row"><span class="e-ln">50</span><span class="e-ind1"></span><span class="c-prop">cursor</span><span class="c-punc">:</span> <span class="c-str">pointer</span><span class="c-punc">;</span></div>
+        <div class="e-row"><span class="e-ln">51</span><span class="c-punc">}</span></div>
+        <div class="e-row" style="margin-top:6px"><span class="e-ln">52</span><span class="c-sel">.btn</span><span class="c-punc">:</span><span class="c-pseudo">hover</span><span class="c-punc">{</span></div>
+        <div class="e-row"><span class="e-ln">53</span><span class="e-ind1"></span><span class="c-prop">background</span><span class="c-punc">:</span> <span class="c-hex">#1d4ed8</span><span class="c-punc">;</span></div>
+        <div class="e-row"><span class="e-ln">54</span><span class="c-punc">}</span></div>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top:.25rem">
+      <div class="card" style="padding:0;overflow:hidden">
+        <table class="tag-table">
+          <thead><tr><th>Selector</th><th>What It Targets</th></tr></thead>
+          <tbody>
+            <tr><td><span class="tag-mono" style="background:#e2e8f0;color:#334155">body</span></td><td>The entire page</td></tr>
+            <tr><td><span class="tag-mono" style="background:#dbeafe;color:#1e40af">header</span></td><td>The &lt;header&gt; element</td></tr>
+            <tr><td><span class="tag-mono" style="background:#d1fae5;color:#065f46">nav</span></td><td>The &lt;nav&gt; bar</td></tr>
+            <tr><td><span class="tag-mono" style="background:#fef9c3;color:#854d0e">nav a</span></td><td>All links inside nav</td></tr>
+            <tr><td><span class="tag-mono" style="background:#cffafe;color:#164e63">nav a:hover</span></td><td>Links on mouse-over</td></tr>
+            <tr><td><span class="tag-mono" style="background:#ede9fe;color:#5b21b6">.hero</span></td><td>Section with class hero</td></tr>
+            <tr><td><span class="tag-mono" style="background:#ede9fe;color:#5b21b6">.hero h2</span></td><td>h2 inside .hero only</td></tr>
+            <tr><td><span class="tag-mono" style="background:#ede9fe;color:#5b21b6">.hero p</span></td><td>p inside .hero only</td></tr>
+            <tr><td><span class="tag-mono" style="background:#dcfce7;color:#166534">.btn</span></td><td>Buttons with class btn</td></tr>
+            <tr><td><span class="tag-mono" style="background:#dcfce7;color:#166534">.btn:hover</span></td><td>Buttons on mouse-over</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <div class="section-label">final skillhub preview</div>
+        <div class="browser">
+          <div class="browser-bar" style="padding:7px 12px"><div class="b-dot2 b-r"></div><div class="b-dot2 b-y"></div><div class="b-dot2 b-g"></div><div class="b-url" style="font-size:11px">frontend/index.html</div></div>
+          <div style="background:#f4f4f4;font-family:Arial">
+            <div style="background:#1e293b;color:#fff;padding:18px;text-align:center;font-size:14px;font-weight:700">SkillHub LMS</div>
+            <div style="background:#1e293b;padding:13px;text-align:center">
+              <a href="#" style="color:white;text-decoration:none;margin:0 12px;font-size:12px">Home</a>
+              <a href="#" style="color:white;text-decoration:none;margin:0 12px;font-size:12px">Courses</a>
+              <a href="#" style="color:white;text-decoration:none;margin:0 12px;font-size:12px">About</a>
+              <a href="#" style="color:white;text-decoration:none;margin:0 12px;font-size:12px">Contact</a>
+            </div>
+            <div style="text-align:center;padding:36px 20px;background:#fff">
+              <h2 style="color:#2563eb;font-size:26px;font-weight:700;margin-bottom:10px">Become a Full Stack Developer</h2>
+              <p style="font-size:14px;color:#333;margin-top:14px;margin-bottom:16px">Learn HTML, CSS, JavaScript, React, Node.js and MongoDB.</p>
+              <button style="background:#2563eb;color:white;border:none;padding:10px 22px;cursor:pointer;font-size:13px;margin:4px;font-family:Arial">Explore Courses</button>
+              <button style="background:#2563eb;color:white;border:none;padding:10px 22px;cursor:pointer;font-size:13px;margin:4px;font-family:Arial">Join Now</button>
+            </div>
+            <div style="background:#1e293b;color:#94a3b8;padding:9px 14px;font-size:10px;text-align:center">Copyright 2026</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-11"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Quiz <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ══════ SLIDE 12  QUIZ ══════ -->
+  <div class="slide" id="slide-12">
+    <div class="slide-header">
+      <span class="badge b-green">Quiz</span>
+      <div>
+        <div class="slide-title">Quick Check — Day 3 Hour 2</div>
+        <div class="slide-subtitle">5 questions on nav styling, hover, classes, and button CSS</div>
+      </div>
+    </div>
+    <div id="quiz-container"></div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-12"></div>
+      <button class="nav-btn" onclick="goSlide(0)"><i class="ti ti-home"></i> Home</button>
+    </div>
+  </div>
+
+</div><!-- /.wrapper -->
+
+<script>
+  var current = 0, total = 13, quizInit = false;
+
+  var quizData = [
+    {
+      q: "In the nav HTML we changed plain text to <code>&lt;a href='#'&gt;Home&lt;/a&gt;</code>. Why is this necessary before styling with <code>nav a { }</code>?",
+      opts: [
+        "CSS only works with &lt;a&gt; tags — it cannot style plain text",
+        "The CSS selector nav a targets &lt;a&gt; elements inside nav. Plain text has no tag, so it cannot be targeted",
+        "Plain text auto-converts to &lt;a&gt; tags when CSS is linked",
+        "href='#' is required or the browser ignores the nav element"
+      ],
+      ans: 1,
+      exp: "CSS selectors target HTML elements. 'nav a' means: find &lt;a&gt; elements inside a &lt;nav&gt;. Plain text 'Home' is not an element — it has no tag — so the selector cannot find it. Wrapping text in &lt;a&gt; tags is what gives CSS something to grab."
+    },
+    {
+      q: "What does <code>text-decoration: none</code> do to a nav link, and why do we add it?",
+      opts: [
+        "It removes the text from the link — making it invisible",
+        "It removes the default underline that browsers automatically add to all &lt;a&gt; tags",
+        "It changes the font of the link text",
+        "It prevents the link from being clickable"
+      ],
+      ans: 1,
+      exp: "Browsers add text-decoration: underline to all &lt;a&gt; tags by default. In a styled nav bar, the underline looks unprofessional. Setting text-decoration: none removes it. The link is still fully clickable — text-decoration only affects the visual decoration, never the functionality."
+    },
+    {
+      q: "We used <code>.hero</code> (class selector) instead of <code>section</code> (element selector) for the hero styles. What is the key reason?",
+      opts: [
+        "Class selectors are faster than element selectors",
+        "Section selectors do not work in CSS",
+        "Using section { } would apply styles to ALL sections on the page. .hero only targets the one section with class='hero'",
+        "The browser requires class names on all section elements"
+      ],
+      ans: 2,
+      exp: "A page may have many &lt;section&gt; elements — hero, courses, testimonials, about. Using 'section { }' would style ALL of them. The class .hero lets us precisely target only the section with class='hero', leaving other sections unstyled. This precision is why classes exist."
+    },
+    {
+      q: "What is the difference between <code>margin</code> and <code>padding</code> — which is the OUTER space and which is the INNER space?",
+      opts: [
+        "Both are outer space — they do the same thing on different sides",
+        "margin = inner space between content and border; padding = outer space pushing neighbours",
+        "margin = outer space pushing other elements away; padding = inner space between content and the element's edge",
+        "padding affects text only; margin affects the entire element"
+      ],
+      ans: 2,
+      exp: "Margin = outer space — pushes other elements away from this element. Padding = inner space — pushes the element's own content away from its border/edge. Memory trick: Padding is like the inside of a pillow (inner cushion). Margin is the gap between pillows on a sofa (space between elements)."
+    },
+    {
+      q: "In <code>.btn { cursor: pointer; }</code> — what does cursor: pointer actually do and why is it important?",
+      opts: [
+        "It makes the button respond to keyboard input",
+        "It changes the mouse cursor from an arrow to a hand when hovering — signalling the element is clickable",
+        "It points the button to a URL destination",
+        "It changes the pointer events — clicking is disabled without it"
+      ],
+      ans: 1,
+      exp: "cursor: pointer changes the mouse cursor to a pointing hand — the universal symbol that something is clickable. Without it, hovering shows the default arrow cursor, which makes the button feel non-interactive. It doesn't affect functionality — only the visual cursor. Always add it to styled buttons and custom clickable elements."
+    }
+  ];
+
+  var quizAnswered = [];
+
+  function renderQuiz() {
+    var c = document.getElementById('quiz-container'); c.innerHTML = '';
+    quizData.forEach(function(q, i) {
+      var d = document.createElement('div'); d.style.cssText = 'margin-bottom:18px';
+      d.innerHTML = '<div style="font-size:13px;font-weight:600;margin-bottom:6px">'+(i+1)+'. '+q.q+'</div>';
+      q.opts.forEach(function(opt, j) {
+        var btn = document.createElement('button'); btn.className = 'quiz-option';
+        btn.innerHTML = String.fromCharCode(65+j)+'. '+opt;
+        btn.onclick = function() {
+          if (quizAnswered[i]) return; quizAnswered[i] = true;
+          var btns = d.querySelectorAll('.quiz-option');
+          btns.forEach(function(b,k){ b.disabled=true; if(k===q.ans) b.classList.add('correct'); else if(k===j) b.classList.add('wrong'); });
+          var fb = d.querySelector('.quiz-feedback');
+          fb.innerHTML = (j===q.ans?'✅ Correct! ':'❌ Not quite. ')+q.exp;
+          fb.className = 'quiz-feedback '+(j===q.ans?'correct':'wrong');
+        };
+        d.appendChild(btn);
+      });
+      var fb = document.createElement('div'); fb.className = 'quiz-feedback'; d.appendChild(fb);
+      c.appendChild(d);
+    });
+  }
+
+  function toggleLex(row) {
+    var was = row.classList.contains('active');
+    document.querySelectorAll('.lex-row.active').forEach(function(r){ r.classList.remove('active'); });
+    if (!was) row.classList.add('active');
+  }
+
+  function toggle(id) {
+    var el = document.getElementById(id); el.classList.toggle('open');
+    el.previousElementSibling.textContent = el.classList.contains('open') ? 'Hide the answer' : 'Reveal the answer';
+  }
+
+  function goSlide(n) {
+    document.getElementById('slide-'+current).classList.remove('active');
+    current = n;
+    document.getElementById('slide-'+current).classList.add('active');
+    updateDots();
+    document.getElementById('slide-counter').textContent = (current+1)+' / '+total;
+    if (n===12 && !quizInit) { renderQuiz(); quizInit=true; }
+    window.scrollTo(0,0);
+  }
+  function nextSlide() { if (current < total-1) goSlide(current+1); }
+  function prevSlide() { if (current > 0) goSlide(current-1); }
+
+  function updateDots() {
+    for (var s=0; s<total; s++) {
+      var el = document.getElementById('dots-'+s); if (!el) continue;
+      el.innerHTML = '';
+      for (var d=0; d<total; d++) {
+        var dot = document.createElement('div');
+        dot.className = 'dot'+(d===current?' active':'');
+        el.appendChild(dot);
+      }
+    }
+  }
+  updateDots();
+</script>
+</body>
+</html>

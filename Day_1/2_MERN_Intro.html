@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Environment Setup</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f4f5f7;
+    color: #1a1a1a;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem 1rem;
+  }
+  .wrapper {
+    width: 100%;
+    max-width: 860px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+    overflow: hidden;
+  }
+  .top-bar {
+    background: #0f172a;
+    color: #fff;
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .top-bar-title { font-size: 15px; font-weight: 600; }
+  .top-bar-sub { font-size: 12px; opacity: .55; margin-top: 2px; }
+  .slide-counter { font-size: 13px; opacity: .6; }
+
+  .slide { display: none; padding: 1.75rem 2rem; min-height: 480px; flex-direction: column; gap: 1.2rem; }
+  .slide.active { display: flex; }
+
+  .slide-header { display: flex; align-items: center; gap: 10px; padding-bottom: 1rem; border-bottom: 1px solid #e8e8e8; }
+  .slide-title { font-size: 20px; font-weight: 700; color: #111; }
+  .slide-subtitle { font-size: 13px; color: #666; margin-top: 2px; }
+
+  .topic-badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+  .badge-blue   { background: #dbeafe; color: #1d4ed8; }
+  .badge-teal   { background: #d1fae5; color: #065f46; }
+  .badge-purple { background: #ede9fe; color: #5b21b6; }
+  .badge-amber  { background: #fef3c7; color: #92400e; }
+  .badge-coral  { background: #fee2e2; color: #991b1b; }
+  .badge-green  { background: #dcfce7; color: #166534; }
+  .badge-slate  { background: #e2e8f0; color: #334155; }
+  .badge-indigo { background: #e0e7ff; color: #3730a3; }
+
+  .section-label { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 8px; }
+
+  .card { background: #fff; border: 1px solid #e8e8e8; border-radius: 12px; padding: 1rem 1.25rem; }
+  .card-gray { background: #f8f9fa; }
+  .card-dark { background: #0f172a; border-color: #1e293b; color: #e2e8f0; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+  .tag { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; padding: 4px 10px; border-radius: 20px; font-weight: 600; }
+  .tag-blue   { background: #dbeafe; color: #1e40af; }
+  .tag-teal   { background: #d1fae5; color: #065f46; }
+  .tag-green  { background: #dcfce7; color: #166534; }
+  .tag-amber  { background: #fef3c7; color: #92400e; }
+  .tag-slate  { background: #e2e8f0; color: #334155; }
+
+  /* Terminal / code block */
+  .terminal {
+    background: #0f172a;
+    border-radius: 10px;
+    overflow: hidden;
+    font-family: 'SFMono-Regular', Consolas, monospace;
+  }
+  .terminal-bar {
+    background: #1e293b;
+    padding: 8px 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .t-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .t-red    { background: #ef4444; }
+  .t-yellow { background: #f59e0b; }
+  .t-green  { background: #22c55e; }
+  .t-label { font-size: 11px; color: #64748b; margin-left: 4px; font-family: -apple-system, sans-serif; }
+  .terminal-body { padding: 14px 18px; }
+  .t-prompt { color: #22c55e; font-size: 13px; }
+  .t-cmd    { color: #e2e8f0; font-size: 13px; }
+  .t-output { color: #94a3b8; font-size: 13px; margin-top: 4px; display: block; }
+  .t-success { color: #4ade80; font-size: 13px; margin-top: 4px; display: block; }
+  .t-line { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+
+  .code-chip {
+    font-family: 'SFMono-Regular', Consolas, monospace;
+    font-size: 12px; background: #f1f3f5;
+    padding: 2px 8px; border-radius: 5px; border: 1px solid #dee2e6;
+  }
+  .code-inline {
+    font-family: 'SFMono-Regular', Consolas, monospace;
+    font-size: 13px; background: #0f172a; color: #7dd3fc;
+    padding: 3px 10px; border-radius: 6px;
+  }
+
+  /* Step item */
+  .step-item { display: flex; align-items: flex-start; gap: 14px; padding: 8px 0; }
+  .step-line { display: flex; flex-direction: column; align-items: center; }
+  .step-dot {
+    width: 30px; height: 30px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; flex-shrink: 0;
+  }
+  .step-connector { width: 2px; height: 18px; background: #e0e0e0; margin: 3px 0; }
+
+  /* Folder tree */
+  .folder-tree {
+    background: #0f172a; border-radius: 10px; padding: 16px 20px;
+    font-family: 'SFMono-Regular', Consolas, monospace; font-size: 13px;
+  }
+  .ft-root  { color: #fbbf24; font-weight: 700; }
+  .ft-dir   { color: #60a5fa; }
+  .ft-file  { color: #a3e635; }
+  .ft-line  { color: #475569; }
+  .ft-row   { display: flex; align-items: center; gap: 6px; margin: 4px 0; }
+
+  /* Checklist */
+  .checklist { display: flex; flex-direction: column; gap: 8px; }
+  .check-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px; border-radius: 10px; border: 1px solid #e8e8e8;
+    font-size: 13px; cursor: pointer; transition: all .15s;
+    user-select: none;
+  }
+  .check-item:hover { background: #f8f9fa; }
+  .check-item.done { background: #f0fdf4; border-color: #86efac; }
+  .check-item.done .check-circle { background: #22c55e; border-color: #22c55e; color: #fff; }
+  .check-circle {
+    width: 22px; height: 22px; border-radius: 50%; border: 2px solid #dee2e6;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; flex-shrink: 0; transition: all .2s;
+  }
+  .check-label { font-weight: 500; }
+  .check-sub { font-size: 11px; color: #888; margin-top: 1px; }
+
+  /* Quiz */
+  .quiz-option {
+    border: 1px solid #dee2e6; border-radius: 8px;
+    padding: 10px 14px; font-size: 13px; cursor: pointer;
+    margin-bottom: 6px; transition: all .15s;
+    background: transparent; width: 100%; text-align: left; color: #1a1a1a;
+  }
+  .quiz-option:hover:not(:disabled) { background: #f8f9fa; }
+  .quiz-option.correct { background: #d1fae5; border-color: #059669; color: #065f46; }
+  .quiz-option.wrong   { background: #fee2e2; border-color: #dc2626; color: #991b1b; }
+  .quiz-feedback { display: none; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-top: 4px; }
+  .quiz-feedback.correct { background: #d1fae5; color: #065f46; display: block; }
+  .quiz-feedback.wrong   { background: #fee2e2; color: #991b1b; display: block; }
+
+  /* Reveal */
+  .reveal-btn {
+    background: #f1f3f5; border: 1px solid #dee2e6;
+    border-radius: 8px; padding: 7px 14px; font-size: 13px;
+    cursor: pointer; color: #333; transition: background .15s;
+  }
+  .reveal-btn:hover { background: #e9ecef; }
+  .reveal-content { display: none; margin-top: 8px; }
+  .reveal-content.open { display: block; }
+
+  /* Nav */
+  .nav-row {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: auto; padding-top: 1rem; border-top: 1px solid #f0f0f0;
+  }
+  .nav-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 9px 18px; border: 1px solid #dee2e6;
+    border-radius: 8px; background: transparent;
+    font-size: 13px; cursor: pointer; color: #333; transition: background .15s;
+  }
+  .nav-btn:hover:not(:disabled) { background: #f1f3f5; }
+  .nav-btn:disabled { opacity: .35; cursor: default; }
+  .nav-btn.primary { background: #1d4ed8; border-color: transparent; color: #fff; }
+  .nav-btn.primary:hover { background: #1e40af; }
+
+  .progress-dots { display: flex; gap: 6px; align-items: center; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: #dee2e6; transition: all .2s; }
+  .dot.active { width: 20px; border-radius: 4px; background: #1d4ed8; }
+
+  /* Home grid */
+  .home-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .home-card {
+    background: #fff; border: 1px solid #e8e8e8; border-radius: 12px;
+    padding: 1rem 1.25rem; cursor: pointer; transition: all .15s;
+  }
+  .home-card:hover { border-color: #1d4ed8; box-shadow: 0 2px 8px rgba(29,78,216,.1); }
+  .home-card-title { font-size: 15px; font-weight: 700; margin: 6px 0 2px; }
+  .home-card-sub   { font-size: 12px; color: #666; }
+
+  .tip-box {
+    display: flex; gap: 10px; align-items: flex-start;
+    background: #fffbeb; border: 1px solid #fde68a;
+    border-radius: 10px; padding: 10px 14px;
+  }
+  .tip-icon { color: #d97706; font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .tip-text { font-size: 13px; color: #92400e; line-height: 1.6; }
+
+  .info-box {
+    display: flex; gap: 10px; align-items: flex-start;
+    background: #eff6ff; border: 1px solid #bfdbfe;
+    border-radius: 10px; padding: 10px 14px;
+  }
+  .info-icon { color: #2563eb; font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .info-text { font-size: 13px; color: #1e40af; line-height: 1.6; }
+
+  .feature-item {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; padding: 6px 0; border-bottom: 1px solid #f0f0f0;
+  }
+  .feature-item:last-child { border-bottom: none; }
+
+  .readme-box {
+    background: #0f172a; border-radius: 10px; padding: 16px 20px;
+    font-family: 'SFMono-Regular', Consolas, monospace;
+  }
+  .readme-h1   { color: #f8fafc; font-size: 15px; font-weight: 700; }
+  .readme-text { color: #94a3b8; font-size: 13px; margin-top: 6px; line-height: 1.7; }
+  .readme-tag  { color: #60a5fa; }
+</style>
+</head>
+<body>
+
+<div class="wrapper">
+  <div class="top-bar">
+    <div>
+      <div class="top-bar-title">MERN Stack Training ·</div>
+      <div class="top-bar-sub">Environment Setup — SkillHub LMS</div>
+    </div>
+    <div class="slide-counter" id="slide-counter">1 / 10</div>
+  </div>
+
+  <!-- SLIDE 0: HOME -->
+  <div class="slide active" id="slide-0">
+    <div class="slide-header">
+      <span class="topic-badge badge-slate">Hour 2</span>
+      <div>
+        <div class="slide-title">Environment Setup</div>
+        <div class="slide-subtitle">8 steps to get your machine ready for MERN development</div>
+      </div>
+    </div>
+    <div class="home-grid">
+      <div class="home-card" onclick="goSlide(1)">
+        <span class="topic-badge badge-blue">Step 1</span>
+        <div class="home-card-title">Install VS Code</div>
+        <div class="home-card-sub">Your code editor — the developer's workspace</div>
+      </div>
+      <div class="home-card" onclick="goSlide(2)">
+        <span class="topic-badge badge-green">Step 2</span>
+        <div class="home-card-title">Install Node.js</div>
+        <div class="home-card-sub">Verify node -v and npm -v in terminal</div>
+      </div>
+      <div class="home-card" onclick="goSlide(3)">
+        <span class="topic-badge badge-amber">Step 3</span>
+        <div class="home-card-title">Install Git</div>
+        <div class="home-card-sub">Version control — track every change</div>
+      </div>
+      <div class="home-card" onclick="goSlide(4)">
+        <span class="topic-badge badge-teal">Step 4</span>
+        <div class="home-card-title">Create Project Folder</div>
+        <div class="home-card-sub">SkillHub-LMS with frontend / backend / docs</div>
+      </div>
+      <div class="home-card" onclick="goSlide(5)">
+        <span class="topic-badge badge-purple">Step 5</span>
+        <div class="home-card-title">Open in VS Code</div>
+        <div class="home-card-sub">Launch VS Code from terminal with code .</div>
+      </div>
+      <div class="home-card" onclick="goSlide(6)">
+        <span class="topic-badge badge-indigo">Step 6</span>
+        <div class="home-card-title">Create Git Repository</div>
+        <div class="home-card-sub">git init — initialise version control</div>
+      </div>
+      <div class="home-card" onclick="goSlide(7)">
+        <span class="topic-badge badge-coral">Step 7</span>
+        <div class="home-card-title">Create README</div>
+        <div class="home-card-sub">README.md — document your project</div>
+      </div>
+      <div class="home-card" onclick="goSlide(8)">
+        <span class="topic-badge badge-teal">Step 8</span>
+        <div class="home-card-title">First Commit</div>
+        <div class="home-card-sub">git add . and git commit to save history</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px">
+      <div class="home-card" style="flex:1;cursor:pointer" onclick="goSlide(9)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="topic-badge badge-green">Checklist</span>
+          <span style="font-size:14px;font-weight:600">Setup Progress Tracker</span>
+          <i class="ti ti-checklist" style="margin-left:auto;color:#aaa"></i>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <div></div>
+      <div class="progress-dots" id="dots-0"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Start <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- SLIDE 1: VS CODE -->
+  <div class="slide" id="slide-1">
+    <div class="slide-header">
+      <span class="topic-badge badge-blue">Step 1</span>
+      <div>
+        <div class="slide-title">Install VS Code</div>
+        <div class="slide-subtitle">Visual Studio Code — your primary code editor</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-label">what is vs code?</div>
+      <div style="display:flex;align-items:center;gap:16px;margin-top:4px">
+        <div style="width:56px;height:56px;background:#dbeafe;border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <i class="ti ti-brand-vscode" style="font-size:32px;color:#1d4ed8"></i>
+        </div>
+        <div>
+          <div style="font-size:16px;font-weight:700;margin-bottom:4px">Visual Studio Code</div>
+          <div style="font-size:13px;color:#444;line-height:1.65">A free, open-source <strong>code editor</strong> made by Microsoft. It's the most popular editor for web developers worldwide — lightweight, fast, and packed with extensions.</div>
+        </div>
+      </div>
+    </div>
+    <div class="grid-3">
+      <div class="card card-gray" style="text-align:center;padding:1rem .75rem">
+        <i class="ti ti-puzzle" style="font-size:24px;color:#5b21b6"></i>
+        <div style="font-size:13px;font-weight:600;margin-top:6px;margin-bottom:2px">Extensions</div>
+        <div style="font-size:11px;color:#666">Add features like React snippets, GitLens, Prettier</div>
+      </div>
+      <div class="card card-gray" style="text-align:center;padding:1rem .75rem">
+        <i class="ti ti-terminal-2" style="font-size:24px;color:#065f46"></i>
+        <div style="font-size:13px;font-weight:600;margin-top:6px;margin-bottom:2px">Built-in Terminal</div>
+        <div style="font-size:11px;color:#666">Run Node, Git, and npm commands without switching apps</div>
+      </div>
+      <div class="card card-gray" style="text-align:center;padding:1rem .75rem">
+        <i class="ti ti-color-swatch" style="font-size:24px;color:#d97706"></i>
+        <div style="font-size:13px;font-weight:600;margin-top:6px;margin-bottom:2px">Syntax Highlighting</div>
+        <div style="font-size:11px;color:#666">Color-codes HTML, CSS, JS, JSX for easy reading</div>
+      </div>
+    </div>
+    <div class="tip-box">
+      <i class="ti ti-download tip-icon"></i>
+      <div class="tip-text"><strong>Download:</strong> Go to <strong>code.visualstudio.com</strong> → Click the big blue Download button → Run the installer → Done!</div>
+    </div>
+    <div class="card">
+      <div class="section-label">recommended extensions for mern</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px">
+        <span class="tag tag-blue"><i class="ti ti-puzzle"></i> ES7+ React Snippets</span>
+        <span class="tag tag-teal"><i class="ti ti-puzzle"></i> Prettier</span>
+        <span class="tag tag-amber"><i class="ti ti-puzzle"></i> ESLint</span>
+        <span class="tag tag-slate"><i class="ti ti-puzzle"></i> GitLens</span>
+        <span class="tag tag-green"><i class="ti ti-puzzle"></i> Thunder Client</span>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-1"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- SLIDE 2: NODE.JS -->
+  <div class="slide" id="slide-2">
+    <div class="slide-header">
+      <span class="topic-badge badge-green">Step 2</span>
+      <div>
+        <div class="slide-title">Install Node.js</div>
+        <div class="slide-subtitle">The runtime that lets JavaScript run on the server</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-label">what is node.js?</div>
+      <div style="font-size:14px;color:#444;line-height:1.75;margin-top:2px">
+        Node.js lets you run JavaScript <strong>outside the browser</strong> — on your computer and servers. Without it, Express and npm (our package manager) won't work. Think of it as the <span class="tag tag-green" style="font-size:11px">engine</span> that powers the backend of SkillHub.
+      </div>
+    </div>
+    <div>
+      <div class="section-label">verify node installation</div>
+      <div class="terminal">
+        <div class="terminal-bar">
+          <div class="t-dot t-red"></div><div class="t-dot t-yellow"></div><div class="t-dot t-green"></div>
+          <span class="t-label">Terminal</span>
+        </div>
+        <div class="terminal-body">
+          <div class="t-line"><span class="t-prompt">$</span><span class="t-cmd">node -v</span></div>
+          <span class="t-success">v22.x.x</span>
+          <div class="t-line" style="margin-top:12px"><span class="t-prompt">$</span><span class="t-cmd">npm -v</span></div>
+          <span class="t-success">10.x.x</span>
+        </div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="card card-gray">
+        <div style="font-size:13px;font-weight:600;margin-bottom:6px;display:flex;align-items:center;gap:6px"><i class="ti ti-circle-check" style="color:#16a34a"></i> What is Node.js?</div>
+        <div style="font-size:13px;color:#555;line-height:1.65">JavaScript runtime built on Chrome's V8 engine. Runs JS code server-side — powers our Express backend.</div>
+      </div>
+      <div class="card card-gray">
+        <div style="font-size:13px;font-weight:600;margin-bottom:6px;display:flex;align-items:center;gap:6px"><i class="ti ti-package" style="color:#d97706"></i> What is npm?</div>
+        <div style="font-size:13px;color:#555;line-height:1.65">Node Package Manager — comes bundled with Node. Used to install React, Express, and every library we need.</div>
+      </div>
+    </div>
+    <div class="tip-box">
+      <i class="ti ti-bulb tip-icon"></i>
+      <div class="tip-text"><strong>Tip:</strong> Always download the <strong>LTS (Long-Term Support)</strong> version from <strong>nodejs.org</strong> — it's the most stable and recommended for projects.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-2"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- SLIDE 3: GIT -->
+  <div class="slide" id="slide-3">
+    <div class="slide-header">
+      <span class="topic-badge badge-amber">Step 3</span>
+      <div>
+        <div class="slide-title">Install Git</div>
+        <div class="slide-subtitle">Version control — track, save, and collaborate on code</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-label">what is git?</div>
+      <div style="font-size:14px;color:#444;line-height:1.75;margin-top:2px">
+        Git is a <strong>version control system</strong> — it takes snapshots of your code over time. If you break something, you can always roll back. Think of it as an <span class="tag tag-amber" style="font-size:11px">unlimited undo button</span> for your project.
+      </div>
+    </div>
+    <div>
+      <div class="section-label">verify git installation</div>
+      <div class="terminal">
+        <div class="terminal-bar">
+          <div class="t-dot t-red"></div><div class="t-dot t-yellow"></div><div class="t-dot t-green"></div>
+          <span class="t-label">Terminal</span>
+        </div>
+        <div class="terminal-body">
+          <div class="t-line"><span class="t-prompt">$</span><span class="t-cmd">git --version</span></div>
+          <span class="t-success">git version 2.x.x</span>
+        </div>
+      </div>
+    </div>
+    <div class="grid-3">
+      <div class="card card-gray" style="text-align:center;padding:1rem .75rem">
+        <i class="ti ti-git-branch" style="font-size:24px;color:#d97706"></i>
+        <div style="font-size:13px;font-weight:600;margin-top:6px;margin-bottom:2px">Branches</div>
+        <div style="font-size:11px;color:#666">Work on features without breaking main code</div>
+      </div>
+      <div class="card card-gray" style="text-align:center;padding:1rem .75rem">
+        <i class="ti ti-history" style="font-size:24px;color:#1d4ed8"></i>
+        <div style="font-size:13px;font-weight:600;margin-top:6px;margin-bottom:2px">History</div>
+        <div style="font-size:11px;color:#666">See every change made to every file</div>
+      </div>
+      <div class="card card-gray" style="text-align:center;padding:1rem .75rem">
+        <i class="ti ti-users" style="font-size:24px;color:#065f46"></i>
+        <div style="font-size:13px;font-weight:600;margin-top:6px;margin-bottom:2px">Collaboration</div>
+        <div style="font-size:11px;color:#666">Multiple devs work on the same project</div>
+      </div>
+    </div>
+    <div class="tip-box">
+      <i class="ti ti-download tip-icon"></i>
+      <div class="tip-text"><strong>Download:</strong> Visit <strong>git-scm.com</strong> → Download for your OS → Install with default settings → Verify with <code>git --version</code>.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-3"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- SLIDE 4: PROJECT FOLDER -->
+  <div class="slide" id="slide-4">
+    <div class="slide-header">
+      <span class="topic-badge badge-teal">Step 4</span>
+      <div>
+        <div class="slide-title">Create Project Folder</div>
+        <div class="slide-subtitle">Set up the SkillHub-LMS folder structure</div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="section-label">terminal commands</div>
+        <div class="terminal">
+          <div class="terminal-bar">
+            <div class="t-dot t-red"></div><div class="t-dot t-yellow"></div><div class="t-dot t-green"></div>
+            <span class="t-label">Terminal</span>
+          </div>
+          <div class="terminal-body">
+            <div class="t-line"><span class="t-prompt">$</span><span class="t-cmd">mkdir SkillHub-LMS</span></div>
+            <div class="t-line"><span class="t-prompt">$</span><span class="t-cmd">cd SkillHub-LMS</span></div>
+            <div class="t-line"><span class="t-prompt">$</span><span class="t-cmd">mkdir frontend backend docs</span></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">folder structure</div>
+        <div class="folder-tree">
+          <div class="ft-row"><span class="ft-root"><i class="ti ti-folder-filled"></i> SkillHub-LMS/</span></div>
+          <div class="ft-row" style="margin-left:16px"><span class="ft-line">├──</span><span class="ft-dir"><i class="ti ti-folder"></i> frontend/</span></div>
+          <div class="ft-row" style="margin-left:32px"><span class="ft-line">└──</span><span style="color:#64748b;font-size:12px">(React app goes here)</span></div>
+          <div class="ft-row" style="margin-left:16px"><span class="ft-line">├──</span><span class="ft-dir"><i class="ti ti-folder"></i> backend/</span></div>
+          <div class="ft-row" style="margin-left:32px"><span class="ft-line">└──</span><span style="color:#64748b;font-size:12px">(Express app goes here)</span></div>
+          <div class="ft-row" style="margin-left:16px"><span class="ft-line">└──</span><span class="ft-dir"><i class="ti ti-folder"></i> docs/</span></div>
+          <div class="ft-row" style="margin-left:32px"><span class="ft-line">└──</span><span style="color:#64748b;font-size:12px">(Notes &amp; diagrams)</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="grid-3">
+      <div class="card" style="text-align:center;padding:1rem .75rem">
+        <i class="ti ti-brand-react" style="font-size:24px;color:#38bdf8"></i>
+        <div style="font-size:13px;font-weight:600;margin-top:6px;margin-bottom:2px">frontend/</div>
+        <div style="font-size:11px;color:#666">React.js — everything the user sees</div>
+      </div>
+      <div class="card" style="text-align:center;padding:1rem .75rem">
+        <i class="ti ti-server" style="font-size:24px;color:#065f46"></i>
+        <div style="font-size:13px;font-weight:600;margin-top:6px;margin-bottom:2px">backend/</div>
+        <div style="font-size:11px;color:#666">Express + Node — APIs and logic</div>
+      </div>
+      <div class="card" style="text-align:center;padding:1rem .75rem">
+        <i class="ti ti-file-text" style="font-size:24px;color:#d97706"></i>
+        <div style="font-size:13px;font-weight:600;margin-top:6px;margin-bottom:2px">docs/</div>
+        <div style="font-size:11px;color:#666">Notes, diagrams, API references</div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-4"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- SLIDE 5: OPEN IN VS CODE -->
+  <div class="slide" id="slide-5">
+    <div class="slide-header">
+      <span class="topic-badge badge-purple">Step 5</span>
+      <div>
+        <div class="slide-title">Open in VS Code</div>
+        <div class="slide-subtitle">Launch VS Code directly from the terminal</div>
+      </div>
+    </div>
+    <div>
+      <div class="section-label">command</div>
+      <div class="terminal">
+        <div class="terminal-bar">
+          <div class="t-dot t-red"></div><div class="t-dot t-yellow"></div><div class="t-dot t-green"></div>
+          <span class="t-label">Terminal — inside SkillHub-LMS/</span>
+        </div>
+        <div class="terminal-body">
+          <div class="t-line"><span class="t-prompt">$</span><span class="t-cmd">code .</span></div>
+          <span class="t-output"># VS Code opens with SkillHub-LMS as the workspace</span>
+        </div>
+      </div>
+    </div>
+    <div class="info-box" style="margin-top:.25rem">
+      <i class="ti ti-info-circle info-icon"></i>
+      <div class="info-text">The <strong>dot (.)</strong> means "open this current folder". VS Code will launch with your full SkillHub-LMS project visible in the sidebar Explorer.</div>
+    </div>
+    <div class="card">
+      <div class="section-label">what you'll see in vs code</div>
+      <div style="background:#1e293b;border-radius:8px;overflow:hidden;margin-top:4px">
+        <div style="background:#0f172a;padding:8px 12px;font-size:12px;color:#64748b;font-family:monospace">EXPLORER — SKILLHUB-LMS</div>
+        <div style="padding:12px 16px;font-family:monospace;font-size:13px">
+          <div style="color:#60a5fa;display:flex;align-items:center;gap:6px;margin-bottom:6px"><i class="ti ti-chevron-down" style="font-size:12px"></i><i class="ti ti-folder-filled" style="color:#fbbf24"></i> SkillHub-LMS</div>
+          <div style="margin-left:20px;color:#94a3b8;display:flex;align-items:center;gap:6px;margin-bottom:4px"><i class="ti ti-chevron-right" style="font-size:12px"></i><i class="ti ti-folder" style="color:#60a5fa"></i> frontend</div>
+          <div style="margin-left:20px;color:#94a3b8;display:flex;align-items:center;gap:6px;margin-bottom:4px"><i class="ti ti-chevron-right" style="font-size:12px"></i><i class="ti ti-folder" style="color:#60a5fa"></i> backend</div>
+          <div style="margin-left:20px;color:#94a3b8;display:flex;align-items:center;gap:6px"><i class="ti ti-chevron-right" style="font-size:12px"></i><i class="ti ti-folder" style="color:#60a5fa"></i> docs</div>
+        </div>
+      </div>
+    </div>
+    <div class="tip-box">
+      <i class="ti ti-bulb tip-icon"></i>
+      <div class="tip-text"><strong>Tip:</strong> If <code>code .</code> doesn't work, open VS Code manually → <strong>File → Open Folder</strong> → select SkillHub-LMS. Then install the "Shell Command" from the Command Palette next time.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-5"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- SLIDE 6: GIT INIT -->
+  <div class="slide" id="slide-6">
+    <div class="slide-header">
+      <span class="topic-badge badge-indigo">Step 6</span>
+      <div>
+        <div class="slide-title">Create Git Repository</div>
+        <div class="slide-subtitle">Initialise version control for the project</div>
+      </div>
+    </div>
+    <div>
+      <div class="section-label">command &amp; output</div>
+      <div class="terminal">
+        <div class="terminal-bar">
+          <div class="t-dot t-red"></div><div class="t-dot t-yellow"></div><div class="t-dot t-green"></div>
+          <span class="t-label">Terminal — inside SkillHub-LMS/</span>
+        </div>
+        <div class="terminal-body">
+          <div class="t-line"><span class="t-prompt">$</span><span class="t-cmd">git init</span></div>
+          <span class="t-success">Initialized empty Git repository in .../SkillHub-LMS/.git/</span>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-label">what just happened?</div>
+      <div class="feature-item"><i class="ti ti-folder-filled" style="font-size:16px;color:#d97706"></i> A hidden <strong>.git/</strong> folder was created inside SkillHub-LMS</div>
+      <div class="feature-item"><i class="ti ti-camera" style="font-size:16px;color:#1d4ed8"></i> Git is now watching your project — ready to take snapshots</div>
+      <div class="feature-item"><i class="ti ti-git-commit" style="font-size:16px;color:#065f46"></i> Every <code>git commit</code> you make is saved forever</div>
+      <div class="feature-item"><i class="ti ti-rotate" style="font-size:16px;color:#5b21b6"></i> You can roll back to any commit at any time</div>
+    </div>
+    <div class="grid-2">
+      <div class="card card-gray">
+        <div style="font-size:13px;font-weight:600;margin-bottom:6px;color:#1d4ed8">git init</div>
+        <div style="font-size:12px;color:#555;line-height:1.6">Creates a new empty repository in the current folder. Run this only once per project.</div>
+      </div>
+      <div class="card card-gray">
+        <div style="font-size:13px;font-weight:600;margin-bottom:6px;color:#065f46">git clone &lt;url&gt;</div>
+        <div style="font-size:12px;color:#555;line-height:1.6">Used when a repository already exists online (GitHub). We'll use this later when pushing to GitHub.</div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-6"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- SLIDE 7: README -->
+  <div class="slide" id="slide-7">
+    <div class="slide-header">
+      <span class="topic-badge badge-coral">Step 7</span>
+      <div>
+        <div class="slide-title">Create README.md</div>
+        <div class="slide-subtitle">Document your project — every good project has one</div>
+      </div>
+    </div>
+    <div>
+      <div class="section-label">create the file</div>
+      <div class="terminal">
+        <div class="terminal-bar">
+          <div class="t-dot t-red"></div><div class="t-dot t-yellow"></div><div class="t-dot t-green"></div>
+          <span class="t-label">Terminal</span>
+        </div>
+        <div class="terminal-body">
+          <div class="t-line"><span class="t-prompt">$</span><span class="t-cmd">touch README.md</span></div>
+          <span class="t-output"># Or create it directly in VS Code (right-click → New File)</span>
+        </div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="section-label">content to write</div>
+        <div class="readme-box">
+          <div class="readme-h1"><span class="readme-tag"># </span>SkillHub LMS</div>
+          <div class="readme-text">
+            Learning Management System<br>
+            built using MERN Stack.<br><br>
+            Course Project for<br>
+            Full Stack Training.
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">what is markdown?</div>
+        <div class="card" style="height:calc(100% - 20px)">
+          <div class="feature-item"><span class="code-chip"># H1</span><span style="font-size:13px;color:#555">Big heading</span></div>
+          <div class="feature-item"><span class="code-chip">## H2</span><span style="font-size:13px;color:#555">Sub heading</span></div>
+          <div class="feature-item"><span class="code-chip">**bold**</span><span style="font-size:13px;color:#555"><strong>Bold text</strong></span></div>
+          <div class="feature-item"><span class="code-chip">- item</span><span style="font-size:13px;color:#555">Bullet list</span></div>
+          <div class="feature-item"><span class="code-chip">`code`</span><span style="font-size:13px;color:#555;font-family:monospace">inline code</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="info-box">
+      <i class="ti ti-info-circle info-icon"></i>
+      <div class="info-text">README.md is the first file GitHub shows when someone visits your project. It's your project's front page — always keep it updated!</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-7"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- SLIDE 8: FIRST COMMIT -->
+  <div class="slide" id="slide-8">
+    <div class="slide-header">
+      <span class="topic-badge badge-teal">Step 8</span>
+      <div>
+        <div class="slide-title">First Commit</div>
+        <div class="slide-subtitle">Save your project's first snapshot with Git</div>
+      </div>
+    </div>
+    <div>
+      <div class="section-label">commands in order</div>
+      <div class="terminal">
+        <div class="terminal-bar">
+          <div class="t-dot t-red"></div><div class="t-dot t-yellow"></div><div class="t-dot t-green"></div>
+          <span class="t-label">Terminal — inside SkillHub-LMS/</span>
+        </div>
+        <div class="terminal-body">
+          <div class="t-line"><span class="t-prompt">$</span><span class="t-cmd">git add .</span></div>
+          <span class="t-output"># Stages all files — tells Git "watch these"</span>
+          <div class="t-line" style="margin-top:10px"><span class="t-prompt">$</span><span class="t-cmd">git commit -m "Initial project setup"</span></div>
+          <span class="t-success">[main (root-commit)] Initial project setup</span>
+          <span class="t-output"> 1 file changed, 4 insertions(+)</span>
+          <span class="t-output"> create mode 100644 README.md</span>
+        </div>
+      </div>
+    </div>
+    <div class="grid-3">
+      <div class="card card-gray" style="text-align:center;padding:.85rem .75rem">
+        <span class="code-chip" style="font-size:12px">git add .</span>
+        <div style="font-size:12px;font-weight:600;margin:8px 0 4px;color:#333">Stage</div>
+        <div style="font-size:11px;color:#666">Select which files Git should include in the next snapshot</div>
+      </div>
+      <div class="card card-gray" style="text-align:center;padding:.85rem .75rem">
+        <span class="code-chip" style="font-size:12px">git commit -m</span>
+        <div style="font-size:12px;font-weight:600;margin:8px 0 4px;color:#333">Commit</div>
+        <div style="font-size:11px;color:#666">Save the snapshot with a message describing the change</div>
+      </div>
+      <div class="card card-gray" style="text-align:center;padding:.85rem .75rem">
+        <span class="code-chip" style="font-size:12px">git log</span>
+        <div style="font-size:12px;font-weight:600;margin:8px 0 4px;color:#333">History</div>
+        <div style="font-size:11px;color:#666">See all commits made so far — try this after committing!</div>
+      </div>
+    </div>
+    <div class="card" style="background:#f0fdf4;border-color:#86efac">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+        <i class="ti ti-trophy" style="color:#16a34a;font-size:18px"></i>
+        <div style="font-size:14px;font-weight:700;color:#166534">Setup Complete! 🎉</div>
+      </div>
+      <div style="font-size:13px;color:#166534;line-height:1.65">Your machine is now ready for MERN development. VS Code installed, Node.js running, Git tracking your project, and your first commit saved!</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-8"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Progress Tracker <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- SLIDE 9: CHECKLIST -->
+  <div class="slide" id="slide-9">
+    <div class="slide-header">
+      <span class="topic-badge badge-green">Checklist</span>
+      <div>
+        <div class="slide-title">Setup Progress Tracker</div>
+        <div class="slide-subtitle">Tap each step as you complete it</div>
+      </div>
+    </div>
+    <div class="checklist" id="checklist">
+      <div class="check-item" onclick="toggleCheck(this)">
+        <div class="check-circle"><i class="ti ti-check" style="font-size:12px"></i></div>
+        <div><div class="check-label"><i class="ti ti-brand-vscode" style="color:#1d4ed8;margin-right:4px"></i> VS Code installed</div><div class="check-sub">code.visualstudio.com → Download → Install</div></div>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this)">
+        <div class="check-circle"><i class="ti ti-check" style="font-size:12px"></i></div>
+        <div><div class="check-label"><i class="ti ti-brand-nodejs" style="color:#16a34a;margin-right:4px"></i> Node.js installed — <code>node -v</code> shows v22.x.x</div><div class="check-sub">nodejs.org → LTS version → Install</div></div>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this)">
+        <div class="check-circle"><i class="ti ti-check" style="font-size:12px"></i></div>
+        <div><div class="check-label"><i class="ti ti-package" style="color:#d97706;margin-right:4px"></i> npm verified — <code>npm -v</code> shows version</div><div class="check-sub">Comes bundled with Node.js automatically</div></div>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this)">
+        <div class="check-circle"><i class="ti ti-check" style="font-size:12px"></i></div>
+        <div><div class="check-label"><i class="ti ti-git-branch" style="color:#d97706;margin-right:4px"></i> Git installed — <code>git --version</code> works</div><div class="check-sub">git-scm.com → Download → Install</div></div>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this)">
+        <div class="check-circle"><i class="ti ti-check" style="font-size:12px"></i></div>
+        <div><div class="check-label"><i class="ti ti-folder" style="color:#0ea5e9;margin-right:4px"></i> SkillHub-LMS folder created with frontend / backend / docs</div><div class="check-sub">mkdir SkillHub-LMS &amp;&amp; cd SkillHub-LMS &amp;&amp; mkdir frontend backend docs</div></div>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this)">
+        <div class="check-circle"><i class="ti ti-check" style="font-size:12px"></i></div>
+        <div><div class="check-label"><i class="ti ti-brand-vscode" style="color:#1d4ed8;margin-right:4px"></i> Opened in VS Code — <code>code .</code> launched successfully</div><div class="check-sub">Folder visible in VS Code Explorer sidebar</div></div>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this)">
+        <div class="check-circle"><i class="ti ti-check" style="font-size:12px"></i></div>
+        <div><div class="check-label"><i class="ti ti-git-commit" style="color:#5b21b6;margin-right:4px"></i> Git repo initialised — <code>git init</code> done</div><div class="check-sub">Saw "Initialized empty Git repository" message</div></div>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this)">
+        <div class="check-circle"><i class="ti ti-check" style="font-size:12px"></i></div>
+        <div><div class="check-label"><i class="ti ti-file-text" style="color:#d97706;margin-right:4px"></i> README.md created with project description</div><div class="check-sub">Contains # SkillHub LMS heading and description</div></div>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this)">
+        <div class="check-circle"><i class="ti ti-check" style="font-size:12px"></i></div>
+        <div><div class="check-label"><i class="ti ti-trophy" style="color:#16a34a;margin-right:4px"></i> First commit made — <code>git commit -m "Initial project setup"</code></div><div class="check-sub">git add . → git commit → success message shown</div></div>
+      </div>
+    </div>
+    <div id="progress-bar-wrapper" style="margin-top:.5rem">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <span style="font-size:12px;color:#666">Progress</span>
+        <span style="font-size:12px;font-weight:600;color:#166534" id="progress-label">0 / 9</span>
+      </div>
+      <div style="height:8px;background:#e8e8e8;border-radius:4px;overflow:hidden">
+        <div id="progress-fill" style="height:100%;width:0%;background:#16a34a;border-radius:4px;transition:width .3s"></div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-9"></div>
+      <button class="nav-btn" onclick="goSlide(0)"><i class="ti ti-home"></i> Home</button>
+    </div>
+  </div>
+
+</div><!-- /.wrapper -->
+
+<script>
+  var current = 0, total = 10;
+
+  function goSlide(n) {
+    document.getElementById('slide-' + current).classList.remove('active');
+    current = n;
+    document.getElementById('slide-' + current).classList.add('active');
+    updateDots();
+    document.getElementById('slide-counter').textContent = (current + 1) + ' / ' + total;
+    window.scrollTo(0, 0);
+  }
+  function nextSlide() { if (current < total - 1) goSlide(current + 1); }
+  function prevSlide() { if (current > 0) goSlide(current - 1); }
+
+  function updateDots() {
+    for (var s = 0; s < total; s++) {
+      var el = document.getElementById('dots-' + s);
+      if (!el) continue;
+      el.innerHTML = '';
+      for (var d = 0; d < total; d++) {
+        var dot = document.createElement('div');
+        dot.className = 'dot' + (d === current ? ' active' : '');
+        el.appendChild(dot);
+      }
+    }
+  }
+
+  function toggle(id) {
+    var el = document.getElementById(id);
+    el.classList.toggle('open');
+    var btn = el.previousElementSibling;
+    btn.textContent = el.classList.contains('open') ? 'Hide Answer' : 'Reveal Answer';
+  }
+
+  function toggleCheck(el) {
+    el.classList.toggle('done');
+    var circle = el.querySelector('.check-circle');
+    if (el.classList.contains('done')) {
+      circle.style.background = '#22c55e';
+      circle.style.borderColor = '#22c55e';
+      circle.style.color = '#fff';
+    } else {
+      circle.style.background = '';
+      circle.style.borderColor = '';
+      circle.style.color = '';
+    }
+    updateProgress();
+  }
+
+  function updateProgress() {
+    var items = document.querySelectorAll('.check-item');
+    var done = document.querySelectorAll('.check-item.done').length;
+    var total = items.length;
+    var pct = Math.round((done / total) * 100);
+    document.getElementById('progress-fill').style.width = pct + '%';
+    document.getElementById('progress-label').textContent = done + ' / ' + total;
+  }
+
+  updateDots();
+</script>
+</body>
+</html>

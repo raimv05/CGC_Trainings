@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MERN Stack Introduction</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f4f5f7;
+    color: #1a1a1a;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 2rem 1rem;
+  }
+  .wrapper {
+    width: 100%;
+    max-width: 860px;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+    overflow: hidden;
+  }
+  .top-bar {
+    background: #1a1a2e;
+    color: #fff;
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .top-bar-title { font-size: 15px; font-weight: 500; }
+  .top-bar-sub { font-size: 12px; opacity: .6; margin-top: 2px; }
+  .slide-counter { font-size: 13px; opacity: .7; }
+
+  .slide { display: none; padding: 1.75rem 2rem; min-height: 460px; flex-direction: column; gap: 1.25rem; }
+  .slide.active { display: flex; }
+
+  .slide-header { display: flex; align-items: center; gap: 10px; padding-bottom: 1rem; border-bottom: 1px solid #e8e8e8; }
+  .slide-title { font-size: 20px; font-weight: 600; color: #111; }
+  .slide-subtitle { font-size: 13px; color: #666; margin-top: 2px; }
+
+  .topic-badge {
+    font-size: 11px; font-weight: 600; padding: 3px 10px;
+    border-radius: 20px; white-space: nowrap;
+  }
+  .badge-blue   { background: #dbeafe; color: #1d4ed8; }
+  .badge-teal   { background: #d1fae5; color: #065f46; }
+  .badge-purple { background: #ede9fe; color: #5b21b6; }
+  .badge-amber  { background: #fef3c7; color: #92400e; }
+  .badge-coral  { background: #fee2e2; color: #991b1b; }
+  .badge-green  { background: #dcfce7; color: #166534; }
+
+  .section-label {
+    font-size: 11px; font-weight: 600; color: #888;
+    text-transform: uppercase; letter-spacing: .07em; margin-bottom: 8px;
+  }
+
+  .card {
+    background: #fff; border: 1px solid #e8e8e8;
+    border-radius: 12px; padding: 1rem 1.25rem;
+  }
+  .card-gray { background: #f8f9fa; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; }
+
+  .tag {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 12px; padding: 4px 10px; border-radius: 20px; font-weight: 500;
+  }
+  .tag-blue   { background: #dbeafe; color: #1e40af; }
+  .tag-teal   { background: #d1fae5; color: #065f46; }
+  .tag-purple { background: #ede9fe; color: #5b21b6; }
+  .tag-amber  { background: #fef3c7; color: #92400e; }
+  .tag-coral  { background: #fee2e2; color: #991b1b; }
+  .tag-green  { background: #dcfce7; color: #166534; }
+
+  .reveal-btn {
+    background: #f1f3f5; border: 1px solid #dee2e6;
+    border-radius: 8px; padding: 8px 16px; font-size: 13px;
+    cursor: pointer; color: #333; transition: background .15s;
+  }
+  .reveal-btn:hover { background: #e9ecef; }
+  .reveal-content { display: none; margin-top: 8px; }
+  .reveal-content.open { display: block; }
+
+  .flow-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .flow-box {
+    padding: 8px 14px; border-radius: 8px;
+    font-size: 13px; font-weight: 500; text-align: center; min-width: 90px;
+  }
+  .flow-arrow { color: #aaa; font-size: 20px; line-height: 1; }
+
+  .step-flow { display: flex; flex-direction: column; gap: 0; }
+  .step-item { display: flex; align-items: flex-start; gap: 12px; padding: 8px 0; }
+  .step-line { display: flex; flex-direction: column; align-items: center; }
+  .step-dot {
+    width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 600; flex-shrink: 0;
+  }
+  .step-connector { width: 2px; height: 18px; background: #e0e0e0; margin: 3px 0; }
+
+  .feature-col { display: flex; flex-direction: column; gap: 2px; }
+  .feature-item {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; padding: 6px 0; border-bottom: 1px solid #f0f0f0;
+  }
+  .feature-item:last-child { border-bottom: none; }
+  .icon-circle {
+    width: 30px; height: 30px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+
+  .code-chip {
+    font-family: 'SFMono-Regular', Consolas, monospace;
+    font-size: 12px; background: #f1f3f5;
+    padding: 2px 8px; border-radius: 5px; border: 1px solid #dee2e6;
+  }
+  .mern-letter { font-size: 30px; font-weight: 700; line-height: 1; }
+
+  .quiz-option {
+    border: 1px solid #dee2e6; border-radius: 8px;
+    padding: 10px 14px; font-size: 13px; cursor: pointer;
+    margin-bottom: 6px; transition: all .15s;
+    background: transparent; width: 100%; text-align: left; color: #1a1a1a;
+  }
+  .quiz-option:hover:not(:disabled) { background: #f8f9fa; }
+  .quiz-option.correct { background: #d1fae5; border-color: #059669; color: #065f46; }
+  .quiz-option.wrong   { background: #fee2e2; border-color: #dc2626; color: #991b1b; }
+  .quiz-feedback {
+    display: none; padding: 10px 14px;
+    border-radius: 8px; font-size: 13px; margin-top: 4px;
+  }
+  .quiz-feedback.correct { background: #d1fae5; color: #065f46; display: block; }
+  .quiz-feedback.wrong   { background: #fee2e2; color: #991b1b; display: block; }
+
+  .nav-row {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: auto; padding-top: 1rem; border-top: 1px solid #f0f0f0;
+  }
+  .nav-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 9px 18px; border: 1px solid #dee2e6;
+    border-radius: 8px; background: transparent;
+    font-size: 13px; cursor: pointer; color: #333; transition: background .15s;
+  }
+  .nav-btn:hover:not(:disabled) { background: #f1f3f5; }
+  .nav-btn:disabled { opacity: .35; cursor: default; }
+  .nav-btn.primary { background: #1d4ed8; border-color: transparent; color: #fff; }
+  .nav-btn.primary:hover { background: #1e40af; }
+
+  .progress-dots { display: flex; gap: 6px; align-items: center; }
+  .dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: #dee2e6; transition: all .2s;
+  }
+  .dot.active { width: 20px; border-radius: 4px; background: #1d4ed8; }
+
+  .home-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .home-card {
+    background: #fff; border: 1px solid #e8e8e8; border-radius: 12px;
+    padding: 1rem 1.25rem; cursor: pointer; transition: all .15s;
+  }
+  .home-card:hover { border-color: #1d4ed8; box-shadow: 0 2px 8px rgba(29,78,216,.1); }
+  .home-card-title { font-size: 15px; font-weight: 600; margin: 6px 0 2px; }
+  .home-card-sub { font-size: 12px; color: #666; }
+</style>
+</head>
+<body>
+
+<div class="wrapper">
+  <div class="top-bar">
+    <div>
+      <div class="top-bar-title">MERN Stack Training ·</div>
+      <div class="top-bar-sub">Introduction &amp; Theory — SkillHub LMS</div>
+    </div>
+    <div class="slide-counter" id="slide-counter">1 / 7</div>
+  </div>
+
+  <!-- SLIDE 0: HOME -->
+  <div class="slide active" id="slide-0">
+    <div class="slide-header">
+      <span class="topic-badge badge-blue">Welcome</span>
+      <div>
+        <div class="slide-title"> Introduction &amp; Theory</div>
+        <div class="slide-subtitle">Click any topic card to jump directly</div>
+      </div>
+    </div>
+    <div class="home-grid">
+      <div class="home-card" onclick="goSlide(1)">
+        <span class="topic-badge badge-blue">Topic 1</span>
+        <div class="home-card-title">What is a Website?</div>
+        <div class="home-card-sub">Google, Amazon, Instagram — what's common?</div>
+      </div>
+      <div class="home-card" onclick="goSlide(2)">
+        <span class="topic-badge badge-teal">Topic 2</span>
+        <div class="home-card-title">How does the Internet Work?</div>
+        <div class="home-card-sub">Food delivery analogy · Request-Response flow</div>
+      </div>
+      <div class="home-card" onclick="goSlide(3)">
+        <span class="topic-badge badge-purple">Topic 3</span>
+        <div class="home-card-title">Frontend vs Backend</div>
+        <div class="home-card-sub">What users see · Logic · Storage</div>
+      </div>
+      <div class="home-card" onclick="goSlide(4)">
+        <span class="topic-badge badge-amber">Topic 4</span>
+        <div class="home-card-title">What is MERN?</div>
+        <div class="home-card-sub">MongoDB · Express · React · Node</div>
+      </div>
+      <div class="home-card" style="grid-column:1/-1" onclick="goSlide(5)">
+        <span class="topic-badge badge-coral">Project</span>
+        <div class="home-card-title">SkillHub LMS — Project Introduction</div>
+        <div class="home-card-sub">What we'll build: Student &amp; Admin features</div>
+      </div>
+    </div>
+    <div>
+      <div class="home-card" onclick="goSlide(6)" style="display:flex;align-items:center;gap:10px">
+        <span class="topic-badge badge-green">Quiz</span>
+        <span style="font-size:14px;font-weight:500">Quick Check — test your understanding</span>
+        <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+      </div>
+    </div>
+    <div class="nav-row">
+      <div></div>
+      <div class="progress-dots" id="dots-0"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Start <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- SLIDE 1: WHAT IS A WEBSITE -->
+  <div class="slide" id="slide-1">
+    <div class="slide-header">
+      <span class="topic-badge badge-blue">Topic 1</span>
+      <div>
+        <div class="slide-title">What is a Website?</div>
+        <div class="slide-subtitle">Ask students — what do these have in common?</div>
+      </div>
+    </div>
+    <div>
+      <div class="section-label">familiar examples</div>
+      <div class="grid-4">
+        <div class="card" style="text-align:center;padding:.85rem .5rem">
+          <i class="ti ti-brand-google" style="font-size:26px;color:#1d4ed8"></i>
+          <div style="font-size:13px;font-weight:600;margin-top:6px">Google</div>
+        </div>
+        <div class="card" style="text-align:center;padding:.85rem .5rem">
+          <i class="ti ti-brand-facebook" style="font-size:26px;color:#1d4ed8"></i>
+          <div style="font-size:13px;font-weight:600;margin-top:6px">Facebook</div>
+        </div>
+        <div class="card" style="text-align:center;padding:.85rem .5rem">
+          <i class="ti ti-shopping-cart" style="font-size:26px;color:#d97706"></i>
+          <div style="font-size:13px;font-weight:600;margin-top:6px">Amazon</div>
+        </div>
+        <div class="card" style="text-align:center;padding:.85rem .5rem">
+          <i class="ti ti-brand-instagram" style="font-size:26px;color:#be185d"></i>
+          <div style="font-size:13px;font-weight:600;margin-top:6px">Instagram</div>
+        </div>
+      </div>
+    </div>
+    <div class="card card-gray">
+      <div style="font-size:14px;font-weight:600;margin-bottom:8px">❓ What do all these have in common?</div>
+      <button class="reveal-btn" onclick="toggle('ans1')">Reveal Answer</button>
+      <div class="reveal-content" id="ans1">
+        <div style="margin-top:10px;padding:12px 16px;background:#d1fae5;border-radius:10px;border:1px solid #6ee7b7">
+          <div style="font-size:14px;font-weight:600;color:#065f46">✅ They are all Web Applications</div>
+          <div style="font-size:13px;color:#047857;margin-top:4px">They run in a browser, interact with servers, and store data — not just static pages.</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-label">key insight</div>
+      <div style="font-size:14px;color:#444;line-height:1.75">
+        A <strong>web application</strong> is a program that runs inside a browser.
+        It has a <span class="tag tag-blue" style="font-size:11px">frontend</span> the user sees,
+        a <span class="tag tag-teal" style="font-size:11px">backend</span> that handles logic,
+        and a <span class="tag tag-amber" style="font-size:11px">database</span> that stores data.
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-1"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- SLIDE 2: HOW DOES THE INTERNET WORK -->
+  <div class="slide" id="slide-2">
+    <div class="slide-header">
+      <span class="topic-badge badge-teal">Topic 2</span>
+      <div>
+        <div class="slide-title">How does the Internet Work?</div>
+        <div class="slide-subtitle">Food delivery analogy → request &amp; response</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-label">the analogy</div>
+      <div class="grid-3" style="margin-top:4px">
+        <div style="text-align:center;padding:.85rem .5rem;background:#f8f9fa;border-radius:10px">
+          <i class="ti ti-device-laptop" style="font-size:24px;color:#1d4ed8"></i>
+          <div style="font-size:13px;font-weight:600;margin-top:6px">Customer</div>
+          <div style="font-size:12px;color:#666">= Browser</div>
+        </div>
+        <div style="text-align:center;padding:.85rem .5rem;background:#f8f9fa;border-radius:10px">
+          <i class="ti ti-building-store" style="font-size:24px;color:#065f46"></i>
+          <div style="font-size:13px;font-weight:600;margin-top:6px">Restaurant</div>
+          <div style="font-size:12px;color:#666">= Server</div>
+        </div>
+        <div style="text-align:center;padding:.85rem .5rem;background:#f8f9fa;border-radius:10px">
+          <i class="ti ti-database" style="font-size:24px;color:#d97706"></i>
+          <div style="font-size:13px;font-weight:600;margin-top:6px">Kitchen Storage</div>
+          <div style="font-size:12px;color:#666">= Database</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-label">request–response flow</div>
+      <div class="step-flow" style="margin-top:8px">
+        <div class="step-item">
+          <div class="step-line">
+            <div class="step-dot" style="background:#dbeafe;color:#1d4ed8">1</div>
+            <div class="step-connector"></div>
+          </div>
+          <div style="padding-top:2px">
+            <div style="font-size:13px;font-weight:600">You type <span class="code-chip">www.amazon.com</span></div>
+            <div style="font-size:12px;color:#666">Browser captures the URL</div>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-line">
+            <div class="step-dot" style="background:#d1fae5;color:#065f46">2</div>
+            <div class="step-connector"></div>
+          </div>
+          <div style="padding-top:2px">
+            <div style="font-size:13px;font-weight:600">Browser sends a <strong>Request</strong></div>
+            <div style="font-size:12px;color:#666">Like calling the restaurant to place an order</div>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-line">
+            <div class="step-dot" style="background:#fef3c7;color:#92400e">3</div>
+            <div class="step-connector"></div>
+          </div>
+          <div style="padding-top:2px">
+            <div style="font-size:13px;font-weight:600">Server receives the request</div>
+            <div style="font-size:12px;color:#666">Amazon's server processes what you asked for</div>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-line">
+            <div class="step-dot" style="background:#ede9fe;color:#5b21b6">4</div>
+            <div class="step-connector"></div>
+          </div>
+          <div style="padding-top:2px">
+            <div style="font-size:13px;font-weight:600">Database fetches products</div>
+            <div style="font-size:12px;color:#666">Like the kitchen getting ingredients from storage</div>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-line">
+            <div class="step-dot" style="background:#d1fae5;color:#065f46">5</div>
+          </div>
+          <div style="padding-top:2px">
+            <div style="font-size:13px;font-weight:600">Response sent back → page displayed 🎉</div>
+            <div style="font-size:12px;color:#666">Food delivered to your door!</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-2"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- SLIDE 3: FRONTEND VS BACKEND -->
+  <div class="slide" id="slide-3">
+    <div class="slide-header">
+      <span class="topic-badge badge-purple">Topic 3</span>
+      <div>
+        <div class="slide-title">Frontend vs Backend</div>
+        <div class="slide-subtitle">Who does what in a web application?</div>
+      </div>
+    </div>
+    <div class="grid-3">
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <div class="icon-circle" style="background:#dbeafe"><i class="ti ti-eye" style="color:#1d4ed8;font-size:16px"></i></div>
+          <div style="font-size:14px;font-weight:600">Frontend</div>
+        </div>
+        <div style="font-size:12px;color:#666;margin-bottom:8px">What users <em>see and interact with</em></div>
+        <div class="feature-col">
+          <div class="feature-item"><i class="ti ti-square-rounded" style="font-size:14px;color:#888"></i> Buttons</div>
+          <div class="feature-item"><i class="ti ti-forms" style="font-size:14px;color:#888"></i> Forms</div>
+          <div class="feature-item"><i class="ti ti-photo" style="font-size:14px;color:#888"></i> Images</div>
+          <div class="feature-item"><i class="ti ti-layout-navbar" style="font-size:14px;color:#888"></i> Navigation</div>
+        </div>
+        <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:4px">
+          <span class="code-chip">HTML</span>
+          <span class="code-chip">CSS</span>
+          <span class="code-chip">JS</span>
+          <span class="code-chip">React</span>
+        </div>
+      </div>
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <div class="icon-circle" style="background:#d1fae5"><i class="ti ti-settings" style="color:#065f46;font-size:16px"></i></div>
+          <div style="font-size:14px;font-weight:600">Backend</div>
+        </div>
+        <div style="font-size:12px;color:#666;margin-bottom:8px">Handles the <em>logic and processing</em></div>
+        <div class="feature-col">
+          <div class="feature-item"><i class="ti ti-login" style="font-size:14px;color:#888"></i> Login</div>
+          <div class="feature-item"><i class="ti ti-user-plus" style="font-size:14px;color:#888"></i> Registration</div>
+          <div class="feature-item"><i class="ti ti-credit-card" style="font-size:14px;color:#888"></i> Payments</div>
+          <div class="feature-item"><i class="ti ti-shield-check" style="font-size:14px;color:#888"></i> Auth rules</div>
+        </div>
+        <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:4px">
+          <span class="code-chip">Node.js</span>
+          <span class="code-chip">Express.js</span>
+        </div>
+      </div>
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <div class="icon-circle" style="background:#fef3c7"><i class="ti ti-database" style="color:#d97706;font-size:16px"></i></div>
+          <div style="font-size:14px;font-weight:600">Database</div>
+        </div>
+        <div style="font-size:12px;color:#666;margin-bottom:8px"><em>Stores</em> all application data</div>
+        <div class="feature-col">
+          <div class="feature-item"><i class="ti ti-users" style="font-size:14px;color:#888"></i> Users</div>
+          <div class="feature-item"><i class="ti ti-book" style="font-size:14px;color:#888"></i> Courses</div>
+          <div class="feature-item"><i class="ti ti-package" style="font-size:14px;color:#888"></i> Orders</div>
+          <div class="feature-item"><i class="ti ti-tag" style="font-size:14px;color:#888"></i> Products</div>
+        </div>
+        <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:4px">
+          <span class="code-chip">MongoDB</span>
+        </div>
+      </div>
+    </div>
+    <div class="card card-gray">
+      <div style="font-size:13px;font-weight:600;margin-bottom:8px">When you log in to Instagram…</div>
+      <div class="flow-row">
+        <div class="flow-box" style="background:#dbeafe;color:#1e40af;font-size:12px">Frontend<br><span style="font-size:10px;opacity:.75">Shows login form</span></div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-box" style="background:#d1fae5;color:#065f46;font-size:12px">Backend<br><span style="font-size:10px;opacity:.75">Checks credentials</span></div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-box" style="background:#fef3c7;color:#92400e;font-size:12px">Database<br><span style="font-size:10px;opacity:.75">Fetches user data</span></div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-box" style="background:#dbeafe;color:#1e40af;font-size:12px">Frontend<br><span style="font-size:10px;opacity:.75">Shows your feed</span></div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-3"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- SLIDE 4: WHAT IS MERN -->
+  <div class="slide" id="slide-4">
+    <div class="slide-header">
+      <span class="topic-badge badge-amber">Topic 4</span>
+      <div>
+        <div class="slide-title">What is MERN?</div>
+        <div class="slide-subtitle">The four technologies we'll use throughout this course</div>
+      </div>
+    </div>
+    <div class="grid-4">
+      <div class="card" style="text-align:center;padding:1rem .75rem">
+        <div class="mern-letter" style="color:#16a34a">M</div>
+        <div style="font-size:14px;font-weight:600;margin:6px 0 2px">MongoDB</div>
+        <div style="font-size:11px;color:#666;margin-bottom:10px">Database</div>
+        <span class="code-chip">NoSQL</span>
+      </div>
+      <div class="card" style="text-align:center;padding:1rem .75rem">
+        <div class="mern-letter" style="color:#5b21b6">E</div>
+        <div style="font-size:14px;font-weight:600;margin:6px 0 2px">Express.js</div>
+        <div style="font-size:11px;color:#666;margin-bottom:10px">Web Framework</div>
+        <span class="code-chip">Backend</span>
+      </div>
+      <div class="card" style="text-align:center;padding:1rem .75rem">
+        <div class="mern-letter" style="color:#1d4ed8">R</div>
+        <div style="font-size:14px;font-weight:600;margin:6px 0 2px">React.js</div>
+        <div style="font-size:11px;color:#666;margin-bottom:10px">UI Library</div>
+        <span class="code-chip">Frontend</span>
+      </div>
+      <div class="card" style="text-align:center;padding:1rem .75rem">
+        <div class="mern-letter" style="color:#065f46">N</div>
+        <div style="font-size:14px;font-weight:600;margin:6px 0 2px">Node.js</div>
+        <div style="font-size:11px;color:#666;margin-bottom:10px">Runtime</div>
+        <span class="code-chip">Backend</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-label">real architecture</div>
+      <div class="flow-row" style="margin-top:6px;justify-content:center">
+        <div class="flow-box" style="background:#dbeafe;color:#1e40af;font-size:12px">React.js<br><span style="font-size:10px;opacity:.75">User Interface</span></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:2px">
+          <span class="flow-arrow">→</span>
+          <span style="font-size:9px;color:#888">API Calls</span>
+        </div>
+        <div class="flow-box" style="background:#d1fae5;color:#065f46;font-size:12px">Express + Node<br><span style="font-size:10px;opacity:.75">Business Logic</span></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:2px">
+          <span class="flow-arrow">→</span>
+          <span style="font-size:9px;color:#888">Queries</span>
+        </div>
+        <div class="flow-box" style="background:#dcfce7;color:#166534;font-size:12px">MongoDB<br><span style="font-size:10px;opacity:.75">Data Storage</span></div>
+      </div>
+    </div>
+    <div class="card card-gray">
+      <div style="font-size:13px;font-weight:600;margin-bottom:8px">Why MERN?</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <span class="tag tag-blue"><i class="ti ti-brand-javascript"></i> JavaScript everywhere</span>
+        <span class="tag tag-teal"><i class="ti ti-rocket"></i> Fast development</span>
+        <span class="tag tag-purple"><i class="ti ti-users"></i> Large community</span>
+        <span class="tag tag-amber"><i class="ti ti-briefcase"></i> High job demand</span>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-4"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- SLIDE 5: PROJECT -->
+  <div class="slide" id="slide-5">
+    <div class="slide-header">
+      <span class="topic-badge badge-coral">Project</span>
+      <div>
+        <div class="slide-title">SkillHub LMS</div>
+        <div class="slide-subtitle">Learning Management System — what we'll build together</div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <div class="icon-circle" style="background:#dbeafe"><i class="ti ti-student" style="color:#1d4ed8;font-size:16px"></i></div>
+          <div style="font-size:14px;font-weight:600">Student Features</div>
+        </div>
+        <div class="feature-col">
+          <div class="feature-item"><i class="ti ti-user-plus" style="font-size:14px;color:#888"></i> Register</div>
+          <div class="feature-item"><i class="ti ti-login" style="font-size:14px;color:#888"></i> Login</div>
+          <div class="feature-item"><i class="ti ti-book" style="font-size:14px;color:#888"></i> View Courses</div>
+          <div class="feature-item"><i class="ti ti-search" style="font-size:14px;color:#888"></i> Search Courses</div>
+          <div class="feature-item"><i class="ti ti-circle-check" style="font-size:14px;color:#888"></i> Enroll</div>
+        </div>
+      </div>
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <div class="icon-circle" style="background:#fee2e2"><i class="ti ti-shield-lock" style="color:#dc2626;font-size:16px"></i></div>
+          <div style="font-size:14px;font-weight:600">Admin Features</div>
+        </div>
+        <div class="feature-col">
+          <div class="feature-item"><i class="ti ti-plus" style="font-size:14px;color:#888"></i> Add Course</div>
+          <div class="feature-item"><i class="ti ti-edit" style="font-size:14px;color:#888"></i> Update Course</div>
+          <div class="feature-item"><i class="ti ti-trash" style="font-size:14px;color:#888"></i> Delete Course</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-label">MERN mapping for SkillHub</div>
+      <div class="grid-4" style="margin-top:6px">
+        <div style="padding:8px;background:#f8f9fa;border-radius:8px;font-size:12px;text-align:center">
+          <span class="code-chip" style="font-size:11px">React</span>
+          <div style="font-size:11px;color:#666;margin-top:4px">Course listing, login forms</div>
+        </div>
+        <div style="padding:8px;background:#f8f9fa;border-radius:8px;font-size:12px;text-align:center">
+          <span class="code-chip" style="font-size:11px">Express</span>
+          <div style="font-size:11px;color:#666;margin-top:4px">REST APIs for courses &amp; auth</div>
+        </div>
+        <div style="padding:8px;background:#f8f9fa;border-radius:8px;font-size:12px;text-align:center">
+          <span class="code-chip" style="font-size:11px">Node</span>
+          <div style="font-size:11px;color:#666;margin-top:4px">Server, middleware</div>
+        </div>
+        <div style="padding:8px;background:#f8f9fa;border-radius:8px;font-size:12px;text-align:center">
+          <span class="code-chip" style="font-size:11px">MongoDB</span>
+          <div style="font-size:11px;color:#666;margin-top:4px">Users, courses, enrollments</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-5"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Quick Quiz <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- SLIDE 6: QUIZ -->
+  <div class="slide" id="slide-6">
+    <div class="slide-header">
+      <span class="topic-badge badge-green">Quiz</span>
+      <div>
+        <div class="slide-title">Quick Check</div>
+        <div class="slide-subtitle">Test your understanding — tap the correct answer</div>
+      </div>
+    </div>
+    <div id="quiz-container"></div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-6"></div>
+      <button class="nav-btn" onclick="goSlide(0)"><i class="ti ti-home"></i> Home</button>
+    </div>
+  </div>
+
+</div><!-- /.wrapper -->
+
+<script>
+  var current = 0, total = 7;
+  var quizInit = false;
+
+  var quizData = [
+    {
+      q: "Which part of a web app does the user directly see and interact with?",
+      opts: ["Database", "Backend", "Frontend", "Server"],
+      ans: 2,
+      exp: "The Frontend is what users see — buttons, forms, images, and navigation."
+    },
+    {
+      q: "In the food delivery analogy, what does the 'Restaurant (Server)' represent?",
+      opts: ["The database", "The browser", "The backend server", "The CSS styles"],
+      ans: 2,
+      exp: "The Server (Restaurant) handles your request and coordinates between the frontend and database."
+    },
+    {
+      q: "What does the 'M' in MERN stand for?",
+      opts: ["MySQL", "MongoDB", "Middleware", "Module"],
+      ans: 1,
+      exp: "M = MongoDB — our NoSQL database for storing application data."
+    },
+    {
+      q: "Which technology in MERN is used for building the User Interface?",
+      opts: ["Node.js", "Express.js", "MongoDB", "React.js"],
+      ans: 3,
+      exp: "R = React.js — a JavaScript library for building fast, interactive user interfaces."
+    },
+    {
+      q: "In SkillHub LMS, which user role can Add, Update, and Delete courses?",
+      opts: ["Student", "Guest", "Admin", "Instructor"],
+      ans: 2,
+      exp: "The Admin has full CRUD (Create, Read, Update, Delete) access to course management."
+    }
+  ];
+
+  var quizAnswered = [];
+
+  function renderQuiz() {
+    var c = document.getElementById('quiz-container');
+    c.innerHTML = '';
+    quizData.forEach(function(q, i) {
+      var d = document.createElement('div');
+      d.style.cssText = 'margin-bottom:16px';
+      d.innerHTML = '<div style="font-size:13px;font-weight:600;margin-bottom:6px">' + (i+1) + '. ' + q.q + '</div>';
+      q.opts.forEach(function(opt, j) {
+        var btn = document.createElement('button');
+        btn.className = 'quiz-option';
+        btn.textContent = String.fromCharCode(65+j) + '. ' + opt;
+        btn.onclick = function() {
+          if (quizAnswered[i]) return;
+          quizAnswered[i] = true;
+          var btns = d.querySelectorAll('.quiz-option');
+          btns.forEach(function(b, k) {
+            b.disabled = true;
+            if (k === q.ans) b.classList.add('correct');
+            else if (k === j) b.classList.add('wrong');
+          });
+          var fb = d.querySelector('.quiz-feedback');
+          fb.textContent = (j === q.ans ? '✅ Correct! ' : '❌ Not quite. ') + q.exp;
+          fb.className = 'quiz-feedback ' + (j === q.ans ? 'correct' : 'wrong');
+        };
+        d.appendChild(btn);
+      });
+      var fb = document.createElement('div');
+      fb.className = 'quiz-feedback';
+      d.appendChild(fb);
+      c.appendChild(d);
+    });
+  }
+
+  function toggle(id) {
+    var el = document.getElementById(id);
+    el.classList.toggle('open');
+    var btn = el.previousElementSibling;
+    btn.textContent = el.classList.contains('open') ? 'Hide Answer' : 'Reveal Answer';
+  }
+
+  function goSlide(n) {
+    document.getElementById('slide-' + current).classList.remove('active');
+    current = n;
+    document.getElementById('slide-' + current).classList.add('active');
+    updateDots();
+    document.getElementById('slide-counter').textContent = (current + 1) + ' / ' + total;
+    if (n === 6 && !quizInit) { renderQuiz(); quizInit = true; }
+    window.scrollTo(0, 0);
+  }
+
+  function nextSlide() { if (current < total - 1) goSlide(current + 1); }
+  function prevSlide() { if (current > 0) goSlide(current - 1); }
+
+  function updateDots() {
+    for (var s = 0; s < total; s++) {
+      var el = document.getElementById('dots-' + s);
+      if (!el) continue;
+      el.innerHTML = '';
+      for (var d = 0; d < total; d++) {
+        var dot = document.createElement('div');
+        dot.className = 'dot' + (d === current ? ' active' : '');
+        el.appendChild(dot);
+      }
+    }
+  }
+
+  updateDots();
+</script>
+</body>
+</html>

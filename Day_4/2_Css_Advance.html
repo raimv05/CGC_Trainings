@@ -1,0 +1,1294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Day 4 · Hour 2 – CSS Flexbox</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f4f5f7; color: #1a1a1a;
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; padding: 2rem 1rem;
+  }
+  .wrapper {
+    width: 100%; max-width: 920px; background: #fff;
+    border-radius: 16px; box-shadow: 0 2px 20px rgba(0,0,0,0.09); overflow: hidden;
+  }
+  .top-bar {
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    color: #fff; padding: 14px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .top-bar-title { font-size: 15px; font-weight: 600; }
+  .top-bar-sub   { font-size: 12px; opacity: .55; margin-top: 2px; }
+  .slide-counter { font-size: 13px; opacity: .6; font-variant-numeric: tabular-nums; }
+  .slide { display: none; padding: 1.75rem 2rem; min-height: 500px; flex-direction: column; gap: 1.2rem; }
+  .slide.active { display: flex; }
+  .slide-header { display: flex; align-items: center; gap: 10px; padding-bottom: 1rem; border-bottom: 1px solid #e8e8e8; }
+  .slide-title    { font-size: 20px; font-weight: 700; color: #111; }
+  .slide-subtitle { font-size: 13px; color: #666; margin-top: 2px; }
+
+  /* ── Badges ── */
+  .badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+  .b-blue   { background:#dbeafe; color:#1d4ed8; }
+  .b-teal   { background:#d1fae5; color:#065f46; }
+  .b-purple { background:#ede9fe; color:#5b21b6; }
+  .b-amber  { background:#fef3c7; color:#92400e; }
+  .b-green  { background:#dcfce7; color:#166534; }
+  .b-slate  { background:#e2e8f0; color:#334155; }
+  .b-rose   { background:#ffe4e6; color:#9f1239; }
+  .b-orange { background:#ffedd5; color:#9a3412; }
+  .b-indigo { background:#e0e7ff; color:#3730a3; }
+  .b-cyan   { background:#cffafe; color:#164e63; }
+  .b-yellow { background:#fef9c3; color:#854d0e; }
+  .b-pink   { background:#fce7f3; color:#9d174d; }
+  .b-coral  { background:#fee2e2; color:#991b1b; }
+
+  /* ── Layout ── */
+  .section-label { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 8px; }
+  .card { background: #fff; border: 1px solid #e8e8e8; border-radius: 12px; padding: 1rem 1.25rem; }
+  .card-gray { background: #f8f9fa; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+  /* ── Code Editor (Dracula) ── */
+  .editor { background: #1e1e2e; border-radius: 12px; overflow: hidden; font-family: 'SFMono-Regular', Consolas, 'Courier New', monospace; }
+  .editor-bar { background: #13131f; padding: 9px 14px; display: flex; align-items: center; gap: 6px; }
+  .e-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .e-red { background:#ff5f57; } .e-yellow { background:#febc2e; } .e-green { background:#28c840; }
+  .e-label { font-size: 12px; color: #6272a4; margin-left: 4px; font-family: -apple-system, sans-serif; }
+  .editor-body { padding: 14px 18px; font-size: 12.5px; line-height: 1.8; }
+  .e-ln   { color: #44475a; font-size: 11px; display: inline-block; width: 22px; user-select: none; }
+  .e-tag  { color: #ff79c6; }
+  .e-att  { color: #50fa7b; }
+  .e-val  { color: #f1fa8c; }
+  .e-txt  { color: #f8f8f2; }
+  .e-cmt  { color: #6272a4; font-style: italic; }
+  .e-new  { color: #80ffea; }
+  .e-h2   { color: #ffb86c; font-weight: 700; }
+  .e-p    { color: #8be9fd; }
+  .c-sel  { color: #ff79c6; font-weight: 700; }
+  .c-prop { color: #50fa7b; }
+  .c-val  { color: #f1fa8c; }
+  .c-punc { color: #f8f8f2; }
+  .c-hex  { color: #bd93f9; }
+  .c-str  { color: #ffb86c; }
+  .c-num  { color: #ff79c6; }
+  .c-cmt  { color: #6272a4; font-style: italic; }
+  .e-row  { display: flex; gap: 8px; }
+  .e-ind1 { display: inline-block; width: 20px; }
+  .e-ind2 { display: inline-block; width: 40px; }
+  .e-ind3 { display: inline-block; width: 60px; }
+
+  /* ── Browser frame ── */
+  .browser { border-radius: 12px; overflow: hidden; border: 1px solid #e0e0e0; }
+  .browser-bar { background: #f1f3f4; padding: 9px 14px; display: flex; align-items: center; gap: 7px; border-bottom: 1px solid #e0e0e0; }
+  .b-dot2 { width: 10px; height: 10px; border-radius: 50%; }
+  .b-r { background:#ff5f57; } .b-y { background:#febc2e; } .b-g { background:#28c840; }
+  .b-url { flex:1; background:#fff; border:1px solid #dadce0; border-radius:20px; padding:4px 14px; font-size:12px; color:#555; }
+
+  /* ── Tables ── */
+  .tag-table { border-collapse: collapse; width: 100%; }
+  .tag-table th { background: #f1f5f9; font-size: 12px; font-weight: 700; text-align: left; padding: 10px 14px; color: #475569; border-bottom: 2px solid #e2e8f0; }
+  .tag-table td { font-size: 13px; padding: 10px 14px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+  .tag-table tr:last-child td { border-bottom: none; }
+  .tag-table tr:hover td { background: #f8f9fa; }
+  .tag-mono { font-family: 'SFMono-Regular', Consolas, monospace; font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 5px; }
+
+  /* ── Quiz ── */
+  .quiz-option { border: 1px solid #dee2e6; border-radius: 8px; padding: 10px 14px; font-size: 13px; cursor: pointer; margin-bottom: 6px; transition: all .15s; background: transparent; width: 100%; text-align: left; color: #1a1a1a; }
+  .quiz-option:hover:not(:disabled) { background: #f8f9fa; }
+  .quiz-option.correct { background: #d1fae5; border-color: #059669; color: #065f46; }
+  .quiz-option.wrong   { background: #fee2e2; border-color: #dc2626; color: #991b1b; }
+  .quiz-feedback { display: none; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-top: 4px; }
+  .quiz-feedback.correct { background: #d1fae5; color: #065f46; display: block; }
+  .quiz-feedback.wrong   { background: #fee2e2; color: #991b1b; display: block; }
+
+  /* ── Activity / challenge ── */
+  .activity-box { border: 2px dashed #a5b4fc; background: #eef2ff; border-radius: 12px; padding: 14px 18px; }
+  .activity-title { font-size: 13px; font-weight: 700; color: #3730a3; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .challenge-box { border: 2px dashed #f9a8d4; background: #fdf2f8; border-radius: 12px; padding: 14px 18px; }
+  .challenge-title { font-size: 13px; font-weight: 700; color: #9f1239; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+
+  /* ── Tip / info / warn / success ── */
+  .tip-box   { display:flex; gap:10px; align-items:flex-start; background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:10px 14px; }
+  .tip-icon  { color:#d97706; font-size:18px; flex-shrink:0; margin-top:1px; }
+  .tip-text  { font-size:13px; color:#92400e; line-height:1.6; }
+  .info-box  { display:flex; gap:10px; align-items:flex-start; background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:10px 14px; }
+  .info-icon { color:#2563eb; font-size:18px; flex-shrink:0; margin-top:1px; }
+  .info-text { font-size:13px; color:#1e40af; line-height:1.6; }
+  .warn-box  { display:flex; gap:10px; align-items:flex-start; background:#fef9ee; border:1px solid #fcd34d; border-radius:10px; padding:10px 14px; }
+  .success-box { display:flex; gap:10px; align-items:flex-start; background:#f0fdf4; border:1px solid #86efac; border-radius:10px; padding:10px 14px; }
+
+  /* ── Line explainer ── */
+  .lex-row { display:flex; align-items:stretch; cursor:pointer; transition:background .12s; border-bottom:1px solid #f0f0f0; }
+  .lex-row:last-child { border-bottom:none; }
+  .lex-row:hover { background:#f8f9fa; }
+  .lex-row.active { background:#eff6ff; border-left:3px solid #1d4ed8; }
+  .lex-code { background:#1e1e2e; padding:10px 14px; font-family:'SFMono-Regular',Consolas,monospace; font-size:12px; min-width:220px; flex-shrink:0; display:flex; align-items:center; }
+  .lex-info { padding:10px 14px; flex:1; }
+  .lex-name   { font-size:13px; font-weight:700; color:#1d4ed8; margin-bottom:2px; }
+  .lex-desc   { font-size:12px; color:#555; line-height:1.55; }
+  .lex-detail { display:none; font-size:12px; color:#1d4ed8; margin-top:4px; padding-top:4px; border-top:1px dashed #bfdbfe; }
+  .lex-row.active .lex-detail { display:block; }
+  .line-explain { border:1px solid #e8e8e8; border-radius:10px; overflow:hidden; }
+
+  /* ── Reveal ── */
+  .reveal-btn { background:#f1f3f5; border:1px solid #dee2e6; border-radius:8px; padding:7px 14px; font-size:13px; cursor:pointer; color:#333; transition:background .15s; }
+  .reveal-btn:hover { background:#e9ecef; }
+  .reveal-content { display:none; margin-top:8px; }
+  .reveal-content.open { display:block; }
+
+  /* ── Nav ── */
+  .nav-row { display:flex; align-items:center; justify-content:space-between; margin-top:auto; padding-top:1rem; border-top:1px solid #f0f0f0; }
+  .nav-btn { display:inline-flex; align-items:center; gap:6px; padding:9px 18px; border:1px solid #dee2e6; border-radius:8px; background:transparent; font-size:13px; cursor:pointer; color:#333; transition:background .15s; }
+  .nav-btn:hover:not(:disabled) { background:#f1f3f5; }
+  .nav-btn:disabled { opacity:.35; cursor:default; }
+  .nav-btn.primary { background:#1d4ed8; border-color:transparent; color:#fff; }
+  .nav-btn.primary:hover { background:#1e40af; }
+  .progress-dots { display:flex; gap:6px; align-items:center; }
+  .dot { width:7px; height:7px; border-radius:50%; background:#dee2e6; transition:all .2s; }
+  .dot.active { width:20px; border-radius:4px; background:#1d4ed8; }
+
+  /* ── Home grid ── */
+  .home-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .home-card { background:#fff; border:1px solid #e8e8e8; border-radius:12px; padding:1rem 1.25rem; cursor:pointer; transition:all .15s; }
+  .home-card:hover { border-color:#1d4ed8; box-shadow:0 2px 8px rgba(29,78,216,.1); }
+  .home-card-title { font-size:15px; font-weight:700; margin:6px 0 2px; }
+  .home-card-sub   { font-size:12px; color:#666; }
+
+  code { font-family:'SFMono-Regular',Consolas,monospace; font-size:12px; background:#f1f3f5; padding:1px 6px; border-radius:4px; border:1px solid #dee2e6; }
+  .tag-chip { font-family:'SFMono-Regular',Consolas,monospace; font-size:12px; font-weight:700; padding:3px 9px; border-radius:6px; }
+
+  /* ── SkillHub live preview ── */
+  .sh-wrap  { font-family: Arial, sans-serif; border:1px solid #e0e0e0; border-radius:10px; overflow:hidden; font-size:13px; }
+  .sh-header2 { background:#1e293b; color:#fff; padding:10px 14px; text-align:center; font-size:13px; font-weight:700; }
+  .sh-courses { background:#f4f4f4; padding:14px; text-align:center; }
+  .sh-courses h2 { font-size:13px; margin-bottom:10px; }
+  .sh-cards { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+  .sh-card  { background:white; width:120px; padding:10px; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,.15); text-align:left; }
+  .sh-card h3 { font-size:11px; margin-bottom:3px; }
+  .sh-card p  { font-size:10px; color:#666; }
+
+  /* ── Checklist ── */
+  .check-item { display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:10px; border:1px solid #e8e8e8; font-size:13px; cursor:pointer; transition:all .15s; user-select:none; }
+  .check-item:hover { background:#f8f9fa; }
+  .check-item.done { background:#f0fdf4; border-color:#86efac; }
+  .check-circle { width:22px; height:22px; border-radius:50%; border:2px solid #dee2e6; display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0; transition:all .2s; color:transparent; }
+  .check-item.done .check-circle { background:#22c55e; border-color:#22c55e; color:#fff; }
+
+  /* ══ FLEXBOX SPECIFIC STYLES ══ */
+
+  /* Before/After flex demo */
+  .flex-before { display:block; }
+  .flex-before .mini-card { display:block; background:#e2e8f0; border-radius:6px; padding:8px 12px; font-size:11px; font-weight:700; color:#334155; margin-bottom:6px; text-align:center; }
+  .flex-after  { display:flex; gap:8px; flex-wrap:wrap; }
+  .flex-after .mini-card  { flex:0 0 auto; background:#dbeafe; border-radius:6px; padding:8px 12px; font-size:11px; font-weight:700; color:#1e40af; text-align:center; }
+
+  /* justify-content demo */
+  .jc-demo { border:2px dashed #a5b4fc; border-radius:8px; padding:10px; background:#f5f3ff; display:flex; gap:8px; min-height:52px; align-items:center; transition:all .3s; }
+  .jc-box { width:44px; height:32px; border-radius:5px; background:#6366f1; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; color:white; flex-shrink:0; }
+
+  /* align-items demo */
+  .ai-demo { border:2px dashed #a5b4fc; border-radius:8px; padding:8px; background:#f5f3ff; display:flex; gap:8px; height:80px; transition:all .3s; }
+  .ai-box-s { width:44px; background:#6366f1; border-radius:5px; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; color:white; }
+
+  /* Live flex playground */
+  .fx-playground { border:2px dashed #cbd5e1; border-radius:10px; padding:10px; background:#f8fafc; min-height:120px; transition:all .3s; }
+  .fx-item { border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:white; flex-shrink:0; transition:all .3s; }
+
+  /* Property selector tabs */
+  .prop-tab { padding:6px 14px; border-radius:8px; border:1px solid #e2e8f0; font-size:12px; font-weight:600; cursor:pointer; transition:all .15s; background:white; color:#555; }
+  .prop-tab:hover { border-color:#6366f1; color:#4338ca; }
+  .prop-tab.active { background:#6366f1; border-color:#6366f1; color:white; }
+
+  /* Value pill buttons */
+  .val-pill { padding:5px 12px; border-radius:20px; border:1px solid #dee2e6; font-size:12px; cursor:pointer; transition:all .15s; background:white; color:#555; font-family:'SFMono-Regular',Consolas,monospace; }
+  .val-pill:hover { border-color:#6366f1; color:#4338ca; }
+  .val-pill.active { background:#6366f1; border-color:#6366f1; color:white; }
+
+  /* SkillHub cards improved */
+  .sh-course-card { background:white; padding:14px; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,.12); transition:transform .3s; cursor:default; text-align:left; width:180px; flex-shrink:0; }
+  .sh-course-card:hover { transform:translateY(-10px); }
+  .sh-course-card h3 { font-size:13px; font-weight:700; margin-bottom:4px; color:#1a1a1a; }
+  .sh-course-card p { font-size:11px; color:#666; }
+  .sh-course-badge { font-size:10px; font-weight:700; padding:2px 8px; border-radius:10px; display:inline-block; margin-bottom:6px; }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <div>
+      <div class="top-bar-title">MERN Stack Training · Day 4 · Hour 2</div>
+      <div class="top-bar-sub">CSS Flexbox — SkillHub LMS</div>
+    </div>
+    <div class="slide-counter" id="slide-counter">1 / 13</div>
+  </div>
+
+  <!-- ═══════════ SLIDE 0  HOME ═══════════ -->
+  <div class="slide active" id="slide-0">
+    <div class="slide-header">
+      <span class="badge b-amber">Day 4 · Hour 2</span>
+      <div>
+        <div class="slide-title">CSS Flexbox</div>
+        <div class="slide-subtitle">The most important CSS layout tool — you'll use this in every project you ever build.</div>
+      </div>
+    </div>
+
+    <div style="background:#ede9fe;border:1px solid #c4b5fd;border-radius:12px;padding:12px 16px;display:flex;gap:12px;align-items:flex-start">
+      <i class="ti ti-layout-columns" style="color:#7c3aed;font-size:22px;flex-shrink:0;margin-top:1px"></i>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#4c1d95;margin-bottom:4px">Hour 2 Goal — Professional Course Cards with Flexbox</div>
+        <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:#5b21b6">
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Understand display:flex</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>justify-content &amp; align-items</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>gap &amp; flex-wrap</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Upgrade SkillHub cards</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Mini challenge completed</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="home-grid">
+      <div class="home-card" onclick="goSlide(1)">
+        <span class="badge b-green">Recap</span>
+        <div class="home-card-title">Where We Are Now</div>
+        <div class="home-card-sub">What Hour 1 built + what Flexbox adds</div>
+      </div>
+      <div class="home-card" onclick="goSlide(2)">
+        <span class="badge b-amber">Hook</span>
+        <div class="home-card-title">Opening Question</div>
+        <div class="home-card-sub">How does Amazon arrange its products?</div>
+      </div>
+      <div class="home-card" onclick="goSlide(3)">
+        <span class="badge b-purple">Concept</span>
+        <div class="home-card-title">Before vs After Flexbox</div>
+        <div class="home-card-sub">See the "Boom!" moment live</div>
+      </div>
+      <div class="home-card" onclick="goSlide(4)">
+        <span class="badge b-blue">Explain</span>
+        <div class="home-card-title">justify-content — all 5 values</div>
+        <div class="home-card-sub">Interactive demo — click each value</div>
+      </div>
+      <div class="home-card" onclick="goSlide(5)">
+        <span class="badge b-teal">Explain</span>
+        <div class="home-card-title">align-items &amp; gap</div>
+        <div class="home-card-sub">Cross-axis alignment + spacing</div>
+      </div>
+      <div class="home-card" onclick="goSlide(6)">
+        <span class="badge b-indigo">Explain</span>
+        <div class="home-card-title">flex-wrap — Responsive Magic</div>
+        <div class="home-card-sub">Resize browser = instant responsive</div>
+      </div>
+      <div class="home-card" onclick="goSlide(7)">
+        <span class="badge b-orange">Live Lab</span>
+        <div class="home-card-title">Flex Playground</div>
+        <div class="home-card-sub">Toggle all properties live in browser</div>
+      </div>
+      <div class="home-card" onclick="goSlide(8)">
+        <span class="badge b-blue">Code</span>
+        <div class="home-card-title">Upgrade HTML — Course Cards</div>
+        <div class="home-card-sub">Wrap cards in .course-container</div>
+      </div>
+      <div class="home-card" onclick="goSlide(9)">
+        <span class="badge b-teal">CSS</span>
+        <div class="home-card-title">Write the Flexbox CSS</div>
+        <div class="home-card-sub">container + card + hover styles</div>
+      </div>
+      <div class="home-card" onclick="goSlide(10)">
+        <span class="badge b-rose">Challenge</span>
+        <div class="home-card-title">Mini Challenge — 6 More Cards</div>
+        <div class="home-card-sub">Bootstrap, Express, Git, React, Node…</div>
+      </div>
+      <div class="home-card" onclick="goSlide(11)">
+        <span class="badge b-slate">Quiz</span>
+        <div class="home-card-title">Quick-Fire Quiz</div>
+        <div class="home-card-sub">4 questions — test your Flexbox knowledge</div>
+      </div>
+      <div class="home-card" onclick="goSlide(12)">
+        <span class="badge b-green">Wrap-Up</span>
+        <div class="home-card-title">Day 4 Complete!</div>
+        <div class="home-card-sub">What you built + Day 5 preview</div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" disabled><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-0"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Start <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 1  RECAP ═══════════ -->
+  <div class="slide" id="slide-1">
+    <div class="slide-header">
+      <span class="badge b-green">Recap</span>
+      <div>
+        <div class="slide-title">Where We Are Now</div>
+        <div class="slide-subtitle">Hour 1 gave your cards shape — Hour 2 gives them layout</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="section-label">what hour 1 built</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#dcfce7;border-radius:8px;font-size:12px;font-weight:700;color:#166534"><span><i class="ti ti-box" style="margin-right:5px"></i>Box Model understood</span><span class="badge b-green" style="font-size:10px">✓ done</span></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#dcfce7;border-radius:8px;font-size:12px;font-weight:700;color:#166534"><span><i class="ti ti-arrow-autofit-content" style="margin-right:5px"></i>padding, margin, border</span><span class="badge b-green" style="font-size:10px">✓ done</span></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#dcfce7;border-radius:8px;font-size:12px;font-weight:700;color:#166534"><span><i class="ti ti-circle-half" style="margin-right:5px"></i>border-radius on cards</span><span class="badge b-green" style="font-size:10px">✓ done</span></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#dcfce7;border-radius:8px;font-size:12px;font-weight:700;color:#166534"><span><i class="ti ti-shadow" style="margin-right:5px"></i>box-shadow added</span><span class="badge b-green" style="font-size:10px">✓ done</span></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#ede9fe;border-radius:8px;font-size:12px;font-weight:700;color:#5b21b6;border:2px dashed #a78bfa"><span><i class="ti ti-layout-columns" style="margin-right:5px"></i>Arrange cards in a row</span><span class="badge b-purple" style="font-size:10px">← NOW</span></div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">the problem without flexbox</div>
+        <div class="browser">
+          <div class="browser-bar"><div class="b-dot2 b-r"></div><div class="b-dot2 b-y"></div><div class="b-dot2 b-g"></div><div class="b-url">index.html — cards stack vertically</div></div>
+          <div style="background:#f8f9fa;padding:14px;font-family:Arial,sans-serif">
+            <div style="font-size:11px;font-weight:700;color:#1a1a1a;margin-bottom:8px">Courses</div>
+            <div style="background:white;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,.12);padding:10px;margin-bottom:8px;font-size:11px;font-weight:700">HTML &amp; CSS Fundamentals<br><span style="font-size:10px;color:#666;font-weight:400">Build your first webpage</span></div>
+            <div style="background:white;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,.12);padding:10px;margin-bottom:8px;font-size:11px;font-weight:700">JavaScript Basics<br><span style="font-size:10px;color:#666;font-weight:400">Make pages interactive</span></div>
+            <div style="background:white;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,.12);padding:10px;font-size:11px;font-weight:700">React Fundamentals<br><span style="font-size:10px;color:#666;font-weight:400">Build modern UIs</span></div>
+          </div>
+        </div>
+        <div class="warn-box" style="margin-top:8px">
+          <i class="ti ti-alert-triangle" style="color:#d97706;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+          <div style="font-size:13px;color:#92400e;line-height:1.6">Cards stack <strong>vertically</strong> by default. No e-commerce site looks like this — Flexbox is the fix.</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-1"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Opening Hook <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 2  HOOK ═══════════ -->
+  <div class="slide" id="slide-2">
+    <div class="slide-header">
+      <span class="badge b-amber">Hook</span>
+      <div>
+        <div class="slide-title">Opening Question</div>
+        <div class="slide-subtitle">Ask the class before revealing the answer</div>
+      </div>
+    </div>
+
+    <div style="background:linear-gradient(135deg,#1e1b4b,#312e81);border-radius:16px;padding:32px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:16px">
+      <div style="font-size:13px;font-weight:700;color:#a5b4fc;letter-spacing:.08em;text-transform:uppercase">Ask The Class</div>
+      <div style="font-size:26px;font-weight:800;color:#fff;line-height:1.3">How does Amazon arrange<br>its products side by side?</div>
+      <div style="font-size:13px;color:#818cf8">Wait for students to answer…</div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">student answer (expected)</div>
+        <div style="background:#fef3c7;border:1px solid #fde68a;border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px">
+          <i class="ti ti-message" style="color:#d97706;font-size:24px;flex-shrink:0"></i>
+          <div>
+            <div style="font-size:14px;font-weight:700;color:#92400e">"Using CSS"</div>
+            <div style="font-size:12px;color:#a16207;margin-top:2px">Technically correct — but which CSS property?</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">correct answer</div>
+        <div style="background:#ede9fe;border:2px solid #7c3aed;border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px">
+          <i class="ti ti-layout-columns" style="color:#7c3aed;font-size:24px;flex-shrink:0"></i>
+          <div>
+            <div style="font-size:16px;font-weight:800;color:#4c1d95;font-family:'SFMono-Regular',Consolas,monospace">display: flex</div>
+            <div style="font-size:12px;color:#5b21b6;margin-top:2px">This one property changes everything.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card card-gray">
+      <div style="font-size:13px;font-weight:700;margin-bottom:10px">Why Flexbox matters</div>
+      <div class="grid-3">
+        <div style="text-align:center;padding:12px 8px;background:white;border-radius:10px;border:1px solid #e8e8e8">
+          <i class="ti ti-brand-amazon" style="font-size:28px;color:#f97316;margin-bottom:6px;display:block"></i>
+          <div style="font-size:11px;font-weight:700;color:#1a1a1a">Amazon</div>
+          <div style="font-size:10px;color:#666;margin-top:2px">Products in a row</div>
+        </div>
+        <div style="text-align:center;padding:12px 8px;background:white;border-radius:10px;border:1px solid #e8e8e8">
+          <i class="ti ti-brand-netflix" style="font-size:28px;color:#dc2626;margin-bottom:6px;display:block"></i>
+          <div style="font-size:11px;font-weight:700;color:#1a1a1a">Netflix</div>
+          <div style="font-size:10px;color:#666;margin-top:2px">Movie rows</div>
+        </div>
+        <div style="text-align:center;padding:12px 8px;background:white;border-radius:10px;border:1px solid #e8e8e8">
+          <i class="ti ti-brand-google" style="font-size:28px;color:#2563eb;margin-bottom:6px;display:block"></i>
+          <div style="font-size:11px;font-weight:700;color:#1a1a1a">Google</div>
+          <div style="font-size:10px;color:#666;margin-top:2px">Nav bar items</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tip-box">
+      <i class="ti ti-bulb tip-icon"></i>
+      <div class="tip-text"><strong>Instructor note:</strong> This "Boom!" moment is the turning point for most beginners. One property — entire layout changes. Let them sit with that surprise before moving on.</div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-2"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Before vs After <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 3  BEFORE / AFTER ═══════════ -->
+  <div class="slide" id="slide-3">
+    <div class="slide-header">
+      <span class="badge b-purple">Concept</span>
+      <div>
+        <div class="slide-title">Before vs After — display:flex</div>
+        <div class="slide-subtitle">One CSS rule changes vertical stacking into a horizontal row</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <!-- BEFORE -->
+      <div>
+        <div class="section-label" style="color:#dc2626">before — no flexbox</div>
+        <div class="editor" style="border-radius:8px;margin-bottom:8px">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">style.css</span></div>
+          <div class="editor-body" style="font-size:12px">
+            <div class="e-row"><span class="c-sel">.course-container</span><span class="c-punc"> {</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="c-cmt">/* no display:flex */</span></div>
+            <div class="e-row"><span class="c-punc">}</span></div>
+          </div>
+        </div>
+        <div style="background:#fef2f2;border:2px solid #fca5a5;border-radius:10px;padding:12px">
+          <div style="font-size:10px;font-weight:700;color:#dc2626;margin-bottom:8px;text-transform:uppercase">Result — cards stack vertically</div>
+          <div class="flex-before">
+            <div class="mini-card">HTML &amp; CSS</div>
+            <div class="mini-card">JavaScript</div>
+            <div class="mini-card">React</div>
+          </div>
+        </div>
+      </div>
+      <!-- AFTER -->
+      <div>
+        <div class="section-label" style="color:#059669">after — display:flex added</div>
+        <div class="editor" style="border-radius:8px;margin-bottom:8px">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">style.css</span></div>
+          <div class="editor-body" style="font-size:12px">
+            <div class="e-row"><span class="c-sel">.course-container</span><span class="c-punc"> {</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="c-prop">display</span><span class="c-punc">:</span> <span class="c-str">flex</span><span class="c-punc">;</span> <span class="c-cmt">/* ← BOOM! */</span></div>
+            <div class="e-row"><span class="c-punc">}</span></div>
+          </div>
+        </div>
+        <div style="background:#f0fdf4;border:2px solid #86efac;border-radius:10px;padding:12px">
+          <div style="font-size:10px;font-weight:700;color:#059669;margin-bottom:8px;text-transform:uppercase">Result — cards line up horizontally</div>
+          <div class="flex-after">
+            <div class="mini-card">HTML &amp; CSS</div>
+            <div class="mini-card">JavaScript</div>
+            <div class="mini-card">React</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <i class="ti ti-info-circle info-icon"></i>
+      <div class="info-text"><strong>What happened?</strong> <code>display:flex</code> turns the parent (<code>.course-container</code>) into a <strong>Flex Container</strong>. Its direct children automatically become <strong>Flex Items</strong> and arrange in a row. No other CSS needed for this effect.</div>
+    </div>
+
+    <div class="card card-gray">
+      <div style="font-size:13px;font-weight:700;margin-bottom:8px">Two new vocabulary words — remember them:</div>
+      <div class="grid-2">
+        <div style="background:#ede9fe;border-radius:8px;padding:12px 14px">
+          <div style="font-size:12px;font-weight:700;color:#5b21b6;margin-bottom:4px">Flex Container</div>
+          <div style="font-size:12px;color:#555">The parent element with <code>display:flex</code> on it. Controls how children are arranged.</div>
+        </div>
+        <div style="background:#dbeafe;border-radius:8px;padding:12px 14px">
+          <div style="font-size:12px;font-weight:700;color:#1d4ed8;margin-bottom:4px">Flex Items</div>
+          <div style="font-size:12px;color:#555">The direct children inside the container. They respond to the container's flex rules.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-3"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">justify-content <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 4  JUSTIFY-CONTENT ═══════════ -->
+  <div class="slide" id="slide-4">
+    <div class="slide-header">
+      <span class="badge b-blue">Explain</span>
+      <div>
+        <div class="slide-title">justify-content — Control Horizontal Alignment</div>
+        <div class="slide-subtitle">Click each value below to see how items are distributed on the main axis</div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="val-pill active" onclick="setJC('flex-start')">flex-start</button>
+      <button class="val-pill" onclick="setJC('center')">center</button>
+      <button class="val-pill" onclick="setJC('flex-end')">flex-end</button>
+      <button class="val-pill" onclick="setJC('space-between')">space-between</button>
+      <button class="val-pill" onclick="setJC('space-around')">space-around</button>
+      <button class="val-pill" onclick="setJC('space-evenly')">space-evenly</button>
+    </div>
+
+    <div>
+      <div class="jc-demo" id="jc-demo" style="justify-content:flex-start">
+        <div class="jc-box">A</div>
+        <div class="jc-box">B</div>
+        <div class="jc-box">C</div>
+      </div>
+      <div style="margin-top:8px;display:flex;align-items:center;gap:8px">
+        <span style="font-size:11px;color:#888">Current:</span>
+        <code id="jc-label" style="font-size:13px;font-weight:700;background:#ede9fe;border-color:#c4b5fd;color:#5b21b6">justify-content: flex-start</code>
+      </div>
+    </div>
+
+    <div id="jc-desc" style="background:#f5f3ff;border:1px solid #c4b5fd;border-radius:10px;padding:12px 14px;font-size:13px;color:#4c1d95;line-height:1.65">
+      <strong>flex-start</strong> — items pack to the left edge of the container. This is the default when you don't write justify-content at all.
+    </div>
+
+    <div>
+      <div class="section-label">reference table</div>
+      <table class="tag-table">
+        <thead><tr><th>Value</th><th>Effect</th><th>Use Case</th></tr></thead>
+        <tbody>
+          <tr><td><span class="tag-mono" style="background:#ede9fe;color:#5b21b6">flex-start</span></td><td style="font-size:12px">Pack items to the left</td><td style="font-size:12px">Default layout, nav links left-aligned</td></tr>
+          <tr><td><span class="tag-mono" style="background:#dbeafe;color:#1d4ed8">center</span></td><td style="font-size:12px">Centre items in container</td><td style="font-size:12px">Hero buttons, centered headings</td></tr>
+          <tr><td><span class="tag-mono" style="background:#d1fae5;color:#065f46">flex-end</span></td><td style="font-size:12px">Pack items to the right</td><td style="font-size:12px">Login button in nav, right-aligned controls</td></tr>
+          <tr><td><span class="tag-mono" style="background:#fef3c7;color:#92400e">space-between</span></td><td style="font-size:12px">First &amp; last hug edges, rest spread evenly</td><td style="font-size:12px">Nav bar (logo left, links right)</td></tr>
+          <tr><td><span class="tag-mono" style="background:#ffedd5;color:#9a3412">space-around</span></td><td style="font-size:12px">Equal space on each side of items</td><td style="font-size:12px">Product card rows</td></tr>
+          <tr><td><span class="tag-mono" style="background:#fce7f3;color:#9d174d">space-evenly</span></td><td style="font-size:12px">Perfectly equal gaps everywhere</td><td style="font-size:12px">Icon rows, feature lists</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-4"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">align-items &amp; gap <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 5  ALIGN-ITEMS + GAP ═══════════ -->
+  <div class="slide" id="slide-5">
+    <div class="slide-header">
+      <span class="badge b-teal">Explain</span>
+      <div>
+        <div class="slide-title">align-items &amp; gap</div>
+        <div class="slide-subtitle">align-items controls the cross-axis (vertical); gap adds space between items</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <!-- align-items -->
+      <div>
+        <div style="font-size:12px;font-weight:700;color:#059669;margin-bottom:8px;display:flex;align-items:center;gap:6px"><i class="ti ti-arrows-vertical" style="font-size:15px"></i> align-items — vertical alignment</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
+          <button class="val-pill active" onclick="setAI('flex-start')">flex-start</button>
+          <button class="val-pill" onclick="setAI('center')">center</button>
+          <button class="val-pill" onclick="setAI('flex-end')">flex-end</button>
+          <button class="val-pill" onclick="setAI('stretch')">stretch</button>
+        </div>
+        <div class="ai-demo" id="ai-demo" style="align-items:flex-start">
+          <div class="ai-box-s" style="height:28px">A</div>
+          <div class="ai-box-s" style="height:50px">B</div>
+          <div class="ai-box-s" style="height:38px">C</div>
+        </div>
+        <div style="margin-top:6px"><code id="ai-label" style="font-size:12px;background:#d1fae5;border-color:#6ee7b7;color:#065f46">align-items: flex-start</code></div>
+        <div id="ai-desc" style="margin-top:8px;font-size:12px;color:#555;line-height:1.6;background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:8px 12px">Items line up at the <strong>top</strong> of the container. Each sits at the start of the cross axis.</div>
+      </div>
+
+      <!-- gap -->
+      <div>
+        <div style="font-size:12px;font-weight:700;color:#7c3aed;margin-bottom:8px;display:flex;align-items:center;gap:6px"><i class="ti ti-spacing-horizontal" style="font-size:15px"></i> gap — space between items</div>
+        <div class="editor" style="border-radius:8px;margin-bottom:8px">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div></div>
+          <div class="editor-body" style="font-size:12px">
+            <div class="e-row"><span class="c-sel">.course-container</span><span class="c-punc"> {</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="c-prop">display</span><span class="c-punc">:</span> <span class="c-str">flex</span><span class="c-punc">;</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="c-prop">gap</span><span class="c-punc">:</span> <span class="c-num" id="gap-css-val">20px</span><span class="c-punc">;</span></div>
+            <div class="e-row"><span class="c-punc">}</span></div>
+          </div>
+        </div>
+        <div style="margin-bottom:6px;display:flex;align-items:center;gap:10px">
+          <span style="font-size:12px;color:#555">gap:</span>
+          <input type="range" min="0" max="50" value="20" style="flex:1;accent-color:#7c3aed" oninput="setGap(this.value)">
+          <span style="font-family:monospace;font-size:13px;font-weight:700;color:#7c3aed;min-width:36px" id="gap-val">20px</span>
+        </div>
+        <div class="jc-demo" id="gap-demo" style="justify-content:flex-start;gap:20px">
+          <div class="jc-box" style="background:#7c3aed">A</div>
+          <div class="jc-box" style="background:#7c3aed">B</div>
+          <div class="jc-box" style="background:#7c3aed">C</div>
+        </div>
+        <div class="tip-box" style="margin-top:8px">
+          <i class="ti ti-bulb tip-icon"></i>
+          <div class="tip-text"><strong>gap vs margin:</strong> <code>gap</code> adds space <em>between</em> items only — no gap before the first or after the last. <code>margin</code> would add space on all sides. Always prefer gap inside flex containers.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-5"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">flex-wrap <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 6  FLEX-WRAP ═══════════ -->
+  <div class="slide" id="slide-6">
+    <div class="slide-header">
+      <span class="badge b-indigo">Explain</span>
+      <div>
+        <div class="slide-title">flex-wrap — Instant Responsive Design</div>
+        <div class="slide-subtitle">Without wrap, items overflow. With wrap, they flow to the next line automatically.</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label" style="color:#dc2626">without flex-wrap (default)</div>
+        <div class="editor" style="border-radius:8px;margin-bottom:8px">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div></div>
+          <div class="editor-body" style="font-size:12px">
+            <div class="e-row"><span class="c-sel">.course-container</span><span class="c-punc"> {</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="c-prop">display</span><span class="c-punc">:</span> <span class="c-str">flex</span><span class="c-punc">;</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="c-cmt">/* flex-wrap: nowrap (default) */</span></div>
+            <div class="e-row"><span class="c-punc">}</span></div>
+          </div>
+        </div>
+        <div style="background:#fef2f2;border:2px solid #fca5a5;border-radius:10px;padding:10px;overflow:hidden">
+          <div style="font-size:10px;font-weight:700;color:#dc2626;margin-bottom:6px">Cards squeeze or overflow the screen</div>
+          <div style="display:flex;gap:5px;flex-wrap:nowrap">
+            <div style="min-width:80px;background:#dc2626;color:white;border-radius:5px;padding:6px 8px;font-size:9px;font-weight:700;text-align:center">HTML CSS</div>
+            <div style="min-width:80px;background:#dc2626;color:white;border-radius:5px;padding:6px 8px;font-size:9px;font-weight:700;text-align:center">JavaScript</div>
+            <div style="min-width:80px;background:#dc2626;color:white;border-radius:5px;padding:6px 8px;font-size:9px;font-weight:700;text-align:center">React</div>
+            <div style="min-width:80px;background:#dc2626;color:white;border-radius:5px;padding:6px 8px;font-size:9px;font-weight:700;text-align:center">Node.js</div>
+            <div style="min-width:80px;background:#dc2626;color:white;border-radius:5px;padding:6px 8px;font-size:9px;font-weight:700;text-align:center;opacity:.4">→ overfl…</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label" style="color:#059669">with flex-wrap: wrap</div>
+        <div class="editor" style="border-radius:8px;margin-bottom:8px">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div></div>
+          <div class="editor-body" style="font-size:12px">
+            <div class="e-row"><span class="c-sel">.course-container</span><span class="c-punc"> {</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="c-prop">display</span><span class="c-punc">:</span> <span class="c-str">flex</span><span class="c-punc">;</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="c-prop">flex-wrap</span><span class="c-punc">:</span> <span class="c-str">wrap</span><span class="c-punc">;</span></div>
+            <div class="e-row"><span class="c-punc">}</span></div>
+          </div>
+        </div>
+        <div style="background:#f0fdf4;border:2px solid #86efac;border-radius:10px;padding:10px">
+          <div style="font-size:10px;font-weight:700;color:#059669;margin-bottom:6px">Cards wrap to the next line automatically!</div>
+          <div style="display:flex;gap:5px;flex-wrap:wrap">
+            <div style="min-width:80px;background:#059669;color:white;border-radius:5px;padding:6px 8px;font-size:9px;font-weight:700;text-align:center">HTML CSS</div>
+            <div style="min-width:80px;background:#059669;color:white;border-radius:5px;padding:6px 8px;font-size:9px;font-weight:700;text-align:center">JavaScript</div>
+            <div style="min-width:80px;background:#059669;color:white;border-radius:5px;padding:6px 8px;font-size:9px;font-weight:700;text-align:center">React</div>
+            <div style="min-width:80px;background:#059669;color:white;border-radius:5px;padding:6px 8px;font-size:9px;font-weight:700;text-align:center">Node.js</div>
+            <div style="min-width:80px;background:#059669;color:white;border-radius:5px;padding:6px 8px;font-size:9px;font-weight:700;text-align:center">Bootstrap</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="success-box">
+      <i class="ti ti-sparkles" style="color:#16a34a;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+      <div style="font-size:13px;color:#166534;line-height:1.65"><strong>Students love this moment.</strong> Ask them to resize the browser window after adding flex-wrap. Cards automatically rearrange — no media queries needed. This is their first taste of responsive design.</div>
+    </div>
+
+    <div class="info-box">
+      <i class="ti ti-info-circle info-icon"></i>
+      <div class="info-text"><strong>How does wrap decide when to break?</strong> It wraps when items exceed the container width. Since each card has a fixed <code>width: 260px</code>, the browser calculates how many fit per row and wraps the rest automatically.</div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-6"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Live Playground <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 7  FLEX PLAYGROUND ═══════════ -->
+  <div class="slide" id="slide-7">
+    <div class="slide-header">
+      <span class="badge b-orange">Live Lab</span>
+      <div>
+        <div class="slide-title">Flex Playground</div>
+        <div class="slide-subtitle">Toggle every property live — watch the cards react instantly</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <!-- Controls -->
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="card card-gray">
+          <div class="section-label">justify-content</div>
+          <div style="display:flex;flex-wrap:wrap;gap:5px">
+            <button class="val-pill active" onclick="setPG('jc','flex-start',this)">flex-start</button>
+            <button class="val-pill" onclick="setPG('jc','center',this)">center</button>
+            <button class="val-pill" onclick="setPG('jc','flex-end',this)">flex-end</button>
+            <button class="val-pill" onclick="setPG('jc','space-between',this)">space-between</button>
+            <button class="val-pill" onclick="setPG('jc','space-evenly',this)">space-evenly</button>
+          </div>
+        </div>
+        <div class="card card-gray">
+          <div class="section-label">align-items</div>
+          <div style="display:flex;flex-wrap:wrap;gap:5px">
+            <button class="val-pill active" onclick="setPG('ai','stretch',this)">stretch</button>
+            <button class="val-pill" onclick="setPG('ai','flex-start',this)">flex-start</button>
+            <button class="val-pill" onclick="setPG('ai','center',this)">center</button>
+            <button class="val-pill" onclick="setPG('ai','flex-end',this)">flex-end</button>
+          </div>
+        </div>
+        <div class="card card-gray">
+          <div class="section-label">flex-wrap</div>
+          <div style="display:flex;gap:5px">
+            <button class="val-pill active" onclick="setPG('fw','wrap',this)">wrap</button>
+            <button class="val-pill" onclick="setPG('fw','nowrap',this)">nowrap</button>
+          </div>
+        </div>
+        <div class="card card-gray">
+          <div class="section-label">gap</div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <input type="range" min="0" max="40" value="16" style="flex:1;accent-color:#f97316" oninput="setPG('gap',this.value+'px',null,this)">
+            <span style="font-family:monospace;font-size:13px;font-weight:700;color:#f97316;min-width:36px" id="pg-gap-val">16px</span>
+          </div>
+        </div>
+      </div>
+      <!-- Preview -->
+      <div>
+        <div class="section-label">live preview</div>
+        <div class="fx-playground" id="fx-pg" style="display:flex;justify-content:flex-start;align-items:stretch;flex-wrap:wrap;gap:16px">
+          <div class="fx-item" style="background:#6366f1;padding:14px 10px;min-height:54px;min-width:80px">HTML</div>
+          <div class="fx-item" style="background:#f59e0b;padding:14px 10px;min-height:64px;min-width:80px">CSS</div>
+          <div class="fx-item" style="background:#10b981;padding:14px 10px;min-height:44px;min-width:80px">JS</div>
+          <div class="fx-item" style="background:#ef4444;padding:14px 10px;min-height:58px;min-width:80px">React</div>
+          <div class="fx-item" style="background:#8b5cf6;padding:14px 10px;min-height:50px;min-width:80px">Node</div>
+        </div>
+        <div style="margin-top:10px">
+          <div class="section-label">generated css</div>
+          <div class="editor" style="border-radius:8px">
+            <div class="editor-body" style="font-size:12px;padding:10px 14px">
+              <div class="e-row"><span class="c-sel">.course-container</span><span class="c-punc"> {</span></div>
+              <div class="e-row"><span class="e-ind1"></span><span class="c-prop">display</span><span class="c-punc">:</span> <span class="c-str">flex</span><span class="c-punc">;</span></div>
+              <div class="e-row"><span class="e-ind1"></span><span class="c-prop">justify-content</span><span class="c-punc">:</span> <span class="c-str" id="pg-css-jc">flex-start</span><span class="c-punc">;</span></div>
+              <div class="e-row"><span class="e-ind1"></span><span class="c-prop">align-items</span><span class="c-punc">:</span> <span class="c-str" id="pg-css-ai">stretch</span><span class="c-punc">;</span></div>
+              <div class="e-row"><span class="e-ind1"></span><span class="c-prop">flex-wrap</span><span class="c-punc">:</span> <span class="c-str" id="pg-css-fw">wrap</span><span class="c-punc">;</span></div>
+              <div class="e-row"><span class="e-ind1"></span><span class="c-prop">gap</span><span class="c-punc">:</span> <span class="c-num" id="pg-css-gap">16px</span><span class="c-punc">;</span></div>
+              <div class="e-row"><span class="c-punc">}</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-7"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Add HTML <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 8  HTML CODE ═══════════ -->
+  <div class="slide" id="slide-8">
+    <div class="slide-header">
+      <span class="badge b-blue">Code</span>
+      <div>
+        <div class="slide-title">Upgrade index.html — Wrap Cards in a Container</div>
+        <div class="slide-subtitle">We need a parent div to apply Flexbox — the cards become its children</div>
+      </div>
+    </div>
+
+    <div class="activity-box">
+      <div class="activity-title"><i class="ti ti-keyboard"></i> Find your Courses section and update it like this</div>
+      <div class="editor" style="border-radius:8px">
+        <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">frontend/index.html — courses section</span></div>
+        <div class="editor-body">
+          <div class="e-row"><span class="e-ln">1</span><span class="e-new">&lt;section</span> <span class="e-att">class</span><span class="e-val">="courses"</span><span class="e-new">&gt;</span></div>
+          <div class="e-row"><span class="e-ln">2</span></div>
+          <div class="e-row"><span class="e-ln">3</span><span class="e-ind1"></span><span class="e-h2">&lt;h2&gt;</span><span class="e-txt">Our Courses</span><span class="e-h2">&lt;/h2&gt;</span></div>
+          <div class="e-row"><span class="e-ln">4</span></div>
+          <div class="e-row"><span class="e-ln">5</span><span class="e-ind1"></span><span class="e-cmt">&lt;!-- WRAP ALL CARDS IN THIS DIV --&gt;</span></div>
+          <div class="e-row"><span class="e-ln">6</span><span class="e-ind1"></span><span class="e-new">&lt;div</span> <span class="e-att">class</span><span class="e-val">="course-container"</span><span class="e-new">&gt;</span></div>
+          <div class="e-row"><span class="e-ln">7</span></div>
+          <div class="e-row"><span class="e-ln">8</span><span class="e-ind2"></span><span class="e-new">&lt;div</span> <span class="e-att">class</span><span class="e-val">="card"</span><span class="e-new">&gt;</span></div>
+          <div class="e-row"><span class="e-ln">9</span><span class="e-ind3"></span><span class="e-h2">&lt;h3&gt;</span><span class="e-txt">HTML &amp;amp; CSS</span><span class="e-h2">&lt;/h3&gt;</span></div>
+          <div class="e-row"><span class="e-ln">10</span><span class="e-ind3"></span><span class="e-p">&lt;p&gt;</span><span class="e-txt">Build your first webpage</span><span class="e-p">&lt;/p&gt;</span></div>
+          <div class="e-row"><span class="e-ln">11</span><span class="e-ind2"></span><span class="e-new">&lt;/div&gt;</span></div>
+          <div class="e-row"><span class="e-ln">12</span></div>
+          <div class="e-row"><span class="e-ln">13</span><span class="e-ind2"></span><span class="e-new">&lt;div</span> <span class="e-att">class</span><span class="e-val">="card"</span><span class="e-new">&gt;</span></div>
+          <div class="e-row"><span class="e-ln">14</span><span class="e-ind3"></span><span class="e-h2">&lt;h3&gt;</span><span class="e-txt">JavaScript</span><span class="e-h2">&lt;/h3&gt;</span></div>
+          <div class="e-row"><span class="e-ln">15</span><span class="e-ind3"></span><span class="e-p">&lt;p&gt;</span><span class="e-txt">Make pages interactive</span><span class="e-p">&lt;/p&gt;</span></div>
+          <div class="e-row"><span class="e-ln">16</span><span class="e-ind2"></span><span class="e-new">&lt;/div&gt;</span></div>
+          <div class="e-row"><span class="e-ln">17</span></div>
+          <div class="e-row"><span class="e-ln">18</span><span class="e-ind2"></span><span class="e-new">&lt;div</span> <span class="e-att">class</span><span class="e-val">="card"</span><span class="e-new">&gt;</span></div>
+          <div class="e-row"><span class="e-ln">19</span><span class="e-ind3"></span><span class="e-h2">&lt;h3&gt;</span><span class="e-txt">React</span><span class="e-h2">&lt;/h3&gt;</span></div>
+          <div class="e-row"><span class="e-ln">20</span><span class="e-ind3"></span><span class="e-p">&lt;p&gt;</span><span class="e-txt">Build modern UIs</span><span class="e-p">&lt;/p&gt;</span></div>
+          <div class="e-row"><span class="e-ln">21</span><span class="e-ind2"></span><span class="e-new">&lt;/div&gt;</span></div>
+          <div class="e-row"><span class="e-ln">22</span></div>
+          <div class="e-row"><span class="e-ln">23</span><span class="e-ind1"></span><span class="e-new">&lt;/div&gt;</span> <span class="e-cmt">&lt;!-- end .course-container --&gt;</span></div>
+          <div class="e-row"><span class="e-ln">24</span></div>
+          <div class="e-row"><span class="e-ln">25</span><span class="e-new">&lt;/section&gt;</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="info-box">
+        <i class="ti ti-info-circle info-icon"></i>
+        <div class="info-text"><strong>Key idea:</strong> The <code>.course-container</code> div is the <strong>Flex Container</strong>. Each <code>.card</code> inside it becomes a <strong>Flex Item</strong>. We apply <code>display:flex</code> to the parent, never the cards themselves.</div>
+      </div>
+      <div class="tip-box">
+        <i class="ti ti-bulb tip-icon"></i>
+        <div class="tip-text"><strong>If you have existing cards:</strong> Just wrap them — don't rewrite the card HTML. Select all card divs, indent them, and add the container div around them.</div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-8"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Write the CSS <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 9  CSS ═══════════ -->
+  <div class="slide" id="slide-9">
+    <div class="slide-header">
+      <span class="badge b-teal">CSS</span>
+      <div>
+        <div class="slide-title">Write the Flexbox CSS</div>
+        <div class="slide-subtitle">Add these rules to the bottom of style.css — container, card, and hover</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="editor">
+        <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">frontend/css/style.css — add at the bottom</span></div>
+        <div class="editor-body">
+          <div class="e-row"><span class="e-ln">1</span><span class="c-cmt">/* ── Flexbox Layout (Day 4 Hour 2) ── */</span></div>
+          <div class="e-row"><span class="e-ln">2</span><span class="c-sel">.course-container</span><span class="c-punc"> {</span></div>
+          <div class="e-row"><span class="e-ln">3</span><span class="e-ind1"></span><span class="c-prop">display</span><span class="c-punc">:</span> <span class="c-str">flex</span><span class="c-punc">;</span></div>
+          <div class="e-row"><span class="e-ln">4</span><span class="e-ind1"></span><span class="c-prop">justify-content</span><span class="c-punc">:</span> <span class="c-str">center</span><span class="c-punc">;</span></div>
+          <div class="e-row"><span class="e-ln">5</span><span class="e-ind1"></span><span class="c-prop">gap</span><span class="c-punc">:</span> <span class="c-num">25px</span><span class="c-punc">;</span></div>
+          <div class="e-row"><span class="e-ln">6</span><span class="e-ind1"></span><span class="c-prop">flex-wrap</span><span class="c-punc">:</span> <span class="c-str">wrap</span><span class="c-punc">;</span></div>
+          <div class="e-row"><span class="e-ln">7</span><span class="c-punc">}</span></div>
+          <div class="e-row"><span class="e-ln">8</span></div>
+          <div class="e-row"><span class="e-ln">9</span><span class="c-sel">.card</span><span class="c-punc"> {</span></div>
+          <div class="e-row"><span class="e-ln">10</span><span class="e-ind1"></span><span class="c-prop">width</span><span class="c-punc">:</span> <span class="c-num">260px</span><span class="c-punc">;</span></div>
+          <div class="e-row"><span class="e-ln">11</span><span class="e-ind1"></span><span class="c-prop">padding</span><span class="c-punc">:</span> <span class="c-num">20px</span><span class="c-punc">;</span></div>
+          <div class="e-row"><span class="e-ln">12</span><span class="e-ind1"></span><span class="c-prop">background</span><span class="c-punc">:</span> <span class="c-str">white</span><span class="c-punc">;</span></div>
+          <div class="e-row"><span class="e-ln">13</span><span class="e-ind1"></span><span class="c-prop">border-radius</span><span class="c-punc">:</span> <span class="c-num">10px</span><span class="c-punc">;</span></div>
+          <div class="e-row"><span class="e-ln">14</span><span class="e-ind1"></span><span class="c-prop">box-shadow</span><span class="c-punc">:</span> <span class="c-str">0 0 10px rgba(0,0,0,.2)</span><span class="c-punc">;</span></div>
+          <div class="e-row"><span class="e-ln">15</span><span class="e-ind1"></span><span class="c-prop">transition</span><span class="c-punc">:</span> <span class="c-num">.3s</span><span class="c-punc">;</span></div>
+          <div class="e-row"><span class="e-ln">16</span><span class="c-punc">}</span></div>
+          <div class="e-row"><span class="e-ln">17</span></div>
+          <div class="e-row"><span class="e-ln">18</span><span class="c-sel">.card:hover</span><span class="c-punc"> {</span></div>
+          <div class="e-row"><span class="e-ln">19</span><span class="e-ind1"></span><span class="c-prop">transform</span><span class="c-punc">:</span> <span class="c-str">translateY</span><span class="c-punc">(</span><span class="c-num">-10px</span><span class="c-punc">);</span></div>
+          <div class="e-row"><span class="e-ln">20</span><span class="c-punc">}</span></div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="section-label">result in browser</div>
+        <div class="sh-wrap">
+          <div class="sh-header2">SkillHub LMS</div>
+          <div class="sh-courses">
+            <div style="font-size:12px;font-weight:700;margin-bottom:12px">Our Courses</div>
+            <div style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap">
+              <div class="sh-course-card">
+                <span class="sh-course-badge" style="background:#dbeafe;color:#1d4ed8">Beginner</span>
+                <h3>HTML &amp; CSS</h3>
+                <p>Build your first webpage from scratch</p>
+              </div>
+              <div class="sh-course-card">
+                <span class="sh-course-badge" style="background:#fef3c7;color:#92400e">Intermediate</span>
+                <h3>JavaScript</h3>
+                <p>Make pages interactive</p>
+              </div>
+              <div class="sh-course-card">
+                <span class="sh-course-badge" style="background:#ede9fe;color:#5b21b6">Advanced</span>
+                <h3>React</h3>
+                <p>Build modern UIs</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="line-explain">
+          <div class="lex-row" onclick="toggleLex(this)">
+            <div class="lex-code"><span class="c-prop">display</span><span class="c-punc">:</span><span class="c-str">flex</span></div>
+            <div class="lex-info">
+              <div class="lex-name">Makes .course-container a Flex Container</div>
+              <div class="lex-desc">Children (cards) immediately line up in a row.</div>
+              <div class="lex-detail">Without this line, every other property in the block is meaningless. This is the on/off switch for Flexbox.</div>
+            </div>
+          </div>
+          <div class="lex-row" onclick="toggleLex(this)">
+            <div class="lex-code"><span class="c-prop">justify-content</span><span class="c-punc">:</span><span class="c-str">center</span></div>
+            <div class="lex-info">
+              <div class="lex-name">Centres the cards horizontally</div>
+              <div class="lex-desc">If there are only 2 cards, they sit in the middle — not left-aligned.</div>
+              <div class="lex-detail">Try space-between to push cards to edges. Try flex-start for left-alignment. Pick what suits your design.</div>
+            </div>
+          </div>
+          <div class="lex-row" onclick="toggleLex(this)">
+            <div class="lex-code"><span class="c-prop">gap</span><span class="c-punc">:</span><span class="c-num">25px</span></div>
+            <div class="lex-info">
+              <div class="lex-name">25px space between every card</div>
+              <div class="lex-desc">No gap before the first card, no gap after the last — just between.</div>
+              <div class="lex-detail">Using margin on cards instead would add space outside the container too. gap is always cleaner inside flex.</div>
+            </div>
+          </div>
+          <div class="lex-row" onclick="toggleLex(this)">
+            <div class="lex-code"><span class="c-prop">transform</span><span class="c-punc">:translateY(</span><span class="c-num">-10px</span><span class="c-punc">)</span></div>
+            <div class="lex-info">
+              <div class="lex-name">Card lifts up on hover</div>
+              <div class="lex-desc">The transition:.3s on .card makes this animate smoothly.</div>
+              <div class="lex-detail">translateY moves the element along the Y-axis (vertical). Negative = up. Combined with box-shadow, this creates a "lifting card" effect popular on modern sites.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-9"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Mini Challenge <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 10  CHALLENGE ═══════════ -->
+  <div class="slide" id="slide-10">
+    <div class="slide-header">
+      <span class="badge b-rose">Challenge</span>
+      <div>
+        <div class="slide-title">Mini Challenge — Add 6 More Course Cards</div>
+        <div class="slide-subtitle">Practice writing card HTML — Flexbox handles the layout automatically</div>
+      </div>
+    </div>
+
+    <div class="challenge-box">
+      <div class="challenge-title"><i class="ti ti-trophy"></i> Your Task — Add These 6 Cards to index.html</div>
+      <div class="grid-3" style="gap:8px">
+        <div style="background:#dbeafe;border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:8px">
+          <i class="ti ti-brand-bootstrap" style="color:#7c3aed;font-size:20px"></i>
+          <div><div style="font-size:12px;font-weight:700;color:#1e40af">Bootstrap</div><div style="font-size:11px;color:#555">CSS Framework</div></div>
+        </div>
+        <div style="background:#d1fae5;border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:8px">
+          <i class="ti ti-server" style="color:#059669;font-size:20px"></i>
+          <div><div style="font-size:12px;font-weight:700;color:#065f46">Express.js</div><div style="font-size:11px;color:#555">Backend Framework</div></div>
+        </div>
+        <div style="background:#fef3c7;border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:8px">
+          <i class="ti ti-brand-git" style="color:#f97316;font-size:20px"></i>
+          <div><div style="font-size:12px;font-weight:700;color:#92400e">Git</div><div style="font-size:11px;color:#555">Version Control</div></div>
+        </div>
+        <div style="background:#ede9fe;border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:8px">
+          <i class="ti ti-brand-react" style="color:#06b6d4;font-size:20px"></i>
+          <div><div style="font-size:12px;font-weight:700;color:#5b21b6">React</div><div style="font-size:11px;color:#555">UI Library</div></div>
+        </div>
+        <div style="background:#dcfce7;border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:8px">
+          <i class="ti ti-brand-nodejs" style="color:#16a34a;font-size:20px"></i>
+          <div><div style="font-size:12px;font-weight:700;color:#166534">Node.js</div><div style="font-size:11px;color:#555">JavaScript Runtime</div></div>
+        </div>
+        <div style="background:#fce7f3;border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:8px">
+          <i class="ti ti-database" style="color:#be185d;font-size:20px"></i>
+          <div><div style="font-size:12px;font-weight:700;color:#9d174d">MongoDB</div><div style="font-size:11px;color:#555">NoSQL Database</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">code pattern for each card</div>
+        <div class="editor" style="border-radius:8px">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">inside .course-container</span></div>
+          <div class="editor-body">
+            <div class="e-row"><span class="e-ln">1</span><span class="e-new">&lt;div</span> <span class="e-att">class</span><span class="e-val">="card"</span><span class="e-new">&gt;</span></div>
+            <div class="e-row"><span class="e-ln">2</span><span class="e-ind1"></span><span class="e-h2">&lt;h3&gt;</span><span class="e-txt">Bootstrap</span><span class="e-h2">&lt;/h3&gt;</span></div>
+            <div class="e-row"><span class="e-ln">3</span><span class="e-ind1"></span><span class="e-p">&lt;p&gt;</span><span class="e-txt">CSS Framework</span><span class="e-p">&lt;/p&gt;</span></div>
+            <div class="e-row"><span class="e-ln">4</span><span class="e-new">&lt;/div&gt;</span></div>
+            <div class="e-row"><span class="e-ln">5</span></div>
+            <div class="e-row"><span class="e-ln">6</span><span class="e-cmt">&lt;!-- repeat for each course --&gt;</span></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">expected result with flex-wrap</div>
+        <div style="background:#f8f9fa;border:1px solid #e0e0e0;border-radius:10px;padding:10px;font-family:Arial,sans-serif">
+          <div style="font-size:11px;font-weight:700;margin-bottom:8px;color:#1a1a1a">Our Courses</div>
+          <div style="display:flex;flex-wrap:wrap;gap:7px;justify-content:center">
+            <div style="background:white;border-radius:6px;padding:8px 10px;box-shadow:0 2px 5px rgba(0,0,0,.12);font-size:10px;font-weight:700;width:90px">HTML &amp; CSS<br><span style="color:#666;font-weight:400">Basics</span></div>
+            <div style="background:white;border-radius:6px;padding:8px 10px;box-shadow:0 2px 5px rgba(0,0,0,.12);font-size:10px;font-weight:700;width:90px">JavaScript<br><span style="color:#666;font-weight:400">Logic</span></div>
+            <div style="background:white;border-radius:6px;padding:8px 10px;box-shadow:0 2px 5px rgba(0,0,0,.12);font-size:10px;font-weight:700;width:90px">Bootstrap<br><span style="color:#666;font-weight:400">Framework</span></div>
+            <div style="background:white;border-radius:6px;padding:8px 10px;box-shadow:0 2px 5px rgba(0,0,0,.12);font-size:10px;font-weight:700;width:90px">Express<br><span style="color:#666;font-weight:400">Backend</span></div>
+            <div style="background:white;border-radius:6px;padding:8px 10px;box-shadow:0 2px 5px rgba(0,0,0,.12);font-size:10px;font-weight:700;width:90px">Git<br><span style="color:#666;font-weight:400">Version Control</span></div>
+            <div style="background:white;border-radius:6px;padding:8px 10px;box-shadow:0 2px 5px rgba(0,0,0,.12);font-size:10px;font-weight:700;width:90px">React<br><span style="color:#666;font-weight:400">UI Library</span></div>
+            <div style="background:white;border-radius:6px;padding:8px 10px;box-shadow:0 2px 5px rgba(0,0,0,.12);font-size:10px;font-weight:700;width:90px">Node.js<br><span style="color:#666;font-weight:400">Runtime</span></div>
+            <div style="background:white;border-radius:6px;padding:8px 10px;box-shadow:0 2px 5px rgba(0,0,0,.12);font-size:10px;font-weight:700;width:90px">MongoDB<br><span style="color:#666;font-weight:400">Database</span></div>
+          </div>
+        </div>
+        <div class="success-box" style="margin-top:8px">
+          <i class="ti ti-sparkles" style="color:#16a34a;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+          <div style="font-size:12px;color:#166534">Notice: You didn't write any extra CSS. Flexbox + flex-wrap handled the grid automatically!</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <div class="section-label">student checklist</div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><span>Added .course-container div wrapping all card divs</span></div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><span>Added CSS: display:flex, justify-content:center, gap:25px, flex-wrap:wrap</span></div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><span>Styled .card with width, padding, border-radius, box-shadow, transition</span></div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><span>Added .card:hover with transform:translateY(-10px)</span></div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><span>Added 6 new course cards (Bootstrap, Express, Git, React, Node, MongoDB)</span></div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><span>Resized browser — cards wrap to next row ✓</span></div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-10"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Quick Quiz <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 11  QUIZ ═══════════ -->
+  <div class="slide" id="slide-11">
+    <div class="slide-header">
+      <span class="badge b-slate">Quiz</span>
+      <div>
+        <div class="slide-title">Quick-Fire Quiz</div>
+        <div class="slide-subtitle">4 questions — test your Flexbox understanding</div>
+      </div>
+    </div>
+    <div id="quiz-container"></div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-11"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Wrap Up <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 12  WRAP UP ═══════════ -->
+  <div class="slide" id="slide-12">
+    <div class="slide-header">
+      <span class="badge b-green">Wrap-Up</span>
+      <div>
+        <div class="slide-title">Day 4 Complete — Great Work!</div>
+        <div class="slide-subtitle">Box Model + Flexbox = the foundation of every modern layout</div>
+      </div>
+    </div>
+
+    <div style="background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);border-radius:14px;padding:24px;text-align:center;color:white">
+      <i class="ti ti-confetti" style="font-size:40px;color:#fbbf24;margin-bottom:10px;display:block"></i>
+      <div style="font-size:20px;font-weight:800;margin-bottom:6px">SkillHub LMS — Day 4 Done!</div>
+      <div style="font-size:13px;opacity:.75">Your course cards now sit side-by-side, wrap on small screens, and lift on hover.</div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">what you built today</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div class="check-item done"><div class="check-circle">✓</div><span>Box Model: padding, border, margin, border-radius</span></div>
+          <div class="check-item done"><div class="check-circle">✓</div><span>display:flex on .course-container</span></div>
+          <div class="check-item done"><div class="check-circle">✓</div><span>justify-content: center + 5 values understood</span></div>
+          <div class="check-item done"><div class="check-circle">✓</div><span>align-items + gap for spacing</span></div>
+          <div class="check-item done"><div class="check-circle">✓</div><span>flex-wrap: wrap for responsiveness</span></div>
+          <div class="check-item done"><div class="check-circle">✓</div><span>Hover animation with transform + transition</span></div>
+          <div class="check-item done"><div class="check-circle">✓</div><span>9 course cards on SkillHub</span></div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">day 5 preview</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="background:#fef3c7;border:1px solid #fde68a;border-radius:10px;padding:12px 14px">
+            <div style="font-size:13px;font-weight:700;color:#92400e;margin-bottom:4px"><i class="ti ti-brand-javascript" style="margin-right:5px"></i>Day 5 — JavaScript Basics</div>
+            <div style="font-size:12px;color:#a16207">Variables, functions, DOM manipulation — making SkillHub interactive</div>
+          </div>
+          <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:12px 14px">
+            <div style="font-size:13px;font-weight:700;color:#1e40af;margin-bottom:6px">Flexbox Cheat Sheet — remember this:</div>
+            <div style="display:flex;flex-direction:column;gap:4px;font-size:12px;color:#1d4ed8;font-family:monospace">
+              <span>display: flex; <span style="color:#888;font-family:sans-serif">→ turn it on</span></span>
+              <span>justify-content: center; <span style="color:#888;font-family:sans-serif">→ horizontal</span></span>
+              <span>align-items: center; <span style="color:#888;font-family:sans-serif">→ vertical</span></span>
+              <span>gap: 20px; <span style="color:#888;font-family:sans-serif">→ spacing</span></span>
+              <span>flex-wrap: wrap; <span style="color:#888;font-family:sans-serif">→ responsive</span></span>
+            </div>
+          </div>
+          <div class="tip-box">
+            <i class="ti ti-bulb tip-icon"></i>
+            <div class="tip-text"><strong>Homework:</strong> Open any website you use daily and inspect it (F12 → Elements). See how many flex containers you can spot. Flexbox is literally everywhere.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-12"></div>
+      <button class="nav-btn" onclick="goSlide(0)"><i class="ti ti-home"></i> Home</button>
+    </div>
+  </div>
+
+</div><!-- end .wrapper -->
+
+<script>
+  var current = 0;
+  var total = 13;
+  var quizInit = false;
+
+  /* ── justify-content demo ── */
+  var jcDescriptions = {
+    'flex-start':   '<strong>flex-start</strong> — Items pack to the left edge of the container. This is the default when you do not write justify-content at all.',
+    'center':       '<strong>center</strong> — Items are centred horizontally in the container. Perfect for hero buttons and centred card rows.',
+    'flex-end':     '<strong>flex-end</strong> — Items pack to the right edge. Useful for login buttons on the right side of a nav bar.',
+    'space-between':'<strong>space-between</strong> — First and last items hug the edges; remaining space is distributed evenly between items. Classic nav bar pattern.',
+    'space-around': '<strong>space-around</strong> — Each item gets equal space on both sides. The gaps at the edges are half the size of gaps between items.',
+    'space-evenly': '<strong>space-evenly</strong> — All gaps (between items AND at edges) are exactly equal. The most visually balanced option.'
+  };
+  function setJC(val) {
+    document.getElementById('jc-demo').style.justifyContent = val;
+    document.getElementById('jc-label').textContent = 'justify-content: ' + val;
+    document.getElementById('jc-desc').innerHTML = jcDescriptions[val];
+    document.querySelectorAll('#slide-4 .val-pill').forEach(function(btn){
+      btn.classList.toggle('active', btn.textContent === val);
+    });
+  }
+
+  /* ── align-items demo ── */
+  var aiDescriptions = {
+    'flex-start': 'Items line up at the <strong>top</strong> of the container. Each sits at the start of the cross axis.',
+    'center':     'Items are <strong>vertically centred</strong> in the container — regardless of their individual heights.',
+    'flex-end':   'Items align to the <strong>bottom</strong> of the container.',
+    'stretch':    'Items <strong>stretch to fill</strong> the full height of the container. This is the default value.'
+  };
+  function setAI(val) {
+    document.getElementById('ai-demo').style.alignItems = val;
+    document.getElementById('ai-label').textContent = 'align-items: ' + val;
+    document.getElementById('ai-desc').innerHTML = aiDescriptions[val];
+    document.querySelectorAll('#slide-5 .val-pill').forEach(function(btn){
+      btn.classList.toggle('active', btn.textContent === val);
+    });
+  }
+
+  /* ── gap demo ── */
+  function setGap(val) {
+    document.getElementById('gap-demo').style.gap = val + 'px';
+    document.getElementById('gap-val').textContent = val + 'px';
+    document.getElementById('gap-css-val').textContent = val + 'px';
+  }
+
+  /* ── playground ── */
+  var pgState = { jc: 'flex-start', ai: 'stretch', fw: 'wrap', gap: '16px' };
+  function setPG(prop, val, btn, rangeEl) {
+    var pg = document.getElementById('fx-pg');
+    if (prop === 'jc') { pgState.jc = val; pg.style.justifyContent = val; document.getElementById('pg-css-jc').textContent = val; }
+    if (prop === 'ai') { pgState.ai = val; pg.style.alignItems = val;     document.getElementById('pg-css-ai').textContent = val; }
+    if (prop === 'fw') { pgState.fw = val; pg.style.flexWrap = val;       document.getElementById('pg-css-fw').textContent = val; }
+    if (prop === 'gap') { pgState.gap = val; pg.style.gap = val; document.getElementById('pg-css-gap').textContent = val; document.getElementById('pg-gap-val').textContent = val; }
+    if (btn) {
+      var group = btn.parentElement;
+      group.querySelectorAll('.val-pill').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+    }
+  }
+
+  /* ── Quiz data ── */
+  var quizData = [
+    {
+      q: "Which CSS property turns an element into a Flex Container?",
+      opts: ["flex: container", "display: flex", "flex-direction: row", "position: flex"],
+      ans: 1,
+      exp: "display: flex is the on/off switch. Applied to the parent, it turns direct children into Flex Items arranged in a row by default."
+    },
+    {
+      q: "You want cards centred horizontally with equal gaps between them, but the first and last cards touching the container edges. Which value do you use?",
+      opts: ["justify-content: center", "justify-content: space-around", "justify-content: space-between", "justify-content: flex-start"],
+      ans: 2,
+      exp: "space-between pushes the first item to the left edge and the last to the right edge, distributing remaining space evenly between items."
+    },
+    {
+      q: "Your SkillHub cards overflow the screen on mobile. Which property makes them wrap to the next line?",
+      opts: ["flex-direction: column", "flex-wrap: wrap", "overflow: hidden", "width: auto"],
+      ans: 1,
+      exp: "flex-wrap: wrap tells the Flex Container to send items to the next line when there is not enough horizontal space. This is the simplest way to get a responsive card grid."
+    },
+    {
+      q: "What is the difference between gap and margin when used inside a Flex Container?",
+      opts: [
+        "There is no difference — both add the same spacing",
+        "gap adds space between items only; margin adds space on all sides including outside the container",
+        "margin works inside flex; gap only works with CSS Grid",
+        "gap: 20px is the same as margin: 0 10px on each child"
+      ],
+      ans: 1,
+      exp: "gap only creates space between Flex Items — no space before the first or after the last item. margin adds space on all four sides of each item, which can push against the container edges and cause uneven spacing."
+    }
+  ];
+  var quizAnswered = [];
+
+  function renderQuiz() {
+    var c = document.getElementById('quiz-container'); c.innerHTML = '';
+    quizData.forEach(function(q, i) {
+      var d = document.createElement('div'); d.style.cssText = 'margin-bottom:18px';
+      d.innerHTML = '<div style="font-size:13px;font-weight:600;margin-bottom:6px">'+(i+1)+'. '+q.q+'</div>';
+      q.opts.forEach(function(opt, j) {
+        var btn = document.createElement('button'); btn.className = 'quiz-option';
+        btn.innerHTML = String.fromCharCode(65+j)+'. '+opt;
+        btn.onclick = function() {
+          if (quizAnswered[i]) return; quizAnswered[i] = true;
+          var btns = d.querySelectorAll('.quiz-option');
+          btns.forEach(function(b,k){ b.disabled=true; if(k===q.ans) b.classList.add('correct'); else if(k===j) b.classList.add('wrong'); });
+          var fb = d.querySelector('.quiz-feedback');
+          fb.innerHTML = (j===q.ans?'✅ Correct! ':'❌ Not quite. ')+q.exp;
+          fb.className = 'quiz-feedback '+(j===q.ans?'correct':'wrong');
+        };
+        d.appendChild(btn);
+      });
+      var fb = document.createElement('div'); fb.className = 'quiz-feedback'; d.appendChild(fb);
+      c.appendChild(d);
+    });
+  }
+
+  function toggleLex(row) {
+    var was = row.classList.contains('active');
+    document.querySelectorAll('.lex-row.active').forEach(function(r){ r.classList.remove('active'); });
+    if (!was) row.classList.add('active');
+  }
+
+  function toggleCheck(item) {
+    item.classList.toggle('done');
+  }
+
+  function goSlide(n) {
+    document.getElementById('slide-'+current).classList.remove('active');
+    current = n;
+    document.getElementById('slide-'+current).classList.add('active');
+    updateDots();
+    document.getElementById('slide-counter').textContent = (current+1)+' / '+total;
+    if (n===11 && !quizInit) { renderQuiz(); quizInit=true; }
+    window.scrollTo(0,0);
+  }
+  function nextSlide() { if (current < total-1) goSlide(current+1); }
+  function prevSlide() { if (current > 0) goSlide(current-1); }
+
+  function updateDots() {
+    for (var s=0; s<total; s++) {
+      var el = document.getElementById('dots-'+s); if (!el) continue;
+      el.innerHTML = '';
+      for (var d=0; d<total; d++) {
+        var dot = document.createElement('div');
+        dot.className = 'dot'+(d===current?' active':'');
+        el.appendChild(dot);
+      }
+    }
+  }
+  updateDots();
+</script>
+</body>
+</html>

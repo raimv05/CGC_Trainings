@@ -1,0 +1,1345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Day 3 · Hour 3 – About + Course Cards + Footer</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f4f5f7; color: #1a1a1a;
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; padding: 2rem 1rem;
+  }
+  .wrapper {
+    width: 100%; max-width: 920px; background: #fff;
+    border-radius: 16px; box-shadow: 0 2px 20px rgba(0,0,0,0.09); overflow: hidden;
+  }
+  .top-bar {
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    color: #fff; padding: 14px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .top-bar-title { font-size: 15px; font-weight: 600; }
+  .top-bar-sub   { font-size: 12px; opacity: .55; margin-top: 2px; }
+  .slide-counter { font-size: 13px; opacity: .6; font-variant-numeric: tabular-nums; }
+  .slide { display: none; padding: 1.75rem 2rem; min-height: 500px; flex-direction: column; gap: 1.2rem; }
+  .slide.active { display: flex; }
+  .slide-header { display: flex; align-items: center; gap: 10px; padding-bottom: 1rem; border-bottom: 1px solid #e8e8e8; }
+  .slide-title    { font-size: 20px; font-weight: 700; color: #111; }
+  .slide-subtitle { font-size: 13px; color: #666; margin-top: 2px; }
+
+  /* ── Badges ── */
+  .badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+  .b-blue   { background:#dbeafe; color:#1d4ed8; }
+  .b-teal   { background:#d1fae5; color:#065f46; }
+  .b-purple { background:#ede9fe; color:#5b21b6; }
+  .b-amber  { background:#fef3c7; color:#92400e; }
+  .b-green  { background:#dcfce7; color:#166534; }
+  .b-slate  { background:#e2e8f0; color:#334155; }
+  .b-rose   { background:#ffe4e6; color:#9f1239; }
+  .b-orange { background:#ffedd5; color:#9a3412; }
+  .b-indigo { background:#e0e7ff; color:#3730a3; }
+  .b-cyan   { background:#cffafe; color:#164e63; }
+  .b-yellow { background:#fef9c3; color:#854d0e; }
+  .b-pink   { background:#fce7f3; color:#9d174d; }
+
+  /* ── Layout ── */
+  .section-label { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 8px; }
+  .card { background: #fff; border: 1px solid #e8e8e8; border-radius: 12px; padding: 1rem 1.25rem; }
+  .card-gray { background: #f8f9fa; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+  /* ── Code Editor (Dracula) ── */
+  .editor { background: #1e1e2e; border-radius: 12px; overflow: hidden; font-family: 'SFMono-Regular', Consolas, 'Courier New', monospace; }
+  .editor-bar { background: #13131f; padding: 9px 14px; display: flex; align-items: center; gap: 6px; }
+  .e-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .e-red { background:#ff5f57; } .e-yellow { background:#febc2e; } .e-green { background:#28c840; }
+  .e-label { font-size: 12px; color: #6272a4; margin-left: 4px; font-family: -apple-system, sans-serif; }
+  .editor-body { padding: 14px 18px; font-size: 12.5px; line-height: 1.8; }
+  .e-ln   { color: #44475a; font-size: 11px; display: inline-block; width: 22px; user-select: none; }
+  .e-tag  { color: #ff79c6; }
+  .e-att  { color: #50fa7b; }
+  .e-val  { color: #f1fa8c; }
+  .e-txt  { color: #f8f8f2; }
+  .e-cmt  { color: #6272a4; font-style: italic; }
+  .e-new  { color: #80ffea; }
+  .e-h2   { color: #ffb86c; font-weight: 700; }
+  .e-p    { color: #8be9fd; }
+  /* CSS-specific tokens */
+  .c-sel  { color: #ff79c6; font-weight: 700; }
+  .c-prop { color: #50fa7b; }
+  .c-val  { color: #f1fa8c; }
+  .c-punc { color: #f8f8f2; }
+  .c-hex  { color: #bd93f9; }
+  .c-str  { color: #ffb86c; }
+  .c-num  { color: #ff79c6; }
+  .c-cmt  { color: #6272a4; font-style: italic; }
+  .c-pseudo { color: #80ffea; }
+  .e-row  { display: flex; gap: 8px; }
+  .e-ind1 { display: inline-block; width: 20px; }
+  .e-ind2 { display: inline-block; width: 40px; }
+
+  /* ── Browser frame ── */
+  .browser { border-radius: 12px; overflow: hidden; border: 1px solid #e0e0e0; }
+  .browser-bar { background: #f1f3f4; padding: 9px 14px; display: flex; align-items: center; gap: 7px; border-bottom: 1px solid #e0e0e0; }
+  .b-dot2 { width: 10px; height: 10px; border-radius: 50%; }
+  .b-r { background:#ff5f57; } .b-y { background:#febc2e; } .b-g { background:#28c840; }
+  .b-url { flex:1; background:#fff; border:1px solid #dadce0; border-radius:20px; padding:4px 14px; font-size:12px; color:#555; }
+
+  /* ── Tables ── */
+  .tag-table { border-collapse: collapse; width: 100%; }
+  .tag-table th { background: #f1f5f9; font-size: 12px; font-weight: 700; text-align: left; padding: 10px 14px; color: #475569; border-bottom: 2px solid #e2e8f0; }
+  .tag-table td { font-size: 13px; padding: 10px 14px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+  .tag-table tr:last-child td { border-bottom: none; }
+  .tag-table tr:hover td { background: #f8f9fa; }
+  .tag-mono { font-family: 'SFMono-Regular', Consolas, monospace; font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 5px; }
+
+  /* ── Quiz ── */
+  .quiz-option { border: 1px solid #dee2e6; border-radius: 8px; padding: 10px 14px; font-size: 13px; cursor: pointer; margin-bottom: 6px; transition: all .15s; background: transparent; width: 100%; text-align: left; color: #1a1a1a; }
+  .quiz-option:hover:not(:disabled) { background: #f8f9fa; }
+  .quiz-option.correct { background: #d1fae5; border-color: #059669; color: #065f46; }
+  .quiz-option.wrong   { background: #fee2e2; border-color: #dc2626; color: #991b1b; }
+  .quiz-feedback { display: none; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-top: 4px; }
+  .quiz-feedback.correct { background: #d1fae5; color: #065f46; display: block; }
+  .quiz-feedback.wrong   { background: #fee2e2; color: #991b1b; display: block; }
+
+  /* ── Activity / challenge ── */
+  .activity-box { border: 2px dashed #a5b4fc; background: #eef2ff; border-radius: 12px; padding: 14px 18px; }
+  .activity-title { font-size: 13px; font-weight: 700; color: #3730a3; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .challenge-box { border: 2px dashed #f9a8d4; background: #fdf2f8; border-radius: 12px; padding: 14px 18px; }
+  .challenge-title { font-size: 13px; font-weight: 700; color: #9f1239; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+
+  /* ── Tip / info / warn / success ── */
+  .tip-box   { display:flex; gap:10px; align-items:flex-start; background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:10px 14px; }
+  .tip-icon  { color:#d97706; font-size:18px; flex-shrink:0; margin-top:1px; }
+  .tip-text  { font-size:13px; color:#92400e; line-height:1.6; }
+  .info-box  { display:flex; gap:10px; align-items:flex-start; background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:10px 14px; }
+  .info-icon { color:#2563eb; font-size:18px; flex-shrink:0; margin-top:1px; }
+  .info-text { font-size:13px; color:#1e40af; line-height:1.6; }
+  .warn-box  { display:flex; gap:10px; align-items:flex-start; background:#fef9ee; border:1px solid #fcd34d; border-radius:10px; padding:10px 14px; }
+  .success-box { display:flex; gap:10px; align-items:flex-start; background:#f0fdf4; border:1px solid #86efac; border-radius:10px; padding:10px 14px; }
+
+  /* ── Line explainer ── */
+  .lex-row { display:flex; align-items:stretch; cursor:pointer; transition:background .12s; border-bottom:1px solid #f0f0f0; }
+  .lex-row:last-child { border-bottom:none; }
+  .lex-row:hover { background:#f8f9fa; }
+  .lex-row.active { background:#eff6ff; border-left:3px solid #1d4ed8; }
+  .lex-code { background:#1e1e2e; padding:10px 14px; font-family:'SFMono-Regular',Consolas,monospace; font-size:12px; min-width:220px; flex-shrink:0; display:flex; align-items:center; }
+  .lex-info { padding:10px 14px; flex:1; }
+  .lex-name   { font-size:13px; font-weight:700; color:#1d4ed8; margin-bottom:2px; }
+  .lex-desc   { font-size:12px; color:#555; line-height:1.55; }
+  .lex-detail { display:none; font-size:12px; color:#1d4ed8; margin-top:4px; padding-top:4px; border-top:1px dashed #bfdbfe; }
+  .lex-row.active .lex-detail { display:block; }
+  .line-explain { border:1px solid #e8e8e8; border-radius:10px; overflow:hidden; }
+
+  /* ── Reveal ── */
+  .reveal-btn { background:#f1f3f5; border:1px solid #dee2e6; border-radius:8px; padding:7px 14px; font-size:13px; cursor:pointer; color:#333; transition:background .15s; }
+  .reveal-btn:hover { background:#e9ecef; }
+  .reveal-content { display:none; margin-top:8px; }
+  .reveal-content.open { display:block; }
+
+  /* ── Nav ── */
+  .nav-row { display:flex; align-items:center; justify-content:space-between; margin-top:auto; padding-top:1rem; border-top:1px solid #f0f0f0; }
+  .nav-btn { display:inline-flex; align-items:center; gap:6px; padding:9px 18px; border:1px solid #dee2e6; border-radius:8px; background:transparent; font-size:13px; cursor:pointer; color:#333; transition:background .15s; }
+  .nav-btn:hover:not(:disabled) { background:#f1f3f5; }
+  .nav-btn:disabled { opacity:.35; cursor:default; }
+  .nav-btn.primary { background:#1d4ed8; border-color:transparent; color:#fff; }
+  .nav-btn.primary:hover { background:#1e40af; }
+  .progress-dots { display:flex; gap:6px; align-items:center; }
+  .dot { width:7px; height:7px; border-radius:50%; background:#dee2e6; transition:all .2s; }
+  .dot.active { width:20px; border-radius:4px; background:#1d4ed8; }
+
+  /* ── Home grid ── */
+  .home-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .home-card { background:#fff; border:1px solid #e8e8e8; border-radius:12px; padding:1rem 1.25rem; cursor:pointer; transition:all .15s; }
+  .home-card:hover { border-color:#1d4ed8; box-shadow:0 2px 8px rgba(29,78,216,.1); }
+  .home-card-title { font-size:15px; font-weight:700; margin:6px 0 2px; }
+  .home-card-sub   { font-size:12px; color:#666; }
+
+  code { font-family:'SFMono-Regular',Consolas,monospace; font-size:12px; background:#f1f3f5; padding:1px 6px; border-radius:4px; border:1px solid #dee2e6; }
+  .tag-chip { font-family:'SFMono-Regular',Consolas,monospace; font-size:12px; font-weight:700; padding:3px 9px; border-radius:6px; }
+
+  /* ── SkillHub live preview ── */
+  .sh-wrap { font-family: Arial, sans-serif; border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden; font-size: 13px; }
+  .sh-header2 { background: #1e293b; color: #fff; padding: 14px; text-align: center; font-size: 14px; font-weight: 700; }
+  .sh-nav2 { background: #1e293b; padding: 10px; text-align: center; }
+  .sh-nav2 a { color: white; text-decoration: none; margin: 0 12px; font-size: 12px; }
+  .sh-hero2 { background: #fff; padding: 30px 16px; text-align: center; }
+  .sh-hero2 h2 { color: #2563eb; font-size: 20px; margin-bottom: 8px; }
+  .sh-hero2 p  { font-size: 12px; color: #555; }
+  .sh-hero2 button { background: #2563eb; color: white; border: none; padding: 10px 20px; margin-top: 12px; cursor: pointer; font-size: 12px; font-weight: 600; border-radius: 2px; }
+  .sh-about { background: white; margin: 10px; padding: 16px; border-radius: 4px; }
+  .sh-about h2 { font-size: 15px; margin-bottom: 6px; color: #1a1a1a; }
+  .sh-about p  { font-size: 12px; color: #555; }
+  .sh-courses { background: #f4f4f4; padding: 16px; text-align: center; }
+  .sh-courses h2 { font-size: 15px; margin-bottom: 12px; }
+  .sh-cards { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .sh-card { background: white; width: 140px; padding: 12px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.15); text-align: left; }
+  .sh-card h3 { font-size: 12px; margin-bottom: 4px; }
+  .sh-card p  { font-size: 11px; color: #666; }
+  .sh-card-hover { background: white; width: 140px; padding: 12px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.15); text-align: left; transform: translateY(-5px); transition: transform .2s; }
+  .sh-footer2 { background: #1e293b; color: white; text-align: center; padding: 14px; font-size: 12px; margin-top: 10px; }
+
+  /* ── CSS property cards ── */
+  .prop-card { border: 1px solid #e8e8e8; border-radius: 10px; overflow: hidden; }
+  .prop-card-head { padding: 9px 14px; font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+  .prop-card-body { padding: 10px 14px; font-size: 13px; color: #555; line-height: 1.6; }
+
+  /* ── Flex visual demo ── */
+  .flex-demo { background: #f8faff; border: 2px dashed #93c5fd; border-radius: 10px; padding: 14px; display: flex; gap: 10px; justify-content: center; }
+  .flex-box  { background: #2563eb; color: white; border-radius: 6px; padding: 10px 16px; font-size: 12px; font-weight: 700; text-align: center; }
+
+  /* hover card live demo */
+  .demo-card-normal { background:white; width:130px; padding:14px; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,0.18); font-size:12px; text-align:center; transition:transform .2s; }
+  .demo-card-hover  { background:white; width:130px; padding:14px; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,0.18); font-size:12px; text-align:center; transform:translateY(-5px); }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <div>
+      <div class="top-bar-title">MERN Stack Training · Day 3 · Hour 3</div>
+      <div class="top-bar-sub">About + Course Cards + Footer — SkillHub LMS</div>
+    </div>
+    <div class="slide-counter" id="slide-counter">1 / 14</div>
+  </div>
+
+  <!-- ══════ SLIDE 0  HOME ══════ -->
+  <div class="slide active" id="slide-0">
+    <div class="slide-header">
+      <span class="badge b-indigo">Day 3 · Hour 3</span>
+      <div>
+        <div class="slide-title">About + Course Cards + Footer</div>
+        <div class="slide-subtitle">SkillHub starts looking like a professional website — sections, flex layout, shadows, hover</div>
+      </div>
+    </div>
+
+    <div style="background:#ede9fe;border:1px solid #c4b5fd;border-radius:12px;padding:12px 16px;display:flex;gap:12px;align-items:flex-start">
+      <i class="ti ti-sparkles" style="color:#7c3aed;font-size:22px;flex-shrink:0;margin-top:1px"></i>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#4c1d95;margin-bottom:4px">End Deliverable — SkillHub with About, Cards &amp; Footer</div>
+        <div style="display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:#5b21b6">
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>About section with white card background</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>3 course cards in a Flexbox row</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Box shadow &amp; border-radius on cards</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Lift hover effect with transform</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Dark footer completing the page</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:12px;padding:12px 16px;display:flex;gap:12px;align-items:flex-start">
+      <i class="ti ti-git-branch" style="color:#166534;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#166534;margin-bottom:3px">Continuing from Hours 1 &amp; 2 — same files</div>
+        <div style="font-size:13px;color:#166534;line-height:1.6">In Hours 1 &amp; 2 you built the <strong>header, nav, and hero</strong> with CSS. In Hour 3 we continue in the <strong>same index.html and style.css</strong> — adding the About section, replacing the old course list with flex cards, and closing the page with a footer.</div>
+      </div>
+    </div>
+
+    <div class="home-grid">
+      <div class="home-card" onclick="goSlide(1)">
+        <span class="badge b-amber">Recap</span>
+        <div class="home-card-title">Where We Left Off</div>
+        <div class="home-card-sub">Hour 2 state of SkillHub + what we build next</div>
+      </div>
+      <div class="home-card" onclick="goSlide(2)">
+        <span class="badge b-blue">HTML</span>
+        <div class="home-card-title">About Section HTML</div>
+        <div class="home-card-sub">&lt;section class="about"&gt; — structure before style</div>
+      </div>
+      <div class="home-card" onclick="goSlide(3)">
+        <span class="badge b-teal">CSS</span>
+        <div class="home-card-title">Style the About Section</div>
+        <div class="home-card-sub">.about { background, margin, padding }</div>
+      </div>
+      <div class="home-card" onclick="goSlide(4)">
+        <span class="badge b-purple">HTML</span>
+        <div class="home-card-title">Course Cards HTML</div>
+        <div class="home-card-sub">Replace old list with .card divs inside .course-container</div>
+      </div>
+      <div class="home-card" onclick="goSlide(5)">
+        <span class="badge b-green">CSS</span>
+        <div class="home-card-title">Flexbox Container</div>
+        <div class="home-card-sub">display:flex · gap · justify-content explained</div>
+      </div>
+      <div class="home-card" onclick="goSlide(6)">
+        <span class="badge b-cyan">CSS</span>
+        <div class="home-card-title">Card Styling</div>
+        <div class="home-card-sub">background · width · padding · border-radius · box-shadow</div>
+      </div>
+      <div class="home-card" onclick="goSlide(7)">
+        <span class="badge b-pink">Hover</span>
+        <div class="home-card-title">Card Hover Effect</div>
+        <div class="home-card-sub">transform: translateY(-5px) — the lift effect</div>
+      </div>
+      <div class="home-card" onclick="goSlide(8)">
+        <span class="badge b-indigo">Explain</span>
+        <div class="home-card-title">Property Deep-Dive</div>
+        <div class="home-card-sub">box-shadow · border-radius · transform — click to explore</div>
+      </div>
+    </div>
+    <div class="grid-2" style="gap:10px">
+      <div class="home-card" onclick="goSlide(9)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge b-slate">HTML+CSS</span>
+          <span style="font-size:14px;font-weight:700">Footer Section</span>
+          <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+        </div>
+      </div>
+      <div class="home-card" onclick="goSlide(10)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge b-rose">⚡ Challenge</span>
+          <span style="font-size:14px;font-weight:700">Mini Challenge — MongoDB Card</span>
+          <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+        </div>
+      </div>
+    </div>
+    <div class="grid-2" style="gap:10px">
+      <div class="home-card" onclick="goSlide(11)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge b-orange">📋 Assignment</span>
+          <span style="font-size:14px;font-weight:700">Full Page Assignment</span>
+          <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+        </div>
+      </div>
+      <div class="home-card" onclick="goSlide(12)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge b-slate">Ref</span>
+          <span style="font-size:14px;font-weight:700">Full style.css Reference</span>
+          <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+        </div>
+      </div>
+    </div>
+    <div class="grid-2" style="gap:10px">
+      <div class="home-card" onclick="goSlide(13)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge b-green">Quiz</span>
+          <span style="font-size:14px;font-weight:700">Quick Check — 5 Questions</span>
+          <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <div></div>
+      <div class="progress-dots" id="dots-0"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Start <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ══════ SLIDE 1  RECAP ══════ -->
+  <div class="slide" id="slide-1">
+    <div class="slide-header">
+      <span class="badge b-amber">Recap</span>
+      <div>
+        <div class="slide-title">Where We Left Off — Hours 1 &amp; 2</div>
+        <div class="slide-subtitle">SkillHub has a nav + hero — now we add the rest of the page</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">style.css after hour 2</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">css/style.css — current state</span></div>
+          <div class="editor-body">
+            <div class="e-row"><span class="e-ln">1</span><span class="c-sel">body</span><span class="c-punc">{</span> <span class="c-prop">background-color</span><span class="c-punc">:</span><span class="c-hex">#f4f4f4</span><span class="c-punc">;</span> <span class="c-prop">font-family</span><span class="c-punc">:</span><span class="c-str">Arial,sans-serif</span><span class="c-punc">; }</span></div>
+            <div class="e-row"><span class="e-ln">2</span><span class="c-sel">header</span><span class="c-punc">{</span> <span class="c-prop">background</span><span class="c-punc">:</span><span class="c-hex">#1e293b</span><span class="c-punc">;</span> <span class="c-prop">color</span><span class="c-punc">:</span><span class="c-str">white</span><span class="c-punc">;</span> <span class="c-prop">padding</span><span class="c-punc">:</span><span class="c-num">20px</span><span class="c-punc">;</span> <span class="c-prop">text-align</span><span class="c-punc">:</span><span class="c-str">center</span><span class="c-punc">; }</span></div>
+            <div class="e-row"><span class="e-ln">3</span><span class="c-sel">nav</span><span class="c-punc">{</span> <span class="c-prop">background</span><span class="c-punc">:</span><span class="c-hex">#1e293b</span><span class="c-punc">;</span> <span class="c-prop">padding</span><span class="c-punc">:</span><span class="c-num">15px</span><span class="c-punc">;</span> <span class="c-prop">text-align</span><span class="c-punc">:</span><span class="c-str">center</span><span class="c-punc">; }</span></div>
+            <div class="e-row"><span class="e-ln">4</span><span class="c-sel">nav a</span><span class="c-punc">{</span> <span class="c-prop">color</span><span class="c-punc">:</span><span class="c-str">white</span><span class="c-punc">;</span> <span class="c-prop">text-decoration</span><span class="c-punc">:</span><span class="c-str">none</span><span class="c-punc">;</span> <span class="c-prop">margin</span><span class="c-punc">:</span><span class="c-num">15px</span><span class="c-punc">; }</span></div>
+            <div class="e-row"><span class="e-ln">5</span><span class="c-sel">nav a<span class="c-pseudo">:hover</span></span><span class="c-punc">{</span> <span class="c-prop">color</span><span class="c-punc">:</span><span class="c-hex">#facc15</span><span class="c-punc">; }</span></div>
+            <div class="e-row"><span class="e-ln">6</span><span class="c-sel">.hero</span><span class="c-punc">{</span> <span class="c-prop">background</span><span class="c-punc">:</span><span class="c-str">white</span><span class="c-punc">;</span> <span class="c-prop">padding</span><span class="c-punc">:</span><span class="c-num">60px 20px</span><span class="c-punc">;</span> <span class="c-prop">text-align</span><span class="c-punc">:</span><span class="c-str">center</span><span class="c-punc">; }</span></div>
+            <div class="e-row"><span class="e-ln">7</span><span class="c-sel">.hero h2</span><span class="c-punc">{</span> <span class="c-prop">color</span><span class="c-punc">:</span><span class="c-hex">#2563eb</span><span class="c-punc">;</span> <span class="c-prop">font-size</span><span class="c-punc">:</span><span class="c-num">2rem</span><span class="c-punc">; }</span></div>
+            <div class="e-row"><span class="e-ln">8</span><span class="c-sel">.btn</span><span class="c-punc">{</span> <span class="c-prop">background</span><span class="c-punc">:</span><span class="c-hex">#2563eb</span><span class="c-punc">;</span> <span class="c-prop">color</span><span class="c-punc">:</span><span class="c-str">white</span><span class="c-punc">;</span> <span class="c-prop">padding</span><span class="c-punc">:</span><span class="c-num">12px 25px</span><span class="c-punc">;</span> <span class="c-prop">border</span><span class="c-punc">:</span><span class="c-str">none</span><span class="c-punc">;</span> <span class="c-prop">cursor</span><span class="c-punc">:</span><span class="c-str">pointer</span><span class="c-punc">; }</span></div>
+            <div class="e-row" style="margin-top:6px"><span class="e-ln">9</span><span class="c-cmt">/* ← Add new rules below here in Hour 3 */</span></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">skillhub preview after hour 2</div>
+        <div class="sh-wrap">
+          <div class="sh-header2">SkillHub LMS</div>
+          <div class="sh-nav2">
+            <a href="#">Home</a><a href="#">Courses</a><a href="#">About</a><a href="#">Contact</a>
+          </div>
+          <div class="sh-hero2">
+            <h2>Become a Full Stack Developer</h2>
+            <p>Learn HTML, CSS, JavaScript, React, Node.js and MongoDB.</p>
+            <button>Get Started</button>
+          </div>
+          <div style="background:#f4f4f4;padding:12px 16px;font-family:Arial;font-size:12px">
+            <strong>Our Courses</strong>
+            <ul style="margin-top:6px;padding-left:18px;color:#555;font-size:11px">
+              <li>HTML &amp; CSS</li><li>JavaScript</li><li>React</li>
+            </ul>
+            <div style="margin-top:8px;color:#dc2626;font-size:11px">⚠️ Old bullet-point list — we replace this with cards in Hour 3</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card card-gray">
+      <div class="section-label">hour 3 plan — 3 new sections to add</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:6px">
+        <div style="text-align:center;padding:12px 8px;background:#fff;border:1px solid #dbeafe;border-radius:8px">
+          <div style="font-size:20px;margin-bottom:5px">ℹ️</div>
+          <div style="font-size:11px;font-weight:700;color:#1e40af;font-family:monospace">.about { }</div>
+          <div style="font-size:11px;color:#888;margin-top:3px">About section card</div>
+        </div>
+        <div style="text-align:center;padding:12px 8px;background:#fff;border:1px solid #d1fae5;border-radius:8px">
+          <div style="font-size:20px;margin-bottom:5px">🃏</div>
+          <div style="font-size:11px;font-weight:700;color:#065f46;font-family:monospace">.card { }</div>
+          <div style="font-size:11px;color:#888;margin-top:3px">Flex course cards</div>
+        </div>
+        <div style="text-align:center;padding:12px 8px;background:#fff;border:1px solid #ede9fe;border-radius:8px">
+          <div style="font-size:20px;margin-bottom:5px">🦶</div>
+          <div style="font-size:11px;font-weight:700;color:#5b21b6;font-family:monospace">footer { }</div>
+          <div style="font-size:11px;color:#888;margin-top:3px">Dark footer</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-1"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">About Section HTML <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ══════ SLIDE 2  ABOUT HTML ══════ -->
+  <div class="slide" id="slide-2">
+    <div class="slide-header">
+      <span class="badge b-blue">HTML</span>
+      <div>
+        <div class="slide-title">About Section — HTML Structure</div>
+        <div class="slide-subtitle">Add &lt;section class="about"&gt; below the hero in index.html</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">add to index.html — after .hero section</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">frontend/index.html</span></div>
+          <div class="editor-body">
+            <div class="e-row"><span class="e-ln">1</span><span class="e-cmt">&lt;!-- After the hero section --&gt;</span></div>
+            <div class="e-row" style="background:#0d1f0d"><span class="e-ln">2</span><span class="e-new">&lt;section</span> <span class="e-att">class</span><span class="e-txt">=</span><span class="e-val">"about"</span><span class="e-new">&gt;</span></div>
+            <div class="e-row" style="background:#0d1f0d"><span class="e-ln">3</span><span class="e-ind1"></span><span class="e-new">&lt;h2&gt;</span><span class="e-txt">About Us</span><span class="e-new">&lt;/h2&gt;</span></div>
+            <div class="e-row" style="background:#0d1f0d"><span class="e-ln">4</span><span class="e-ind1"></span><span class="e-new">&lt;p&gt;</span></div>
+            <div class="e-row" style="background:#0d1f0d"><span class="e-ln">5</span><span class="e-ind2"></span><span class="e-txt">SkillHub LMS helps students become</span></div>
+            <div class="e-row" style="background:#0d1f0d"><span class="e-ln">6</span><span class="e-ind2"></span><span class="e-txt">industry-ready developers.</span></div>
+            <div class="e-row" style="background:#0d1f0d"><span class="e-ln">7</span><span class="e-ind1"></span><span class="e-new">&lt;/p&gt;</span></div>
+            <div class="e-row" style="background:#0d1f0d"><span class="e-ln">8</span><span class="e-new">&lt;/section&gt;</span></div>
+          </div>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#166534;background:#f0fdf4;border:1px solid #86efac;border-radius:7px;padding:8px 12px">✅ class="about" lets CSS target only this section with <code>.about { }</code></div>
+      </div>
+      <div>
+        <div class="section-label">unstyled result (before css)</div>
+        <div class="browser">
+          <div class="browser-bar"><div class="b-dot2 b-r"></div><div class="b-dot2 b-y"></div><div class="b-dot2 b-g"></div><div class="b-url">frontend/index.html</div></div>
+          <div style="background:#f4f4f4;padding:14px;font-family:Arial">
+            <div style="background:#1e293b;color:#fff;padding:12px;text-align:center;font-size:13px;font-weight:700">SkillHub LMS</div>
+            <div style="background:#1e293b;padding:8px;text-align:center"><a href="#" style="color:white;text-decoration:none;margin:0 10px;font-size:11px">Home</a><a href="#" style="color:white;text-decoration:none;margin:0 10px;font-size:11px">Courses</a><a href="#" style="color:white;text-decoration:none;margin:0 10px;font-size:11px">About</a></div>
+            <div style="background:white;padding:20px;text-align:center"><h2 style="color:#2563eb;font-size:16px">Become a Full Stack Developer</h2></div>
+            <div style="padding:10px;font-family:Arial">
+              <h2 style="font-size:14px">About Us</h2>
+              <p style="font-size:12px;color:#555;margin-top:4px">SkillHub LMS helps students become industry-ready developers.</p>
+              <div style="margin-top:8px;color:#d97706;font-size:11px">⚠️ No background or spacing yet — we add CSS next</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="line-explain">
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="e-tag">&lt;section</span> <span class="e-att">class</span><span class="e-txt">=</span><span class="e-val">"about"</span><span class="e-tag">&gt;</span></div>
+        <div class="lex-info">
+          <div class="lex-name">Section with a Class</div>
+          <div class="lex-desc">A semantic container for a page area. The <code>class="about"</code> lets CSS target it specifically.</div>
+          <div class="lex-detail">Without a class, we'd have to write <code>section { }</code> which would affect ALL sections. The class gives us a name to hook into. This is the same pattern as <code>.hero</code> from Hour 2.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="e-tag">&lt;h2&gt;</span><span class="e-txt">About Us</span><span class="e-tag">&lt;/h2&gt;</span></div>
+        <div class="lex-info">
+          <div class="lex-name">Heading Level 2</div>
+          <div class="lex-desc">The section heading — appears bold and larger by default. Only one <code>&lt;h1&gt;</code> per page; <code>&lt;h2&gt;</code> for section titles.</div>
+          <div class="lex-detail">The page already has an h1 in the header (SkillHub LMS). Each new section uses h2 for its title, creating a logical document outline. Screen readers and search engines read this hierarchy.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-2"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Style About Section <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ══════ SLIDE 3  ABOUT CSS ══════ -->
+  <div class="slide" id="slide-3">
+    <div class="slide-header">
+      <span class="badge b-teal">CSS</span>
+      <div>
+        <div class="slide-title">Style the About Section</div>
+        <div class="slide-subtitle">.about { background, margin, padding } — white card floating on grey background</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">add to css/style.css</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">css/style.css</span></div>
+          <div class="editor-body">
+            <div class="e-row"><span class="e-ln">9</span><span class="c-cmt">/* ─ About ─ */</span></div>
+            <div class="e-row"><span class="e-ln">10</span><span class="c-sel">.about</span><span class="c-punc">{</span></div>
+            <div class="e-row"><span class="e-ln">11</span><span class="e-ind1"></span><span class="c-prop">background</span><span class="c-punc">:</span> <span class="c-str">white</span><span class="c-punc">;</span></div>
+            <div class="e-row"><span class="e-ln">12</span><span class="e-ind1"></span><span class="c-prop">margin</span><span class="c-punc">:</span> <span class="c-num">30px</span><span class="c-punc">;</span></div>
+            <div class="e-row"><span class="e-ln">13</span><span class="e-ind1"></span><span class="c-prop">padding</span><span class="c-punc">:</span> <span class="c-num">30px</span><span class="c-punc">;</span></div>
+            <div class="e-row"><span class="e-ln">14</span><span class="c-punc">}</span></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">result — white card on grey page</div>
+        <div class="sh-wrap">
+          <div class="sh-header2">SkillHub LMS</div>
+          <div class="sh-nav2"><a href="#">Home</a><a href="#">Courses</a><a href="#">About</a></div>
+          <div class="sh-hero2" style="padding:20px 16px"><h2 style="font-size:16px">Become a Full Stack Developer</h2></div>
+          <div style="background:#f4f4f4">
+            <div class="sh-about">
+              <h2>About Us</h2>
+              <p>SkillHub LMS helps students become industry-ready developers.</p>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:8px;background:#d1fae5;border:1px solid #6ee7b7;border-radius:8px;padding:8px 12px;font-size:12px;color:#065f46">
+          ✅ White card with breathing room — <code>margin</code> pushes it away from the edges, <code>padding</code> keeps text away from the border
+        </div>
+      </div>
+    </div>
+
+    <div class="card card-gray">
+      <div class="section-label">margin vs padding — the key difference</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px">
+        <div style="padding:12px;background:#fff;border:1px solid #e8e8e8;border-radius:8px">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+            <span class="tag-chip" style="background:#dbeafe;color:#1e40af">margin: 30px</span>
+          </div>
+          <div style="font-size:13px;color:#444;line-height:1.6"><strong>Outer space</strong> — pushes the whole section away from surrounding elements. The <code>30px</code> gap between the page edge and the white card comes from <code>margin</code>.</div>
+        </div>
+        <div style="padding:12px;background:#fff;border:1px solid #e8e8e8;border-radius:8px">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+            <span class="tag-chip" style="background:#d1fae5;color:#065f46">padding: 30px</span>
+          </div>
+          <div style="font-size:13px;color:#444;line-height:1.6"><strong>Inner space</strong> — pushes the text away from the card's own edge. Without padding, the "About Us" heading would touch the white card border.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tip-box">
+      <i class="ti ti-bulb tip-icon"></i>
+      <div class="tip-text"><strong>Memory trick:</strong> Padding is the <em>pillow inside</em> a sofa cushion — it's internal comfort. Margin is the <em>gap between cushions</em> — it's space between separate things.</div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-3"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Course Cards HTML <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ══════ SLIDE 4  COURSE CARDS HTML ══════ -->
+  <div class="slide" id="slide-4">
+    <div class="slide-header">
+      <span class="badge b-purple">HTML</span>
+      <div>
+        <div class="slide-title">Course Cards — Replace the Old List</div>
+        <div class="slide-subtitle">Three .card divs inside .course-container — a flex row of cards</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">before — old unordered list</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">before — remove this</span></div>
+          <div class="editor-body">
+            <div class="e-row"><span class="e-ln">1</span><span class="e-tag">&lt;section&gt;</span></div>
+            <div class="e-row"><span class="e-ln">2</span><span class="e-ind1"></span><span class="e-tag">&lt;h2&gt;</span><span class="e-txt">Our Courses</span><span class="e-tag">&lt;/h2&gt;</span></div>
+            <div class="e-row"><span class="e-ln">3</span><span class="e-ind1"></span><span class="e-tag">&lt;ul&gt;</span></div>
+            <div class="e-row"><span class="e-ln">4</span><span class="e-ind2"></span><span class="e-tag">&lt;li&gt;</span><span class="e-txt">HTML &amp; CSS</span><span class="e-tag">&lt;/li&gt;</span></div>
+            <div class="e-row"><span class="e-ln">5</span><span class="e-ind2"></span><span class="e-tag">&lt;li&gt;</span><span class="e-txt">JavaScript</span><span class="e-tag">&lt;/li&gt;</span></div>
+            <div class="e-row"><span class="e-ln">6</span><span class="e-ind1"></span><span class="e-tag">&lt;/ul&gt;</span></div>
+            <div class="e-row"><span class="e-ln">7</span><span class="e-tag">&lt;/section&gt;</span></div>
+          </div>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#dc2626;background:#fee2e2;border:1px solid #fca5a5;border-radius:7px;padding:8px 12px">❌ Plain bullet list — not visual, not styleable as cards</div>
+      </div>
+      <div>
+        <div class="section-label">after — card layout (replace with this)</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">frontend/index.html — new cards</span></div>
+          <div class="editor-body">
+            <div class="e-row"><span class="e-ln">1</span><span class="e-tag">&lt;section&gt;</span></div>
+            <div class="e-row"><span class="e-ln">2</span><span class="e-ind1"></span><span class="e-tag">&lt;h2&gt;</span><span class="e-txt">Our Courses</span><span class="e-tag">&lt;/h2&gt;</span></div>
+            <div class="e-row" style="background:#0d1f0d"><span class="e-ln">3</span><span class="e-ind1"></span><span class="e-new">&lt;div</span> <span class="e-att">class</span><span class="e-txt">=</span><span class="e-val">"course-container"</span><span class="e-new">&gt;</span></div>
+            <div class="e-row" style="background:#0d1f0d"><span class="e-ln">4</span><span class="e-ind2"></span><span class="e-new">&lt;div</span> <span class="e-att">class</span><span class="e-txt">=</span><span class="e-val">"card"</span><span class="e-new">&gt;</span></div>
+            <div class="e-row" style="background:#0d1f0d"><span class="e-ln">5</span><span class="e-ind2"></span><span class="e-ind1"></span><span class="e-new">&lt;h3&gt;</span><span class="e-txt">HTML &amp; CSS</span><span class="e-new">&lt;/h3&gt;</span></div>
+            <div class="e-row" style="background:#0d1f0d"><span class="e-ln">6</span><span class="e-ind2"></span><span class="e-ind1"></span><span class="e-new">&lt;p&gt;</span><span class="e-txt">Learn website fundamentals.</span><span class="e-new">&lt;/p&gt;</span></div>
+            <div class="e-row" style="background:#0d1f0d"><span class="e-ln">7</span><span class="e-ind2"></span><span class="e-new">&lt;/div&gt;</span></div>
+            <div class="e-row" style="background:#0d1f0d"><span class="e-ln">8</span><span class="e-ind2"></span><span class="e-new">&lt;div</span> <span class="e-att">class</span><span class="e-txt">=</span><span class="e-val">"card"</span><span class="e-new">&gt;</span></div>
+            <div class="e-row" style="background:#0d1f0d"><span class="e-ln">9</span><span class="e-ind2"></span><span class="e-ind1"></span><span class="e-new">&lt;h3&gt;</span><span class="e-txt">JavaScript</span><span class="e-new">&lt;/h3&gt;</span></div>
+            <div class="e-row" style="background:#0d1f0d"><span class="e-ln">10</span><span class="e-ind2"></span><span class="e-ind1"></span><span class="e-new">&lt;p&gt;</span><span class="e-txt">Build interactive websites.</span><span class="e-new">&lt;/p&gt;</span></div>
+            <div class="e-row" style="background:#0d1f0d"><span class="e-ln">11</span><span class="e-ind2"></span><span class="e-new">&lt;/div&gt;</span></div>
+            <div class="e-row" style="background:#0d1f0d"><span class="e-ln">12</span><span class="e-ind2"></span><span class="e-new">&lt;div</span> <span class="e-att">class</span><span class="e-txt">=</span><span class="e-val">"card"</span><span class="e-new">&gt;</span></div>
+            <div class="e-row" style="background:#0d1f0d"><span class="e-ln">13</span><span class="e-ind2"></span><span class="e-ind1"></span><span class="e-new">&lt;h3&gt;</span><span class="e-txt">React</span><span class="e-new">&lt;/h3&gt;</span></div>
+            <div class="e-row" style="background:#0d1f0d"><span class="e-ln">14</span><span class="e-ind2"></span><span class="e-ind1"></span><span class="e-new">&lt;p&gt;</span><span class="e-txt">Create modern web applications.</span><span class="e-new">&lt;/p&gt;</span></div>
+            <div class="e-row" style="background:#0d1f0d"><span class="e-ln">15</span><span class="e-ind2"></span><span class="e-new">&lt;/div&gt;</span></div>
+            <div class="e-row" style="background:#0d1f0d"><span class="e-ln">16</span><span class="e-ind1"></span><span class="e-new">&lt;/div&gt;</span></div>
+            <div class="e-row"><span class="e-ln">17</span><span class="e-tag">&lt;/section&gt;</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <i class="ti ti-info-circle info-icon"></i>
+      <div class="info-text"><strong>Two classes, one pattern:</strong> <code>course-container</code> is the Flexbox row that holds all cards side by side. Each <code>card</code> div is one course tile. The container handles layout; the card handles looks. This is a very common CSS pattern.</div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-4"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Flexbox Container CSS <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ══════ SLIDE 5  FLEXBOX ══════ -->
+  <div class="slide" id="slide-5">
+    <div class="slide-header">
+      <span class="badge b-green">CSS — Flexbox</span>
+      <div>
+        <div class="slide-title">Flexbox — Lay Cards Side by Side</div>
+        <div class="slide-subtitle">display:flex · gap · justify-content — the three Flexbox properties students need now</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">add to css/style.css</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">css/style.css</span></div>
+          <div class="editor-body">
+            <div class="e-row"><span class="e-ln">15</span><span class="c-cmt">/* ─ Course Container ─ */</span></div>
+            <div class="e-row"><span class="e-ln">16</span><span class="c-sel">.course-container</span><span class="c-punc">{</span></div>
+            <div class="e-row"><span class="e-ln">17</span><span class="e-ind1"></span><span class="c-prop">display</span><span class="c-punc">:</span> <span class="c-val">flex</span><span class="c-punc">;</span></div>
+            <div class="e-row"><span class="e-ln">18</span><span class="e-ind1"></span><span class="c-prop">gap</span><span class="c-punc">:</span> <span class="c-num">20px</span><span class="c-punc">;</span></div>
+            <div class="e-row"><span class="e-ln">19</span><span class="e-ind1"></span><span class="c-prop">justify-content</span><span class="c-punc">:</span> <span class="c-val">center</span><span class="c-punc">;</span></div>
+            <div class="e-row"><span class="e-ln">20</span><span class="c-punc">}</span></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">result — 3 cards in a row</div>
+        <div class="browser">
+          <div class="browser-bar"><div class="b-dot2 b-r"></div><div class="b-dot2 b-y"></div><div class="b-dot2 b-g"></div><div class="b-url">frontend/index.html</div></div>
+          <div style="background:#f4f4f4;padding:14px;font-family:Arial">
+            <div style="text-align:center;font-size:13px;font-weight:700;margin-bottom:10px">Our Courses</div>
+            <div style="display:flex;gap:14px;justify-content:center">
+              <div style="background:white;width:100px;padding:10px;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,0.15)"><div style="font-size:11px;font-weight:700">HTML &amp; CSS</div><div style="font-size:10px;color:#666;margin-top:3px">Learn fundamentals.</div></div>
+              <div style="background:white;width:100px;padding:10px;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,0.15)"><div style="font-size:11px;font-weight:700">JavaScript</div><div style="font-size:10px;color:#666;margin-top:3px">Build interactive sites.</div></div>
+              <div style="background:white;width:100px;padding:10px;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,0.15)"><div style="font-size:11px;font-weight:700">React</div><div style="font-size:10px;color:#666;margin-top:3px">Modern web apps.</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Flex property explainer -->
+    <div class="line-explain">
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="c-prop">display</span><span class="c-punc">:</span> <span class="c-val">flex</span></div>
+        <div class="lex-info">
+          <div class="lex-name">display: flex</div>
+          <div class="lex-desc">Turns the container into a <strong>Flexbox</strong> — its direct children automatically line up in a horizontal row.</div>
+          <div class="lex-detail">By default, HTML elements stack vertically (block layout). <code>display:flex</code> switches the container to Flexbox mode. Its direct children (the <code>.card</code> divs) then lay out in a row from left to right. This is the single most powerful layout switch in CSS.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="c-prop">gap</span><span class="c-punc">:</span> <span class="c-num">20px</span></div>
+        <div class="lex-info">
+          <div class="lex-name">gap</div>
+          <div class="lex-desc">Sets the space <strong>between</strong> flex items. Much cleaner than adding margin to each card individually.</div>
+          <div class="lex-detail"><code>gap</code> only creates space <em>between</em> items — not before the first one or after the last one. Without gap, the three cards would be jammed together. You can also write <code>gap: 20px 10px</code> to set row-gap and column-gap separately.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="c-prop">justify-content</span><span class="c-punc">:</span> <span class="c-val">center</span></div>
+        <div class="lex-info">
+          <div class="lex-name">justify-content</div>
+          <div class="lex-desc">Controls how flex items are positioned along the <strong>main axis</strong> (horizontal row). <code>center</code> pushes all cards to the middle.</div>
+          <div class="lex-detail">Other common values: <code>flex-start</code> (left-aligned), <code>flex-end</code> (right-aligned), <code>space-between</code> (first at start, last at end, equal gaps between), <code>space-around</code> (equal gaps around each item). We use <code>center</code> here to keep the course cards in the middle of the page.</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="background:#f4f5f7;border:1px solid #e2e8f0;border-radius:10px;padding:12px 16px">
+      <div class="section-label" style="margin-bottom:6px">visual — what display:flex does</div>
+      <div style="display:flex;gap:10px;align-items:center;font-size:12px">
+        <div>
+          <div style="font-size:10px;color:#888;margin-bottom:4px;text-align:center">WITHOUT flex (stacked)</div>
+          <div style="border:2px dashed #e0e0e0;padding:8px;border-radius:6px;width:90px">
+            <div style="background:#2563eb;color:white;border-radius:4px;padding:5px;font-size:10px;text-align:center;margin-bottom:4px">Card 1</div>
+            <div style="background:#2563eb;color:white;border-radius:4px;padding:5px;font-size:10px;text-align:center;margin-bottom:4px">Card 2</div>
+            <div style="background:#2563eb;color:white;border-radius:4px;padding:5px;font-size:10px;text-align:center">Card 3</div>
+          </div>
+        </div>
+        <div style="font-size:20px;color:#aaa">→</div>
+        <div>
+          <div style="font-size:10px;color:#888;margin-bottom:4px;text-align:center">WITH display:flex (row)</div>
+          <div style="border:2px dashed #93c5fd;padding:8px;border-radius:6px;display:flex;gap:6px;justify-content:center">
+            <div style="background:#2563eb;color:white;border-radius:4px;padding:5px 8px;font-size:10px;text-align:center">Card 1</div>
+            <div style="background:#2563eb;color:white;border-radius:4px;padding:5px 8px;font-size:10px;text-align:center">Card 2</div>
+            <div style="background:#2563eb;color:white;border-radius:4px;padding:5px 8px;font-size:10px;text-align:center">Card 3</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-5"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Style the Cards <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ══════ SLIDE 6  CARD STYLING ══════ -->
+  <div class="slide" id="slide-6">
+    <div class="slide-header">
+      <span class="badge b-cyan">CSS</span>
+      <div>
+        <div class="slide-title">Card Styling</div>
+        <div class="slide-subtitle">background · width · padding · border-radius · box-shadow</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">add to css/style.css — after .course-container</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">css/style.css</span></div>
+          <div class="editor-body">
+            <div class="e-row"><span class="e-ln">21</span><span class="c-cmt">/* ─ Card ─ */</span></div>
+            <div class="e-row"><span class="e-ln">22</span><span class="c-sel">.card</span><span class="c-punc">{</span></div>
+            <div class="e-row"><span class="e-ln">23</span><span class="e-ind1"></span><span class="c-prop">background</span><span class="c-punc">:</span> <span class="c-str">white</span><span class="c-punc">;</span></div>
+            <div class="e-row"><span class="e-ln">24</span><span class="e-ind1"></span><span class="c-prop">width</span><span class="c-punc">:</span> <span class="c-num">250px</span><span class="c-punc">;</span></div>
+            <div class="e-row"><span class="e-ln">25</span><span class="e-ind1"></span><span class="c-prop">padding</span><span class="c-punc">:</span> <span class="c-num">20px</span><span class="c-punc">;</span></div>
+            <div class="e-row"><span class="e-ln">26</span><span class="e-ind1"></span><span class="c-prop">border-radius</span><span class="c-punc">:</span> <span class="c-num">10px</span><span class="c-punc">;</span></div>
+            <div class="e-row"><span class="e-ln">27</span><span class="e-ind1"></span><span class="c-prop">box-shadow</span><span class="c-punc">:</span> <span class="c-num">0</span> <span class="c-num">2px</span> <span class="c-num">8px</span> <span class="c-str">rgba</span><span class="c-punc">(</span><span class="c-num">0,0,0,0.2</span><span class="c-punc">);</span></div>
+            <div class="e-row"><span class="e-ln">28</span><span class="c-punc">}</span></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">result — professional cards</div>
+        <div class="browser">
+          <div class="browser-bar"><div class="b-dot2 b-r"></div><div class="b-dot2 b-y"></div><div class="b-dot2 b-g"></div><div class="b-url">frontend/index.html</div></div>
+          <div style="background:#f4f4f4;padding:16px;font-family:Arial;text-align:center">
+            <div style="font-size:13px;font-weight:700;margin-bottom:12px">Our Courses</div>
+            <div style="display:flex;gap:10px;justify-content:center">
+              <div style="background:white;width:100px;padding:14px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.2);text-align:left">
+                <div style="font-size:11px;font-weight:700">HTML &amp; CSS</div>
+                <div style="font-size:10px;color:#666;margin-top:4px">Learn website fundamentals.</div>
+              </div>
+              <div style="background:white;width:100px;padding:14px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.2);text-align:left">
+                <div style="font-size:11px;font-weight:700">JavaScript</div>
+                <div style="font-size:10px;color:#666;margin-top:4px">Build interactive websites.</div>
+              </div>
+              <div style="background:white;width:100px;padding:14px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.2);text-align:left">
+                <div style="font-size:11px;font-weight:700">React</div>
+                <div style="font-size:10px;color:#666;margin-top:4px">Create modern web apps.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3-property breakdown -->
+    <div class="grid-3">
+      <div class="prop-card">
+        <div class="prop-card-head" style="background:#ede9fe;">
+          <code style="background:transparent;border:none;font-size:12px;font-weight:800;color:#5b21b6">border-radius</code>
+        </div>
+        <div class="prop-card-body">Rounds the corners of the card. <code>10px</code> = gentle curve. Try <code>50%</code> to make a circle. <code>0</code> = sharp square corners.</div>
+      </div>
+      <div class="prop-card">
+        <div class="prop-card-head" style="background:#dbeafe;">
+          <code style="background:transparent;border:none;font-size:12px;font-weight:800;color:#1e40af">box-shadow</code>
+        </div>
+        <div class="prop-card-body"><strong>4 values:</strong> <code>0</code> x-offset · <code>2px</code> y-offset · <code>8px</code> blur · <code>rgba(0,0,0,0.2)</code> colour. Creates the floating card look.</div>
+      </div>
+      <div class="prop-card">
+        <div class="prop-card-head" style="background:#dcfce7;">
+          <code style="background:transparent;border:none;font-size:12px;font-weight:800;color:#166534">width: 250px</code>
+        </div>
+        <div class="prop-card-body">Fixes each card at 250px wide. Without this, cards would stretch to fill the container. Fixed width keeps all cards the same size.</div>
+      </div>
+    </div>
+
+    <div class="tip-box">
+      <i class="ti ti-bulb tip-icon"></i>
+      <div class="tip-text"><strong>box-shadow breakdown:</strong> <code>box-shadow: 0 2px 8px rgba(0,0,0,0.2)</code> — <strong>0</strong> = no left/right offset · <strong>2px</strong> = 2px below · <strong>8px</strong> = how soft/blurry · <strong>rgba(0,0,0,0.2)</strong> = black at 20% opacity. Increase the last number (0.4, 0.6) for a darker shadow.</div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-6"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Card Hover Effect <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ══════ SLIDE 7  HOVER EFFECT ══════ -->
+  <div class="slide" id="slide-7">
+    <div class="slide-header">
+      <span class="badge b-pink">Hover</span>
+      <div>
+        <div class="slide-title">Card Hover — The Lift Effect</div>
+        <div class="slide-subtitle">.card:hover { transform: translateY(-5px) } — cards rise on mouse-over</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">add to css/style.css — after .card { }</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">css/style.css</span></div>
+          <div class="editor-body">
+            <div class="e-row"><span class="e-ln">29</span><span class="c-sel">.card<span class="c-pseudo">:hover</span></span><span class="c-punc">{</span></div>
+            <div class="e-row"><span class="e-ln">30</span><span class="e-ind1"></span><span class="c-prop">transform</span><span class="c-punc">:</span> <span class="c-val">translateY</span><span class="c-punc">(</span><span class="c-num">-5px</span><span class="c-punc">);</span></div>
+            <div class="e-row"><span class="e-ln">31</span><span class="c-punc">}</span></div>
+          </div>
+        </div>
+        <div style="margin-top:10px" class="info-box">
+          <i class="ti ti-info-circle info-icon"></i>
+          <div class="info-text"><strong>Pro tip:</strong> Add <code>transition: transform 0.2s</code> inside <code>.card { }</code> to make the lift animation smooth instead of instant.</div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">normal vs hovered</div>
+        <div style="background:#f4f4f4;padding:18px;border-radius:10px;display:flex;gap:20px;justify-content:center;align-items:flex-end">
+          <div style="text-align:center">
+            <div style="font-size:10px;color:#888;margin-bottom:8px;font-weight:700">NORMAL</div>
+            <div class="demo-card-normal">
+              <div style="font-size:20px">📘</div>
+              <div style="font-size:12px;font-weight:700;margin-top:6px">HTML &amp; CSS</div>
+              <div style="font-size:11px;color:#666;margin-top:4px">Learn fundamentals</div>
+            </div>
+          </div>
+          <div style="text-align:center">
+            <div style="font-size:10px;color:#888;margin-bottom:8px;font-weight:700">ON HOVER ↑</div>
+            <div class="demo-card-hover">
+              <div style="font-size:20px">📘</div>
+              <div style="font-size:12px;font-weight:700;margin-top:6px">HTML &amp; CSS</div>
+              <div style="font-size:11px;color:#666;margin-top:4px">Learn fundamentals</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="line-explain">
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="c-sel">.card<span class="c-pseudo">:hover</span></span></div>
+        <div class="lex-info">
+          <div class="lex-name">:hover Pseudo-class</div>
+          <div class="lex-desc">CSS that only applies when the mouse pointer is over the element. Same concept as <code>nav a:hover</code> from Hour 2.</div>
+          <div class="lex-detail">The colon <code>:</code> signals a pseudo-class — a state that the element can be in. Other pseudo-classes: <code>:focus</code> (element is focused), <code>:active</code> (element is being clicked), <code>:first-child</code> (first among siblings). All of these can trigger separate CSS rules.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="c-prop">transform</span><span class="c-punc">:</span> <span class="c-val">translateY</span><span class="c-punc">(-5px)</span></div>
+        <div class="lex-info">
+          <div class="lex-name">transform: translateY()</div>
+          <div class="lex-desc">Moves the element along the Y axis (vertical). Negative = upward. <code>-5px</code> lifts the card 5 pixels up.</div>
+          <div class="lex-detail"><code>transform</code> moves the element visually without affecting layout — surrounding elements don't shift. Other transform functions: <code>translateX()</code> (horizontal), <code>rotate()</code> (spin), <code>scale()</code> (resize). Combine them: <code>transform: translateY(-5px) scale(1.02)</code>.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-7"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Property Deep-Dive <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ══════ SLIDE 8  DEEP DIVE ══════ -->
+  <div class="slide" id="slide-8">
+    <div class="slide-header">
+      <span class="badge b-indigo">Explain</span>
+      <div>
+        <div class="slide-title">Property Deep-Dive</div>
+        <div class="slide-subtitle">box-shadow · border-radius · transform — click each row to expand</div>
+      </div>
+    </div>
+
+    <div class="line-explain">
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="c-prop">box-shadow</span></div>
+        <div class="lex-info">
+          <div class="lex-name">box-shadow</div>
+          <div class="lex-desc">Adds a drop shadow behind an element — creating a sense of depth and lifting the card off the page.</div>
+          <div class="lex-detail"><code>box-shadow: X Y Blur Spread Color</code>. Our value <code>0 2px 8px rgba(0,0,0,0.2)</code> means: 0 left/right offset, 2px downward, 8px blur radius, semi-transparent black. You can layer multiple shadows: <code>box-shadow: 0 2px 8px rgba(0,0,0,.1), 0 4px 20px rgba(0,0,0,.05)</code>. Inner shadow: <code>inset 0 2px 4px rgba(0,0,0,.1)</code>.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="c-prop">border-radius</span></div>
+        <div class="lex-info">
+          <div class="lex-name">border-radius</div>
+          <div class="lex-desc">Rounds the corners of an element. Works on any element that has visible borders or a background.</div>
+          <div class="lex-detail">Values: a single value applies to all 4 corners equally. You can target individual corners: <code>border-radius: 10px 0 0 10px</code> (top-left, top-right, bottom-right, bottom-left). <code>border-radius: 50%</code> makes a perfect circle if width = height. Widely used for buttons, cards, avatars, and pill-shaped badges.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="c-prop">transform</span></div>
+        <div class="lex-info">
+          <div class="lex-name">transform</div>
+          <div class="lex-desc">Visually moves, rotates, scales, or skews an element without disrupting the document flow.</div>
+          <div class="lex-detail">Because transform is visual-only, the browser doesn't re-flow the page — making it extremely fast to animate. Works with CSS transitions and animations: <code>transition: transform 0.2s ease</code> turns any transform into a smooth animation. Common functions: <code>translate(x, y)</code>, <code>rotate(deg)</code>, <code>scale(n)</code>, <code>skew(deg)</code>. Our card uses <code>translateY(-5px)</code> on hover for the lift.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="c-prop">display: flex</span></div>
+        <div class="lex-info">
+          <div class="lex-name">display: flex (recap)</div>
+          <div class="lex-desc">Turns an element into a flex container — children line up in a row and can be aligned, distributed, and spaced with Flexbox properties.</div>
+          <div class="lex-detail">Flexbox is a full layout system. Key properties on the container: <code>flex-direction</code> (row/column), <code>justify-content</code> (main axis), <code>align-items</code> (cross axis), <code>flex-wrap</code> (allow wrapping). Key property on items: <code>flex: 1</code> (fill available space equally). We'll use more of these in React and the full MERN project.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card card-gray">
+      <div class="section-label">quick reference — shadow values</div>
+      <table class="tag-table" style="margin-top:6px">
+        <thead><tr><th>CSS</th><th>Effect</th></tr></thead>
+        <tbody>
+          <tr><td><code>box-shadow: 0 2px 4px rgba(0,0,0,0.1)</code></td><td>Very subtle — almost invisible</td></tr>
+          <tr><td><code>box-shadow: 0 2px 8px rgba(0,0,0,0.2)</code></td><td>Standard card shadow (our current value)</td></tr>
+          <tr><td><code>box-shadow: 0 4px 20px rgba(0,0,0,0.3)</code></td><td>Dramatic — floats above the page</td></tr>
+          <tr><td><code>box-shadow: none</code></td><td>Removes all shadow</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-8"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Footer <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ══════ SLIDE 9  FOOTER ══════ -->
+  <div class="slide" id="slide-9">
+    <div class="slide-header">
+      <span class="badge b-slate">HTML + CSS</span>
+      <div>
+        <div class="slide-title">Footer — Closing the Page</div>
+        <div class="slide-subtitle">Add &lt;footer&gt; in HTML and one CSS rule to finish SkillHub</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">add to index.html — at the very bottom, before &lt;/body&gt;</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">frontend/index.html</span></div>
+          <div class="editor-body">
+            <div class="e-row"><span class="e-ln">1</span><span class="e-tag">&lt;footer&gt;</span></div>
+            <div class="e-row"><span class="e-ln">2</span><span class="e-ind1"></span><span class="e-tag">&lt;p&gt;</span><span class="e-txt">&amp;copy; 2024 SkillHub LMS. All rights reserved.</span><span class="e-tag">&lt;/p&gt;</span></div>
+            <div class="e-row"><span class="e-ln">3</span><span class="e-tag">&lt;/footer&gt;</span></div>
+          </div>
+        </div>
+        <div style="margin-top:10px">
+          <div class="section-label">add to css/style.css — after .card:hover</div>
+          <div class="editor">
+            <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">css/style.css</span></div>
+            <div class="editor-body">
+              <div class="e-row"><span class="e-ln">32</span><span class="c-cmt">/* ─ Footer ─ */</span></div>
+              <div class="e-row"><span class="e-ln">33</span><span class="c-sel">footer</span><span class="c-punc">{</span></div>
+              <div class="e-row"><span class="e-ln">34</span><span class="e-ind1"></span><span class="c-prop">background</span><span class="c-punc">:</span> <span class="c-hex">#1e293b</span><span class="c-punc">;</span></div>
+              <div class="e-row"><span class="e-ln">35</span><span class="e-ind1"></span><span class="c-prop">color</span><span class="c-punc">:</span> <span class="c-str">white</span><span class="c-punc">;</span></div>
+              <div class="e-row"><span class="e-ln">36</span><span class="e-ind1"></span><span class="c-prop">text-align</span><span class="c-punc">:</span> <span class="c-str">center</span><span class="c-punc">;</span></div>
+              <div class="e-row"><span class="e-ln">37</span><span class="e-ind1"></span><span class="c-prop">padding</span><span class="c-punc">:</span> <span class="c-num">20px</span><span class="c-punc">;</span></div>
+              <div class="e-row"><span class="e-ln">38</span><span class="e-ind1"></span><span class="c-prop">margin-top</span><span class="c-punc">:</span> <span class="c-num">40px</span><span class="c-punc">;</span></div>
+              <div class="e-row"><span class="e-ln">39</span><span class="c-punc">}</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">complete skillhub preview — hour 3 done!</div>
+        <div class="sh-wrap">
+          <div class="sh-header2">SkillHub LMS</div>
+          <div class="sh-nav2"><a href="#">Home</a><a href="#">Courses</a><a href="#">About</a><a href="#">Contact</a></div>
+          <div class="sh-hero2" style="padding:22px 14px"><h2 style="font-size:16px">Become a Full Stack Developer</h2><p style="font-size:11px">Learn HTML, CSS, JavaScript, React, Node.js and MongoDB.</p><button style="font-size:11px;padding:8px 16px">Get Started</button></div>
+          <div style="background:#f4f4f4">
+            <div class="sh-about"><h2 style="font-size:13px">About Us</h2><p style="font-size:11px;margin-top:4px">SkillHub LMS helps students become industry-ready developers.</p></div>
+            <div class="sh-courses">
+              <h2 style="font-size:13px">Our Courses</h2>
+              <div class="sh-cards">
+                <div class="sh-card"><h3>HTML &amp; CSS</h3><p>Learn website fundamentals.</p></div>
+                <div class="sh-card"><h3>JavaScript</h3><p>Build interactive websites.</p></div>
+                <div class="sh-card"><h3>React</h3><p>Create modern web apps.</p></div>
+              </div>
+            </div>
+          </div>
+          <div class="sh-footer2">© 2024 SkillHub LMS. All rights reserved.</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="background:#d1fae5;border:1px solid #6ee7b7;border-radius:10px;padding:12px 16px;display:flex;gap:10px;align-items:flex-start">
+      <i class="ti ti-trophy" style="color:#059669;font-size:20px;flex-shrink:0"></i>
+      <div style="font-size:13px;color:#065f46;line-height:1.6"><strong>SkillHub is now a complete, professional-looking page!</strong> Dark header → nav → hero → about card → course cards with shadow + hover → dark footer. This is real front-end development. 🎉</div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-9"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Mini Challenge <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ══════ SLIDE 10  MINI CHALLENGE ══════ -->
+  <div class="slide" id="slide-10">
+    <div class="slide-header">
+      <span class="badge b-rose">⚡ Challenge</span>
+      <div>
+        <div class="slide-title">Mini Challenge — 20 Minutes</div>
+        <div class="slide-subtitle">Students add a MongoDB card to the course container</div>
+      </div>
+    </div>
+
+    <div class="challenge-box">
+      <div class="challenge-title"><i class="ti ti-bolt"></i> Your Task — Add a MongoDB Course Card</div>
+      <div style="font-size:13px;color:#4a044e;line-height:1.7">
+        Open <code>frontend/index.html</code> and inside <code>.course-container</code>, add a <strong>fourth card</strong> for MongoDB:
+      </div>
+      <div class="editor" style="margin-top:10px">
+        <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">your task — add this card</span></div>
+        <div class="editor-body">
+          <div class="e-row"><span class="e-ln">1</span><span class="e-tag">&lt;div</span> <span class="e-att">class</span><span class="e-txt">=</span><span class="e-val">"card"</span><span class="e-tag">&gt;</span></div>
+          <div class="e-row"><span class="e-ln">2</span><span class="e-ind1"></span><span class="e-tag">&lt;h3&gt;</span><span class="e-txt">MongoDB</span><span class="e-tag">&lt;/h3&gt;</span></div>
+          <div class="e-row"><span class="e-ln">3</span><span class="e-ind1"></span><span class="e-tag">&lt;p&gt;</span><span class="e-txt">Store and manage data.</span><span class="e-tag">&lt;/p&gt;</span></div>
+          <div class="e-row"><span class="e-ln">4</span><span class="e-tag">&lt;/div&gt;</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:4px">
+      <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:12px 16px">
+        <div style="font-size:12px;font-weight:700;color:#92400e;margin-bottom:8px">✅ Success Checklist</div>
+        <div style="font-size:12px;color:#78350f;line-height:2">
+          ☐ MongoDB card appears in the row<br>
+          ☐ Card has white background + shadow<br>
+          ☐ Card lifts on hover<br>
+          ☐ No new CSS needed — <code>.card</code> rule already covers it
+        </div>
+      </div>
+      <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:12px 16px">
+        <div style="font-size:12px;font-weight:700;color:#1e40af;margin-bottom:8px">💡 Hint — Where to Put It</div>
+        <div style="font-size:12px;color:#1e3a8a;line-height:1.7">Place the new <code>&lt;div class="card"&gt;</code> <strong>inside</strong> <code>&lt;div class="course-container"&gt;</code>, after the React card. Because it uses the same <code>class="card"</code>, all styles apply automatically — this is the power of CSS classes!</div>
+      </div>
+    </div>
+
+    <div class="reveal-btn" onclick="toggle('challenge-answer')">Reveal the answer</div>
+    <div class="reveal-content" id="challenge-answer">
+      <div class="editor">
+        <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">complete course-container with 4 cards</span></div>
+        <div class="editor-body">
+          <div class="e-row"><span class="e-ln">1</span><span class="e-tag">&lt;div</span> <span class="e-att">class</span><span class="e-txt">=</span><span class="e-val">"course-container"</span><span class="e-tag">&gt;</span></div>
+          <div class="e-row"><span class="e-ln">2</span><span class="e-ind1"></span><span class="e-tag">&lt;div</span> <span class="e-att">class</span><span class="e-txt">=</span><span class="e-val">"card"</span><span class="e-tag">&gt;&lt;h3&gt;</span><span class="e-txt">HTML &amp; CSS</span><span class="e-tag">&lt;/h3&gt;&lt;p&gt;</span><span class="e-txt">Learn website fundamentals.</span><span class="e-tag">&lt;/p&gt;&lt;/div&gt;</span></div>
+          <div class="e-row"><span class="e-ln">3</span><span class="e-ind1"></span><span class="e-tag">&lt;div</span> <span class="e-att">class</span><span class="e-txt">=</span><span class="e-val">"card"</span><span class="e-tag">&gt;&lt;h3&gt;</span><span class="e-txt">JavaScript</span><span class="e-tag">&lt;/h3&gt;&lt;p&gt;</span><span class="e-txt">Build interactive websites.</span><span class="e-tag">&lt;/p&gt;&lt;/div&gt;</span></div>
+          <div class="e-row"><span class="e-ln">4</span><span class="e-ind1"></span><span class="e-tag">&lt;div</span> <span class="e-att">class</span><span class="e-txt">=</span><span class="e-val">"card"</span><span class="e-tag">&gt;&lt;h3&gt;</span><span class="e-txt">React</span><span class="e-tag">&lt;/h3&gt;&lt;p&gt;</span><span class="e-txt">Create modern web applications.</span><span class="e-tag">&lt;/p&gt;&lt;/div&gt;</span></div>
+          <div class="e-row" style="background:#0d1f0d"><span class="e-ln">5</span><span class="e-ind1"></span><span class="e-new">&lt;div</span> <span class="e-att">class</span><span class="e-txt">=</span><span class="e-val">"card"</span><span class="e-new">&gt;&lt;h3&gt;</span><span class="e-txt">MongoDB</span><span class="e-new">&lt;/h3&gt;&lt;p&gt;</span><span class="e-txt">Store and manage data.</span><span class="e-new">&lt;/p&gt;&lt;/div&gt;</span></div>
+          <div class="e-row"><span class="e-ln">6</span><span class="e-tag">&lt;/div&gt;</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-10"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Assignment <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ══════ SLIDE 11  ASSIGNMENT ══════ -->
+  <div class="slide" id="slide-11">
+    <div class="slide-header">
+      <span class="badge b-orange">📋 Assignment</span>
+      <div>
+        <div class="slide-title">Assignment — Enhance SkillHub LMS</div>
+        <div class="slide-subtitle">Add 4 more courses, apply colours, hover effects, and rounded buttons</div>
+      </div>
+    </div>
+
+    <div class="activity-box">
+      <div class="activity-title"><i class="ti ti-pencil"></i> Your Assignment</div>
+      <div class="grid-2">
+        <div>
+          <div style="font-size:13px;font-weight:700;color:#3730a3;margin-bottom:8px">Task 1 — Add 4 More Course Cards</div>
+          <div class="editor" style="font-size:12px">
+            <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">inside .course-container</span></div>
+            <div class="editor-body">
+              <div class="e-row"><span class="e-ln">1</span><span class="e-cmt">&lt;!-- After MongoDB card --&gt;</span></div>
+              <div class="e-row"><span class="e-ln">2</span><span class="e-tag">&lt;div</span> <span class="e-att">class</span><span class="e-txt">=</span><span class="e-val">"card"</span><span class="e-tag">&gt;</span></div>
+              <div class="e-row"><span class="e-ln">3</span><span class="e-ind1"></span><span class="e-tag">&lt;h3&gt;</span><span class="e-txt">Bootstrap</span><span class="e-tag">&lt;/h3&gt;</span></div>
+              <div class="e-row"><span class="e-ln">4</span><span class="e-ind1"></span><span class="e-tag">&lt;p&gt;</span><span class="e-txt">Design fast with CSS framework.</span><span class="e-tag">&lt;/p&gt;</span></div>
+              <div class="e-row"><span class="e-ln">5</span><span class="e-tag">&lt;/div&gt;</span></div>
+              <div class="e-row"><span class="e-ln">6</span><span class="e-cmt">&lt;!-- Repeat for Node.js, Express.js, MongoDB --&gt;</span></div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:13px;font-weight:700;color:#3730a3;margin-bottom:8px">Task 2 — Apply Styles</div>
+          <div class="editor">
+            <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">css/style.css — ideas</span></div>
+            <div class="editor-body">
+              <div class="e-row"><span class="e-ln">1</span><span class="c-cmt">/* Different bg colours per card */</span></div>
+              <div class="e-row"><span class="e-ln">2</span><span class="c-sel">.card.bootstrap</span><span class="c-punc">{</span> <span class="c-prop">background</span><span class="c-punc">:</span><span class="c-hex">#e0e7ff</span><span class="c-punc">; }</span></div>
+              <div class="e-row"><span class="e-ln">3</span><span class="c-sel">.card.node</span><span class="c-punc">{</span> <span class="c-prop">background</span><span class="c-punc">:</span><span class="c-hex">#dcfce7</span><span class="c-punc">; }</span></div>
+              <div class="e-row" style="margin-top:6px"><span class="e-ln">4</span><span class="c-cmt">/* Smooth hover transition */</span></div>
+              <div class="e-row"><span class="e-ln">5</span><span class="c-sel">.card</span><span class="c-punc">{</span> <span class="c-prop">transition</span><span class="c-punc">:</span><span class="c-str">transform 0.2s</span><span class="c-punc">; }</span></div>
+              <div class="e-row" style="margin-top:6px"><span class="e-ln">6</span><span class="c-cmt">/* Rounded button */</span></div>
+              <div class="e-row"><span class="e-ln">7</span><span class="c-sel">.btn</span><span class="c-punc">{</span> <span class="c-prop">border-radius</span><span class="c-punc">:</span><span class="c-num">25px</span><span class="c-punc">; }</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card card-gray" style="margin-top:4px">
+      <div class="section-label">all 7 courses to add (including the mini challenge)</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+        <span class="tag-chip" style="background:#dbeafe;color:#1e40af">HTML &amp; CSS ✅</span>
+        <span class="tag-chip" style="background:#d1fae5;color:#065f46">JavaScript ✅</span>
+        <span class="tag-chip" style="background:#ede9fe;color:#5b21b6">React ✅</span>
+        <span class="tag-chip" style="background:#fef9c3;color:#854d0e">MongoDB ✅ (mini challenge)</span>
+        <span class="tag-chip" style="background:#ffedd5;color:#9a3412">Bootstrap</span>
+        <span class="tag-chip" style="background:#dcfce7;color:#166534">Node.js</span>
+        <span class="tag-chip" style="background:#e0e7ff;color:#3730a3">Express.js</span>
+      </div>
+    </div>
+
+    <div class="tip-box">
+      <i class="ti ti-bulb tip-icon"></i>
+      <div class="tip-text"><strong>Bonus:</strong> Add a second class to each card HTML — e.g. <code>class="card bootstrap"</code> — then target it with <code>.card.bootstrap { background: #e0e7ff; }</code> to give each course a unique colour without touching the shared <code>.card</code> rule.</div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-11"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Full CSS Reference <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ══════ SLIDE 12  FULL CSS REFERENCE ══════ -->
+  <div class="slide" id="slide-12">
+    <div class="slide-header">
+      <span class="badge b-slate">Reference</span>
+      <div>
+        <div class="slide-title">Complete style.css — All 3 Hours</div>
+        <div class="slide-subtitle">The full CSS file after Day 3, Hours 1 + 2 + 3</div>
+      </div>
+    </div>
+
+    <div class="editor">
+      <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">css/style.css — complete file after Hour 3</span></div>
+      <div class="editor-body">
+        <div class="e-row"><span class="e-ln">1</span><span class="c-cmt">/* ─── Hour 1 ─── */</span></div>
+        <div class="e-row"><span class="e-ln">2</span><span class="c-sel">body</span><span class="c-punc">{</span> <span class="c-prop">background-color</span><span class="c-punc">:</span><span class="c-hex">#f4f4f4</span><span class="c-punc">;</span> <span class="c-prop">font-family</span><span class="c-punc">:</span><span class="c-str">Arial, sans-serif</span><span class="c-punc">; }</span></div>
+        <div class="e-row"><span class="e-ln">3</span><span class="c-sel">header</span><span class="c-punc">{</span> <span class="c-prop">background</span><span class="c-punc">:</span><span class="c-hex">#1e293b</span><span class="c-punc">;</span> <span class="c-prop">color</span><span class="c-punc">:</span><span class="c-str">white</span><span class="c-punc">;</span> <span class="c-prop">padding</span><span class="c-punc">:</span><span class="c-num">20px</span><span class="c-punc">;</span> <span class="c-prop">text-align</span><span class="c-punc">:</span><span class="c-str">center</span><span class="c-punc">; }</span></div>
+        <div class="e-row" style="margin-top:8px"><span class="e-ln">4</span><span class="c-cmt">/* ─── Hour 2 ─── */</span></div>
+        <div class="e-row"><span class="e-ln">5</span><span class="c-sel">nav</span><span class="c-punc">{</span> <span class="c-prop">background</span><span class="c-punc">:</span><span class="c-hex">#1e293b</span><span class="c-punc">;</span> <span class="c-prop">padding</span><span class="c-punc">:</span><span class="c-num">15px</span><span class="c-punc">;</span> <span class="c-prop">text-align</span><span class="c-punc">:</span><span class="c-str">center</span><span class="c-punc">; }</span></div>
+        <div class="e-row"><span class="e-ln">6</span><span class="c-sel">nav a</span><span class="c-punc">{</span> <span class="c-prop">color</span><span class="c-punc">:</span><span class="c-str">white</span><span class="c-punc">;</span> <span class="c-prop">text-decoration</span><span class="c-punc">:</span><span class="c-str">none</span><span class="c-punc">;</span> <span class="c-prop">margin</span><span class="c-punc">:</span><span class="c-num">15px</span><span class="c-punc">; }</span></div>
+        <div class="e-row"><span class="e-ln">7</span><span class="c-sel">nav a<span class="c-pseudo">:hover</span></span><span class="c-punc">{</span> <span class="c-prop">color</span><span class="c-punc">:</span><span class="c-hex">#facc15</span><span class="c-punc">; }</span></div>
+        <div class="e-row"><span class="e-ln">8</span><span class="c-sel">.hero</span><span class="c-punc">{</span> <span class="c-prop">background</span><span class="c-punc">:</span><span class="c-str">white</span><span class="c-punc">;</span> <span class="c-prop">padding</span><span class="c-punc">:</span><span class="c-num">60px 20px</span><span class="c-punc">;</span> <span class="c-prop">text-align</span><span class="c-punc">:</span><span class="c-str">center</span><span class="c-punc">; }</span></div>
+        <div class="e-row"><span class="e-ln">9</span><span class="c-sel">.hero h2</span><span class="c-punc">{</span> <span class="c-prop">color</span><span class="c-punc">:</span><span class="c-hex">#2563eb</span><span class="c-punc">;</span> <span class="c-prop">font-size</span><span class="c-punc">:</span><span class="c-num">2rem</span><span class="c-punc">; }</span></div>
+        <div class="e-row"><span class="e-ln">10</span><span class="c-sel">.hero p</span><span class="c-punc">{</span> <span class="c-prop">font-size</span><span class="c-punc">:</span><span class="c-num">1.1rem</span><span class="c-punc">;</span> <span class="c-prop">color</span><span class="c-punc">:</span><span class="c-hex">#555</span><span class="c-punc">;</span> <span class="c-prop">margin-top</span><span class="c-punc">:</span><span class="c-num">20px</span><span class="c-punc">; }</span></div>
+        <div class="e-row"><span class="e-ln">11</span><span class="c-sel">.btn</span><span class="c-punc">{</span> <span class="c-prop">background</span><span class="c-punc">:</span><span class="c-hex">#2563eb</span><span class="c-punc">;</span> <span class="c-prop">color</span><span class="c-punc">:</span><span class="c-str">white</span><span class="c-punc">;</span> <span class="c-prop">border</span><span class="c-punc">:</span><span class="c-str">none</span><span class="c-punc">;</span> <span class="c-prop">padding</span><span class="c-punc">:</span><span class="c-num">12px 25px</span><span class="c-punc">;</span> <span class="c-prop">margin-top</span><span class="c-punc">:</span><span class="c-num">20px</span><span class="c-punc">;</span> <span class="c-prop">cursor</span><span class="c-punc">:</span><span class="c-str">pointer</span><span class="c-punc">;</span> <span class="c-prop">font-size</span><span class="c-punc">:</span><span class="c-num">1rem</span><span class="c-punc">; }</span></div>
+        <div class="e-row"><span class="e-ln">12</span><span class="c-sel">.btn<span class="c-pseudo">:hover</span></span><span class="c-punc">{</span> <span class="c-prop">background</span><span class="c-punc">:</span><span class="c-hex">#1d4ed8</span><span class="c-punc">; }</span></div>
+        <div class="e-row" style="margin-top:8px"><span class="e-ln">13</span><span class="c-cmt">/* ─── Hour 3 (new) ─── */</span></div>
+        <div class="e-row"><span class="e-ln">14</span><span class="c-sel">.about</span><span class="c-punc">{</span> <span class="c-prop">background</span><span class="c-punc">:</span><span class="c-str">white</span><span class="c-punc">;</span> <span class="c-prop">margin</span><span class="c-punc">:</span><span class="c-num">30px</span><span class="c-punc">;</span> <span class="c-prop">padding</span><span class="c-punc">:</span><span class="c-num">30px</span><span class="c-punc">; }</span></div>
+        <div class="e-row"><span class="e-ln">15</span><span class="c-sel">.course-container</span><span class="c-punc">{</span> <span class="c-prop">display</span><span class="c-punc">:</span><span class="c-val">flex</span><span class="c-punc">;</span> <span class="c-prop">gap</span><span class="c-punc">:</span><span class="c-num">20px</span><span class="c-punc">;</span> <span class="c-prop">justify-content</span><span class="c-punc">:</span><span class="c-val">center</span><span class="c-punc">; }</span></div>
+        <div class="e-row"><span class="e-ln">16</span><span class="c-sel">.card</span><span class="c-punc">{</span> <span class="c-prop">background</span><span class="c-punc">:</span><span class="c-str">white</span><span class="c-punc">;</span> <span class="c-prop">width</span><span class="c-punc">:</span><span class="c-num">250px</span><span class="c-punc">;</span> <span class="c-prop">padding</span><span class="c-punc">:</span><span class="c-num">20px</span><span class="c-punc">;</span> <span class="c-prop">border-radius</span><span class="c-punc">:</span><span class="c-num">10px</span><span class="c-punc">;</span> <span class="c-prop">box-shadow</span><span class="c-punc">:</span><span class="c-num">0 2px 8px</span> <span class="c-str">rgba(0,0,0,0.2)</span><span class="c-punc">; }</span></div>
+        <div class="e-row"><span class="e-ln">17</span><span class="c-sel">.card<span class="c-pseudo">:hover</span></span><span class="c-punc">{</span> <span class="c-prop">transform</span><span class="c-punc">:</span><span class="c-val">translateY</span><span class="c-punc">(-</span><span class="c-num">5px</span><span class="c-punc">); }</span></div>
+        <div class="e-row"><span class="e-ln">18</span><span class="c-sel">footer</span><span class="c-punc">{</span> <span class="c-prop">background</span><span class="c-punc">:</span><span class="c-hex">#1e293b</span><span class="c-punc">;</span> <span class="c-prop">color</span><span class="c-punc">:</span><span class="c-str">white</span><span class="c-punc">;</span> <span class="c-prop">text-align</span><span class="c-punc">:</span><span class="c-str">center</span><span class="c-punc">;</span> <span class="c-prop">padding</span><span class="c-punc">:</span><span class="c-num">20px</span><span class="c-punc">;</span> <span class="c-prop">margin-top</span><span class="c-punc">:</span><span class="c-num">40px</span><span class="c-punc">; }</span></div>
+      </div>
+    </div>
+
+    <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:12px 16px;display:flex;gap:10px;align-items:flex-start">
+      <i class="ti ti-check" style="color:#059669;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+      <div style="font-size:13px;color:#065f46;line-height:1.6">Lines 1–12 were written in Hours 1 and 2. Lines 13–18 are what you added today. Notice how each hour builds on the last — one file, progressively growing.</div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-12"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Quiz <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ══════ SLIDE 13  QUIZ ══════ -->
+  <div class="slide" id="slide-13">
+    <div class="slide-header">
+      <span class="badge b-green">Quiz</span>
+      <div>
+        <div class="slide-title">Quick Check — 5 Questions</div>
+        <div class="slide-subtitle">Flexbox, box-shadow, border-radius, transform, and card layout</div>
+      </div>
+    </div>
+    <div id="quiz-container"></div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-13"></div>
+      <button class="nav-btn" onclick="goSlide(0)"><i class="ti ti-home"></i> Home</button>
+    </div>
+  </div>
+
+</div><!-- /.wrapper -->
+
+<script>
+  var current = 0, total = 14, quizInit = false;
+
+  var quizData = [
+    {
+      q: "We used <code>display: flex</code> on <code>.course-container</code>. What does this do to the <code>.card</code> divs inside it?",
+      opts: [
+        "It makes all cards the same height and width automatically",
+        "It causes the card divs to line up in a horizontal row instead of stacking vertically",
+        "It adds gap and border-radius to each card automatically",
+        "It centres the text inside every card"
+      ],
+      ans: 1,
+      exp: "display:flex turns the container into a Flexbox, making its direct children (the .card divs) arrange in a horizontal row by default. Without it, block elements stack vertically. The flex container controls layout; gap and border-radius are separate properties added to the children."
+    },
+    {
+      q: "What does <code>box-shadow: 0 2px 8px rgba(0,0,0,0.2)</code> do — and what do the 4 values mean?",
+      opts: [
+        "Adds a border — 0 thickness on left, 2px on top, 8px on right, 20% opacity on bottom",
+        "Adds a drop shadow — 0 horizontal offset, 2px vertical offset, 8px blur radius, black at 20% opacity",
+        "Adds an inner glow — 0 hue, 2px saturation, 8px brightness, 0.2 alpha",
+        "Sets box dimensions — width:0, height:2px, padding:8px, margin:0.2px"
+      ],
+      ans: 1,
+      exp: "box-shadow takes: X-offset (0 = no left/right), Y-offset (2px = 2px down), blur-radius (8px = how soft), and color (rgba(0,0,0,0.2) = semi-transparent black). Together they create the card's floating shadow. Increase blur for softer shadows, increase opacity (0.4, 0.6) for darker ones."
+    },
+    {
+      q: "Why do we write <code>.card:hover { transform: translateY(-5px); }</code> instead of editing the original <code>.card { }</code> rule?",
+      opts: [
+        "The :hover pseudo-class only works in a separate rule — it cannot be inside .card { }",
+        ":hover is a state — it applies CSS only when the mouse is over the element, leaving the default state unchanged",
+        "Adding translateY inside .card { } would break the box-shadow",
+        "The browser ignores transform if it is inside a class selector"
+      ],
+      ans: 1,
+      exp: ".card { } defines how the card looks normally. .card:hover { } defines how it looks when hovered. They are separate rules so the card returns to its original position when you move your mouse away. If you put translateY in .card { } it would always be shifted up — the hover state would have no effect."
+    },
+    {
+      q: "In <code>.about { margin: 30px; padding: 30px; }</code> — which property creates space OUTSIDE the white card, and which creates space INSIDE?",
+      opts: [
+        "Both margin and padding add inner space — they are interchangeable",
+        "margin = inner space between content and the white edge; padding = outer space pushing neighbours",
+        "margin = outer space pushing other elements away; padding = inner space between content and the card's edge",
+        "padding affects only text; margin affects the entire element"
+      ],
+      ans: 2,
+      exp: "margin is OUTER space — it pushes the white .about card away from the surrounding page elements (creating the visible gap between the card and the page edge). padding is INNER space — it pushes the text (h2, p) away from the white card's own edge, so the text doesn't touch the border. Both set to 30px here."
+    },
+    {
+      q: "We used <code>justify-content: center</code> on <code>.course-container</code>. What would happen if we changed it to <code>justify-content: space-between</code>?",
+      opts: [
+        "Cards would stack vertically with space between them",
+        "The first card would go to the far left, the last card to the far right, with equal gaps between each card",
+        "All cards would be centred with no gap between them",
+        "Cards would wrap onto the next line when they don't fit"
+      ],
+      ans: 1,
+      exp: "justify-content controls how flex items are distributed along the main axis (horizontal). space-between puts the first item at the start, the last item at the end, and distributes remaining items with equal gaps between them — no gap before the first or after the last. center groups them all in the middle. flex-start aligns all to the left."
+    }
+  ];
+
+  var quizAnswered = [];
+
+  function renderQuiz() {
+    var c = document.getElementById('quiz-container'); c.innerHTML = '';
+    quizData.forEach(function(q, i) {
+      var d = document.createElement('div'); d.style.cssText = 'margin-bottom:18px';
+      d.innerHTML = '<div style="font-size:13px;font-weight:600;margin-bottom:6px">'+(i+1)+'. '+q.q+'</div>';
+      q.opts.forEach(function(opt, j) {
+        var btn = document.createElement('button'); btn.className = 'quiz-option';
+        btn.innerHTML = String.fromCharCode(65+j)+'. '+opt;
+        btn.onclick = function() {
+          if (quizAnswered[i]) return; quizAnswered[i] = true;
+          var btns = d.querySelectorAll('.quiz-option');
+          btns.forEach(function(b,k){ b.disabled=true; if(k===q.ans) b.classList.add('correct'); else if(k===j) b.classList.add('wrong'); });
+          var fb = d.querySelector('.quiz-feedback');
+          fb.innerHTML = (j===q.ans?'✅ Correct! ':'❌ Not quite. ')+q.exp;
+          fb.className = 'quiz-feedback '+(j===q.ans?'correct':'wrong');
+        };
+        d.appendChild(btn);
+      });
+      var fb = document.createElement('div'); fb.className = 'quiz-feedback'; d.appendChild(fb);
+      c.appendChild(d);
+    });
+  }
+
+  function toggleLex(row) {
+    var was = row.classList.contains('active');
+    document.querySelectorAll('.lex-row.active').forEach(function(r){ r.classList.remove('active'); });
+    if (!was) row.classList.add('active');
+  }
+
+  function toggle(id) {
+    var el = document.getElementById(id); el.classList.toggle('open');
+    el.previousElementSibling.textContent = el.classList.contains('open') ? 'Hide the answer' : 'Reveal the answer';
+  }
+
+  function goSlide(n) {
+    document.getElementById('slide-'+current).classList.remove('active');
+    current = n;
+    document.getElementById('slide-'+current).classList.add('active');
+    updateDots();
+    document.getElementById('slide-counter').textContent = (current+1)+' / '+total;
+    if (n===13 && !quizInit) { renderQuiz(); quizInit=true; }
+    window.scrollTo(0,0);
+  }
+  function nextSlide() { if (current < total-1) goSlide(current+1); }
+  function prevSlide() { if (current > 0) goSlide(current-1); }
+
+  function updateDots() {
+    for (var s=0; s<total; s++) {
+      var el = document.getElementById('dots-'+s); if (!el) continue;
+      el.innerHTML = '';
+      for (var d=0; d<total; d++) {
+        var dot = document.createElement('div');
+        dot.className = 'dot'+(d===current?' active':'');
+        el.appendChild(dot);
+      }
+    }
+  }
+  updateDots();
+</script>
+</body>
+</html>

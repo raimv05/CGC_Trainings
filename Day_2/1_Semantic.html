@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Day 2 · Hour 1 – Semantic HTML</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f4f5f7; color: #1a1a1a;
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; padding: 2rem 1rem;
+  }
+  .wrapper {
+    width: 100%; max-width: 920px; background: #fff;
+    border-radius: 16px; box-shadow: 0 2px 20px rgba(0,0,0,0.09); overflow: hidden;
+  }
+
+  /* ── Top Bar ── */
+  .top-bar {
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    color: #fff; padding: 14px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .top-bar-title { font-size: 15px; font-weight: 600; }
+  .top-bar-sub   { font-size: 12px; opacity: .55; margin-top: 2px; }
+  .slide-counter { font-size: 13px; opacity: .6; font-variant-numeric: tabular-nums; }
+
+  /* ── Slides ── */
+  .slide { display: none; padding: 1.75rem 2rem; min-height: 500px; flex-direction: column; gap: 1.2rem; }
+  .slide.active { display: flex; }
+  .slide-header { display: flex; align-items: center; gap: 10px; padding-bottom: 1rem; border-bottom: 1px solid #e8e8e8; }
+  .slide-title    { font-size: 20px; font-weight: 700; color: #111; }
+  .slide-subtitle { font-size: 13px; color: #666; margin-top: 2px; }
+
+  /* ── Badges ── */
+  .badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+  .b-blue   { background:#dbeafe; color:#1d4ed8; }
+  .b-teal   { background:#d1fae5; color:#065f46; }
+  .b-purple { background:#ede9fe; color:#5b21b6; }
+  .b-amber  { background:#fef3c7; color:#92400e; }
+  .b-coral  { background:#fee2e2; color:#991b1b; }
+  .b-green  { background:#dcfce7; color:#166534; }
+  .b-slate  { background:#e2e8f0; color:#334155; }
+  .b-rose   { background:#ffe4e6; color:#9f1239; }
+  .b-orange { background:#ffedd5; color:#9a3412; }
+  .b-indigo { background:#e0e7ff; color:#3730a3; }
+
+  /* ── Utility ── */
+  .section-label { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 8px; }
+  .card { background: #fff; border: 1px solid #e8e8e8; border-radius: 12px; padding: 1rem 1.25rem; }
+  .card-gray { background: #f8f9fa; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+  /* ── Code Editor ── */
+  .editor { background: #1e1e2e; border-radius: 12px; overflow: hidden; font-family: 'SFMono-Regular', Consolas, 'Courier New', monospace; }
+  .editor-bar { background: #13131f; padding: 9px 14px; display: flex; align-items: center; gap: 6px; }
+  .e-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .e-red { background:#ff5f57; } .e-yellow { background:#febc2e; } .e-green { background:#28c840; }
+  .e-label { font-size: 12px; color: #6272a4; margin-left: 4px; font-family: -apple-system, sans-serif; }
+  .editor-body { padding: 14px 18px; font-size: 12.5px; line-height: 1.8; }
+  .e-ln   { color: #44475a; font-size: 11px; display: inline-block; width: 22px; user-select: none; }
+  .e-tag  { color: #ff79c6; }
+  .e-att  { color: #50fa7b; }
+  .e-val  { color: #f1fa8c; }
+  .e-txt  { color: #f8f8f2; }
+  .e-cmt  { color: #6272a4; font-style: italic; }
+  .e-new  { color: #80ffea; }
+  .e-row  { display: flex; gap: 8px; }
+  .e-ind1 { display: inline-block; width: 20px; }
+  .e-ind2 { display: inline-block; width: 40px; }
+  .e-ind3 { display: inline-block; width: 60px; }
+
+  /* ── Browser frame ── */
+  .browser { border-radius: 12px; overflow: hidden; border: 1px solid #e0e0e0; }
+  .browser-bar {
+    background: #f1f3f4; padding: 9px 14px;
+    display: flex; align-items: center; gap: 7px; border-bottom: 1px solid #e0e0e0;
+  }
+  .b-dot2 { width: 10px; height: 10px; border-radius: 50%; }
+  .b-r { background:#ff5f57; } .b-y { background:#febc2e; } .b-g { background:#28c840; }
+  .b-url { flex:1; background:#fff; border:1px solid #dadce0; border-radius:20px; padding:4px 14px; font-size:12px; color:#555; }
+
+  /* ── Semantic preview blocks ── */
+  .sem-page { border: 2px solid #cbd5e1; border-radius: 10px; overflow: hidden; font-family: -apple-system, sans-serif; }
+  .sem-header { background: #1e40af; color: #fff; padding: 12px 16px; font-size: 14px; font-weight: 700; }
+  .sem-header span { font-size: 10px; opacity: .7; margin-left: 8px; font-weight: 400; font-family: monospace; }
+  .sem-nav { background: #0f766e; color: #fff; padding: 8px 16px; font-size: 12px; display: flex; gap: 14px; }
+  .sem-nav span { font-size: 10px; opacity: .7; margin-left: 4px; font-family: monospace; }
+  .sem-section { background: #fff; padding: 12px 16px; border-bottom: 1px solid #f0f0f0; }
+  .sem-section-label { font-size: 10px; font-weight: 700; color: #7c3aed; font-family: monospace; margin-bottom: 4px; }
+  .sem-article { background: #fefce8; padding: 10px 14px; border: 1px solid #fde047; border-radius: 6px; margin: 8px 0; }
+  .sem-article-label { font-size: 10px; font-weight: 700; color: #92400e; font-family: monospace; margin-bottom: 3px; }
+  .sem-footer { background: #334155; color: #cbd5e1; padding: 10px 16px; font-size: 12px; }
+  .sem-footer span { font-size: 10px; opacity: .7; margin-left: 8px; font-family: monospace; }
+
+  /* ── Tag table ── */
+  .tag-table { border-collapse: collapse; width: 100%; }
+  .tag-table th { background: #f1f5f9; font-size: 12px; font-weight: 700; text-align: left; padding: 10px 14px; color: #475569; border-bottom: 2px solid #e2e8f0; }
+  .tag-table td { font-size: 13px; padding: 10px 14px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+  .tag-table tr:last-child td { border-bottom: none; }
+  .tag-table tr:hover td { background: #f8f9fa; }
+  .tag-mono { font-family: 'SFMono-Regular', Consolas, monospace; font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 5px; }
+
+  /* ── Book analogy cards ── */
+  .analogy-row { display: flex; gap: 0; align-items: stretch; }
+  .analogy-card {
+    flex: 1; text-align: center; padding: 14px 8px;
+    border-right: 1px solid #e8e8e8;
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+  }
+  .analogy-card:last-child { border-right: none; }
+  .analogy-icon { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+  .analogy-book { font-size: 11px; color: #888; }
+  .analogy-web  { font-size: 11px; font-weight: 700; }
+
+  /* ── Quiz ── */
+  .quiz-option {
+    border: 1px solid #dee2e6; border-radius: 8px; padding: 10px 14px;
+    font-size: 13px; cursor: pointer; margin-bottom: 6px; transition: all .15s;
+    background: transparent; width: 100%; text-align: left; color: #1a1a1a;
+  }
+  .quiz-option:hover:not(:disabled) { background: #f8f9fa; }
+  .quiz-option.correct { background: #d1fae5; border-color: #059669; color: #065f46; }
+  .quiz-option.wrong   { background: #fee2e2; border-color: #dc2626; color: #991b1b; }
+  .quiz-feedback { display: none; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-top: 4px; }
+  .quiz-feedback.correct { background: #d1fae5; color: #065f46; display: block; }
+  .quiz-feedback.wrong   { background: #fee2e2; color: #991b1b; display: block; }
+
+  /* ── Activity / challenge ── */
+  .activity-box { border: 2px dashed #a5b4fc; background: #eef2ff; border-radius: 12px; padding: 14px 18px; }
+  .activity-title { font-size: 13px; font-weight: 700; color: #3730a3; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .challenge-box { border: 2px dashed #f9a8d4; background: #fdf2f8; border-radius: 12px; padding: 14px 18px; }
+  .challenge-title { font-size: 13px; font-weight: 700; color: #9f1239; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+
+  /* ── Tips ── */
+  .tip-box  { display:flex; gap:10px; align-items:flex-start; background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:10px 14px; }
+  .tip-icon { color:#d97706; font-size:18px; flex-shrink:0; margin-top:1px; }
+  .tip-text { font-size:13px; color:#92400e; line-height:1.6; }
+  .info-box  { display:flex; gap:10px; align-items:flex-start; background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:10px 14px; }
+  .info-icon { color:#2563eb; font-size:18px; flex-shrink:0; margin-top:1px; }
+  .info-text { font-size:13px; color:#1e40af; line-height:1.6; }
+  .warn-box  { display:flex; gap:10px; align-items:flex-start; background:#fef9ee; border:1px solid #fcd34d; border-radius:10px; padding:10px 14px; }
+
+  /* ── Interactive line explainer ── */
+  .lex-row { display:flex; align-items:stretch; cursor:pointer; transition:background .12s; border-bottom:1px solid #f0f0f0; }
+  .lex-row:last-child { border-bottom:none; }
+  .lex-row:hover { background:#f8f9fa; }
+  .lex-row.active { background:#eff6ff; border-left:3px solid #1d4ed8; }
+  .lex-code { background:#1e1e2e; padding:10px 14px; font-family:'SFMono-Regular',Consolas,monospace; font-size:12px; min-width:200px; flex-shrink:0; display:flex; align-items:center; }
+  .lex-info { padding:10px 14px; flex:1; }
+  .lex-name   { font-size:13px; font-weight:700; color:#1d4ed8; margin-bottom:2px; }
+  .lex-desc   { font-size:12px; color:#555; line-height:1.55; }
+  .lex-detail { display:none; font-size:12px; color:#1d4ed8; margin-top:4px; padding-top:4px; border-top:1px dashed #bfdbfe; }
+  .lex-row.active .lex-detail { display:block; }
+  .line-explain { border:1px solid #e8e8e8; border-radius:10px; overflow:hidden; }
+
+  /* ── Mini challenge cards ── */
+  .brand-card {
+    border-radius: 12px; overflow: hidden; border: 1px solid #e8e8e8;
+    transition: transform .15s; cursor: default;
+  }
+  .brand-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,.1); }
+  .brand-header { padding: 12px 16px; font-size: 14px; font-weight: 700; color: #fff; }
+  .brand-nav { padding: 8px 14px; font-size: 12px; display: flex; gap: 12px; }
+  .brand-body { padding: 12px 16px; font-size: 12px; color: #444; min-height: 48px; }
+
+  /* ── Reveal ── */
+  .reveal-btn { background:#f1f3f5; border:1px solid #dee2e6; border-radius:8px; padding:7px 14px; font-size:13px; cursor:pointer; color:#333; transition:background .15s; }
+  .reveal-btn:hover { background:#e9ecef; }
+  .reveal-content { display:none; margin-top:8px; }
+  .reveal-content.open { display:block; }
+
+  /* ── Nav ── */
+  .nav-row { display:flex; align-items:center; justify-content:space-between; margin-top:auto; padding-top:1rem; border-top:1px solid #f0f0f0; }
+  .nav-btn { display:inline-flex; align-items:center; gap:6px; padding:9px 18px; border:1px solid #dee2e6; border-radius:8px; background:transparent; font-size:13px; cursor:pointer; color:#333; transition:background .15s; }
+  .nav-btn:hover:not(:disabled) { background:#f1f3f5; }
+  .nav-btn:disabled { opacity:.35; cursor:default; }
+  .nav-btn.primary { background:#1d4ed8; border-color:transparent; color:#fff; }
+  .nav-btn.primary:hover { background:#1e40af; }
+  .progress-dots { display:flex; gap:6px; align-items:center; }
+  .dot { width:7px; height:7px; border-radius:50%; background:#dee2e6; transition:all .2s; }
+  .dot.active { width:20px; border-radius:4px; background:#1d4ed8; }
+
+  /* ── Home grid ── */
+  .home-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .home-card { background:#fff; border:1px solid #e8e8e8; border-radius:12px; padding:1rem 1.25rem; cursor:pointer; transition:all .15s; }
+  .home-card:hover { border-color:#1d4ed8; box-shadow:0 2px 8px rgba(29,78,216,.1); }
+  .home-card-title { font-size:15px; font-weight:700; margin:6px 0 2px; }
+  .home-card-sub   { font-size:12px; color:#666; }
+
+  code { font-family:'SFMono-Regular',Consolas,monospace; font-size:12px; background:#f1f3f5; padding:1px 6px; border-radius:4px; border:1px solid #dee2e6; }
+  .tag-chip { font-family:'SFMono-Regular',Consolas,monospace; font-size:12px; font-weight:700; padding:3px 9px; border-radius:6px; }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <div>
+      <div class="top-bar-title">MERN Stack Training · Day 2 · Hour 1</div>
+      <div class="top-bar-sub">HTML Structure &amp; Semantic Elements — SkillHub LMS</div>
+    </div>
+    <div class="slide-counter" id="slide-counter">1 / 12</div>
+  </div>
+
+  <!-- ══════════════════════════════ SLIDE 0  HOME ══════════════════════════════════════ -->
+  <div class="slide active" id="slide-0">
+    <div class="slide-header">
+      <span class="badge b-indigo">Day 2 · Hour 1</span>
+      <div>
+        <div class="slide-title">HTML Structure &amp; Semantic Elements</div>
+        <div class="slide-subtitle">Students learn how to give meaning to their HTML, not just structure</div>
+      </div>
+    </div>
+    <div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:12px;padding:12px 16px;display:flex;gap:12px;align-items:flex-start">
+      <i class="ti ti-target" style="color:#0284c7;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#0c4a6e;margin-bottom:4px">Learning Objectives</div>
+        <div style="display:flex;gap:18px;flex-wrap:wrap;font-size:13px;color:#0369a1">
+          <span><i class="ti ti-circle-check" style="font-size:13px;margin-right:3px"></i>HTML Document Structure</span>
+          <span><i class="ti ti-circle-check" style="font-size:13px;margin-right:3px"></i>Semantic Tags</span>
+          <span><i class="ti ti-circle-check" style="font-size:13px;margin-right:3px"></i>Why Semantics Matter</span>
+        </div>
+      </div>
+    </div>
+    <div class="home-grid">
+      <div class="home-card" onclick="goSlide(1)">
+        <span class="badge b-amber">Theory</span>
+        <div class="home-card-title">Book vs Website Analogy</div>
+        <div class="home-card-sub">How a book's structure maps to a webpage</div>
+      </div>
+      <div class="home-card" onclick="goSlide(2)">
+        <span class="badge b-purple">Concept</span>
+        <div class="home-card-title">What Are Semantic Tags?</div>
+        <div class="home-card-sub">Non-semantic vs semantic — what's the difference?</div>
+      </div>
+      <div class="home-card" onclick="goSlide(3)">
+        <span class="badge b-blue">Tags</span>
+        <div class="home-card-title">The 5 Semantic Tags</div>
+        <div class="home-card-sub">header · nav · section · article · footer</div>
+      </div>
+      <div class="home-card" onclick="goSlide(4)">
+        <span class="badge b-teal">Visual</span>
+        <div class="home-card-title">Page Layout Diagram</div>
+        <div class="home-card-sub">See how semantic tags wrap a real webpage</div>
+      </div>
+      <div class="home-card" onclick="goSlide(5)">
+        <span class="badge b-green">Code</span>
+        <div class="home-card-title">Live Coding — SkillHub</div>
+        <div class="home-card-sub">Write the full semantic index.html together</div>
+      </div>
+      <div class="home-card" onclick="goSlide(6)">
+        <span class="badge b-blue">Explain</span>
+        <div class="home-card-title">Tag-by-Tag Explanation</div>
+        <div class="home-card-sub">Click each tag to expand its meaning</div>
+      </div>
+      <div class="home-card" onclick="goSlide(7)">
+        <span class="badge b-orange">Activity</span>
+        <div class="home-card-title">Add Blog &amp; Projects to Nav</div>
+        <div class="home-card-sub">Students extend the navigation section</div>
+      </div>
+      <div class="home-card" onclick="goSlide(8)">
+        <span class="badge b-slate">Why</span>
+        <div class="home-card-title">Why Semantic HTML Matters</div>
+        <div class="home-card-sub">SEO · Accessibility · Maintainability</div>
+      </div>
+    </div>
+    <div class="grid-2" style="gap:10px">
+      <div class="home-card" onclick="goSlide(9)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge b-rose">Challenge</span>
+          <span style="font-size:14px;font-weight:700">Mini Challenge — Netflix, Amazon, Flipkart</span>
+          <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+        </div>
+      </div>
+      <div class="home-card" onclick="goSlide(10)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge b-slate">Ref</span>
+          <span style="font-size:14px;font-weight:700">Semantic Tags Reference Table</span>
+          <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+        </div>
+      </div>
+    </div>
+    <div class="home-card" onclick="goSlide(11)" style="cursor:pointer">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="badge b-green">Quiz</span>
+        <span style="font-size:14px;font-weight:700">Quick Check — 5 Questions</span>
+        <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+      </div>
+    </div>
+    <div class="nav-row">
+      <div></div>
+      <div class="progress-dots" id="dots-0"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Start <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ SLIDE 1  BOOK ANALOGY ══════════════════════════════ -->
+  <div class="slide" id="slide-1">
+    <div class="slide-header">
+      <span class="badge b-amber">Theory</span>
+      <div>
+        <div class="slide-title">Book vs Website Analogy</div>
+        <div class="slide-subtitle">Ask students: "When you read a book, how is it organised?"</div>
+      </div>
+    </div>
+    <div class="card card-gray">
+      <div style="font-size:14px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:8px">
+        <i class="ti ti-message-question" style="color:#d97706;font-size:18px"></i>
+        ❓ When you read a book, how is it organised?
+      </div>
+      <button class="reveal-btn" onclick="toggle('book-ans')">Reveal student answers</button>
+      <div class="reveal-content" id="book-ans">
+        <div style="margin-top:10px;padding:12px 16px;background:#fff;border-radius:10px;border:1px solid #e8e8e8">
+          <div style="display:flex;gap:8px;flex-wrap:wrap;font-size:13px;color:#444">
+            <span style="background:#fef9c3;border-radius:6px;padding:4px 12px;font-weight:600">📖 Title</span>
+            <span style="background:#e0f2fe;border-radius:6px;padding:4px 12px;font-weight:600">📑 Chapter</span>
+            <span style="background:#f0fdf4;border-radius:6px;padding:4px 12px;font-weight:600">📝 Paragraph</span>
+            <span style="background:#fae8ff;border-radius:6px;padding:4px 12px;font-weight:600">📂 Section</span>
+            <span style="background:#fff7ed;border-radius:6px;padding:4px 12px;font-weight:600">📌 Footer</span>
+          </div>
+          <div style="margin-top:10px;font-size:13px;color:#555;font-weight:600">✅ Websites are organised the same way!</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-label">book → website mapping</div>
+      <div class="analogy-row" style="border:1px solid #e8e8e8;border-radius:10px;overflow:hidden;margin-top:4px">
+        <div class="analogy-card">
+          <div class="analogy-icon" style="background:#fef3c7"><i class="ti ti-book" style="color:#92400e"></i></div>
+          <div style="font-size:12px;font-weight:700">Book Part</div>
+          <div class="analogy-book">———</div>
+          <div style="font-size:11px;color:#888;font-weight:600">HTML Tag</div>
+        </div>
+        <div class="analogy-card">
+          <div class="analogy-icon" style="background:#dbeafe"><i class="ti ti-bookmark" style="color:#1d4ed8"></i></div>
+          <div style="font-size:12px;font-weight:700">Title</div>
+          <div class="analogy-book">maps to</div>
+          <div class="analogy-web" style="color:#1d4ed8"><code>&lt;header&gt;</code></div>
+        </div>
+        <div class="analogy-card">
+          <div class="analogy-icon" style="background:#d1fae5"><i class="ti ti-list" style="color:#065f46"></i></div>
+          <div style="font-size:12px;font-weight:700">Contents Page</div>
+          <div class="analogy-book">maps to</div>
+          <div class="analogy-web" style="color:#065f46"><code>&lt;nav&gt;</code></div>
+        </div>
+        <div class="analogy-card">
+          <div class="analogy-icon" style="background:#ede9fe"><i class="ti ti-layout-2" style="color:#5b21b6"></i></div>
+          <div style="font-size:12px;font-weight:700">Chapter</div>
+          <div class="analogy-book">maps to</div>
+          <div class="analogy-web" style="color:#5b21b6"><code>&lt;section&gt;</code></div>
+        </div>
+        <div class="analogy-card">
+          <div class="analogy-icon" style="background:#fef9c3"><i class="ti ti-article" style="color:#854d0e"></i></div>
+          <div style="font-size:12px;font-weight:700">Story / Essay</div>
+          <div class="analogy-book">maps to</div>
+          <div class="analogy-web" style="color:#854d0e"><code>&lt;article&gt;</code></div>
+        </div>
+        <div class="analogy-card">
+          <div class="analogy-icon" style="background:#e2e8f0"><i class="ti ti-layout-bottombar" style="color:#334155"></i></div>
+          <div style="font-size:12px;font-weight:700">Back Cover</div>
+          <div class="analogy-book">maps to</div>
+          <div class="analogy-web" style="color:#334155"><code>&lt;footer&gt;</code></div>
+        </div>
+      </div>
+    </div>
+    <div class="info-box">
+      <i class="ti ti-info-circle info-icon"></i>
+      <div class="info-text"><strong>Key idea:</strong> Just like a well-organised book is easy to navigate and understand, a well-structured HTML page is easy for browsers, search engines, and screen readers to understand.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-1"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ SLIDE 2  SEMANTIC CONCEPT ══════════════════════════ -->
+  <div class="slide" id="slide-2">
+    <div class="slide-header">
+      <span class="badge b-purple">Concept</span>
+      <div>
+        <div class="slide-title">What Are Semantic Tags?</div>
+        <div class="slide-subtitle">Tags that describe meaning, not just appearance</div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="card" style="border-color:#fca5a5">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <div style="width:30px;height:30px;background:#fee2e2;border-radius:8px;display:flex;align-items:center;justify-content:center"><i class="ti ti-x" style="color:#dc2626;font-size:15px"></i></div>
+          <div style="font-size:14px;font-weight:700;color:#dc2626">Non-Semantic HTML</div>
+        </div>
+        <div class="editor" style="border-radius:8px">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">old style</span></div>
+          <div class="editor-body" style="font-size:12px">
+            <div class="e-row"><span class="e-ln">1</span><span class="e-tag">&lt;div</span> <span class="e-att">id</span><span style="color:#f8f8f2">=</span><span class="e-val">"header"</span><span class="e-tag">&gt;</span></div>
+            <div class="e-row"><span class="e-ln">2</span><span class="e-ind1"></span><span class="e-tag">&lt;div</span> <span class="e-att">class</span><span style="color:#f8f8f2">=</span><span class="e-val">"nav"</span><span class="e-tag">&gt;</span><span class="e-tag">&lt;/div&gt;</span></div>
+            <div class="e-row"><span class="e-ln">3</span><span class="e-tag">&lt;/div&gt;</span></div>
+            <div class="e-row"><span class="e-ln">4</span><span class="e-tag">&lt;div</span> <span class="e-att">class</span><span style="color:#f8f8f2">=</span><span class="e-val">"content"</span><span class="e-tag">&gt;</span></div>
+            <div class="e-row"><span class="e-ln">5</span><span class="e-ind1"></span><span class="e-tag">&lt;div</span> <span class="e-att">class</span><span style="color:#f8f8f2">=</span><span class="e-val">"box"</span><span class="e-tag">&gt;</span><span class="e-tag">&lt;/div&gt;</span></div>
+            <div class="e-row"><span class="e-ln">6</span><span class="e-tag">&lt;/div&gt;</span></div>
+            <div class="e-row"><span class="e-ln">7</span><span class="e-tag">&lt;div</span> <span class="e-att">id</span><span style="color:#f8f8f2">=</span><span class="e-val">"footer"</span><span class="e-tag">&gt;</span><span class="e-tag">&lt;/div&gt;</span></div>
+          </div>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#dc2626;line-height:1.6">❌ Just <code>&lt;div&gt;</code> tags everywhere. A browser sees "box box box" — no meaning at all.</div>
+      </div>
+      <div class="card" style="border-color:#86efac">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <div style="width:30px;height:30px;background:#dcfce7;border-radius:8px;display:flex;align-items:center;justify-content:center"><i class="ti ti-check" style="color:#16a34a;font-size:15px"></i></div>
+          <div style="font-size:14px;font-weight:700;color:#16a34a">Semantic HTML</div>
+        </div>
+        <div class="editor" style="border-radius:8px">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">modern style</span></div>
+          <div class="editor-body" style="font-size:12px">
+            <div class="e-row"><span class="e-ln">1</span><span class="e-tag">&lt;header&gt;</span></div>
+            <div class="e-row"><span class="e-ln">2</span><span class="e-ind1"></span><span class="e-tag">&lt;nav&gt;</span><span class="e-tag">&lt;/nav&gt;</span></div>
+            <div class="e-row"><span class="e-ln">3</span><span class="e-tag">&lt;/header&gt;</span></div>
+            <div class="e-row"><span class="e-ln">4</span><span class="e-tag">&lt;section&gt;</span></div>
+            <div class="e-row"><span class="e-ln">5</span><span class="e-ind1"></span><span class="e-tag">&lt;article&gt;</span><span class="e-tag">&lt;/article&gt;</span></div>
+            <div class="e-row"><span class="e-ln">6</span><span class="e-tag">&lt;/section&gt;</span></div>
+            <div class="e-row"><span class="e-ln">7</span><span class="e-tag">&lt;footer&gt;</span><span class="e-tag">&lt;/footer&gt;</span></div>
+          </div>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#16a34a;line-height:1.6">✅ Each tag tells everyone — browser, Google, screen reader — exactly what it contains.</div>
+      </div>
+    </div>
+    <div class="card card-gray">
+      <div class="section-label">semantic = meaning</div>
+      <div style="font-size:14px;color:#444;line-height:1.75">
+        <strong>Semantic</strong> comes from the Greek word for <em>meaning</em>. A semantic HTML tag doesn't just create a box — it <strong>describes what's inside the box</strong>. <code>&lt;header&gt;</code> doesn't just say "here is a div at the top" — it says "this is the page header." That matters for <span style="color:#1d4ed8;font-weight:600">SEO</span>, <span style="color:#065f46;font-weight:600">Accessibility</span>, and <span style="color:#5b21b6;font-weight:600">Readability</span>.
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-2"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ SLIDE 3  THE 5 TAGS ════════════════════════════════ -->
+  <div class="slide" id="slide-3">
+    <div class="slide-header">
+      <span class="badge b-blue">Tags</span>
+      <div>
+        <div class="slide-title">The 5 Semantic Tags</div>
+        <div class="slide-subtitle">Introduce each tag — purpose and real-world use</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div class="card" style="display:flex;gap:14px;align-items:flex-start">
+        <span class="tag-chip" style="background:#dbeafe;color:#1e40af;flex-shrink:0">&lt;header&gt;</span>
+        <div>
+          <div style="font-size:14px;font-weight:700;margin-bottom:3px">Top Area — Site Identity</div>
+          <div style="font-size:13px;color:#555;line-height:1.6">Contains the logo, site title, and sometimes the navigation. Usually the first thing inside <code>&lt;body&gt;</code>. On SkillHub it holds the "SkillHub LMS" heading.</div>
+          <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap"><span style="background:#f0f4ff;color:#3b4fd8;font-size:11px;padding:2px 8px;border-radius:4px;font-weight:600">Google</span><span style="background:#f0f4ff;color:#3b4fd8;font-size:11px;padding:2px 8px;border-radius:4px;font-weight:600">YouTube</span><span style="background:#f0f4ff;color:#3b4fd8;font-size:11px;padding:2px 8px;border-radius:4px;font-weight:600">Amazon</span><span style="font-size:11px;color:#888;padding:2px 4px">— all have a &lt;header&gt;</span></div>
+        </div>
+      </div>
+      <div class="card" style="display:flex;gap:14px;align-items:flex-start">
+        <span class="tag-chip" style="background:#d1fae5;color:#065f46;flex-shrink:0">&lt;nav&gt;</span>
+        <div>
+          <div style="font-size:14px;font-weight:700;margin-bottom:3px">Navigation Links</div>
+          <div style="font-size:13px;color:#555;line-height:1.6">Wraps the site's main navigation menu. Links to other pages or sections. Screen readers announce this as "navigation" so users can skip directly to it.</div>
+        </div>
+      </div>
+      <div class="card" style="display:flex;gap:14px;align-items:flex-start">
+        <span class="tag-chip" style="background:#ede9fe;color:#5b21b6;flex-shrink:0">&lt;section&gt;</span>
+        <div>
+          <div style="font-size:14px;font-weight:700;margin-bottom:3px">Content Blocks / Grouped Content</div>
+          <div style="font-size:13px;color:#555;line-height:1.6">Groups related content together. A page can have multiple sections — Hero section, Courses section, Testimonials section. Usually has a heading inside.</div>
+        </div>
+      </div>
+      <div class="card" style="display:flex;gap:14px;align-items:flex-start">
+        <span class="tag-chip" style="background:#fef9c3;color:#854d0e;flex-shrink:0">&lt;article&gt;</span>
+        <div>
+          <div style="font-size:14px;font-weight:700;margin-bottom:3px">Self-Contained, Independent Content</div>
+          <div style="font-size:13px;color:#555;line-height:1.6">Content that makes sense on its own — a blog post, a course card, a news article. Could be copy-pasted to another page and still make sense.</div>
+        </div>
+      </div>
+      <div class="card" style="display:flex;gap:14px;align-items:flex-start">
+        <span class="tag-chip" style="background:#e2e8f0;color:#334155;flex-shrink:0">&lt;footer&gt;</span>
+        <div>
+          <div style="font-size:14px;font-weight:700;margin-bottom:3px">Bottom Area — Closing Info</div>
+          <div style="font-size:13px;color:#555;line-height:1.6">Copyright notice, social links, contact info, privacy policy links. Always at the very bottom of the page content.</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-3"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">See Layout <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ SLIDE 4  VISUAL LAYOUT ════════════════════════════ -->
+  <div class="slide" id="slide-4">
+    <div class="slide-header">
+      <span class="badge b-teal">Visual</span>
+      <div>
+        <div class="slide-title">Page Layout Diagram</div>
+        <div class="slide-subtitle">How semantic tags wrap a real webpage — colour-coded</div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="section-label">visual layout</div>
+        <div class="sem-page">
+          <div class="sem-header">
+            SkillHub LMS
+            <span>&lt;header&gt;</span>
+          </div>
+          <div class="sem-nav">
+            <span>Home</span><span>Courses</span><span>About</span><span>Contact</span>
+            <span style="margin-left:auto">&lt;nav&gt;</span>
+          </div>
+          <div class="sem-section">
+            <div class="sem-section-label">&lt;section&gt;</div>
+            <div style="font-size:13px;font-weight:700;margin-bottom:4px">Welcome to SkillHub LMS</div>
+            <div class="sem-article">
+              <div class="sem-article-label">&lt;article&gt;</div>
+              <div style="font-size:12px;color:#555">MERN Stack Course — Full Stack from scratch</div>
+            </div>
+            <div class="sem-article">
+              <div class="sem-article-label">&lt;article&gt;</div>
+              <div style="font-size:12px;color:#555">Python for Beginners — Zero to Hero</div>
+            </div>
+          </div>
+          <div class="sem-footer">
+            Copyright © 2026 SkillHub LMS
+            <span>&lt;footer&gt;</span>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">colour key</div>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-top:2px">
+          <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:#dbeafe;border-radius:8px;border:1px solid #93c5fd">
+            <div style="width:14px;height:14px;background:#1e40af;border-radius:3px;flex-shrink:0"></div>
+            <div><code>&lt;header&gt;</code> — <span style="font-size:13px;color:#1e3a8a">Top bar with logo &amp; brand name</span></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:#d1fae5;border-radius:8px;border:1px solid #6ee7b7">
+            <div style="width:14px;height:14px;background:#0f766e;border-radius:3px;flex-shrink:0"></div>
+            <div><code>&lt;nav&gt;</code> — <span style="font-size:13px;color:#065f46">Navigation links row</span></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:#f3f4f6;border-radius:8px;border:1px solid #d1d5db">
+            <div style="width:14px;height:14px;background:#fff;border:2px solid #7c3aed;border-radius:3px;flex-shrink:0"></div>
+            <div><code>&lt;section&gt;</code> — <span style="font-size:13px;color:#555">Main content block</span></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:#fef9c3;border-radius:8px;border:1px solid #fde047">
+            <div style="width:14px;height:14px;background:#fde047;border-radius:3px;flex-shrink:0"></div>
+            <div><code>&lt;article&gt;</code> — <span style="font-size:13px;color:#854d0e">Individual course cards</span></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:#e2e8f0;border-radius:8px;border:1px solid #94a3b8">
+            <div style="width:14px;height:14px;background:#334155;border-radius:3px;flex-shrink:0"></div>
+            <div><code>&lt;footer&gt;</code> — <span style="font-size:13px;color:#334155">Copyright and links</span></div>
+          </div>
+        </div>
+        <div class="tip-box" style="margin-top:10px">
+          <i class="ti ti-bulb tip-icon"></i>
+          <div class="tip-text">Every major website on earth uses this exact layout pattern. Learn it once, use it forever.</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-4"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Live Code <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ SLIDE 5  LIVE CODING ══════════════════════════════ -->
+  <div class="slide" id="slide-5">
+    <div class="slide-header">
+      <span class="badge b-green">Code</span>
+      <div>
+        <div class="slide-title">Live Coding — SkillHub index.html</div>
+        <div class="slide-subtitle">Type this together, line by line — students follow along</div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="editor">
+        <div class="editor-bar">
+          <div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div>
+          <span class="e-label">frontend/index.html</span>
+        </div>
+        <div class="editor-body">
+          <div class="e-row"><span class="e-ln">1</span><span class="e-tag">&lt;!DOCTYPE html&gt;</span></div>
+          <div class="e-row"><span class="e-ln">2</span><span class="e-tag">&lt;html&gt;</span></div>
+          <div class="e-row"><span class="e-ln">3</span><span class="e-tag">&lt;head&gt;</span></div>
+          <div class="e-row"><span class="e-ln">4</span><span class="e-ind1"></span><span class="e-tag">&lt;title&gt;</span><span class="e-txt">SkillHub LMS</span><span class="e-tag">&lt;/title&gt;</span></div>
+          <div class="e-row"><span class="e-ln">5</span><span class="e-tag">&lt;/head&gt;</span></div>
+          <div class="e-row"><span class="e-ln">6</span><span class="e-tag">&lt;body&gt;</span></div>
+          <div class="e-row" style="margin-top:6px"><span class="e-ln">7</span><span class="e-ind1"></span><span class="e-new">&lt;header&gt;</span></div>
+          <div class="e-row"><span class="e-ln">8</span><span class="e-ind2"></span><span class="e-tag">&lt;h1&gt;</span><span class="e-txt">SkillHub LMS</span><span class="e-tag">&lt;/h1&gt;</span></div>
+          <div class="e-row"><span class="e-ln">9</span><span class="e-ind1"></span><span class="e-new">&lt;/header&gt;</span></div>
+          <div class="e-row" style="margin-top:6px"><span class="e-ln">10</span><span class="e-ind1"></span><span class="e-new">&lt;nav&gt;</span></div>
+          <div class="e-row"><span class="e-ln">11</span><span class="e-ind2"></span><span class="e-txt">Home</span></div>
+          <div class="e-row"><span class="e-ln">12</span><span class="e-ind2"></span><span class="e-txt">Courses</span></div>
+          <div class="e-row"><span class="e-ln">13</span><span class="e-ind2"></span><span class="e-txt">About</span></div>
+          <div class="e-row"><span class="e-ln">14</span><span class="e-ind2"></span><span class="e-txt">Contact</span></div>
+          <div class="e-row"><span class="e-ln">15</span><span class="e-ind1"></span><span class="e-new">&lt;/nav&gt;</span></div>
+          <div class="e-row" style="margin-top:6px"><span class="e-ln">16</span><span class="e-ind1"></span><span class="e-new">&lt;section&gt;</span></div>
+          <div class="e-row"><span class="e-ln">17</span><span class="e-ind2"></span><span class="e-tag">&lt;h2&gt;</span><span class="e-txt">Welcome to SkillHub LMS</span><span class="e-tag">&lt;/h2&gt;</span></div>
+          <div class="e-row"><span class="e-ln">18</span><span class="e-ind2"></span><span class="e-tag">&lt;p&gt;</span></div>
+          <div class="e-row"><span class="e-ln">19</span><span class="e-ind3"></span><span class="e-txt">Learn Full Stack Development from scratch.</span></div>
+          <div class="e-row"><span class="e-ln">20</span><span class="e-ind2"></span><span class="e-tag">&lt;/p&gt;</span></div>
+          <div class="e-row"><span class="e-ln">21</span><span class="e-ind1"></span><span class="e-new">&lt;/section&gt;</span></div>
+          <div class="e-row" style="margin-top:6px"><span class="e-ln">22</span><span class="e-ind1"></span><span class="e-new">&lt;footer&gt;</span></div>
+          <div class="e-row"><span class="e-ln">23</span><span class="e-ind2"></span><span class="e-txt">Copyright 2026</span></div>
+          <div class="e-row"><span class="e-ln">24</span><span class="e-ind1"></span><span class="e-new">&lt;/footer&gt;</span></div>
+          <div class="e-row"><span class="e-ln">25</span><span class="e-tag">&lt;/body&gt;</span></div>
+          <div class="e-row"><span class="e-ln">26</span><span class="e-tag">&lt;/html&gt;</span></div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">browser output</div>
+        <div class="browser">
+          <div class="browser-bar">
+            <div class="b-dot2 b-r"></div><div class="b-dot2 b-y"></div><div class="b-dot2 b-g"></div>
+            <div class="b-url">frontend/index.html</div>
+          </div>
+          <div style="background:#fff;padding:0">
+            <div style="background:#1e293b;color:#fff;padding:12px 16px;font-size:16px;font-weight:700;font-family:serif">SkillHub LMS</div>
+            <div style="background:#e2e8f0;padding:8px 16px;font-size:13px;color:#334155;display:flex;gap:16px">
+              <span>Home</span><span>Courses</span><span>About</span><span>Contact</span>
+            </div>
+            <div style="padding:14px 16px">
+              <div style="font-size:17px;font-weight:700;margin-bottom:6px;font-family:serif">Welcome to SkillHub LMS</div>
+              <div style="font-size:13px;color:#444">Learn Full Stack Development from scratch.</div>
+            </div>
+            <div style="background:#f1f5f9;padding:10px 16px;font-size:12px;color:#64748b;border-top:1px solid #e2e8f0">Copyright 2026</div>
+          </div>
+        </div>
+        <div style="margin-top:10px;background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:10px 14px">
+          <div style="font-size:12px;font-weight:700;color:#166534;margin-bottom:4px">🎨 Semantic highlight</div>
+          <div style="font-size:12px;color:#166534;line-height:1.65">Cyan lines in the code = the new semantic tags we added today. The heading &amp; paragraph are the same as yesterday — but now they live inside meaningful containers.</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-5"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Explain Tags <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ SLIDE 6  TAG EXPLAINER ════════════════════════════ -->
+  <div class="slide" id="slide-6">
+    <div class="slide-header">
+      <span class="badge b-blue">Explain</span>
+      <div>
+        <div class="slide-title">Tag-by-Tag Explanation</div>
+        <div class="slide-subtitle">Click any row to expand the explanation</div>
+      </div>
+    </div>
+    <div class="line-explain">
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="e-new">&lt;header&gt;</span></div>
+        <div class="lex-info">
+          <div class="lex-name">Header Element</div>
+          <div class="lex-desc">Top section — logo, site name, top navigation</div>
+          <div class="lex-detail">Can appear more than once (page header AND article header). Google gives it higher weight for SEO. Screen readers allow users to jump past it. Always the first section inside &lt;body&gt; for the main page header.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="e-new">&lt;nav&gt;</span></div>
+        <div class="lex-info">
+          <div class="lex-name">Navigation Element</div>
+          <div class="lex-desc">Site's main navigation links</div>
+          <div class="lex-detail">Tells screen readers "this is a navigation landmark." Users with disabilities can jump directly to it. Should contain your most important page links. Later we'll fill it with &lt;a&gt; anchor tags.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="e-new">&lt;section&gt;</span></div>
+        <div class="lex-info">
+          <div class="lex-name">Section Element</div>
+          <div class="lex-desc">Thematically grouped content — always with a heading</div>
+          <div class="lex-detail">Use &lt;section&gt; when content belongs together under a shared theme. Best practice: always include a &lt;h2&gt; or &lt;h3&gt; inside. Examples: Hero section, Courses section, Testimonials section.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="e-new">&lt;article&gt;</span></div>
+        <div class="lex-info">
+          <div class="lex-name">Article Element</div>
+          <div class="lex-desc">Self-contained, independently distributable content</div>
+          <div class="lex-detail">The test: "Could I copy this to another site and it still makes sense?" If yes → &lt;article&gt;. Use for blog posts, course cards, news items, product cards. Often nested inside &lt;section&gt;.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="e-new">&lt;footer&gt;</span></div>
+        <div class="lex-info">
+          <div class="lex-name">Footer Element</div>
+          <div class="lex-desc">Bottom of page — copyright, links, contact info</div>
+          <div class="lex-detail">Like &lt;header&gt;, can appear inside &lt;article&gt; too (article footer with author info). Main page footer always goes at the very bottom of &lt;body&gt;. Screen readers announce it as "contentinfo" landmark.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="e-tag">&lt;!DOCTYPE html&gt;</span></div>
+        <div class="lex-info">
+          <div class="lex-name">DOCTYPE</div>
+          <div class="lex-desc">Tells browser: this is an HTML5 document</div>
+          <div class="lex-detail">Without DOCTYPE, browsers go into "quirks mode" and may render pages inconsistently. Always the very first line of every HTML file. Not a tag — it's a declaration.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="e-tag">&lt;html&gt;</span></div>
+        <div class="lex-info">
+          <div class="lex-name">HTML Root Element</div>
+          <div class="lex-desc">The container wrapping the entire page</div>
+          <div class="lex-detail">Everything lives inside &lt;html&gt;. Add lang="en" for English pages — it helps screen readers use the correct pronunciation and helps search engines index the language correctly.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="e-tag">&lt;head&gt;</span></div>
+        <div class="lex-info">
+          <div class="lex-name">Head Element</div>
+          <div class="lex-desc">Invisible metadata — title, CSS links, meta tags</div>
+          <div class="lex-detail">Nothing inside &lt;head&gt; is shown on the page. It holds the browser tab title, charset, viewport settings, CSS file links, and page description for Google.</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-6"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Activity <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ SLIDE 7  ACTIVITY ═════════════════════════════════ -->
+  <div class="slide" id="slide-7">
+    <div class="slide-header">
+      <span class="badge b-orange">Activity</span>
+      <div>
+        <div class="slide-title">Add Blog &amp; Projects to Nav</div>
+        <div class="slide-subtitle">Students extend the navigation — 5 minutes</div>
+      </div>
+    </div>
+    <div class="activity-box">
+      <div class="activity-title"><i class="ti ti-keyboard"></i> Task: Add these two items inside your &lt;nav&gt;</div>
+      <div class="editor" style="border-radius:8px">
+        <div class="editor-bar">
+          <div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div>
+          <span class="e-label">Update your &lt;nav&gt; section</span>
+        </div>
+        <div class="editor-body">
+          <div class="e-row"><span class="e-ln">10</span><span class="e-ind1"></span><span class="e-new">&lt;nav&gt;</span></div>
+          <div class="e-row"><span class="e-ln">11</span><span class="e-ind2"></span><span class="e-txt">Home</span></div>
+          <div class="e-row"><span class="e-ln">12</span><span class="e-ind2"></span><span class="e-txt">Courses</span></div>
+          <div class="e-row"><span class="e-ln">13</span><span class="e-ind2"></span><span class="e-txt">About</span></div>
+          <div class="e-row"><span class="e-ln">14</span><span class="e-ind2"></span><span class="e-txt">Contact</span></div>
+          <div class="e-row" style="background:#1a2a1a"><span class="e-ln">15</span><span class="e-ind2"></span><span style="color:#80ffea;font-weight:700">Blog</span><span style="color:#6272a4;font-style:italic;margin-left:12px">&lt;!-- ADD THIS --&gt;</span></div>
+          <div class="e-row" style="background:#1a2a1a"><span class="e-ln">16</span><span class="e-ind2"></span><span style="color:#80ffea;font-weight:700">Projects</span><span style="color:#6272a4;font-style:italic;margin-left:12px">&lt;!-- ADD THIS --&gt;</span></div>
+          <div class="e-row"><span class="e-ln">17</span><span class="e-ind1"></span><span class="e-new">&lt;/nav&gt;</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="section-label">before</div>
+        <div class="browser">
+          <div class="browser-bar" style="padding:7px 12px"><div class="b-dot2 b-r"></div><div class="b-dot2 b-y"></div><div class="b-dot2 b-g"></div><div class="b-url" style="font-size:11px">index.html</div></div>
+          <div style="background:#e2e8f0;padding:8px 14px;font-size:13px;color:#334155;display:flex;gap:14px">
+            <span>Home</span><span>Courses</span><span>About</span><span>Contact</span>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">after ✅</div>
+        <div class="browser">
+          <div class="browser-bar" style="padding:7px 12px"><div class="b-dot2 b-r"></div><div class="b-dot2 b-y"></div><div class="b-dot2 b-g"></div><div class="b-url" style="font-size:11px">index.html</div></div>
+          <div style="background:#e2e8f0;padding:8px 14px;font-size:13px;color:#334155;display:flex;gap:14px;flex-wrap:wrap">
+            <span>Home</span><span>Courses</span><span>About</span><span>Contact</span>
+            <span style="color:#1d4ed8;font-weight:700">Blog</span>
+            <span style="color:#1d4ed8;font-weight:700">Projects</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tip-box">
+      <i class="ti ti-bulb tip-icon"></i>
+      <div class="tip-text"><strong>Next step (Hour 2):</strong> These nav items are just plain text right now. We'll wrap each one in an <code>&lt;a href=""&gt;</code> anchor tag to make them clickable links. For now, focus on the structure!</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-7"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Why It Matters <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ SLIDE 8  WHY SEMANTIC ═════════════════════════════ -->
+  <div class="slide" id="slide-8">
+    <div class="slide-header">
+      <span class="badge b-slate">Why</span>
+      <div>
+        <div class="slide-title">Why Semantic HTML Matters</div>
+        <div class="slide-subtitle">Three real reasons — not just "best practice"</div>
+      </div>
+    </div>
+    <div class="grid-3">
+      <div class="card" style="text-align:center;border-color:#93c5fd">
+        <div style="width:48px;height:48px;background:#dbeafe;border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 10px"><i class="ti ti-brand-google" style="font-size:26px;color:#1d4ed8"></i></div>
+        <div style="font-size:14px;font-weight:700;margin-bottom:6px;color:#1e40af">SEO</div>
+        <div style="font-size:12px;color:#555;line-height:1.65">Google's crawlers read semantic tags to understand what your page is about. A proper <code>&lt;header&gt;</code> and <code>&lt;h1&gt;</code> help rank your page higher in search results.</div>
+      </div>
+      <div class="card" style="text-align:center;border-color:#6ee7b7">
+        <div style="width:48px;height:48px;background:#d1fae5;border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 10px"><i class="ti ti-accessible" style="font-size:26px;color:#065f46"></i></div>
+        <div style="font-size:14px;font-weight:700;margin-bottom:6px;color:#065f46">Accessibility</div>
+        <div style="font-size:12px;color:#555;line-height:1.65">Screen readers (used by visually impaired users) announce landmarks — "header," "navigation," "main." Semantic HTML makes sites usable for <strong>everyone</strong>.</div>
+      </div>
+      <div class="card" style="text-align:center;border-color:#c4b5fd">
+        <div style="width:48px;height:48px;background:#ede9fe;border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 10px"><i class="ti ti-code" style="font-size:26px;color:#5b21b6"></i></div>
+        <div style="font-size:14px;font-weight:700;margin-bottom:6px;color:#5b21b6">Readability</div>
+        <div style="font-size:12px;color:#555;line-height:1.65">A team reading <code>&lt;article&gt;</code> instantly knows it's a post. Reading <code>&lt;div class="box7"&gt;</code>? Nobody knows. Semantic HTML is self-documenting code.</div>
+      </div>
+    </div>
+    <div class="card card-gray">
+      <div class="section-label">real-world impact</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px">
+        <div style="padding:10px 14px;background:#fff;border-radius:8px;border:1px solid #e8e8e8;font-size:13px;line-height:1.65">
+          <strong style="color:#d97706">Without semantics:</strong> "I see a box at the top, a box of text, another box at the bottom."
+        </div>
+        <div style="padding:10px 14px;background:#f0fdf4;border-radius:8px;border:1px solid #86efac;font-size:13px;line-height:1.65">
+          <strong style="color:#166534">With semantics:</strong> "I see a site header, a navigation bar, a main section, a footer."
+        </div>
+      </div>
+    </div>
+    <div class="warn-box">
+      <i class="ti ti-alert-triangle" style="color:#d97706;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+      <div style="font-size:13px;color:#92400e;line-height:1.6"><strong>Industry standard:</strong> In a real job, your code reviewer will ask you to replace meaningless <code>&lt;div&gt;</code> tags with semantic equivalents. Learning this now puts you ahead.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-8"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Mini Challenge <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ SLIDE 9  MINI CHALLENGE ═══════════════════════════ -->
+  <div class="slide" id="slide-9">
+    <div class="slide-header">
+      <span class="badge b-rose">Challenge</span>
+      <div>
+        <div class="slide-title">Mini Challenge — 30 Minutes</div>
+        <div class="slide-subtitle">Create a &lt;header&gt; for Netflix, Amazon, and Flipkart</div>
+      </div>
+    </div>
+    <div class="challenge-box">
+      <div class="challenge-title"><i class="ti ti-target"></i> Task: Build a &lt;header&gt; and &lt;nav&gt; for each brand below</div>
+      <div style="font-size:13px;color:#9f1239;line-height:1.65">Create a new file called <code>brands.html</code> inside <code>frontend/</code>. Use <code>&lt;header&gt;</code> and <code>&lt;nav&gt;</code> for each brand. Give each brand its own section.</div>
+    </div>
+    <div class="grid-3" style="margin-top:.25rem">
+      <div class="brand-card">
+        <div class="brand-header" style="background:#e50914">📺 Netflix</div>
+        <div class="brand-nav" style="background:#141414;color:#e5e5e5;">
+          <span>Home</span><span>TV Shows</span><span>Movies</span><span>My List</span>
+        </div>
+        <div class="brand-body" style="background:#141414;color:#b3b3b3">
+          <div style="font-size:11px;font-family:monospace;color:#e50914">Expected nav links ↑</div>
+        </div>
+      </div>
+      <div class="brand-card">
+        <div class="brand-header" style="background:#ff9900;color:#0f1111">🛒 Amazon</div>
+        <div class="brand-nav" style="background:#232f3e;color:#fff;">
+          <span>All</span><span>Electronics</span><span>Fashion</span><span>Prime</span>
+        </div>
+        <div class="brand-body" style="background:#febd69;color:#0f1111">
+          <div style="font-size:11px;font-family:monospace">Expected nav links ↑</div>
+        </div>
+      </div>
+      <div class="brand-card">
+        <div class="brand-header" style="background:#2874f0">🛍️ Flipkart</div>
+        <div class="brand-nav" style="background:#2874f0;color:#fff;">
+          <span>Electronics</span><span>Fashion</span><span>Home</span><span>Grocery</span>
+        </div>
+        <div class="brand-body" style="background:#f1f3f6;color:#333">
+          <div style="font-size:11px;font-family:monospace;color:#2874f0">Expected nav links ↑</div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="section-label">starter template</div>
+      <div class="editor">
+        <div class="editor-bar">
+          <div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div>
+          <span class="e-label">frontend/brands.html — starter</span>
+        </div>
+        <div class="editor-body" style="font-size:12px">
+          <div class="e-row"><span class="e-ln">1</span><span class="e-tag">&lt;!DOCTYPE html&gt;</span></div>
+          <div class="e-row"><span class="e-ln">2</span><span class="e-tag">&lt;html&gt;&lt;head&gt;&lt;title&gt;</span><span class="e-txt">Brand Headers</span><span class="e-tag">&lt;/title&gt;&lt;/head&gt;&lt;body&gt;</span></div>
+          <div class="e-row"><span class="e-ln">3</span></div>
+          <div class="e-row"><span class="e-ln">4</span><span class="e-cmt">&lt;!-- NETFLIX --&gt;</span></div>
+          <div class="e-row"><span class="e-ln">5</span><span class="e-new">&lt;header&gt;</span></div>
+          <div class="e-row"><span class="e-ln">6</span><span class="e-ind1"></span><span class="e-tag">&lt;h1&gt;</span><span class="e-txt">Netflix</span><span class="e-tag">&lt;/h1&gt;</span></div>
+          <div class="e-row"><span class="e-ln">7</span><span class="e-ind1"></span><span class="e-new">&lt;nav&gt;</span></div>
+          <div class="e-row"><span class="e-ln">8</span><span class="e-ind2"></span><span class="e-cmt">&lt;!-- Add nav items here --&gt;</span></div>
+          <div class="e-row"><span class="e-ln">9</span><span class="e-ind1"></span><span class="e-new">&lt;/nav&gt;</span></div>
+          <div class="e-row"><span class="e-ln">10</span><span class="e-new">&lt;/header&gt;</span></div>
+          <div class="e-row"><span class="e-ln">11</span></div>
+          <div class="e-row"><span class="e-ln">12</span><span class="e-cmt">&lt;!-- Repeat for Amazon and Flipkart --&gt;</span></div>
+          <div class="e-row"><span class="e-ln">13</span></div>
+          <div class="e-row"><span class="e-ln">14</span><span class="e-tag">&lt;/body&gt;&lt;/html&gt;</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-9"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Tags Ref <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ SLIDE 10 REFERENCE TABLE ══════════════════════════ -->
+  <div class="slide" id="slide-10">
+    <div class="slide-header">
+      <span class="badge b-slate">Reference</span>
+      <div>
+        <div class="slide-title">Semantic Tags Reference</div>
+        <div class="slide-subtitle">Keep this open while you code — complete at-a-glance guide</div>
+      </div>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <table class="tag-table">
+        <thead>
+          <tr>
+            <th>Tag</th>
+            <th>Purpose</th>
+            <th>Where on Page</th>
+            <th>Real Example</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="tag-mono" style="background:#dbeafe;color:#1e40af">&lt;header&gt;</span></td>
+            <td>Site identity — logo, title, top nav</td>
+            <td>Top of &lt;body&gt;</td>
+            <td>SkillHub LMS logo + title</td>
+          </tr>
+          <tr>
+            <td><span class="tag-mono" style="background:#d1fae5;color:#065f46">&lt;nav&gt;</span></td>
+            <td>Main navigation links</td>
+            <td>Inside &lt;header&gt; or below it</td>
+            <td>Home · Courses · About · Contact</td>
+          </tr>
+          <tr>
+            <td><span class="tag-mono" style="background:#ede9fe;color:#5b21b6">&lt;main&gt;</span></td>
+            <td>Primary page content (unique to this page)</td>
+            <td>Between &lt;nav&gt; and &lt;footer&gt;</td>
+            <td>Course listing page content</td>
+          </tr>
+          <tr>
+            <td><span class="tag-mono" style="background:#e0e7ff;color:#3730a3">&lt;section&gt;</span></td>
+            <td>Thematically grouped content</td>
+            <td>Inside &lt;main&gt;</td>
+            <td>Hero section, Courses section</td>
+          </tr>
+          <tr>
+            <td><span class="tag-mono" style="background:#fef9c3;color:#854d0e">&lt;article&gt;</span></td>
+            <td>Self-contained independent content</td>
+            <td>Inside &lt;section&gt;</td>
+            <td>Individual blog post, course card</td>
+          </tr>
+          <tr>
+            <td><span class="tag-mono" style="background:#fce7f3;color:#9d174d">&lt;aside&gt;</span></td>
+            <td>Sidebar — loosely related content</td>
+            <td>Beside &lt;section&gt;</td>
+            <td>Related courses, ads, author bio</td>
+          </tr>
+          <tr>
+            <td><span class="tag-mono" style="background:#e2e8f0;color:#334155">&lt;footer&gt;</span></td>
+            <td>Bottom info — copyright, links</td>
+            <td>Bottom of &lt;body&gt;</td>
+            <td>Copyright 2026 · Privacy Policy</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="grid-2" style="margin-top:.25rem">
+      <div class="tip-box">
+        <i class="ti ti-bulb tip-icon"></i>
+        <div class="tip-text"><strong>Rule of thumb:</strong> If you're tempted to write <code>&lt;div class="header"&gt;</code>, <code>&lt;div class="nav"&gt;</code>, or <code>&lt;div class="footer"&gt;</code> — use the semantic tag instead.</div>
+      </div>
+      <div class="info-box">
+        <i class="ti ti-info-circle info-icon"></i>
+        <div class="info-text"><strong>Note:</strong> <code>&lt;aside&gt;</code> and <code>&lt;main&gt;</code> are bonus tags — we'll add them to SkillHub in a later session when we build the full layout.</div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-10"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Quiz <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ SLIDE 11 QUIZ ═════════════════════════════════════ -->
+  <div class="slide" id="slide-11">
+    <div class="slide-header">
+      <span class="badge b-green">Quiz</span>
+      <div>
+        <div class="slide-title">Quick Check</div>
+        <div class="slide-subtitle">5 questions — tap the correct answer</div>
+      </div>
+    </div>
+    <div id="quiz-container"></div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-11"></div>
+      <button class="nav-btn" onclick="goSlide(0)"><i class="ti ti-home"></i> Home</button>
+    </div>
+  </div>
+
+</div><!-- /.wrapper -->
+<script>
+  var current = 0, total = 12, quizInit = false;
+
+  var quizData = [
+    {
+      q: "Which semantic tag is used for the site's top area — logo, title, and branding?",
+      opts: ["&lt;top&gt;", "&lt;header&gt;", "&lt;head&gt;", "&lt;navbar&gt;"],
+      ans: 1,
+      exp: "&lt;header&gt; is for the top area containing site identity. &lt;head&gt; is different — it holds invisible metadata like the page title and CSS links."
+    },
+    {
+      q: "What is the key difference between &lt;section&gt; and &lt;article&gt;?",
+      opts: [
+        "section is bigger, article is smaller",
+        "There is no difference",
+        "article is self-contained content; section is a thematic group that usually needs context",
+        "article is for images, section is for text"
+      ],
+      ans: 2,
+      exp: "An &lt;article&gt; (blog post, course card) makes sense on its own. A &lt;section&gt; groups related content on the page but needs the page for context."
+    },
+    {
+      q: "Why should you use &lt;nav&gt; instead of &lt;div class='nav'&gt;?",
+      opts: [
+        "They are identical — either works",
+        "&lt;nav&gt; is shorter to type",
+        "&lt;nav&gt; tells browsers, Google, and screen readers that this is a navigation landmark",
+        "&lt;div&gt; doesn't work for navigation"
+      ],
+      ans: 2,
+      exp: "Semantic tags communicate meaning. Screen readers announce &lt;nav&gt; as a navigation landmark. Google understands it for SEO. &lt;div class='nav'&gt; is just a styled box with no meaning."
+    },
+    {
+      q: "Where does the &lt;footer&gt; tag go in the HTML document?",
+      opts: [
+        "Inside &lt;head&gt;",
+        "Before &lt;header&gt;",
+        "At the very bottom of &lt;body&gt;, after all content",
+        "Inside &lt;nav&gt;"
+      ],
+      ans: 2,
+      exp: "The &lt;footer&gt; lives at the bottom of &lt;body&gt;, after all other content — just like a book's back cover comes last."
+    },
+    {
+      q: "In the book analogy, what does the 'Table of Contents' map to in HTML?",
+      opts: ["&lt;header&gt;", "&lt;section&gt;", "&lt;footer&gt;", "&lt;nav&gt;"],
+      ans: 3,
+      exp: "The Table of Contents shows you where to go — just like &lt;nav&gt; provides navigation links. Both help users find what they're looking for."
+    }
+  ];
+  var quizAnswered = [];
+
+  function renderQuiz() {
+    var c = document.getElementById('quiz-container');
+    c.innerHTML = '';
+    quizData.forEach(function(q, i) {
+      var d = document.createElement('div');
+      d.style.cssText = 'margin-bottom:18px';
+      d.innerHTML = '<div style="font-size:13px;font-weight:600;margin-bottom:6px">' + (i+1) + '. ' + q.q + '</div>';
+      q.opts.forEach(function(opt, j) {
+        var btn = document.createElement('button');
+        btn.className = 'quiz-option';
+        btn.innerHTML = String.fromCharCode(65+j) + '. ' + opt;
+        btn.onclick = function() {
+          if (quizAnswered[i]) return;
+          quizAnswered[i] = true;
+          var btns = d.querySelectorAll('.quiz-option');
+          btns.forEach(function(b, k) {
+            b.disabled = true;
+            if (k === q.ans) b.classList.add('correct');
+            else if (k === j) b.classList.add('wrong');
+          });
+          var fb = d.querySelector('.quiz-feedback');
+          fb.innerHTML = (j === q.ans ? '✅ Correct! ' : '❌ Not quite. ') + q.exp;
+          fb.className = 'quiz-feedback ' + (j === q.ans ? 'correct' : 'wrong');
+        };
+        d.appendChild(btn);
+      });
+      var fb = document.createElement('div');
+      fb.className = 'quiz-feedback';
+      d.appendChild(fb);
+      c.appendChild(d);
+    });
+  }
+
+  function toggleLex(row) {
+    var wasActive = row.classList.contains('active');
+    document.querySelectorAll('.lex-row.active').forEach(function(r) { r.classList.remove('active'); });
+    if (!wasActive) row.classList.add('active');
+  }
+
+  function toggle(id) {
+    var el = document.getElementById(id);
+    el.classList.toggle('open');
+    var btn = el.previousElementSibling;
+    btn.textContent = el.classList.contains('open') ? 'Hide answers' : 'Reveal student answers';
+  }
+
+  function goSlide(n) {
+    document.getElementById('slide-' + current).classList.remove('active');
+    current = n;
+    document.getElementById('slide-' + current).classList.add('active');
+    updateDots();
+    document.getElementById('slide-counter').textContent = (current + 1) + ' / ' + total;
+    if (n === 11 && !quizInit) { renderQuiz(); quizInit = true; }
+    window.scrollTo(0, 0);
+  }
+  function nextSlide() { if (current < total - 1) goSlide(current + 1); }
+  function prevSlide() { if (current > 0) goSlide(current - 1); }
+
+  function updateDots() {
+    for (var s = 0; s < total; s++) {
+      var el = document.getElementById('dots-' + s);
+      if (!el) continue;
+      el.innerHTML = '';
+      for (var d = 0; d < total; d++) {
+        var dot = document.createElement('div');
+        dot.className = 'dot' + (d === current ? ' active' : '');
+        el.appendChild(dot);
+      }
+    }
+  }
+  updateDots();
+</script>
+</body>
+</html>

@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Day 2 · Hour 2 – Building the Hero Section</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f4f5f7; color: #1a1a1a;
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; padding: 2rem 1rem;
+  }
+  .wrapper {
+    width: 100%; max-width: 920px; background: #fff;
+    border-radius: 16px; box-shadow: 0 2px 20px rgba(0,0,0,0.09); overflow: hidden;
+  }
+  .top-bar {
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    color: #fff; padding: 14px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .top-bar-title { font-size: 15px; font-weight: 600; }
+  .top-bar-sub   { font-size: 12px; opacity: .55; margin-top: 2px; }
+  .slide-counter { font-size: 13px; opacity: .6; font-variant-numeric: tabular-nums; }
+  .slide { display: none; padding: 1.75rem 2rem; min-height: 500px; flex-direction: column; gap: 1.2rem; }
+  .slide.active { display: flex; }
+  .slide-header { display: flex; align-items: center; gap: 10px; padding-bottom: 1rem; border-bottom: 1px solid #e8e8e8; }
+  .slide-title    { font-size: 20px; font-weight: 700; color: #111; }
+  .slide-subtitle { font-size: 13px; color: #666; margin-top: 2px; }
+  .badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+  .b-blue   { background:#dbeafe; color:#1d4ed8; }
+  .b-teal   { background:#d1fae5; color:#065f46; }
+  .b-purple { background:#ede9fe; color:#5b21b6; }
+  .b-amber  { background:#fef3c7; color:#92400e; }
+  .b-coral  { background:#fee2e2; color:#991b1b; }
+  .b-green  { background:#dcfce7; color:#166534; }
+  .b-slate  { background:#e2e8f0; color:#334155; }
+  .b-rose   { background:#ffe4e6; color:#9f1239; }
+  .b-orange { background:#ffedd5; color:#9a3412; }
+  .b-indigo { background:#e0e7ff; color:#3730a3; }
+  .b-cyan   { background:#cffafe; color:#164e63; }
+  .section-label { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 8px; }
+  .card { background: #fff; border: 1px solid #e8e8e8; border-radius: 12px; padding: 1rem 1.25rem; }
+  .card-gray { background: #f8f9fa; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  .editor { background: #1e1e2e; border-radius: 12px; overflow: hidden; font-family: 'SFMono-Regular', Consolas, 'Courier New', monospace; }
+  .editor-bar { background: #13131f; padding: 9px 14px; display: flex; align-items: center; gap: 6px; }
+  .e-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .e-red { background:#ff5f57; } .e-yellow { background:#febc2e; } .e-green { background:#28c840; }
+  .e-label { font-size: 12px; color: #6272a4; margin-left: 4px; font-family: -apple-system, sans-serif; }
+  .editor-body { padding: 14px 18px; font-size: 12.5px; line-height: 1.8; }
+  .e-ln  { color: #44475a; font-size: 11px; display: inline-block; width: 22px; user-select: none; }
+  .e-tag { color: #ff79c6; }
+  .e-att { color: #50fa7b; }
+  .e-val { color: #f1fa8c; }
+  .e-txt { color: #f8f8f2; }
+  .e-cmt { color: #6272a4; font-style: italic; }
+  .e-new { color: #80ffea; }
+  .e-h1  { color: #f1fa8c; font-weight: 700; }
+  .e-h2  { color: #ffb86c; font-weight: 700; }
+  .e-h3  { color: #ff79c6; }
+  .e-p   { color: #8be9fd; }
+  .e-btn { color: #bd93f9; }
+  .e-br  { color: #ff5555; }
+  .e-img { color: #50fa7b; }
+  .e-row { display: flex; gap: 8px; }
+  .e-ind1 { display: inline-block; width: 20px; }
+  .e-ind2 { display: inline-block; width: 40px; }
+  .e-ind3 { display: inline-block; width: 60px; }
+  .browser { border-radius: 12px; overflow: hidden; border: 1px solid #e0e0e0; }
+  .browser-bar { background: #f1f3f4; padding: 9px 14px; display: flex; align-items: center; gap: 7px; border-bottom: 1px solid #e0e0e0; }
+  .b-dot2 { width: 10px; height: 10px; border-radius: 50%; }
+  .b-r { background:#ff5f57; } .b-y { background:#febc2e; } .b-g { background:#28c840; }
+  .b-url { flex:1; background:#fff; border:1px solid #dadce0; border-radius:20px; padding:4px 14px; font-size:12px; color:#555; }
+  .tag-table { border-collapse: collapse; width: 100%; }
+  .tag-table th { background: #f1f5f9; font-size: 12px; font-weight: 700; text-align: left; padding: 10px 14px; color: #475569; border-bottom: 2px solid #e2e8f0; }
+  .tag-table td { font-size: 13px; padding: 10px 14px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+  .tag-table tr:last-child td { border-bottom: none; }
+  .tag-table tr:hover td { background: #f8f9fa; }
+  .tag-mono { font-family: 'SFMono-Regular', Consolas, monospace; font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 5px; }
+  .quiz-option { border: 1px solid #dee2e6; border-radius: 8px; padding: 10px 14px; font-size: 13px; cursor: pointer; margin-bottom: 6px; transition: all .15s; background: transparent; width: 100%; text-align: left; color: #1a1a1a; }
+  .quiz-option:hover:not(:disabled) { background: #f8f9fa; }
+  .quiz-option.correct { background: #d1fae5; border-color: #059669; color: #065f46; }
+  .quiz-option.wrong   { background: #fee2e2; border-color: #dc2626; color: #991b1b; }
+  .quiz-feedback { display: none; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-top: 4px; }
+  .quiz-feedback.correct { background: #d1fae5; color: #065f46; display: block; }
+  .quiz-feedback.wrong   { background: #fee2e2; color: #991b1b; display: block; }
+  .activity-box { border: 2px dashed #a5b4fc; background: #eef2ff; border-radius: 12px; padding: 14px 18px; }
+  .activity-title { font-size: 13px; font-weight: 700; color: #3730a3; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .challenge-box { border: 2px dashed #f9a8d4; background: #fdf2f8; border-radius: 12px; padding: 14px 18px; }
+  .challenge-title { font-size: 13px; font-weight: 700; color: #9f1239; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .tip-box  { display:flex; gap:10px; align-items:flex-start; background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:10px 14px; }
+  .tip-icon { color:#d97706; font-size:18px; flex-shrink:0; margin-top:1px; }
+  .tip-text { font-size:13px; color:#92400e; line-height:1.6; }
+  .info-box  { display:flex; gap:10px; align-items:flex-start; background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:10px 14px; }
+  .info-icon { color:#2563eb; font-size:18px; flex-shrink:0; margin-top:1px; }
+  .info-text { font-size:13px; color:#1e40af; line-height:1.6; }
+  .warn-box  { display:flex; gap:10px; align-items:flex-start; background:#fef9ee; border:1px solid #fcd34d; border-radius:10px; padding:10px 14px; }
+  .success-box { display:flex; gap:10px; align-items:flex-start; background:#f0fdf4; border:1px solid #86efac; border-radius:10px; padding:10px 14px; }
+  .lex-row { display:flex; align-items:stretch; cursor:pointer; transition:background .12s; border-bottom:1px solid #f0f0f0; }
+  .lex-row:last-child { border-bottom:none; }
+  .lex-row:hover { background:#f8f9fa; }
+  .lex-row.active { background:#eff6ff; border-left:3px solid #1d4ed8; }
+  .lex-code { background:#1e1e2e; padding:10px 14px; font-family:'SFMono-Regular',Consolas,monospace; font-size:12px; min-width:210px; flex-shrink:0; display:flex; align-items:center; }
+  .lex-info { padding:10px 14px; flex:1; }
+  .lex-name   { font-size:13px; font-weight:700; color:#1d4ed8; margin-bottom:2px; }
+  .lex-desc   { font-size:12px; color:#555; line-height:1.55; }
+  .lex-detail { display:none; font-size:12px; color:#1d4ed8; margin-top:4px; padding-top:4px; border-top:1px dashed #bfdbfe; }
+  .lex-row.active .lex-detail { display:block; }
+  .line-explain { border:1px solid #e8e8e8; border-radius:10px; overflow:hidden; }
+  .reveal-btn { background:#f1f3f5; border:1px solid #dee2e6; border-radius:8px; padding:7px 14px; font-size:13px; cursor:pointer; color:#333; transition:background .15s; }
+  .reveal-btn:hover { background:#e9ecef; }
+  .reveal-content { display:none; margin-top:8px; }
+  .reveal-content.open { display:block; }
+  .nav-row { display:flex; align-items:center; justify-content:space-between; margin-top:auto; padding-top:1rem; border-top:1px solid #f0f0f0; }
+  .nav-btn { display:inline-flex; align-items:center; gap:6px; padding:9px 18px; border:1px solid #dee2e6; border-radius:8px; background:transparent; font-size:13px; cursor:pointer; color:#333; transition:background .15s; }
+  .nav-btn:hover:not(:disabled) { background:#f1f3f5; }
+  .nav-btn:disabled { opacity:.35; cursor:default; }
+  .nav-btn.primary { background:#1d4ed8; border-color:transparent; color:#fff; }
+  .nav-btn.primary:hover { background:#1e40af; }
+  .progress-dots { display:flex; gap:6px; align-items:center; }
+  .dot { width:7px; height:7px; border-radius:50%; background:#dee2e6; transition:all .2s; }
+  .dot.active { width:20px; border-radius:4px; background:#1d4ed8; }
+  .home-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .home-card { background:#fff; border:1px solid #e8e8e8; border-radius:12px; padding:1rem 1.25rem; cursor:pointer; transition:all .15s; }
+  .home-card:hover { border-color:#1d4ed8; box-shadow:0 2px 8px rgba(29,78,216,.1); }
+  .home-card-title { font-size:15px; font-weight:700; margin:6px 0 2px; }
+  .home-card-sub   { font-size:12px; color:#666; }
+  code { font-family:'SFMono-Regular',Consolas,monospace; font-size:12px; background:#f1f3f5; padding:1px 6px; border-radius:4px; border:1px solid #dee2e6; }
+  .tag-chip { font-family:'SFMono-Regular',Consolas,monospace; font-size:12px; font-weight:700; padding:3px 9px; border-radius:6px; }
+  .hero-anatomy { border: 2px solid #cbd5e1; border-radius: 12px; overflow: hidden; font-family: -apple-system, sans-serif; }
+  .attr-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .attr-card { background: #fff; border: 1px solid #e8e8e8; border-radius: 10px; padding: 12px 14px; }
+  .attr-name { font-family: monospace; font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+  .attr-desc { font-size: 12px; color: #555; line-height: 1.55; }
+  .attr-ex   { font-size: 11px; color: #888; font-family: monospace; margin-top: 5px; background: #f8f9fa; border-radius: 5px; padding: 3px 7px; display: inline-block; }
+  .site-card { border-radius: 10px; overflow: hidden; border: 1px solid #e8e8e8; }
+  .heading-demo { background: #fff; border: 1px solid #e8e8e8; border-radius: 10px; overflow: hidden; }
+  .heading-row  { display: flex; align-items: center; gap: 14px; padding: 11px 16px; border-bottom: 1px solid #f0f0f0; }
+  .heading-row:last-child { border-bottom: none; }
+  .heading-chip { font-family: monospace; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 5px; flex-shrink: 0; width: 42px; text-align: center; }
+  .heading-note { font-size: 11px; color: #888; flex-shrink: 0; }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <div class="top-bar">
+    <div>
+      <div class="top-bar-title">MERN Stack Training · Day 2 · Hour 2</div>
+      <div class="top-bar-sub">Building the Hero Section — SkillHub LMS</div>
+    </div>
+    <div class="slide-counter" id="slide-counter">1 / 13</div>
+  </div>
+
+  <!-- SLIDE 0: HOME -->
+  <div class="slide active" id="slide-0">
+    <div class="slide-header">
+      <span class="badge b-cyan">Day 2 · Hour 2</span>
+      <div>
+        <div class="slide-title">Building the Hero Section</div>
+        <div class="slide-subtitle">Students add the first real visible section to SkillHub LMS</div>
+      </div>
+    </div>
+    <div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:12px;padding:12px 16px;display:flex;gap:12px;align-items:flex-start">
+      <i class="ti ti-target" style="color:#0284c7;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#0c4a6e;margin-bottom:4px">Learning Objectives</div>
+        <div style="display:flex;gap:18px;flex-wrap:wrap;font-size:13px;color:#0369a1">
+          <span><i class="ti ti-circle-check" style="font-size:13px;margin-right:3px"></i>Understand what a Hero Section is</span>
+          <span><i class="ti ti-circle-check" style="font-size:13px;margin-right:3px"></i>Use h1, h2, h3, p, button, br tags</span>
+          <span><i class="ti ti-circle-check" style="font-size:13px;margin-right:3px"></i>Add images with &lt;img&gt; and its attributes</span>
+        </div>
+      </div>
+    </div>
+    <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:12px;padding:12px 16px;display:flex;gap:12px;align-items:flex-start">
+      <i class="ti ti-git-branch" style="color:#166534;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#166534;margin-bottom:3px">Continuing from Hour 1 — SkillHub LMS</div>
+        <div style="font-size:13px;color:#166534;line-height:1.6">In Hour 1 you built the semantic skeleton: <code>&lt;header&gt;</code>, <code>&lt;nav&gt;</code>, <code>&lt;section&gt;</code>, <code>&lt;footer&gt;</code>. Now in Hour 2 we <strong>fill the &lt;section&gt;</strong> with a real Hero Section — heading, description, button, and image.</div>
+      </div>
+    </div>
+    <div class="home-grid">
+      <div class="home-card" onclick="goSlide(1)">
+        <span class="badge b-amber">Concept</span>
+        <div class="home-card-title">What is a Hero Section?</div>
+        <div class="home-card-sub">Real-world examples — Netflix, Amazon, Udemy</div>
+      </div>
+      <div class="home-card" onclick="goSlide(2)">
+        <span class="badge b-purple">Tags</span>
+        <div class="home-card-title">The Tags We'll Use</div>
+        <div class="home-card-sub">h1 · h2 · h3 · p · button · br — purpose of each</div>
+      </div>
+      <div class="home-card" onclick="goSlide(3)">
+        <span class="badge b-blue">Visual</span>
+        <div class="home-card-title">Heading Hierarchy</div>
+        <div class="home-card-sub">h1 vs h2 vs h3 — size, weight, and when to use each</div>
+      </div>
+      <div class="home-card" onclick="goSlide(4)">
+        <span class="badge b-green">Code</span>
+        <div class="home-card-title">Live Coding — Hero Section</div>
+        <div class="home-card-sub">Add h2, p, button inside &lt;section&gt; of index.html</div>
+      </div>
+      <div class="home-card" onclick="goSlide(5)">
+        <span class="badge b-blue">Explain</span>
+        <div class="home-card-title">Tag-by-Tag Explanation</div>
+        <div class="home-card-sub">Click each tag to understand its role in the hero</div>
+      </div>
+      <div class="home-card" onclick="goSlide(6)">
+        <span class="badge b-orange">Activity</span>
+        <div class="home-card-title">Student Activity — Build Your Hero</div>
+        <div class="home-card-sub">Welcome message, description, Join Now button</div>
+      </div>
+      <div class="home-card" onclick="goSlide(7)">
+        <span class="badge b-teal">Images</span>
+        <div class="home-card-title">Introducing &lt;img&gt;</div>
+        <div class="home-card-sub">src, alt, width, height — all four attributes explained</div>
+      </div>
+      <div class="home-card" onclick="goSlide(8)">
+        <span class="badge b-indigo">Code</span>
+        <div class="home-card-title">Live Coding — Add the Course Image</div>
+        <div class="home-card-sub">Add &lt;img&gt; to the SkillHub hero section</div>
+      </div>
+    </div>
+    <div class="grid-2" style="gap:10px">
+      <div class="home-card" onclick="goSlide(9)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge b-rose">Challenge</span>
+          <span style="font-size:14px;font-weight:700">Mini Challenge — Course Banner</span>
+          <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+        </div>
+      </div>
+      <div class="home-card" onclick="goSlide(10)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge b-amber">Real World</span>
+          <span style="font-size:14px;font-weight:700">Hero Sections in the Wild</span>
+          <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+        </div>
+      </div>
+    </div>
+    <div class="grid-2" style="gap:10px">
+      <div class="home-card" onclick="goSlide(11)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge b-slate">Ref</span>
+          <span style="font-size:14px;font-weight:700">Tags Reference Table</span>
+          <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+        </div>
+      </div>
+      <div class="home-card" onclick="goSlide(12)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge b-green">Quiz</span>
+          <span style="font-size:14px;font-weight:700">Quick Check — 5 Questions</span>
+          <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <div></div>
+      <div class="progress-dots" id="dots-0"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Start <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- SLIDE 1: WHAT IS A HERO -->
+  <div class="slide" id="slide-1">
+    <div class="slide-header">
+      <span class="badge b-amber">Concept</span>
+      <div>
+        <div class="slide-title">What is a Hero Section?</div>
+        <div class="slide-subtitle">Ask students: "What's the first thing you see on Netflix?"</div>
+      </div>
+    </div>
+    <div class="card card-gray">
+      <div style="font-size:14px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:8px">
+        <i class="ti ti-message-question" style="color:#d97706;font-size:18px"></i>
+        ❓ Think of your favourite website. What do you see first?
+      </div>
+      <button class="reveal-btn" onclick="toggle('hero-ans')">Reveal discussion points</button>
+      <div class="reveal-content" id="hero-ans">
+        <div style="margin-top:10px;padding:12px 16px;background:#fff;border-radius:10px;border:1px solid #e8e8e8">
+          <div style="display:flex;gap:8px;flex-wrap:wrap;font-size:13px;color:#444">
+            <span style="background:#fee2e2;border-radius:6px;padding:4px 12px;font-weight:600">🎬 A big heading</span>
+            <span style="background:#dbeafe;border-radius:6px;padding:4px 12px;font-weight:600">📝 A short description</span>
+            <span style="background:#d1fae5;border-radius:6px;padding:4px 12px;font-weight:600">🚀 A big button</span>
+            <span style="background:#fef9c3;border-radius:6px;padding:4px 12px;font-weight:600">🖼️ An image or video</span>
+          </div>
+          <div style="margin-top:10px;font-size:13px;color:#555;font-weight:600">✅ That is the Hero Section — the first thing a visitor sees. It makes them stay or leave!</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-label">every hero section has these 4 parts</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:6px">
+        <div style="text-align:center;padding:14px 8px;background:#fff5f5;border:1px solid #fecaca;border-radius:10px">
+          <div style="font-size:22px;margin-bottom:6px">🏷️</div>
+          <div style="font-size:13px;font-weight:700;color:#991b1b">Logo</div>
+          <div style="font-size:11px;color:#888;margin-top:4px">Brand identity at the top</div>
+        </div>
+        <div style="text-align:center;padding:14px 8px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px">
+          <div style="font-size:22px;margin-bottom:6px">📢</div>
+          <div style="font-size:13px;font-weight:700;color:#1e40af">Heading</div>
+          <div style="font-size:11px;color:#888;margin-top:4px">The big bold statement</div>
+        </div>
+        <div style="text-align:center;padding:14px 8px;background:#f0fdf4;border:1px solid #86efac;border-radius:10px">
+          <div style="font-size:22px;margin-bottom:6px">📝</div>
+          <div style="font-size:13px;font-weight:700;color:#166534">Description</div>
+          <div style="font-size:11px;color:#888;margin-top:4px">Short explanation of value</div>
+        </div>
+        <div style="text-align:center;padding:14px 8px;background:#fef9c3;border:1px solid #fde047;border-radius:10px">
+          <div style="font-size:22px;margin-bottom:6px">🚀</div>
+          <div style="font-size:13px;font-weight:700;color:#854d0e">CTA Button</div>
+          <div style="font-size:11px;color:#888;margin-top:4px">Tells them what to do next</div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="section-label">real-world example — skillhub lms hero anatomy</div>
+      <div class="hero-anatomy">
+        <div style="background:#1e40af;color:#fff;padding:10px 16px;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:space-between">
+          <span>SkillHub LMS</span>
+          <span style="font-size:10px;opacity:.6;font-family:monospace">&lt;header&gt; from Hour 1</span>
+        </div>
+        <div style="background:#2563eb;color:#fff;padding:7px 16px;font-size:12px;display:flex;gap:14px">
+          <span>Home</span><span>Courses</span><span>About</span><span>Contact</span>
+          <span style="margin-left:auto;font-size:10px;opacity:.6;font-family:monospace">&lt;nav&gt; from Hour 1</span>
+        </div>
+        <div style="background:#f8faff;padding:20px 16px;border-bottom:2px dashed #bfdbfe;position:relative">
+          <div style="position:absolute;top:8px;right:10px;font-size:10px;font-weight:700;font-family:monospace;color:#1d4ed8;background:#dbeafe;padding:2px 7px;border-radius:4px">&lt;section&gt; — we build this NOW</div>
+          <div style="font-size:10px;font-weight:700;color:#7c3aed;font-family:monospace;margin-bottom:6px">&lt;h2&gt;</div>
+          <div style="font-size:18px;font-weight:800;color:#111;margin-bottom:6px">Become a Full Stack Developer</div>
+          <div style="font-size:10px;font-weight:700;color:#2563eb;font-family:monospace;margin-bottom:4px">&lt;p&gt;</div>
+          <div style="font-size:12px;color:#555;margin-bottom:10px;line-height:1.5">Learn HTML, CSS, JavaScript, React, Node.js and MongoDB from scratch.</div>
+          <div style="font-size:10px;font-weight:700;color:#059669;font-family:monospace;margin-bottom:6px">&lt;button&gt;</div>
+          <button style="background:#1d4ed8;color:#fff;border:none;padding:8px 18px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">Explore Courses</button>
+        </div>
+      </div>
+    </div>
+    <div class="info-box">
+      <i class="ti ti-info-circle info-icon"></i>
+      <div class="info-text"><strong>Key idea:</strong> The hero section is like the cover of a book — it should make someone want to read more. You have about <strong>5 seconds</strong> to grab a visitor's attention before they leave. Every word matters!</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-1"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- SLIDE 2: TAGS -->
+  <div class="slide" id="slide-2">
+    <div class="slide-header">
+      <span class="badge b-purple">Tags</span>
+      <div>
+        <div class="slide-title">The Tags We'll Use in This Hour</div>
+        <div class="slide-subtitle">Six new tags to build the Hero Section content</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div class="card" style="display:flex;gap:14px;align-items:flex-start">
+        <span class="tag-chip" style="background:#fef9c3;color:#854d0e;flex-shrink:0">&lt;h1&gt;</span>
+        <div>
+          <div style="font-size:14px;font-weight:700;margin-bottom:3px">Most Important Heading — Page Title</div>
+          <div style="font-size:13px;color:#555;line-height:1.6">The biggest, boldest heading. Use it <strong>once per page</strong> for the main message. On SkillHub it is already used for "SkillHub LMS" in the &lt;header&gt; from Hour 1. Google gives it the most SEO weight.</div>
+          <div style="margin-top:6px"><code>&lt;h1&gt;SkillHub LMS&lt;/h1&gt;</code> — already written in Hour 1</div>
+        </div>
+      </div>
+      <div class="card" style="display:flex;gap:14px;align-items:flex-start">
+        <span class="tag-chip" style="background:#ede9fe;color:#5b21b6;flex-shrink:0">&lt;h2&gt;</span>
+        <div>
+          <div style="font-size:14px;font-weight:700;margin-bottom:3px">Section Heading — Our Hero Title</div>
+          <div style="font-size:13px;color:#555;line-height:1.6">Because &lt;h1&gt; is taken, the hero heading uses &lt;h2&gt;. Can be used many times on a page — once per section. Always comes after h1 in hierarchy.</div>
+          <div style="margin-top:6px"><code>&lt;h2&gt;Become a Full Stack Developer&lt;/h2&gt;</code></div>
+        </div>
+      </div>
+      <div class="card" style="display:flex;gap:14px;align-items:flex-start">
+        <span class="tag-chip" style="background:#d1fae5;color:#065f46;flex-shrink:0">&lt;h3&gt;</span>
+        <div>
+          <div style="font-size:14px;font-weight:700;margin-bottom:3px">Sub-Heading — Inside Sections</div>
+          <div style="font-size:13px;color:#555;line-height:1.6">Third-level heading. Smaller than h2. Used inside a section to label cards or sub-topics — for example, individual course names in the courses list.</div>
+          <div style="margin-top:6px"><code>&lt;h3&gt;MERN Stack Course&lt;/h3&gt;</code></div>
+        </div>
+      </div>
+      <div class="card" style="display:flex;gap:14px;align-items:flex-start">
+        <span class="tag-chip" style="background:#dbeafe;color:#1e40af;flex-shrink:0">&lt;p&gt;</span>
+        <div>
+          <div style="font-size:14px;font-weight:700;margin-bottom:3px">Paragraph — Body Text / Description</div>
+          <div style="font-size:13px;color:#555;line-height:1.6">Regular body text. The browser adds a gap above and below each &lt;p&gt; automatically. Use it for the hero description — keep it to 1–2 sentences.</div>
+          <div style="margin-top:6px"><code>&lt;p&gt;Learn HTML, CSS, JavaScript, React, Node.js and MongoDB.&lt;/p&gt;</code></div>
+        </div>
+      </div>
+      <div class="card" style="display:flex;gap:14px;align-items:flex-start">
+        <span class="tag-chip" style="background:#dcfce7;color:#166534;flex-shrink:0">&lt;button&gt;</span>
+        <div>
+          <div style="font-size:14px;font-weight:700;margin-bottom:3px">Button — Call To Action (CTA)</div>
+          <div style="font-size:13px;color:#555;line-height:1.6">Creates a clickable button. The CTA tells the visitor what to do: "Explore Courses," "Join Now," "Start Learning." Without CSS it renders as the browser's plain grey button — we style it in Day 3.</div>
+          <div style="margin-top:6px"><code>&lt;button&gt;Explore Courses&lt;/button&gt;</code></div>
+        </div>
+      </div>
+      <div class="card" style="display:flex;gap:14px;align-items:flex-start">
+        <span class="tag-chip" style="background:#fee2e2;color:#991b1b;flex-shrink:0">&lt;br&gt;</span>
+        <div>
+          <div style="font-size:14px;font-weight:700;margin-bottom:3px">Line Break — Force a New Line</div>
+          <div style="font-size:13px;color:#555;line-height:1.6">Inserts a line break inside text. <strong>Self-closing</strong> — no closing tag. Useful inside a heading to break at a specific word. Don't use for spacing between elements — use &lt;p&gt; tags or CSS margin instead.</div>
+          <div style="margin-top:6px"><code>Learn HTML, CSS &lt;br&gt; and JavaScript.</code></div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-2"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Heading Sizes <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- SLIDE 3: HEADING HIERARCHY -->
+  <div class="slide" id="slide-3">
+    <div class="slide-header">
+      <span class="badge b-blue">Visual</span>
+      <div>
+        <div class="slide-title">Heading Hierarchy</div>
+        <div class="slide-subtitle">h1 is the biggest, h3 the smallest we use today — always go in order</div>
+      </div>
+    </div>
+    <div class="heading-demo">
+      <div class="heading-row">
+        <span class="heading-chip" style="background:#fef9c3;color:#854d0e">&lt;h1&gt;</span>
+        <div style="flex:1"><span style="font-size:26px;font-weight:800;color:#111">SkillHub LMS</span></div>
+        <span style="font-size:11px;color:#888;flex-shrink:0">Used in &lt;header&gt; · Hour 1 · ONE per page</span>
+      </div>
+      <div class="heading-row">
+        <span class="heading-chip" style="background:#ede9fe;color:#5b21b6">&lt;h2&gt;</span>
+        <div style="flex:1"><span style="font-size:20px;font-weight:700;color:#111">Become a Full Stack Developer</span></div>
+        <span style="font-size:11px;color:#888;flex-shrink:0">Hero heading · Today</span>
+      </div>
+      <div class="heading-row">
+        <span class="heading-chip" style="background:#d1fae5;color:#065f46">&lt;h3&gt;</span>
+        <div style="flex:1"><span style="font-size:16px;font-weight:700;color:#111">MERN Stack Course</span></div>
+        <span style="font-size:11px;color:#888;flex-shrink:0">Course cards · Today</span>
+      </div>
+      <div class="heading-row" style="opacity:.45">
+        <span class="heading-chip" style="background:#e2e8f0;color:#334155">&lt;h4&gt;</span>
+        <div style="flex:1"><span style="font-size:14px;font-weight:700;color:#444">Module 1: HTML Basics</span></div>
+        <span style="font-size:11px;color:#888;flex-shrink:0">Rarely needed</span>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="card" style="border-color:#fca5a5">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <div style="width:30px;height:30px;background:#fee2e2;border-radius:8px;display:flex;align-items:center;justify-content:center"><i class="ti ti-x" style="color:#dc2626;font-size:15px"></i></div>
+          <div style="font-size:14px;font-weight:700;color:#dc2626">Wrong — skip levels</div>
+        </div>
+        <div class="editor" style="border-radius:8px">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">bad example</span></div>
+          <div class="editor-body" style="font-size:12px">
+            <div class="e-row"><span class="e-ln">1</span><span class="e-tag">&lt;h1&gt;</span><span class="e-h1">SkillHub LMS</span><span class="e-tag">&lt;/h1&gt;</span></div>
+            <div class="e-row"><span class="e-ln">2</span><span class="e-tag">&lt;h4&gt;</span><span class="e-txt">Hero Text</span><span class="e-tag">&lt;/h4&gt;</span><span class="e-cmt"> &lt;!-- skipped h2,h3! --&gt;</span></div>
+            <div class="e-row"><span class="e-ln">3</span><span class="e-tag">&lt;h1&gt;</span><span class="e-h1">Courses</span><span class="e-tag">&lt;/h1&gt;</span><span class="e-cmt"> &lt;!-- second h1! --&gt;</span></div>
+          </div>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#dc2626">❌ Never skip levels. Never use two &lt;h1&gt; tags on one page.</div>
+      </div>
+      <div class="card" style="border-color:#86efac">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <div style="width:30px;height:30px;background:#dcfce7;border-radius:8px;display:flex;align-items:center;justify-content:center"><i class="ti ti-check" style="color:#16a34a;font-size:15px"></i></div>
+          <div style="font-size:14px;font-weight:700;color:#16a34a">Correct — stay in order</div>
+        </div>
+        <div class="editor" style="border-radius:8px">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">good example</span></div>
+          <div class="editor-body" style="font-size:12px">
+            <div class="e-row"><span class="e-ln">1</span><span class="e-tag">&lt;h1&gt;</span><span class="e-h1">SkillHub LMS</span><span class="e-tag">&lt;/h1&gt;</span><span class="e-cmt"> &lt;!-- header --&gt;</span></div>
+            <div class="e-row"><span class="e-ln">2</span><span class="e-tag">&lt;h2&gt;</span><span class="e-h2">Become a Full Stack...</span><span class="e-tag">&lt;/h2&gt;</span></div>
+            <div class="e-row"><span class="e-ln">3</span><span class="e-tag">&lt;h3&gt;</span><span class="e-h3">MERN Stack Course</span><span class="e-tag">&lt;/h3&gt;</span></div>
+          </div>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#16a34a">✅ h1 → h2 → h3 — always in sequence, like a document outline.</div>
+      </div>
+    </div>
+    <div class="tip-box">
+      <i class="ti ti-bulb tip-icon"></i>
+      <div class="tip-text"><strong>Think of it like an outline:</strong> h1 = book title, h2 = chapter title, h3 = section inside a chapter. Screen readers and Google both follow this hierarchy to understand your page structure. Breaking it confuses both!</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-3"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Live Code <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- SLIDE 4: LIVE CODING -->
+  <div class="slide" id="slide-4">
+    <div class="slide-header">
+      <span class="badge b-green">Code</span>
+      <div>
+        <div class="slide-title">Live Coding — Hero Section in index.html</div>
+        <div class="slide-subtitle">Replace the empty &lt;section&gt; from Hour 1 with real hero content</div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="section-label">frontend/index.html — updated &lt;section&gt;</div>
+        <div class="editor">
+          <div class="editor-bar">
+            <div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div>
+            <span class="e-label">frontend/index.html</span>
+          </div>
+          <div class="editor-body">
+            <div class="e-row"><span class="e-ln">1</span><span class="e-cmt">&lt;!-- Hour 1 code stays exactly the same --&gt;</span></div>
+            <div class="e-row"><span class="e-ln">2</span><span class="e-tag">&lt;header&gt;</span></div>
+            <div class="e-row"><span class="e-ln">3</span><span class="e-ind1"></span><span class="e-tag">&lt;h1&gt;</span><span class="e-txt">SkillHub LMS</span><span class="e-tag">&lt;/h1&gt;</span></div>
+            <div class="e-row"><span class="e-ln">4</span><span class="e-tag">&lt;/header&gt;</span></div>
+            <div class="e-row"><span class="e-ln">5</span><span class="e-tag">&lt;nav&gt;</span><span class="e-txt"> Home · Courses · About · Contact </span><span class="e-tag">&lt;/nav&gt;</span></div>
+            <div class="e-row" style="margin-top:8px"><span class="e-ln">6</span><span class="e-cmt">&lt;!-- HOUR 2: Fill the section below --&gt;</span></div>
+            <div class="e-row"><span class="e-ln">7</span><span class="e-new">&lt;section&gt;</span></div>
+            <div class="e-row" style="background:#1a1a30"><span class="e-ln">8</span><span class="e-ind1"></span><span class="e-tag">&lt;h2&gt;</span></div>
+            <div class="e-row" style="background:#1a1a30"><span class="e-ln">9</span><span class="e-ind2"></span><span class="e-h2">Become a Full Stack Developer</span></div>
+            <div class="e-row" style="background:#1a1a30"><span class="e-ln">10</span><span class="e-ind1"></span><span class="e-tag">&lt;/h2&gt;</span></div>
+            <div class="e-row" style="background:#1a1a30;margin-top:4px"><span class="e-ln">11</span><span class="e-ind1"></span><span class="e-tag">&lt;p&gt;</span></div>
+            <div class="e-row" style="background:#1a1a30"><span class="e-ln">12</span><span class="e-ind2"></span><span class="e-p">Learn HTML, CSS, JavaScript,</span></div>
+            <div class="e-row" style="background:#1a1a30"><span class="e-ln">13</span><span class="e-ind2"></span><span class="e-p">React, Node.js and MongoDB.</span></div>
+            <div class="e-row" style="background:#1a1a30"><span class="e-ln">14</span><span class="e-ind1"></span><span class="e-tag">&lt;/p&gt;</span></div>
+            <div class="e-row" style="background:#1a1a30;margin-top:4px"><span class="e-ln">15</span><span class="e-ind1"></span><span class="e-tag">&lt;button&gt;</span></div>
+            <div class="e-row" style="background:#1a1a30"><span class="e-ln">16</span><span class="e-ind2"></span><span class="e-btn">Explore Courses</span></div>
+            <div class="e-row" style="background:#1a1a30"><span class="e-ln">17</span><span class="e-ind1"></span><span class="e-tag">&lt;/button&gt;</span></div>
+            <div class="e-row"><span class="e-ln">18</span><span class="e-new">&lt;/section&gt;</span></div>
+            <div class="e-row" style="margin-top:8px"><span class="e-ln">19</span><span class="e-tag">&lt;footer&gt;</span><span class="e-txt">Copyright 2026</span><span class="e-tag">&lt;/footer&gt;</span></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">browser output</div>
+        <div class="browser">
+          <div class="browser-bar">
+            <div class="b-dot2 b-r"></div><div class="b-dot2 b-y"></div><div class="b-dot2 b-g"></div>
+            <div class="b-url">frontend/index.html</div>
+          </div>
+          <div style="background:#fff;padding:0">
+            <div style="background:#1e293b;color:#fff;padding:10px 16px;font-size:15px;font-weight:700;font-family:serif">SkillHub LMS</div>
+            <div style="background:#e2e8f0;padding:7px 16px;font-size:12px;color:#334155;display:flex;gap:14px">
+              <span>Home</span><span>Courses</span><span>About</span><span>Contact</span>
+            </div>
+            <div style="padding:18px 16px">
+              <div style="font-size:18px;font-weight:800;margin-bottom:8px;font-family:serif">Become a Full Stack Developer</div>
+              <div style="font-size:13px;color:#444;line-height:1.6;margin-bottom:12px">Learn HTML, CSS, JavaScript, React, Node.js and MongoDB.</div>
+              <button style="background:#efefef;border:1px solid #999;padding:6px 14px;border-radius:4px;font-size:13px;cursor:pointer">Explore Courses</button>
+            </div>
+            <div style="background:#f1f5f9;padding:9px 16px;font-size:11px;color:#64748b;border-top:1px solid #e2e8f0">Copyright 2026</div>
+          </div>
+        </div>
+        <div style="margin-top:10px;background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:10px 14px">
+          <div style="font-size:12px;font-weight:700;color:#166534;margin-bottom:4px">🎨 What changed from Hour 1?</div>
+          <div style="font-size:12px;color:#166534;line-height:1.65">The semantic shell (&lt;header&gt;, &lt;nav&gt;, &lt;footer&gt;) is <strong>completely unchanged</strong>. We only filled the empty &lt;section&gt; with real hero content. Good code is built in layers — skeleton first, content second.</div>
+        </div>
+      </div>
+    </div>
+    <div class="warn-box">
+      <i class="ti ti-alert-triangle" style="color:#d97706;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+      <div style="font-size:13px;color:#92400e;line-height:1.6"><strong>Instructor note:</strong> The button looks plain — no colour, no style. Reassure students: in Day 3 (CSS) we will style this button to look professional. For now, focus on structure. Content and style are separate steps!</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-4"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Explain Tags <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- SLIDE 5: TAG EXPLAINER -->
+  <div class="slide" id="slide-5">
+    <div class="slide-header">
+      <span class="badge b-blue">Explain</span>
+      <div>
+        <div class="slide-title">Tag-by-Tag Explanation</div>
+        <div class="slide-subtitle">Click any row to expand why that tag is used in the hero</div>
+      </div>
+    </div>
+    <div class="line-explain">
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="e-h2">&lt;h2&gt;</span></div>
+        <div class="lex-info">
+          <div class="lex-name">Heading 2 — Hero Title</div>
+          <div class="lex-desc">The main visible headline of the hero section</div>
+          <div class="lex-detail">We use &lt;h2&gt; here (not &lt;h1&gt;) because &lt;h1&gt; is already used for "SkillHub LMS" in the &lt;header&gt; from Hour 1. There must be only one &lt;h1&gt; per page. &lt;h2&gt; is the correct next level for the hero section heading. Google reads this text as a key phrase for the page topic.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="e-p">&lt;p&gt;</span></div>
+        <div class="lex-info">
+          <div class="lex-name">Paragraph — Hero Description</div>
+          <div class="lex-desc">Body text explaining what SkillHub is about</div>
+          <div class="lex-detail">The &lt;p&gt; tag tells the browser "this is a block of text." It automatically adds space above and below. You can have multiple &lt;p&gt; tags. This is where you write the hook — what does the visitor get? For a hero, keep it to 1–2 sentences. More than that and visitors stop reading.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="e-btn">&lt;button&gt;</span></div>
+        <div class="lex-info">
+          <div class="lex-name">Button — Call To Action (CTA)</div>
+          <div class="lex-desc">The action you want the visitor to take</div>
+          <div class="lex-detail">The CTA button is the most important element after the heading. The text must be specific and action-oriented — "Explore Courses" is better than "Click Here." Without CSS it renders with the browser's default grey button style. In Day 3 we add colour, border-radius, padding, and hover effects to make it look great.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="e-br">&lt;br&gt;</span></div>
+        <div class="lex-info">
+          <div class="lex-name">Line Break — Force New Line</div>
+          <div class="lex-desc">Breaks the line without starting a new paragraph</div>
+          <div class="lex-detail">Unlike &lt;p&gt; which creates a paragraph gap, &lt;br&gt; only breaks the line — no extra spacing. Self-closing — no &lt;/br&gt; needed. Useful inside a heading to control where text wraps: &lt;h2&gt;Full Stack &lt;br&gt; Developer&lt;/h2&gt;. Don't use &lt;br&gt; to add spacing between elements — use &lt;p&gt; or CSS margin for that.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="e-new">&lt;section&gt;</span></div>
+        <div class="lex-info">
+          <div class="lex-name">Section (from Hour 1) — The Container</div>
+          <div class="lex-desc">The semantic wrapper for the entire hero block</div>
+          <div class="lex-detail">From Hour 1 — &lt;section&gt; tells the browser this is a thematically grouped block. All our hero content (h2, p, button) lives inside this &lt;section&gt;. In Hour 3+ we will add more sections for "Courses," "Testimonials," etc. Each major block of the page gets its own &lt;section&gt;.</div>
+        </div>
+      </div>
+    </div>
+    <div class="info-box">
+      <i class="ti ti-info-circle info-icon"></i>
+      <div class="info-text"><strong>Connecting to Hour 1:</strong> The semantic structure from Hour 1 (&lt;header&gt;, &lt;nav&gt;, &lt;section&gt;, &lt;footer&gt;) is still exactly there. We only added content <em>inside</em> the &lt;section&gt;. The skeleton we built in Hour 1 is unchanged — good code is built in layers.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-5"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Student Activity <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- SLIDE 6: ACTIVITY -->
+  <div class="slide" id="slide-6">
+    <div class="slide-header">
+      <span class="badge b-orange">Activity</span>
+      <div>
+        <div class="slide-title">Student Activity — Build Your Hero</div>
+        <div class="slide-subtitle">Students customise the hero section with their own content — 5 minutes</div>
+      </div>
+    </div>
+    <div class="activity-box">
+      <div class="activity-title"><i class="ti ti-keyboard"></i> Task: Replace the hero content with your own text</div>
+      <div class="editor" style="border-radius:8px">
+        <div class="editor-bar">
+          <div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div>
+          <span class="e-label">Inside your &lt;section&gt; — change the highlighted parts</span>
+        </div>
+        <div class="editor-body">
+          <div class="e-row"><span class="e-ln">1</span><span class="e-new">&lt;section&gt;</span></div>
+          <div class="e-row" style="background:#1a2a1a"><span class="e-ln">2</span><span class="e-ind1"></span><span class="e-tag">&lt;h2&gt;</span><span style="color:#80ffea;font-weight:700">Welcome to SkillHub LMS</span><span class="e-tag">&lt;/h2&gt;</span><span class="e-cmt"> &lt;!-- your message --&gt;</span></div>
+          <div class="e-row" style="background:#1a2a1a"><span class="e-ln">3</span><span class="e-ind1"></span><span class="e-tag">&lt;p&gt;</span><span style="color:#80ffea;font-weight:700">Describe your website here!</span><span class="e-tag">&lt;/p&gt;</span><span class="e-cmt"> &lt;!-- your description --&gt;</span></div>
+          <div class="e-row" style="background:#1a2a1a"><span class="e-ln">4</span><span class="e-ind1"></span><span class="e-tag">&lt;button&gt;</span><span style="color:#80ffea;font-weight:700">Join Now</span><span class="e-tag">&lt;/button&gt;</span><span class="e-cmt"> &lt;!-- your CTA --&gt;</span></div>
+          <div class="e-row"><span class="e-ln">5</span><span class="e-new">&lt;/section&gt;</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="section-label">complete these 3 tasks</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:#fff;border:1px solid #e8e8e8;border-radius:8px">
+            <div style="width:24px;height:24px;border-radius:6px;background:#1d4ed8;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">1</div>
+            <div style="font-size:13px;color:#444;line-height:1.55">Write a <strong>welcome message</strong> inside <code>&lt;h2&gt;</code> — something that describes your website idea</div>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:#fff;border:1px solid #e8e8e8;border-radius:8px">
+            <div style="width:24px;height:24px;border-radius:6px;background:#1d4ed8;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">2</div>
+            <div style="font-size:13px;color:#444;line-height:1.55">Write a <strong>course description</strong> inside <code>&lt;p&gt;</code> — 1–2 sentences about what you offer</div>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:#fff;border:1px solid #e8e8e8;border-radius:8px">
+            <div style="width:24px;height:24px;border-radius:6px;background:#1d4ed8;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">3</div>
+            <div style="font-size:13px;color:#444;line-height:1.55">Change the <strong>button text</strong> to a strong CTA — try "Start Learning Free" or "Enrol Now"</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">bonus tasks (if done early)</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:#fff;border:1px solid #e8e8e8;border-radius:8px">
+            <div style="width:24px;height:24px;border-radius:6px;background:#059669;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">+</div>
+            <div style="font-size:13px;color:#444;line-height:1.55">Add a second <code>&lt;p&gt;</code> tag with more detail below the first</div>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:#fff;border:1px solid #e8e8e8;border-radius:8px">
+            <div style="width:24px;height:24px;border-radius:6px;background:#059669;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">+</div>
+            <div style="font-size:13px;color:#444;line-height:1.55">Add a <code>&lt;br&gt;</code> inside your &lt;h2&gt; to break the title at a natural point</div>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:#fff;border:1px solid #e8e8e8;border-radius:8px">
+            <div style="width:24px;height:24px;border-radius:6px;background:#059669;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">+</div>
+            <div style="font-size:13px;color:#444;line-height:1.55">Add a second <code>&lt;button&gt;</code> — "Learn More" — next to the first one</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tip-box">
+      <i class="ti ti-bulb tip-icon"></i>
+      <div class="tip-text"><strong>Instructor tip:</strong> Walk around and ask students to read their heading aloud. A good hero heading should answer: "What is this site?" and "Who is it for?" in under 8 words.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-6"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Introducing &lt;img&gt; <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- SLIDE 7: IMG TAG -->
+  <div class="slide" id="slide-7">
+    <div class="slide-header">
+      <span class="badge b-teal">Images</span>
+      <div>
+        <div class="slide-title">Introducing &lt;img&gt; — Add Images to HTML</div>
+        <div class="slide-subtitle">A special self-closing tag — all information lives in its attributes</div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="section-label">the img tag syntax</div>
+        <div class="editor">
+          <div class="editor-bar">
+            <div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div>
+            <span class="e-label">image syntax</span>
+          </div>
+          <div class="editor-body">
+            <div class="e-row"><span class="e-ln">1</span><span class="e-img">&lt;img</span></div>
+            <div class="e-row"><span class="e-ln">2</span><span class="e-ind1"></span><span class="e-att">src</span><span class="e-txt">=</span><span class="e-val">"https://picsum.photos/400"</span></div>
+            <div class="e-row"><span class="e-ln">3</span><span class="e-ind1"></span><span class="e-att">alt</span><span class="e-txt">=</span><span class="e-val">"Course Image"</span></div>
+            <div class="e-row"><span class="e-ln">4</span><span class="e-ind1"></span><span class="e-att">width</span><span class="e-txt">=</span><span class="e-val">"400"</span></div>
+            <div class="e-row"><span class="e-ln">5</span><span class="e-ind1"></span><span class="e-att">height</span><span class="e-txt">=</span><span class="e-val">"250"</span></div>
+            <div class="e-row"><span class="e-ln">6</span><span class="e-img">&gt;</span></div>
+            <div class="e-row" style="margin-top:8px"><span class="e-ln">7</span><span class="e-cmt">&lt;!-- No closing tag needed! --&gt;</span></div>
+          </div>
+        </div>
+        <div style="margin-top:10px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:10px 14px">
+          <div style="font-size:12px;font-weight:700;color:#92400e;margin-bottom:4px">Self-Closing — like &lt;br&gt;</div>
+          <div style="font-size:12px;color:#92400e;line-height:1.6"><code>&lt;img&gt;</code> has no closing tag. It has no content between tags — all information is in <strong>attributes</strong>. Same rule as <code>&lt;br&gt;</code> from earlier in this hour.</div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">rendered result</div>
+        <div class="browser">
+          <div class="browser-bar" style="padding:7px 12px"><div class="b-dot2 b-r"></div><div class="b-dot2 b-y"></div><div class="b-dot2 b-g"></div><div class="b-url" style="font-size:11px">index.html</div></div>
+          <div style="background:#fff;padding:14px 16px">
+            <img src="https://picsum.photos/seed/skillhub/400/200" alt="Course Image" style="width:100%;height:120px;object-fit:cover;border-radius:6px;display:block">
+            <div style="font-size:11px;color:#888;margin-top:6px;font-family:monospace">src="https://picsum.photos/seed/skillhub/400/200"</div>
+          </div>
+        </div>
+        <div style="margin-top:10px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:10px 14px">
+          <div style="font-size:12px;font-weight:700;color:#1e40af;margin-bottom:4px">picsum.photos — free placeholder images</div>
+          <div style="font-size:12px;color:#1e40af;line-height:1.6">We use <code>https://picsum.photos/400/200</code> as a placeholder — it returns a random photo at exactly that size. Change the numbers to change dimensions. Change <code>seed/name</code> to get a consistent image.</div>
+        </div>
+      </div>
+    </div>
+    <div class="section-label" style="margin-top:.25rem">the four attributes — every student must know these</div>
+    <div class="attr-grid">
+      <div class="attr-card" style="border-color:#fde68a">
+        <div class="attr-name" style="color:#92400e">src = "..."</div>
+        <div class="attr-desc"><strong>Source</strong> — the URL or file path of the image. <strong>Required.</strong> Without it nothing shows on the page.</div>
+        <div class="attr-ex">src="images/hero.jpg" or src="https://..."</div>
+      </div>
+      <div class="attr-card" style="border-color:#86efac">
+        <div class="attr-name" style="color:#166534">alt = "..."</div>
+        <div class="attr-desc"><strong>Alternative text</strong> — shown if image fails to load; read by screen readers. Always include for accessibility.</div>
+        <div class="attr-ex">alt="Students learning web development"</div>
+      </div>
+      <div class="attr-card" style="border-color:#bfdbfe">
+        <div class="attr-name" style="color:#1e40af">width = "..."</div>
+        <div class="attr-desc"><strong>Width</strong> in pixels. Controls how wide the image displays. Prevents layout shift while the page loads.</div>
+        <div class="attr-ex">width="400" — displays at 400px wide</div>
+      </div>
+      <div class="attr-card" style="border-color:#c4b5fd">
+        <div class="attr-name" style="color:#5b21b6">height = "..."</div>
+        <div class="attr-desc"><strong>Height</strong> in pixels. Set both width and height together to reserve space and prevent content jumping.</div>
+        <div class="attr-ex">height="250" — displays at 250px tall</div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-7"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Add Image to SkillHub <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- SLIDE 8: LIVE CODE IMG -->
+  <div class="slide" id="slide-8">
+    <div class="slide-header">
+      <span class="badge b-indigo">Code</span>
+      <div>
+        <div class="slide-title">Live Coding — Add Course Image to Hero</div>
+        <div class="slide-subtitle">Add &lt;img&gt; inside the &lt;section&gt; alongside the heading and button</div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="editor">
+        <div class="editor-bar">
+          <div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div>
+          <span class="e-label">frontend/index.html — add &lt;img&gt;</span>
+        </div>
+        <div class="editor-body">
+          <div class="e-row"><span class="e-ln">7</span><span class="e-new">&lt;section&gt;</span></div>
+          <div class="e-row"><span class="e-ln">8</span><span class="e-ind1"></span><span class="e-tag">&lt;h2&gt;</span><span class="e-h2">Become a Full Stack Developer</span><span class="e-tag">&lt;/h2&gt;</span></div>
+          <div class="e-row"><span class="e-ln">9</span><span class="e-ind1"></span><span class="e-tag">&lt;p&gt;</span><span class="e-p">Learn HTML, CSS, JavaScript, React, Node.js and MongoDB.</span><span class="e-tag">&lt;/p&gt;</span></div>
+          <div class="e-row" style="margin-top:8px;background:#0d1f0d"><span class="e-ln">10</span><span class="e-ind1"></span><span class="e-cmt">&lt;!-- NEW: Course image --&gt;</span></div>
+          <div class="e-row" style="background:#0d1f0d"><span class="e-ln">11</span><span class="e-ind1"></span><span class="e-img">&lt;img</span></div>
+          <div class="e-row" style="background:#0d1f0d"><span class="e-ln">12</span><span class="e-ind2"></span><span class="e-att">src</span><span class="e-txt">=</span><span class="e-val">"https://picsum.photos/400"</span></div>
+          <div class="e-row" style="background:#0d1f0d"><span class="e-ln">13</span><span class="e-ind2"></span><span class="e-att">alt</span><span class="e-txt">=</span><span class="e-val">"Course Image"</span></div>
+          <div class="e-row" style="background:#0d1f0d"><span class="e-ln">14</span><span class="e-ind2"></span><span class="e-att">width</span><span class="e-txt">=</span><span class="e-val">"400"</span></div>
+          <div class="e-row" style="background:#0d1f0d"><span class="e-ln">15</span><span class="e-ind2"></span><span class="e-att">height</span><span class="e-txt">=</span><span class="e-val">"250"</span></div>
+          <div class="e-row" style="background:#0d1f0d"><span class="e-ln">16</span><span class="e-ind1"></span><span class="e-img">&gt;</span></div>
+          <div class="e-row" style="margin-top:8px"><span class="e-ln">17</span><span class="e-ind1"></span><span class="e-tag">&lt;button&gt;</span><span class="e-btn">Explore Courses</span><span class="e-tag">&lt;/button&gt;</span></div>
+          <div class="e-row"><span class="e-ln">18</span><span class="e-new">&lt;/section&gt;</span></div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">browser output</div>
+        <div class="browser">
+          <div class="browser-bar" style="padding:7px 12px"><div class="b-dot2 b-r"></div><div class="b-dot2 b-y"></div><div class="b-dot2 b-g"></div><div class="b-url" style="font-size:11px">frontend/index.html</div></div>
+          <div style="background:#fff;padding:0">
+            <div style="background:#1e293b;color:#fff;padding:9px 14px;font-size:14px;font-weight:700;font-family:serif">SkillHub LMS</div>
+            <div style="background:#e2e8f0;padding:6px 14px;font-size:11px;color:#334155;display:flex;gap:12px"><span>Home</span><span>Courses</span><span>About</span><span>Contact</span></div>
+            <div style="padding:14px 16px">
+              <div style="font-size:16px;font-weight:800;margin-bottom:7px;font-family:serif">Become a Full Stack Developer</div>
+              <div style="font-size:12px;color:#444;line-height:1.6;margin-bottom:10px">Learn HTML, CSS, JavaScript, React, Node.js and MongoDB.</div>
+              <img src="https://picsum.photos/seed/code/400/180" alt="Course Image" style="width:100%;height:100px;object-fit:cover;border-radius:4px;display:block;margin-bottom:10px">
+              <button style="background:#efefef;border:1px solid #999;padding:5px 12px;border-radius:4px;font-size:12px;cursor:pointer">Explore Courses</button>
+            </div>
+            <div style="background:#f1f5f9;padding:8px 14px;font-size:10px;color:#64748b;border-top:1px solid #e2e8f0">Copyright 2026</div>
+          </div>
+        </div>
+        <div style="margin-top:10px;background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:10px 14px">
+          <div style="font-size:12px;font-weight:700;color:#166534;margin-bottom:4px">✅ SkillHub hero section is now complete!</div>
+          <div style="font-size:12px;color:#166534;line-height:1.6">The hero now has all four elements: heading, description, image, and CTA button — inside the semantic &lt;section&gt; from Hour 1. Next step in Day 3: CSS to make it look beautiful.</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-8"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Mini Challenge <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- SLIDE 9: MINI CHALLENGE -->
+  <div class="slide" id="slide-9">
+    <div class="slide-header">
+      <span class="badge b-rose">Challenge</span>
+      <div>
+        <div class="slide-title">Mini Challenge — Course Banner</div>
+        <div class="slide-subtitle">Create a course card using &lt;img&gt; and headings — 20 minutes</div>
+      </div>
+    </div>
+    <div class="challenge-box">
+      <div class="challenge-title"><i class="ti ti-target"></i> Task: Create a course banner using an image and a heading</div>
+      <div style="font-size:13px;color:#9f1239;line-height:1.65">Create a new file called <code>courses.html</code> inside <code>frontend/</code>. Build a course banner for three different courses — each with an &lt;article&gt; (from Hour 1), image, h3 heading, description, and enrol button.</div>
+    </div>
+    <div class="grid-3" style="margin-top:.25rem">
+      <div class="site-card">
+        <div style="background:#1e40af;color:#fff;padding:10px 14px;font-size:14px;font-weight:700">📘 MERN Stack</div>
+        <img src="https://picsum.photos/seed/mern/300/120" alt="MERN Stack Course" style="width:100%;height:70px;object-fit:cover;display:block">
+        <div style="padding:14px 16px">
+          <div style="font-size:13px;font-weight:800;color:#1e40af;margin-bottom:5px">Full Stack with MERN</div>
+          <div style="font-size:11px;color:#666;margin-bottom:9px;line-height:1.5">MongoDB, Express, React, Node.js from scratch.</div>
+          <button style="background:#1e40af;color:#fff;border:none;padding:6px 14px;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer">Enrol Now</button>
+        </div>
+      </div>
+      <div class="site-card">
+        <div style="background:#166534;color:#fff;padding:10px 14px;font-size:14px;font-weight:700">🐍 Python</div>
+        <img src="https://picsum.photos/seed/python/300/120" alt="Python Course" style="width:100%;height:70px;object-fit:cover;display:block">
+        <div style="padding:14px 16px">
+          <div style="font-size:13px;font-weight:800;color:#166534;margin-bottom:5px">Python for Beginners</div>
+          <div style="font-size:11px;color:#666;margin-bottom:9px;line-height:1.5">Zero to Hero — automation, data, web.</div>
+          <button style="background:#166534;color:#fff;border:none;padding:6px 14px;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer">Enrol Now</button>
+        </div>
+      </div>
+      <div class="site-card">
+        <div style="background:#854d0e;color:#fff;padding:10px 14px;font-size:14px;font-weight:700">🎨 UI/UX Design</div>
+        <img src="https://picsum.photos/seed/design/300/120" alt="UI UX Course" style="width:100%;height:70px;object-fit:cover;display:block">
+        <div style="padding:14px 16px">
+          <div style="font-size:13px;font-weight:800;color:#854d0e;margin-bottom:5px">UI/UX Fundamentals</div>
+          <div style="font-size:11px;color:#666;margin-bottom:9px;line-height:1.5">Figma, wireframes, and design thinking.</div>
+          <button style="background:#854d0e;color:#fff;border:none;padding:6px 14px;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer">Enrol Now</button>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="section-label">starter template</div>
+      <div class="editor">
+        <div class="editor-bar">
+          <div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div>
+          <span class="e-label">frontend/courses.html — starter</span>
+        </div>
+        <div class="editor-body" style="font-size:12px">
+          <div class="e-row"><span class="e-ln">1</span><span class="e-tag">&lt;!DOCTYPE html&gt;</span></div>
+          <div class="e-row"><span class="e-ln">2</span><span class="e-tag">&lt;html&gt;&lt;head&gt;&lt;title&gt;</span><span class="e-txt">SkillHub — Courses</span><span class="e-tag">&lt;/title&gt;&lt;/head&gt;&lt;body&gt;</span></div>
+          <div class="e-row"><span class="e-ln">3</span></div>
+          <div class="e-row"><span class="e-ln">4</span><span class="e-cmt">&lt;!-- MERN Stack Course Card --&gt;</span></div>
+          <div class="e-row"><span class="e-ln">5</span><span class="e-new">&lt;article&gt;</span><span class="e-cmt"> &lt;!-- &lt;article&gt; from Hour 1 — self-contained content! --&gt;</span></div>
+          <div class="e-row"><span class="e-ln">6</span><span class="e-ind1"></span><span class="e-tag">&lt;h3&gt;</span><span class="e-txt">Full Stack with MERN</span><span class="e-tag">&lt;/h3&gt;</span></div>
+          <div class="e-row"><span class="e-ln">7</span><span class="e-ind1"></span><span class="e-img">&lt;img</span></div>
+          <div class="e-row"><span class="e-ln">8</span><span class="e-ind2"></span><span class="e-att">src</span><span class="e-txt">=</span><span class="e-val">"https://picsum.photos/seed/mern/400/200"</span></div>
+          <div class="e-row"><span class="e-ln">9</span><span class="e-ind2"></span><span class="e-att">alt</span><span class="e-txt">=</span><span class="e-val">"MERN Stack Course"</span></div>
+          <div class="e-row"><span class="e-ln">10</span><span class="e-ind2"></span><span class="e-att">width</span><span class="e-txt">=</span><span class="e-val">"400"</span></div>
+          <div class="e-row"><span class="e-ln">11</span><span class="e-ind1"></span><span class="e-img">&gt;</span></div>
+          <div class="e-row"><span class="e-ln">12</span><span class="e-ind1"></span><span class="e-tag">&lt;p&gt;</span><span class="e-p">MongoDB, Express, React, Node.js from scratch.</span><span class="e-tag">&lt;/p&gt;</span></div>
+          <div class="e-row"><span class="e-ln">13</span><span class="e-ind1"></span><span class="e-tag">&lt;button&gt;</span><span class="e-btn">Enrol Now</span><span class="e-tag">&lt;/button&gt;</span></div>
+          <div class="e-row"><span class="e-ln">14</span><span class="e-new">&lt;/article&gt;</span></div>
+          <div class="e-row"><span class="e-ln">15</span></div>
+          <div class="e-row"><span class="e-ln">16</span><span class="e-cmt">&lt;!-- Repeat for Python and UI/UX below --&gt;</span></div>
+          <div class="e-row"><span class="e-ln">17</span></div>
+          <div class="e-row"><span class="e-ln">18</span><span class="e-tag">&lt;/body&gt;&lt;/html&gt;</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="tip-box">
+      <i class="ti ti-bulb tip-icon"></i>
+      <div class="tip-text"><strong>Notice:</strong> We use <code>&lt;article&gt;</code> from Hour 1 to wrap each course card — because each card is self-contained content that could stand alone. Change <code>seed/mern</code> in the picsum URL to get a different image: try <code>seed/python</code>, <code>seed/design</code>, etc.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-9"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Real World <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- SLIDE 10: REAL WORLD -->
+  <div class="slide" id="slide-10">
+    <div class="slide-header">
+      <span class="badge b-amber">Real World</span>
+      <div>
+        <div class="slide-title">Hero Sections in the Wild</div>
+        <div class="slide-subtitle">Every famous site uses the exact same pattern you just built</div>
+      </div>
+    </div>
+    <div class="grid-3">
+      <div class="site-card">
+        <div style="background:#e50914;color:#fff;padding:10px 14px;font-size:14px;font-weight:700">🎬 Netflix</div>
+        <div style="background:#141414;padding:14px 14px">
+          <div style="font-size:14px;font-weight:800;color:#fff;margin-bottom:6px;line-height:1.35">Unlimited movies, TV shows, and more.</div>
+          <div style="font-size:11px;color:#e5e5e5;margin-bottom:10px;line-height:1.5">Watch anywhere. Cancel anytime.</div>
+          <div style="display:flex;gap:6px;align-items:center">
+            <input placeholder="Email address" style="flex:1;background:#333;border:1px solid #555;color:#fff;padding:5px 8px;border-radius:4px;font-size:10px" readonly>
+            <button style="background:#e50914;color:#fff;border:none;padding:6px 10px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap">Get Started</button>
+          </div>
+        </div>
+        <div style="padding:8px 14px;background:#141414;border-top:1px solid #333">
+          <div style="font-size:10px;color:#888;font-family:monospace">&lt;h1&gt; + &lt;p&gt; + &lt;input&gt; + &lt;button&gt;</div>
+        </div>
+      </div>
+      <div class="site-card">
+        <div style="background:#ff9900;color:#0f1111;padding:10px 14px;font-size:14px;font-weight:700">🛒 Amazon</div>
+        <div style="background:#febd69;padding:14px 14px">
+          <div style="font-size:12px;font-weight:700;color:#0f1111;margin-bottom:4px">Shop deals in Electronics</div>
+          <div style="font-size:11px;color:#333;margin-bottom:10px">Up to 40% off. Today only.</div>
+          <img src="https://picsum.photos/seed/amazon/280/80" alt="Deal banner" style="width:100%;height:60px;object-fit:cover;border-radius:4px;margin-bottom:8px;display:block">
+          <button style="background:#ff9900;color:#0f1111;border:none;padding:6px 14px;border-radius:4px;font-size:10px;font-weight:700">Shop Now</button>
+        </div>
+        <div style="padding:8px 14px;background:#fff;border-top:1px solid #e8e8e8">
+          <div style="font-size:10px;color:#888;font-family:monospace">&lt;h2&gt; + &lt;p&gt; + &lt;img&gt; + &lt;button&gt;</div>
+        </div>
+      </div>
+      <div class="site-card">
+        <div style="background:#a435f0;color:#fff;padding:10px 14px;font-size:14px;font-weight:700">📚 Udemy</div>
+        <div style="background:#f7f9fa;padding:14px 14px">
+          <div style="font-size:13px;font-weight:800;color:#1c1d1f;margin-bottom:5px;line-height:1.35">Learn on your schedule</div>
+          <div style="font-size:11px;color:#555;margin-bottom:10px;line-height:1.5">Explore 210,000+ online courses from top instructors.</div>
+          <input placeholder="Search for anything" style="width:100%;border:1px solid #1c1d1f;padding:6px 10px;border-radius:4px;font-size:10px;background:#fff" readonly>
+          <button style="background:#a435f0;color:#fff;border:none;padding:6px 10px;border-radius:4px;font-size:10px;font-weight:700;margin-top:7px">Search</button>
+        </div>
+        <div style="padding:8px 14px;background:#fff;border-top:1px solid #e8e8e8">
+          <div style="font-size:10px;color:#888;font-family:monospace">&lt;h1&gt; + &lt;p&gt; + &lt;input&gt; + &lt;button&gt;</div>
+        </div>
+      </div>
+    </div>
+    <div class="card card-gray" style="margin-top:.25rem">
+      <div class="section-label">what they all have in common</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:6px">
+        <div style="text-align:center;padding:10px;background:#fff;border:1px solid #e8e8e8;border-radius:8px;font-size:12px"><div style="font-size:18px;margin-bottom:4px">📢</div><div style="font-weight:700;color:#1e40af;margin-bottom:3px">Heading</div><div style="color:#666">Every hero has one</div></div>
+        <div style="text-align:center;padding:10px;background:#fff;border:1px solid #e8e8e8;border-radius:8px;font-size:12px"><div style="font-size:18px;margin-bottom:4px">📝</div><div style="font-weight:700;color:#059669;margin-bottom:3px">Description</div><div style="color:#666">Short value prop</div></div>
+        <div style="text-align:center;padding:10px;background:#fff;border:1px solid #e8e8e8;border-radius:8px;font-size:12px"><div style="font-size:18px;margin-bottom:4px">🖼️</div><div style="font-weight:700;color:#854d0e;margin-bottom:3px">Image / Media</div><div style="color:#666">Visual hook</div></div>
+        <div style="text-align:center;padding:10px;background:#fff;border:1px solid #e8e8e8;border-radius:8px;font-size:12px"><div style="font-size:18px;margin-bottom:4px">🚀</div><div style="font-weight:700;color:#dc2626;margin-bottom:3px">CTA Button</div><div style="color:#666">The action</div></div>
+      </div>
+    </div>
+    <div class="success-box">
+      <i class="ti ti-circle-check" style="color:#166534;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+      <div style="font-size:13px;color:#166534;line-height:1.6"><strong>You just built what Netflix, Amazon, and Udemy use!</strong> The HTML structure is identical — heading, description, image, CTA. The difference is CSS styling, which we add in Day 3. You have the foundation these companies rely on.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-10"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Tags Reference <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- SLIDE 11: REFERENCE TABLE -->
+  <div class="slide" id="slide-11">
+    <div class="slide-header">
+      <span class="badge b-slate">Reference</span>
+      <div>
+        <div class="slide-title">Tags Reference — Hours 1 and 2</div>
+        <div class="slide-subtitle">Keep this open while you code — all tags from both hours in one place</div>
+      </div>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <table class="tag-table">
+        <thead>
+          <tr><th>Tag</th><th>Name</th><th>Use In SkillHub</th><th>Key Rule</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><span class="tag-mono" style="background:#fef9c3;color:#854d0e">&lt;h1&gt;</span></td><td>Heading 1</td><td>Already in &lt;header&gt; — "SkillHub LMS" from Hour 1</td><td>One per page. Never repeat.</td></tr>
+          <tr><td><span class="tag-mono" style="background:#ede9fe;color:#5b21b6">&lt;h2&gt;</span></td><td>Heading 2</td><td>Hero heading — "Become a Full Stack Developer" ✅</td><td>Section titles. Can repeat per page.</td></tr>
+          <tr><td><span class="tag-mono" style="background:#d1fae5;color:#065f46">&lt;h3&gt;</span></td><td>Heading 3</td><td>Course card titles inside &lt;article&gt; ✅</td><td>Sub-titles. Always after h2, never before.</td></tr>
+          <tr><td><span class="tag-mono" style="background:#dbeafe;color:#1e40af">&lt;p&gt;</span></td><td>Paragraph</td><td>Hero description text ✅</td><td>Adds auto-space above/below. Use for body text.</td></tr>
+          <tr><td><span class="tag-mono" style="background:#dcfce7;color:#166534">&lt;button&gt;</span></td><td>Button</td><td>CTA — "Explore Courses" ✅</td><td>Clickable action. Style with CSS in Day 3.</td></tr>
+          <tr><td><span class="tag-mono" style="background:#fee2e2;color:#991b1b">&lt;br&gt;</span></td><td>Line Break</td><td>Inside headings to break long titles</td><td>Self-closing — no &lt;/br&gt;. Don't use for spacing!</td></tr>
+          <tr><td><span class="tag-mono" style="background:#cffafe;color:#164e63">&lt;img&gt;</span></td><td>Image</td><td>Course banner / hero image ✅</td><td>Self-closing. Always include src and alt.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="margin-top:.25rem">
+      <div class="section-label">hour 1 structural tags — still in use, unchanged</div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <table class="tag-table">
+          <thead><tr><th>Tag</th><th>From</th><th>Current Status in SkillHub</th></tr></thead>
+          <tbody>
+            <tr><td><span class="tag-mono" style="background:#dbeafe;color:#1e40af">&lt;header&gt;</span></td><td>Hour 1</td><td>Unchanged — wraps "SkillHub LMS" h1</td></tr>
+            <tr><td><span class="tag-mono" style="background:#d1fae5;color:#065f46">&lt;nav&gt;</span></td><td>Hour 1</td><td>Unchanged — navigation links</td></tr>
+            <tr><td><span class="tag-mono" style="background:#ede9fe;color:#5b21b6">&lt;section&gt;</span></td><td>Hour 1</td><td>Now filled with hero content (h2 + p + img + button) ← Hour 2</td></tr>
+            <tr><td><span class="tag-mono" style="background:#fef9c3;color:#854d0e">&lt;article&gt;</span></td><td>Hour 1</td><td>Used in courses.html for each course card ← Hour 2</td></tr>
+            <tr><td><span class="tag-mono" style="background:#e2e8f0;color:#334155">&lt;footer&gt;</span></td><td>Hour 1</td><td>Unchanged — copyright text at bottom</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="grid-2" style="margin-top:.25rem">
+      <div class="tip-box">
+        <i class="ti ti-bulb tip-icon"></i>
+        <div class="tip-text"><strong>Rule of thumb:</strong> If you are tempted to write <code>&lt;div class="button"&gt;</code> or <code>&lt;div class="heading"&gt;</code> — use the semantic tag instead. Always.</div>
+      </div>
+      <div class="info-box">
+        <i class="ti ti-info-circle info-icon"></i>
+        <div class="info-text"><strong>Day 3 preview:</strong> Everything we built today will look dramatically different after we add CSS. The structure is ready — we just need the styling.</div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-11"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Quiz <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- SLIDE 12: QUIZ -->
+  <div class="slide" id="slide-12">
+    <div class="slide-header">
+      <span class="badge b-green">Quiz</span>
+      <div>
+        <div class="slide-title">Quick Check — Hour 2</div>
+        <div class="slide-subtitle">5 questions covering the hero section and image tags</div>
+      </div>
+    </div>
+    <div id="quiz-container"></div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-12"></div>
+      <button class="nav-btn" onclick="goSlide(0)"><i class="ti ti-home"></i> Home</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  var current = 0, total = 13, quizInit = false;
+  var quizData = [
+    { q: "In SkillHub index.html, we already used &lt;h1&gt; for 'SkillHub LMS' in the &lt;header&gt; (Hour 1). What heading tag should we use for the hero title 'Become a Full Stack Developer', and why?", opts: ["&lt;h1&gt; — because it is the most important line on the page","&lt;h2&gt; — because h1 is already used; we must follow heading order","&lt;h3&gt; — because the hero is inside a &lt;section&gt;","&lt;p&gt; — headings should only be used once per page"], ans: 1, exp: "There should be only ONE &lt;h1&gt; per page — it is already used for 'SkillHub LMS' in the &lt;header&gt;. The hero heading gets &lt;h2&gt; because we always follow hierarchy: h1 then h2 then h3." },
+    { q: "The &lt;img&gt; tag is self-closing. What does this mean, and what must you always include?", opts: ["It needs a closing &lt;/img&gt; tag and requires a width attribute","It has no closing tag — it uses attributes (src, alt) to carry all its information","It auto-closes only when inside a &lt;section&gt;","It requires CSS to render — it does not self-close"], ans: 1, exp: "Self-closing means no &lt;/img&gt; tag is needed. All information is carried in attributes. You MUST always include src (where the image is) and alt (description for screen readers and broken-image fallback)." },
+    { q: "What is the purpose of the 'alt' attribute in an &lt;img&gt; tag?", opts: ["It sets an alternate smaller version of the image for mobile","It changes the image colour on hover","It provides a text description shown if the image fails to load, and read aloud by screen readers","It sets the image file format (jpg, png, etc.)"], ans: 2, exp: "alt serves two purposes: (1) it shows when the image cannot load, and (2) screen readers read it aloud for visually impaired users. Always write a meaningful description — not just 'image'." },
+    { q: "What is the difference between &lt;br&gt; and starting a new &lt;p&gt; tag?", opts: ["There is no difference — they both create the same spacing","&lt;br&gt; is for headings only; &lt;p&gt; is for body text only","&lt;br&gt; breaks the line without extra spacing; &lt;p&gt; creates a new paragraph with automatic gap above and below","&lt;p&gt; is older HTML; &lt;br&gt; is the modern replacement"], ans: 2, exp: "&lt;br&gt; only breaks the line — useful for splitting a heading at a specific word with no extra space. &lt;p&gt; creates a full paragraph block with automatic spacing. Use &lt;p&gt; for body content; use &lt;br&gt; sparingly inside headings." },
+    { q: "In Hour 1 we built &lt;header&gt;, &lt;nav&gt;, an empty &lt;section&gt;, and &lt;footer&gt;. What did Hour 2 add?", opts: ["We replaced &lt;section&gt; with a &lt;div&gt; — sections do not hold content","We moved &lt;nav&gt; inside the section","We added hero content (h2, p, img, button) INSIDE the &lt;section&gt; without touching the Hour 1 structure","We deleted the section and started a new file"], ans: 2, exp: "The key concept of Hour 2 — the semantic skeleton from Hour 1 stays exactly the same. We only filled the empty &lt;section&gt; with hero content. Good HTML is built in layers: structure first, then content, then style." }
+  ];
+  var quizAnswered = [];
+  function renderQuiz() {
+    var c = document.getElementById('quiz-container'); c.innerHTML = '';
+    quizData.forEach(function(q,i) {
+      var d = document.createElement('div'); d.style.cssText = 'margin-bottom:18px';
+      d.innerHTML = '<div style="font-size:13px;font-weight:600;margin-bottom:6px">'+(i+1)+'. '+q.q+'</div>';
+      q.opts.forEach(function(opt,j) {
+        var btn = document.createElement('button'); btn.className = 'quiz-option';
+        btn.innerHTML = String.fromCharCode(65+j)+'. '+opt;
+        btn.onclick = function() {
+          if (quizAnswered[i]) return; quizAnswered[i] = true;
+          var btns = d.querySelectorAll('.quiz-option');
+          btns.forEach(function(b,k) { b.disabled = true; if (k===q.ans) b.classList.add('correct'); else if (k===j) b.classList.add('wrong'); });
+          var fb = d.querySelector('.quiz-feedback');
+          fb.innerHTML = (j===q.ans ? '✅ Correct! ' : '❌ Not quite. ')+q.exp;
+          fb.className = 'quiz-feedback '+(j===q.ans ? 'correct' : 'wrong');
+        };
+        d.appendChild(btn);
+      });
+      var fb = document.createElement('div'); fb.className = 'quiz-feedback'; d.appendChild(fb);
+      c.appendChild(d);
+    });
+  }
+  function toggleLex(row) {
+    var was = row.classList.contains('active');
+    document.querySelectorAll('.lex-row.active').forEach(function(r){r.classList.remove('active');});
+    if (!was) row.classList.add('active');
+  }
+  function toggle(id) {
+    var el = document.getElementById(id); el.classList.toggle('open');
+    el.previousElementSibling.textContent = el.classList.contains('open') ? 'Hide discussion points' : 'Reveal discussion points';
+  }
+  function goSlide(n) {
+    document.getElementById('slide-'+current).classList.remove('active');
+    current = n;
+    document.getElementById('slide-'+current).classList.add('active');
+    updateDots();
+    document.getElementById('slide-counter').textContent = (current+1)+' / '+total;
+    if (n===12 && !quizInit) { renderQuiz(); quizInit = true; }
+    window.scrollTo(0,0);
+  }
+  function nextSlide() { if (current < total-1) goSlide(current+1); }
+  function prevSlide() { if (current > 0) goSlide(current-1); }
+  function updateDots() {
+    for (var s=0; s<total; s++) {
+      var el = document.getElementById('dots-'+s); if (!el) continue;
+      el.innerHTML = '';
+      for (var d=0; d<total; d++) {
+        var dot = document.createElement('div');
+        dot.className = 'dot'+(d===current?' active':'');
+        el.appendChild(dot);
+      }
+    }
+  }
+  updateDots();
+</script>
+</body>
+</html
