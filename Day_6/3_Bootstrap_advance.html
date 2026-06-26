@@ -1,0 +1,1395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Day 6 · Hour 3 – Bootstrap Components</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f4f5f7; color: #1a1a1a;
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; padding: 2rem 1rem;
+  }
+  .wrapper {
+    width: 100%; max-width: 920px; background: #fff;
+    border-radius: 16px; box-shadow: 0 2px 20px rgba(0,0,0,0.09); overflow: hidden;
+  }
+  .top-bar {
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    color: #fff; padding: 14px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .top-bar-title { font-size: 15px; font-weight: 600; }
+  .top-bar-sub   { font-size: 12px; opacity: .55; margin-top: 2px; }
+  .slide-counter { font-size: 13px; opacity: .6; font-variant-numeric: tabular-nums; }
+  .slide { display: none; padding: 1.75rem 2rem; min-height: 500px; flex-direction: column; gap: 1.2rem; }
+  .slide.active { display: flex; }
+  .slide-header { display: flex; align-items: center; gap: 10px; padding-bottom: 1rem; border-bottom: 1px solid #e8e8e8; }
+  .slide-title    { font-size: 20px; font-weight: 700; color: #111; }
+  .slide-subtitle { font-size: 13px; color: #666; margin-top: 2px; }
+
+  /* ── Badges ── */
+  .badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+  .b-blue   { background:#dbeafe; color:#1d4ed8; }
+  .b-teal   { background:#d1fae5; color:#065f46; }
+  .b-purple { background:#ede9fe; color:#5b21b6; }
+  .b-amber  { background:#fef3c7; color:#92400e; }
+  .b-green  { background:#dcfce7; color:#166534; }
+  .b-slate  { background:#e2e8f0; color:#334155; }
+  .b-rose   { background:#ffe4e6; color:#9f1239; }
+  .b-orange { background:#ffedd5; color:#9a3412; }
+  .b-indigo { background:#e0e7ff; color:#3730a3; }
+  .b-cyan   { background:#cffafe; color:#164e63; }
+  .b-pink   { background:#fce7f3; color:#9d174d; }
+  .b-yellow { background:#fef9c3; color:#854d0e; }
+
+  /* ── Layout ── */
+  .section-label { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 8px; }
+  .card { background: #fff; border: 1px solid #e8e8e8; border-radius: 12px; padding: 1rem 1.25rem; }
+  .card-gray { background: #f8f9fa; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+  /* ── Code Editor (Dracula) ── */
+  .editor { background: #1e1e2e; border-radius: 12px; overflow: hidden; font-family: 'SFMono-Regular', Consolas, 'Courier New', monospace; }
+  .editor-bar { background: #13131f; padding: 9px 14px; display: flex; align-items: center; gap: 6px; }
+  .e-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .e-red { background:#ff5f57; } .e-yellow { background:#febc2e; } .e-green { background:#28c840; }
+  .e-label { font-size: 12px; color: #6272a4; margin-left: 4px; font-family: -apple-system, sans-serif; }
+  .editor-body { padding: 14px 18px; font-size: 12.5px; line-height: 1.8; }
+  .e-ln   { color: #44475a; font-size: 11px; display: inline-block; width: 22px; user-select: none; }
+  .e-tag  { color: #ff79c6; }
+  .e-att  { color: #50fa7b; }
+  .e-val  { color: #f1fa8c; }
+  .e-txt  { color: #f8f8f2; }
+  .e-cmt  { color: #6272a4; font-style: italic; }
+  .e-new  { color: #80ffea; }
+  .c-sel  { color: #ff79c6; font-weight: 700; }
+  .c-prop { color: #50fa7b; }
+  .c-val  { color: #f1fa8c; }
+  .c-punc { color: #f8f8f2; }
+  .c-hex  { color: #bd93f9; }
+  .c-cmt  { color: #6272a4; font-style: italic; }
+  .c-num  { color: #ff79c6; }
+  .c-cls  { color: #80ffea; }
+  .c-util { color: #a4e400; }
+  .e-ind1 { display: inline-block; width: 20px; }
+  .e-ind2 { display: inline-block; width: 40px; }
+  .e-ind3 { display: inline-block; width: 60px; }
+  .e-ind4 { display: inline-block; width: 80px; }
+
+  /* ── Browser frame ── */
+  .browser { border-radius: 12px; overflow: hidden; border: 1px solid #e0e0e0; }
+  .browser-bar { background: #f1f3f4; padding: 9px 14px; display: flex; align-items: center; gap: 7px; border-bottom: 1px solid #e0e0e0; }
+  .b-dot2 { width: 10px; height: 10px; border-radius: 50%; }
+  .b-r { background:#ff5f57; } .b-y { background:#febc2e; } .b-g { background:#28c840; }
+  .b-url { flex:1; background:#fff; border:1px solid #dadce0; border-radius:20px; padding:4px 14px; font-size:12px; color:#555; }
+
+  /* ── Tables ── */
+  .tag-table { border-collapse: collapse; width: 100%; }
+  .tag-table th { background: #f1f5f9; font-size: 12px; font-weight: 700; text-align: left; padding: 10px 14px; color: #475569; border-bottom: 2px solid #e2e8f0; }
+  .tag-table td { font-size: 13px; padding: 10px 14px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+  .tag-table tr:last-child td { border-bottom: none; }
+  .tag-table tr:hover td { background: #f8f9fa; }
+
+  /* ── Quiz ── */
+  .quiz-option { border: 1px solid #dee2e6; border-radius: 8px; padding: 10px 14px; font-size: 13px; cursor: pointer; margin-bottom: 6px; transition: all .15s; background: transparent; width: 100%; text-align: left; color: #1a1a1a; }
+  .quiz-option:hover:not(:disabled) { background: #f8f9fa; }
+  .quiz-option.correct { background: #d1fae5; border-color: #059669; color: #065f46; }
+  .quiz-option.wrong   { background: #fee2e2; border-color: #dc2626; color: #991b1b; }
+  .quiz-feedback { display: none; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-top: 4px; }
+  .quiz-feedback.correct { background: #d1fae5; color: #065f46; display: block; }
+  .quiz-feedback.wrong   { background: #fee2e2; color: #991b1b; display: block; }
+
+  /* ── Tip / info / warn / success ── */
+  .tip-box   { display:flex; gap:10px; align-items:flex-start; background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:10px 14px; }
+  .tip-icon  { color:#d97706; font-size:18px; flex-shrink:0; margin-top:1px; }
+  .tip-text  { font-size:13px; color:#92400e; line-height:1.6; }
+  .info-box  { display:flex; gap:10px; align-items:flex-start; background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:10px 14px; }
+  .info-icon { color:#2563eb; font-size:18px; flex-shrink:0; margin-top:1px; }
+  .info-text { font-size:13px; color:#1e40af; line-height:1.6; }
+  .warn-box  { display:flex; gap:10px; align-items:flex-start; background:#fef9ee; border:1px solid #fcd34d; border-radius:10px; padding:10px 14px; }
+  .success-box { display:flex; gap:10px; align-items:flex-start; background:#f0fdf4; border:1px solid #86efac; border-radius:10px; padding:10px 14px; }
+
+  /* ── Line explainer ── */
+  .lex-row { display:flex; align-items:stretch; cursor:pointer; transition:background .12s; border-bottom:1px solid #f0f0f0; }
+  .lex-row:last-child { border-bottom:none; }
+  .lex-row:hover { background:#f8f9fa; }
+  .lex-row.active { background:#eff6ff; border-left:3px solid #7952b3; }
+  .lex-code { background:#1e1e2e; padding:10px 14px; font-family:'SFMono-Regular',Consolas,monospace; font-size:12px; min-width:210px; flex-shrink:0; display:flex; align-items:center; }
+  .lex-info { padding:10px 14px; flex:1; }
+  .lex-name   { font-size:13px; font-weight:700; color:#7952b3; margin-bottom:2px; }
+  .lex-desc   { font-size:12px; color:#555; line-height:1.55; }
+  .lex-detail { display:none; font-size:12px; color:#5b21b6; margin-top:4px; padding-top:4px; border-top:1px dashed #c4b5fd; }
+  .lex-row.active .lex-detail { display:block; }
+  .line-explain { border:1px solid #e8e8e8; border-radius:10px; overflow:hidden; }
+
+  /* ── Nav ── */
+  .nav-row { display:flex; align-items:center; justify-content:space-between; margin-top:auto; padding-top:1rem; border-top:1px solid #f0f0f0; }
+  .nav-btn { display:inline-flex; align-items:center; gap:6px; padding:9px 18px; border:1px solid #dee2e6; border-radius:8px; background:transparent; font-size:13px; cursor:pointer; color:#333; transition:background .15s; }
+  .nav-btn:hover:not(:disabled) { background:#f1f3f5; }
+  .nav-btn:disabled { opacity:.35; cursor:default; }
+  .nav-btn.primary { background:#7952b3; border-color:transparent; color:#fff; }
+  .nav-btn.primary:hover { background:#5a3e8a; }
+  .progress-dots { display:flex; gap:6px; align-items:center; }
+  .dot { width:7px; height:7px; border-radius:50%; background:#dee2e6; transition:all .2s; }
+  .dot.active { width:20px; border-radius:4px; background:#7952b3; }
+
+  /* ── Home grid ── */
+  .home-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .home-card { background:#fff; border:1px solid #e8e8e8; border-radius:12px; padding:1rem 1.25rem; cursor:pointer; transition:all .15s; }
+  .home-card:hover { border-color:#7952b3; box-shadow:0 2px 8px rgba(121,82,179,.12); }
+  .home-card-title { font-size:15px; font-weight:700; margin:6px 0 2px; }
+  .home-card-sub   { font-size:12px; color:#666; }
+
+  code { font-family:'SFMono-Regular',Consolas,monospace; font-size:12px; background:#f1f3f5; padding:1px 6px; border-radius:4px; border:1px solid #dee2e6; }
+
+  /* ── Checklist ── */
+  .check-item { display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:10px; border:1px solid #e8e8e8; font-size:13px; cursor:pointer; transition:all .15s; user-select:none; }
+  .check-item:hover { background:#f8f9fa; }
+  .check-item.done { background:#f0fdf4; border-color:#86efac; }
+  .check-circle { width:22px; height:22px; border-radius:50%; border:2px solid #dee2e6; display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0; transition:all .2s; color:transparent; }
+  .check-item.done .check-circle { background:#22c55e; border-color:#22c55e; color:#fff; }
+
+  /* ══ BOOTSTRAP SPECIFIC ══ */
+  .bs-pill {
+    display: inline-block; font-family: 'SFMono-Regular', Consolas, monospace;
+    font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 6px;
+    background: #7952b3; color: #fff; margin: 2px;
+  }
+
+  /* ── Phone frame ── */
+  .phone-outer { border: 3px solid #334155; border-radius: 20px; overflow: hidden; background: #fff; width: 140px; flex-shrink: 0; }
+  .phone-notch { width: 40px; height: 7px; background: #334155; border-radius: 0 0 7px 7px; margin: 0 auto; }
+
+  /* ── Bootstrap Navbar live preview ── */
+  .bs-nav-wrap { background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden; font-family: Arial, sans-serif; }
+  .bs-nav-bar { background: #212529; padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; }
+  .bs-nav-brand { color: #fff; font-weight: 700; font-size: 14px; }
+  .bs-nav-links { display: flex; gap: 14px; }
+  .bs-nav-link { color: rgba(255,255,255,.75); font-size: 12px; }
+  .bs-nav-link:hover { color: #fff; }
+  .bs-toggler { background: transparent; border: 1px solid rgba(255,255,255,.2); border-radius: 4px; padding: 4px 7px; cursor: pointer; color: rgba(255,255,255,.75); font-size: 14px; display: none; }
+
+  /* ── Bootstrap button swatches ── */
+  .bs-btn { display: inline-flex; align-items: center; justify-content: center; padding: 7px 18px; border-radius: 6px; font-size: 13px; font-weight: 600; border: none; cursor: pointer; transition: all .15s; margin: 3px; font-family: Arial, sans-serif; }
+  .bs-btn-primary { background: #0d6efd; color: #fff; }
+  .bs-btn-primary:hover { background: #0b5ed7; }
+  .bs-btn-success { background: #198754; color: #fff; }
+  .bs-btn-success:hover { background: #157347; }
+  .bs-btn-warning { background: #ffc107; color: #212529; }
+  .bs-btn-warning:hover { background: #ffca2c; }
+  .bs-btn-danger  { background: #dc3545; color: #fff; }
+  .bs-btn-danger:hover  { background: #bb2d3b; }
+  .bs-btn-outline-primary { background: transparent; color: #0d6efd; border: 2px solid #0d6efd; }
+  .bs-btn-outline-secondary { background: transparent; color: #6c757d; border: 2px solid #6c757d; }
+  .bs-btn-secondary { background: #6c757d; color: #fff; }
+  .bs-btn-info    { background: #0dcaf0; color: #212529; }
+  .bs-btn-dark    { background: #212529; color: #fff; }
+  .bs-btn-light   { background: #f8f9fa; color: #212529; border: 1px solid #dee2e6; }
+  .bs-btn-sm { padding: 4px 10px; font-size: 11px; }
+  .bs-btn-lg { padding: 10px 24px; font-size: 15px; }
+
+  /* ── Utility class demo boxes ── */
+  .util-demo-wrap { border: 1px solid #e2e8f0; border-radius: 10px; overflow: hidden; }
+  .util-demo-row { display: flex; align-items: center; padding: 0; border-bottom: 1px solid #f0f0f0; cursor: pointer; transition: background .12s; }
+  .util-demo-row:last-child { border-bottom: none; }
+  .util-demo-row:hover { background: #f8f9fa; }
+  .util-demo-row.active { background: #f5f3ff; border-left: 3px solid #7952b3; }
+  .util-class-tag { background: #1e1e2e; color: #80ffea; font-family: monospace; font-size: 12px; padding: 12px 14px; min-width: 180px; flex-shrink: 0; }
+  .util-preview { padding: 10px 14px; flex: 1; }
+  .util-desc { font-size: 12px; color: #555; margin-top: 3px; }
+
+  /* ── Hero activity builder ── */
+  .hero-builder-preview { background: linear-gradient(135deg, #1e293b, #2563eb); border-radius: 10px; overflow: hidden; font-family: Arial, sans-serif; color: white; }
+  .hero-builder-preview .inner { display: flex; gap: 14px; align-items: center; padding: 18px; }
+  .hero-builder-preview .col-text { flex: 1; }
+  .hero-builder-preview .col-img { width: 80px; height: 80px; background: rgba(255,255,255,.15); border-radius: 8px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 28px; }
+
+  /* ── Trainers card preview ── */
+  .trainer-card { background: white; border-radius: 10px; border: 1px solid #e8e8e8; overflow: hidden; text-align: center; font-family: Arial, sans-serif; }
+  .trainer-img { height: 70px; display: flex; align-items: center; justify-content: center; font-size: 30px; }
+  .trainer-body { padding: 10px 12px; }
+  .trainer-name { font-size: 12px; font-weight: 700; margin-bottom: 2px; }
+  .trainer-role { font-size: 10px; color: #7952b3; font-weight: 600; margin-bottom: 8px; }
+  .trainer-socials { display: flex; gap: 4px; justify-content: center; }
+  .trainer-social-btn { width: 22px; height: 22px; border-radius: 50%; font-size: 10px; display: flex; align-items: center; justify-content: center; font-weight: 700; border: none; cursor: pointer; }
+
+  /* ── Replace comparison ── */
+  .compare-row { display: grid; grid-template-columns: 1fr auto 1fr; gap: 8px; align-items: center; margin-bottom: 8px; }
+  .compare-arrow { color: #7952b3; font-size: 18px; text-align: center; font-weight: 700; }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <div>
+      <div class="top-bar-title">MERN Stack Training · Day 6 · Hour 3</div>
+      <div class="top-bar-sub">Bootstrap Components — SkillHub LMS</div>
+    </div>
+    <div class="slide-counter" id="slide-counter">1 / 14</div>
+  </div>
+
+  <!-- ═══════════ SLIDE 0  HOME ═══════════ -->
+  <div class="slide active" id="slide-0">
+    <div class="slide-header">
+      <span class="badge b-purple">Day 6 · Hour 3</span>
+      <div>
+        <div class="slide-title">Bootstrap Components</div>
+        <div class="slide-subtitle">Now students see how quickly professional websites can be built — Navbar, Buttons, Utilities, Hero rebuild, and Trainers section.</div>
+      </div>
+    </div>
+
+    <div style="background:#ede9fe;border:1px solid #c4b5fd;border-radius:12px;padding:12px 16px;display:flex;gap:12px;align-items:flex-start">
+      <i class="ti ti-components" style="color:#7952b3;font-size:22px;flex-shrink:0;margin-top:1px"></i>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#4c1d95;margin-bottom:4px">Hour 3 Goal — Replace Custom HTML with Production-Ready Bootstrap Components</div>
+        <div style="display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:#5b21b6">
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Bootstrap Navbar with hamburger menu</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Bootstrap Buttons (all variants)</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>7 essential utility classes</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Hero redesign with Bootstrap only</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Meet Our Trainers assignment</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="home-grid">
+      <div class="home-card" onclick="goSlide(1)">
+        <span class="badge b-green">Recap</span>
+        <div class="home-card-title">Where We Are Now</div>
+        <div class="home-card-sub">Grid done — what remains to Bootstrap-ify</div>
+      </div>
+      <div class="home-card" onclick="goSlide(2)">
+        <span class="badge b-amber">Hook</span>
+        <div class="home-card-title">The Wow Moment</div>
+        <div class="home-card-sub">Hamburger menu with zero JavaScript</div>
+      </div>
+      <div class="home-card" onclick="goSlide(3)">
+        <span class="badge b-blue">HTML</span>
+        <div class="home-card-title">Bootstrap Navbar — HTML</div>
+        <div class="home-card-sub">navbar-dark, navbar-toggler, collapse</div>
+      </div>
+      <div class="home-card" onclick="goSlide(4)">
+        <span class="badge b-orange">Demo</span>
+        <div class="home-card-title">Navbar Classes Explained</div>
+        <div class="home-card-sub">Click each class to see what it does</div>
+      </div>
+      <div class="home-card" onclick="goSlide(5)">
+        <span class="badge b-blue">Components</span>
+        <div class="home-card-title">Bootstrap Buttons — All Variants</div>
+        <div class="home-card-sub">btn-primary / success / warning / danger + sizes</div>
+      </div>
+      <div class="home-card" onclick="goSlide(6)">
+        <span class="badge b-teal">Interactive</span>
+        <div class="home-card-title">Utility Classes — Live Demo</div>
+        <div class="home-card-sub">p-5, mt-5, text-center, rounded, shadow, bg-primary</div>
+      </div>
+      <div class="home-card" onclick="goSlide(7)">
+        <span class="badge b-purple">Concept</span>
+        <div class="home-card-title">Custom CSS vs Bootstrap</div>
+        <div class="home-card-sub">Side-by-side — how many lines Bootstrap saves</div>
+      </div>
+      <div class="home-card" onclick="goSlide(8)">
+        <span class="badge b-rose">Activity</span>
+        <div class="home-card-title">20-Min Hero Rebuild</div>
+        <div class="home-card-sub">container → row → col-md-6 + two Bootstrap buttons</div>
+      </div>
+      <div class="home-card" onclick="goSlide(9)">
+        <span class="badge b-orange">Preview</span>
+        <div class="home-card-title">Hero Result — Full Preview</div>
+        <div class="home-card-sub">What the rebuilt hero looks like</div>
+      </div>
+      <div class="home-card" onclick="goSlide(10)">
+        <span class="badge b-rose">Assignment</span>
+        <div class="home-card-title">Meet Our Trainers Section</div>
+        <div class="home-card-sub">3 trainer cards with social buttons + responsive grid</div>
+      </div>
+      <div class="home-card" onclick="goSlide(11)">
+        <span class="badge b-slate">Quiz</span>
+        <div class="home-card-title">Quick-Fire Quiz</div>
+        <div class="home-card-sub">4 questions on Bootstrap Components</div>
+      </div>
+      <div class="home-card" onclick="goSlide(12)">
+        <span class="badge b-green">Wrap-Up</span>
+        <div class="home-card-title">Day 6 Complete!</div>
+        <div class="home-card-sub">What you built + Day 7 preview</div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" disabled><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-0"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Start <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 1  RECAP ═══════════ -->
+  <div class="slide" id="slide-1">
+    <div class="slide-header">
+      <span class="badge b-green">Recap</span>
+      <div>
+        <div class="slide-title">Where We Are Now</div>
+        <div class="slide-subtitle">Hours 1 & 2 gave us the structure — Hour 3 adds the polish</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div class="section-label">day 6 progress</div>
+        <div class="check-item done"><div class="check-circle" style="background:#22c55e;border-color:#22c55e;color:#fff">✓</div><span>Bootstrap CDN linked — utility classes work</span></div>
+        <div class="check-item done"><div class="check-circle" style="background:#22c55e;border-color:#22c55e;color:#fff">✓</div><span>Bootstrap CDN — JS bundle linked before &lt;/body&gt;</span></div>
+        <div class="check-item done"><div class="check-circle" style="background:#22c55e;border-color:#22c55e;color:#fff">✓</div><span>12-column grid mastered</span></div>
+        <div class="check-item done"><div class="check-circle" style="background:#22c55e;border-color:#22c55e;color:#fff">✓</div><span>6 Bootstrap card components built</span></div>
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;border:2px dashed #a78bfa;background:#ede9fe;font-size:13px;margin-top:4px">
+          <i class="ti ti-clock-play" style="color:#7c3aed;font-size:18px;flex-shrink:0"></i>
+          <span style="color:#5b21b6;font-weight:600">Now: Replace the navbar, add buttons, use utility classes</span>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">skillhub before hour 3</div>
+        <div class="browser">
+          <div class="browser-bar"><div class="b-dot2 b-r"></div><div class="b-dot2 b-y"></div><div class="b-dot2 b-g"></div><div class="b-url">skillhub.html — after Hour 2</div></div>
+          <div style="font-family:Arial,sans-serif;font-size:10px">
+            <div style="background:#1e293b;color:#fff;padding:7px 12px;display:flex;justify-content:space-between;align-items:center">
+              <span style="font-weight:700">SkillHub</span>
+              <span style="font-size:9px;opacity:.7">Home · Courses · About ← custom nav, no hamburger</span>
+            </div>
+            <div style="background:linear-gradient(135deg,#1e293b,#2563eb);color:#fff;padding:14px 12px;text-align:center">
+              <div style="font-size:12px;font-weight:700;margin-bottom:3px">Master Full Stack Dev</div>
+              <button style="background:white;color:#2563eb;border:none;padding:4px 12px;border-radius:10px;font-size:9px;font-weight:700">Get Started ← custom button</button>
+            </div>
+            <div style="background:#f4f4f4;padding:10px;display:flex;gap:6px;justify-content:center">
+              <div style="background:white;border-radius:6px;padding:8px;box-shadow:0 1px 4px rgba(0,0,0,.1);font-size:9px;font-weight:700;width:80px">HTML &amp; CSS</div>
+              <div style="background:white;border-radius:6px;padding:8px;box-shadow:0 1px 4px rgba(0,0,0,.1);font-size:9px;font-weight:700;width:80px">JavaScript</div>
+              <div style="background:white;border-radius:6px;padding:8px;box-shadow:0 1px 4px rgba(0,0,0,.1);font-size:9px;font-weight:700;width:80px">React</div>
+            </div>
+          </div>
+        </div>
+        <div class="warn-box" style="margin-top:8px">
+          <i class="ti ti-alert-triangle" style="color:#d97706;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+          <div style="font-size:13px;color:#78350f;line-height:1.6">Custom navbar has no hamburger menu. Custom buttons miss Bootstrap's built-in hover states and variants. Hour 3 fixes all of this.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-1"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">The Wow Moment <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 2  HOOK ═══════════ -->
+  <div class="slide" id="slide-2">
+    <div class="slide-header">
+      <span class="badge b-amber">Hook</span>
+      <div>
+        <div class="slide-title">The Wow Moment — Hamburger Menu with Zero JS</div>
+        <div class="slide-subtitle">Ask the class before showing the code</div>
+      </div>
+    </div>
+
+    <div style="background:linear-gradient(135deg,#1e1b4b,#312e81);border-radius:16px;padding:30px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:14px">
+      <div style="font-size:13px;font-weight:700;color:#a5b4fc;letter-spacing:.08em;text-transform:uppercase">Ask The Class</div>
+      <div style="font-size:23px;font-weight:800;color:#fff;line-height:1.35">How does a ☰ hamburger menu work<br>when the screen gets smaller?</div>
+      <div style="font-size:13px;color:#818cf8">Wait for students to answer… most will say "JavaScript"</div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">what students think</div>
+        <div style="background:#fef3c7;border:1px solid #fde68a;border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px">
+          <i class="ti ti-message" style="color:#d97706;font-size:24px;flex-shrink:0"></i>
+          <div>
+            <div style="font-size:14px;font-weight:700;color:#92400e">"You need to write JavaScript for that!"</div>
+            <div style="font-size:12px;color:#a16207;margin-top:3px">Almost everyone says this. The answer surprises them.</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">the answer</div>
+        <div style="background:#ede9fe;border:2px solid #7952b3;border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px">
+          <i class="ti ti-brand-bootstrap" style="color:#7952b3;font-size:24px;flex-shrink:0"></i>
+          <div>
+            <div style="font-size:15px;font-weight:800;color:#4c1d95">Bootstrap's JS bundle handles it for you.</div>
+            <div style="font-size:12px;color:#5b21b6;margin-top:3px">Add the right class names → Bootstrap's included JS automatically shows/hides the menu on click.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <i class="ti ti-info-circle info-icon"></i>
+      <div class="info-text">This is exactly why Bootstrap is used by millions of developers. The hamburger toggle, dropdowns, modals — all pre-written in Bootstrap's JS. You just add the class names to your HTML and it works. <strong>This is the power of a framework.</strong></div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-2"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Navbar HTML <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 3  NAVBAR HTML ═══════════ -->
+  <div class="slide" id="slide-3">
+    <div class="slide-header">
+      <span class="badge b-blue">HTML</span>
+      <div>
+        <div class="slide-title">Bootstrap Navbar — Replace Your Custom Nav</div>
+        <div class="slide-subtitle">Delete your old &lt;nav&gt; and paste this in — responsive hamburger menu included</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">paste this in index.html</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><div class="e-label">index.html — replace &lt;nav&gt;</div></div>
+          <div class="editor-body" style="font-size:11.5px;line-height:1.75">
+            <div><span class="e-ln"> 1</span> <span class="e-tag">&lt;nav</span> <span class="e-att">class=</span><span class="e-val">"<span class="c-cls">navbar navbar-expand-lg</span></span></div>
+            <div><span class="e-ln"> 2</span>           <span class="e-val">      <span class="c-cls">navbar-dark bg-dark</span>"</span><span class="e-tag">&gt;</span></div>
+            <div><span class="e-ln"> 3</span></div>
+            <div><span class="e-ln"> 4</span>   <span class="e-ind1"></span><span class="e-tag">&lt;div</span> <span class="e-att">class=</span><span class="e-val">"<span class="c-cls">container</span>"</span><span class="e-tag">&gt;</span></div>
+            <div><span class="e-ln"> 5</span></div>
+            <div><span class="e-ln"> 6</span>     <span class="e-ind2"></span><span class="e-tag">&lt;a</span> <span class="e-att">class=</span><span class="e-val">"<span class="c-cls">navbar-brand</span>"</span> <span class="e-att">href=</span><span class="e-val">"#"</span><span class="e-tag">&gt;</span></div>
+            <div><span class="e-ln"> 7</span>     <span class="e-ind3"></span><span class="e-new">SkillHub LMS</span></div>
+            <div><span class="e-ln"> 8</span>     <span class="e-ind2"></span><span class="e-tag">&lt;/a&gt;</span></div>
+            <div><span class="e-ln"> 9</span></div>
+            <div><span class="e-ln">10</span>     <span class="e-ind2"></span><span class="e-tag">&lt;button</span> <span class="e-att">class=</span><span class="e-val">"<span class="c-cls">navbar-toggler</span>"</span></div>
+            <div><span class="e-ln">11</span>             <span class="e-att">type=</span><span class="e-val">"button"</span></div>
+            <div><span class="e-ln">12</span>             <span class="e-att">data-bs-toggle=</span><span class="e-val">"<span class="c-util">collapse</span>"</span></div>
+            <div><span class="e-ln">13</span>             <span class="e-att">data-bs-target=</span><span class="e-val">"<span class="c-util">#menu</span>"</span><span class="e-tag">&gt;</span></div>
+            <div><span class="e-ln">14</span>       <span class="e-ind3"></span><span class="e-tag">&lt;span</span> <span class="e-att">class=</span><span class="e-val">"<span class="c-cls">navbar-toggler-icon</span>"</span><span class="e-tag">&gt;&lt;/span&gt;</span></div>
+            <div><span class="e-ln">15</span>     <span class="e-ind2"></span><span class="e-tag">&lt;/button&gt;</span></div>
+            <div><span class="e-ln">16</span></div>
+            <div><span class="e-ln">17</span>     <span class="e-ind2"></span><span class="e-tag">&lt;div</span> <span class="e-att">class=</span><span class="e-val">"<span class="c-cls">collapse navbar-collapse</span>"</span> <span class="e-att">id=</span><span class="e-val">"menu"</span><span class="e-tag">&gt;</span></div>
+            <div><span class="e-ln">18</span>       <span class="e-ind3"></span><span class="e-tag">&lt;ul</span> <span class="e-att">class=</span><span class="e-val">"<span class="c-cls">navbar-nav ms-auto</span>"</span><span class="e-tag">&gt;</span></div>
+            <div><span class="e-ln">19</span>         <span class="e-ind4"></span><span class="e-tag">&lt;li</span> <span class="e-att">class=</span><span class="e-val">"<span class="c-cls">nav-item</span>"</span><span class="e-tag">&gt;</span></div>
+            <div><span class="e-ln">20</span>           <span class="e-ind4"></span><span class="e-ind1"></span><span class="e-tag">&lt;a</span> <span class="e-att">class=</span><span class="e-val">"<span class="c-cls">nav-link</span>"</span> <span class="e-att">href=</span><span class="e-val">"#"</span><span class="e-tag">&gt;</span><span class="e-new">Home</span><span class="e-tag">&lt;/a&gt;</span></div>
+            <div><span class="e-ln">21</span>         <span class="e-ind4"></span><span class="e-tag">&lt;/li&gt;</span></div>
+            <div><span class="e-ln">22</span>         <span class="e-ind4"></span><span class="e-cmt">&lt;!-- repeat for Courses, About, Contact --&gt;</span></div>
+            <div><span class="e-ln">23</span>       <span class="e-ind3"></span><span class="e-tag">&lt;/ul&gt;</span></div>
+            <div><span class="e-ln">24</span>     <span class="e-ind2"></span><span class="e-tag">&lt;/div&gt;</span></div>
+            <div><span class="e-ln">25</span>   <span class="e-ind1"></span><span class="e-tag">&lt;/div&gt;</span></div>
+            <div><span class="e-ln">26</span> <span class="e-tag">&lt;/nav&gt;</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="section-label">live result</div>
+        <div class="bs-nav-wrap">
+          <div class="bs-nav-bar">
+            <span class="bs-nav-brand">SkillHub LMS</span>
+            <div class="bs-nav-links">
+              <span class="bs-nav-link">Home</span>
+              <span class="bs-nav-link">Courses</span>
+              <span class="bs-nav-link">About</span>
+              <span class="bs-nav-link">Contact</span>
+            </div>
+          </div>
+          <div style="background:#f8f9fa;padding:8px 12px;font-size:11px;color:#555;text-align:center">
+            👆 Desktop: links visible · 📱 Resize window → links become ☰ button
+          </div>
+        </div>
+
+        <div class="section-label">the hamburger magic</div>
+        <div style="display:flex;gap:10px;align-items:flex-start">
+          <div style="flex:1">
+            <div style="font-size:10px;font-weight:700;color:#888;text-align:center;margin-bottom:4px;text-transform:uppercase">Desktop (&gt;992px)</div>
+            <div class="phone-outer" style="width:100%;border-radius:6px">
+              <div style="background:#212529;padding:8px 10px;display:flex;align-items:center;justify-content:space-between">
+                <span style="color:#fff;font-size:10px;font-weight:700">SkillHub LMS</span>
+                <span style="color:rgba(255,255,255,.7);font-size:9px">Home · Courses · About · Contact</span>
+              </div>
+            </div>
+          </div>
+          <div style="flex:1">
+            <div style="font-size:10px;font-weight:700;color:#888;text-align:center;margin-bottom:4px;text-transform:uppercase">Mobile (&lt;992px)</div>
+            <div class="phone-outer" style="width:100%;border-radius:6px">
+              <div style="background:#212529;padding:8px 10px;display:flex;align-items:center;justify-content:space-between">
+                <span style="color:#fff;font-size:10px;font-weight:700">SkillHub LMS</span>
+                <span style="color:rgba(255,255,255,.7);font-size:14px">☰</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-3"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Classes Explained <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 4  NAVBAR CLASSES ═══════════ -->
+  <div class="slide" id="slide-4">
+    <div class="slide-header">
+      <span class="badge b-orange">Deep Dive</span>
+      <div>
+        <div class="slide-title">Every Navbar Class — Click to Explore</div>
+        <div class="slide-subtitle">Each class name is doing something specific — click a row to find out what</div>
+      </div>
+    </div>
+
+    <div class="line-explain">
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="c-cls">navbar</span></div>
+        <div class="lex-info">
+          <div class="lex-name">Base Component Class</div>
+          <div class="lex-desc">Tells Bootstrap "this element is a navbar." Applies the base flex layout, padding, and display properties automatically.</div>
+          <div class="lex-detail">Every Bootstrap component has a "base class" that must be present: navbar, btn, card, modal. Without it, the component-specific modifier classes don't work.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="c-cls">navbar-expand-lg</span></div>
+        <div class="lex-info">
+          <div class="lex-name">Breakpoint for Hamburger Toggle</div>
+          <div class="lex-desc">Links are visible as a row on screens ≥992px (lg). Below 992px, links collapse and the ☰ toggler button appears.</div>
+          <div class="lex-detail">Other options: navbar-expand-sm (576px), navbar-expand-md (768px), navbar-expand-xl (1200px). Choose based on where your nav links become too cramped.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="c-cls">navbar-dark</span></div>
+        <div class="lex-info">
+          <div class="lex-name">Light Text for Dark Background</div>
+          <div class="lex-desc">Sets link colours to white/light so they're readable on a dark background. Use navbar-light for white/grey backgrounds.</div>
+          <div class="lex-detail">navbar-dark / navbar-light only sets text colours — you still need a separate bg-* class (bg-dark, bg-primary) to set the background colour.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="c-cls">bg-dark</span></div>
+        <div class="lex-info">
+          <div class="lex-name">Dark Background Colour</div>
+          <div class="lex-desc">Applies Bootstrap's dark background (#212529). Can be swapped for bg-primary (blue), bg-light (white/grey), bg-success (green), etc.</div>
+          <div class="lex-detail">Bootstrap's bg-* utilities match the btn-* colours exactly. bg-primary = #0d6efd, bg-success = #198754, bg-danger = #dc3545.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="c-cls">navbar-toggler</span></div>
+        <div class="lex-info">
+          <div class="lex-name">The ☰ Hamburger Button</div>
+          <div class="lex-desc">Styled button that only appears on mobile. The data-bs-toggle and data-bs-target attributes tell Bootstrap's JS what to expand/collapse when clicked.</div>
+          <div class="lex-detail">data-bs-target="#menu" must match the id of the collapse div below it — that's how Bootstrap knows which element to show/hide.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="c-cls">navbar-nav ms-auto</span></div>
+        <div class="lex-info">
+          <div class="lex-name">Nav List + Push to Right</div>
+          <div class="lex-desc">navbar-nav styles the &lt;ul&gt; as a horizontal flex list. ms-auto (margin-start: auto) pushes the list to the right side of the navbar.</div>
+          <div class="lex-detail">ms = margin-start (left in LTR layouts). me = margin-end (right). Bootstrap 5 replaced ml-auto (Bootstrap 4) with ms-auto.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="c-cls">collapse navbar-collapse</span></div>
+        <div class="lex-info">
+          <div class="lex-name">Collapsible Menu Container</div>
+          <div class="lex-desc">The div that wraps the nav links. On mobile, Bootstrap hides this div. When ☰ is clicked, Bootstrap toggles the show class on it to reveal the links.</div>
+          <div class="lex-detail">The id="menu" on this div is referenced by data-bs-target="#menu" on the toggler. If these don't match, the hamburger won't work.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-4"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Bootstrap Buttons <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 5  BUTTONS ═══════════ -->
+  <div class="slide" id="slide-5">
+    <div class="slide-header">
+      <span class="badge b-blue">Components</span>
+      <div>
+        <div class="slide-title">Bootstrap Buttons — All Variants</div>
+        <div class="slide-subtitle">Replace every custom button — click any button below to see its class name</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">the code pattern</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><div class="e-label">Replace your custom buttons</div></div>
+          <div class="editor-body" style="font-size:12px">
+            <div><span class="e-ln">1</span> <span class="e-cmt">&lt;!-- Pattern: btn + btn-{colour} --&gt;</span></div>
+            <div><span class="e-ln">2</span> <span class="e-tag">&lt;button</span> <span class="e-att">class=</span><span class="e-val">"<span class="c-cls">btn btn-primary</span>"</span><span class="e-tag">&gt;</span><span class="e-new">Join Now</span><span class="e-tag">&lt;/button&gt;</span></div>
+            <div><span class="e-ln">3</span> <span class="e-tag">&lt;button</span> <span class="e-att">class=</span><span class="e-val">"<span class="c-cls">btn btn-success</span>"</span><span class="e-tag">&gt;</span><span class="e-new">Enroll</span><span class="e-tag">&lt;/button&gt;</span></div>
+            <div><span class="e-ln">4</span> <span class="e-tag">&lt;button</span> <span class="e-att">class=</span><span class="e-val">"<span class="c-cls">btn btn-warning</span>"</span><span class="e-tag">&gt;</span><span class="e-new">Explore</span><span class="e-tag">&lt;/button&gt;</span></div>
+            <div><span class="e-ln">5</span> <span class="e-tag">&lt;button</span> <span class="e-att">class=</span><span class="e-val">"<span class="c-cls">btn btn-danger</span>"</span><span class="e-tag">&gt;</span><span class="e-new">Delete</span><span class="e-tag">&lt;/button&gt;</span></div>
+            <div><span class="e-ln">6</span></div>
+            <div><span class="e-ln">7</span> <span class="e-cmt">&lt;!-- Sizes --&gt;</span></div>
+            <div><span class="e-ln">8</span> <span class="e-tag">&lt;button</span> <span class="e-att">class=</span><span class="e-val">"<span class="c-cls">btn btn-primary btn-sm</span>"</span><span class="e-tag">&gt;</span><span class="e-new">Small</span><span class="e-tag">&lt;/button&gt;</span></div>
+            <div><span class="e-ln">9</span> <span class="e-tag">&lt;button</span> <span class="e-att">class=</span><span class="e-val">"<span class="c-cls">btn btn-primary btn-lg</span>"</span><span class="e-tag">&gt;</span><span class="e-new">Large</span><span class="e-tag">&lt;/button&gt;</span></div>
+            <div><span class="e-ln">10</span></div>
+            <div><span class="e-ln">11</span> <span class="e-cmt">&lt;!-- Outline variant --&gt;</span></div>
+            <div><span class="e-ln">12</span> <span class="e-tag">&lt;button</span> <span class="e-att">class=</span><span class="e-val">"<span class="c-cls">btn btn-outline-primary</span>"</span><span class="e-tag">&gt;</span><span class="e-new">Learn More</span><span class="e-tag">&lt;/button&gt;</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">click any button to see its class</div>
+        <div style="background:#f8f9fa;border:1px solid #e2e8f0;border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:12px">
+          <div>
+            <div style="font-size:10px;font-weight:700;color:#888;margin-bottom:8px;text-transform:uppercase">Solid Variants</div>
+            <div style="display:flex;flex-wrap:wrap;gap:4px">
+              <button class="bs-btn bs-btn-primary" onclick="showBtnClass('btn btn-primary','#0d6efd','#fff')">Join Now</button>
+              <button class="bs-btn bs-btn-success" onclick="showBtnClass('btn btn-success','#198754','#fff')">Enroll</button>
+              <button class="bs-btn bs-btn-warning" onclick="showBtnClass('btn btn-warning','#ffc107','#212529')">Explore</button>
+              <button class="bs-btn bs-btn-danger"  onclick="showBtnClass('btn btn-danger','#dc3545','#fff')">Delete</button>
+              <button class="bs-btn bs-btn-secondary" onclick="showBtnClass('btn btn-secondary','#6c757d','#fff')">Cancel</button>
+              <button class="bs-btn bs-btn-info"    onclick="showBtnClass('btn btn-info','#0dcaf0','#212529')">Info</button>
+              <button class="bs-btn bs-btn-dark"    onclick="showBtnClass('btn btn-dark','#212529','#fff')">Dark</button>
+              <button class="bs-btn bs-btn-light"   onclick="showBtnClass('btn btn-light','#f8f9fa','#212529')">Light</button>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:10px;font-weight:700;color:#888;margin-bottom:8px;text-transform:uppercase">Outline Variants</div>
+            <div style="display:flex;flex-wrap:wrap;gap:4px">
+              <button class="bs-btn bs-btn-outline-primary" onclick="showBtnClass('btn btn-outline-primary','transparent','#0d6efd')">Outline Primary</button>
+              <button class="bs-btn bs-btn-outline-secondary" onclick="showBtnClass('btn btn-outline-secondary','transparent','#6c757d')">Outline Secondary</button>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:10px;font-weight:700;color:#888;margin-bottom:8px;text-transform:uppercase">Sizes</div>
+            <div style="display:flex;flex-wrap:wrap;gap:4px;align-items:center">
+              <button class="bs-btn bs-btn-primary bs-btn-sm" onclick="showBtnClass('btn btn-primary btn-sm','#0d6efd','#fff')">Small</button>
+              <button class="bs-btn bs-btn-primary" onclick="showBtnClass('btn btn-primary','#0d6efd','#fff')">Normal</button>
+              <button class="bs-btn bs-btn-primary bs-btn-lg" onclick="showBtnClass('btn btn-primary btn-lg','#0d6efd','#fff')">Large</button>
+            </div>
+          </div>
+        </div>
+        <div id="btn-class-display" style="display:none;margin-top:8px;background:#1e1e2e;border-radius:8px;padding:10px 14px;font-family:monospace;font-size:13px">
+          <span style="color:#6272a4">class=</span><span style="color:#f1fa8c">"</span><span id="btn-class-text" style="color:#80ffea"></span><span style="color:#f1fa8c">"</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tip-box">
+      <i class="ti ti-bulb tip-icon"></i>
+      <div class="tip-text"><strong>Always use two classes: <code>btn</code> + <code>btn-{variant}</code>.</strong> The first (<code>btn</code>) is the base class that adds padding, border-radius, and cursor. The second sets the colour. Missing either one breaks the button.</div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-5"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Utility Classes <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 6  UTILITIES ═══════════ -->
+  <div class="slide" id="slide-6">
+    <div class="slide-header">
+      <span class="badge b-teal">Interactive</span>
+      <div>
+        <div class="slide-title">Bootstrap Utility Classes — Click Each to See What It Does</div>
+        <div class="slide-subtitle">Demonstrate these one by one — students immediately understand how they replace custom CSS</div>
+      </div>
+    </div>
+
+    <div class="util-demo-wrap">
+      <!-- p-5 -->
+      <div class="util-demo-row" onclick="toggleUtil(this)">
+        <div class="util-class-tag">p-5</div>
+        <div class="util-preview">
+          <div style="font-size:13px;font-weight:700;color:#333">Padding — all sides</div>
+          <div class="util-desc" id="util-desc-p5">CSS equivalent: <code>padding: 3rem (48px)</code></div>
+          <div style="display:none;margin-top:8px" class="util-live">
+            <div style="background:#ede9fe;border-radius:6px;display:inline-block">
+              <div style="padding:24px;background:#7952b3;color:white;border-radius:4px;font-size:12px;font-weight:700">p-5 content</div>
+            </div>
+            <div style="font-size:11px;color:#7952b3;margin-top:4px">Scale: p-0 (0px) → p-1 (4px) → p-2 (8px) → p-3 (16px) → p-4 (24px) → p-5 (48px)</div>
+          </div>
+        </div>
+      </div>
+      <!-- mt-5 -->
+      <div class="util-demo-row" onclick="toggleUtil(this)">
+        <div class="util-class-tag">mt-5</div>
+        <div class="util-preview">
+          <div style="font-size:13px;font-weight:700;color:#333">Margin Top</div>
+          <div class="util-desc">CSS equivalent: <code>margin-top: 3rem (48px)</code></div>
+          <div style="display:none;margin-top:8px" class="util-live">
+            <div style="font-size:11px;color:#7952b3">Prefix t = top · b = bottom · s = start(left) · e = end(right) · x = left+right · y = top+bottom</div>
+            <div style="font-size:11px;color:#555;margin-top:3px">e.g. mb-3 = margin-bottom 16px · ms-auto = margin-left auto (push to right)</div>
+          </div>
+        </div>
+      </div>
+      <!-- text-center -->
+      <div class="util-demo-row" onclick="toggleUtil(this)">
+        <div class="util-class-tag">text-center</div>
+        <div class="util-preview">
+          <div style="font-size:13px;font-weight:700;color:#333">Centre Text</div>
+          <div class="util-desc">CSS equivalent: <code>text-align: center</code></div>
+          <div style="display:none;margin-top:8px" class="util-live">
+            <div style="background:#f0fdf4;padding:8px;border-radius:6px;font-size:11px">
+              <div style="text-align:left;border-bottom:1px solid #e2e8f0;padding-bottom:4px;margin-bottom:4px">text-start → left</div>
+              <div style="text-align:center;border-bottom:1px solid #e2e8f0;padding-bottom:4px;margin-bottom:4px">text-center → centre</div>
+              <div style="text-align:right">text-end → right</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- rounded -->
+      <div class="util-demo-row" onclick="toggleUtil(this)">
+        <div class="util-class-tag">rounded</div>
+        <div class="util-preview">
+          <div style="font-size:13px;font-weight:700;color:#333">Rounded Corners</div>
+          <div class="util-desc">CSS equivalent: <code>border-radius: 0.375rem</code></div>
+          <div style="display:none;margin-top:8px" class="util-live">
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <div style="background:#7952b3;color:white;padding:8px 12px;font-size:10px;font-weight:700">no rounded</div>
+              <div style="background:#7952b3;color:white;padding:8px 12px;font-size:10px;font-weight:700;border-radius:0.375rem">rounded</div>
+              <div style="background:#7952b3;color:white;padding:8px 12px;font-size:10px;font-weight:700;border-radius:0.75rem">rounded-3</div>
+              <div style="background:#7952b3;color:white;padding:8px 12px;font-size:10px;font-weight:700;border-radius:50rem">rounded-pill</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- shadow -->
+      <div class="util-demo-row" onclick="toggleUtil(this)">
+        <div class="util-class-tag">shadow</div>
+        <div class="util-preview">
+          <div style="font-size:13px;font-weight:700;color:#333">Box Shadow</div>
+          <div class="util-desc">CSS equivalent: <code>box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)</code></div>
+          <div style="display:none;margin-top:8px" class="util-live">
+            <div style="display:flex;gap:12px;flex-wrap:wrap">
+              <div style="background:#fff;border:1px solid #eee;padding:10px 14px;font-size:10px;font-weight:700">no shadow</div>
+              <div style="background:#fff;padding:10px 14px;font-size:10px;font-weight:700;box-shadow:0 .125rem .25rem rgba(0,0,0,.075)">shadow-sm</div>
+              <div style="background:#fff;padding:10px 14px;font-size:10px;font-weight:700;box-shadow:0 .5rem 1rem rgba(0,0,0,.15)">shadow</div>
+              <div style="background:#fff;padding:10px 14px;font-size:10px;font-weight:700;box-shadow:0 1rem 3rem rgba(0,0,0,.175)">shadow-lg</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- bg-primary -->
+      <div class="util-demo-row" onclick="toggleUtil(this)">
+        <div class="util-class-tag">bg-primary text-white</div>
+        <div class="util-preview">
+          <div style="font-size:13px;font-weight:700;color:#333">Background + Text Colour</div>
+          <div class="util-desc">CSS equivalent: <code>background-color: #0d6efd; color: white</code></div>
+          <div style="display:none;margin-top:8px" class="util-live">
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <div style="background:#0d6efd;color:white;padding:5px 10px;font-size:10px;font-weight:700;border-radius:4px">bg-primary</div>
+              <div style="background:#198754;color:white;padding:5px 10px;font-size:10px;font-weight:700;border-radius:4px">bg-success</div>
+              <div style="background:#ffc107;color:#212529;padding:5px 10px;font-size:10px;font-weight:700;border-radius:4px">bg-warning</div>
+              <div style="background:#dc3545;color:white;padding:5px 10px;font-size:10px;font-weight:700;border-radius:4px">bg-danger</div>
+              <div style="background:#212529;color:white;padding:5px 10px;font-size:10px;font-weight:700;border-radius:4px">bg-dark</div>
+              <div style="background:#f8f9fa;color:#212529;padding:5px 10px;font-size:10px;font-weight:700;border-radius:4px;border:1px solid #dee2e6">bg-light</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- d-flex -->
+      <div class="util-demo-row" onclick="toggleUtil(this)">
+        <div class="util-class-tag">d-flex gap-3</div>
+        <div class="util-preview">
+          <div style="font-size:13px;font-weight:700;color:#333">Flex Container + Gap</div>
+          <div class="util-desc">CSS equivalent: <code>display: flex; gap: 1rem</code></div>
+          <div style="display:none;margin-top:8px" class="util-live">
+            <div style="display:flex;gap:12px;background:#f8f9fa;padding:8px;border-radius:6px">
+              <div style="background:#7952b3;color:white;padding:6px 12px;border-radius:4px;font-size:10px;font-weight:700">Item 1</div>
+              <div style="background:#7952b3;color:white;padding:6px 12px;border-radius:4px;font-size:10px;font-weight:700">Item 2</div>
+              <div style="background:#7952b3;color:white;padding:6px 12px;border-radius:4px;font-size:10px;font-weight:700">Item 3</div>
+            </div>
+            <div style="font-size:11px;color:#555;margin-top:4px">gap-1=4px · gap-2=8px · gap-3=16px · gap-4=24px · gap-5=48px</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-6"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Custom CSS vs Bootstrap <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 7  COMPARISON ═══════════ -->
+  <div class="slide" id="slide-7">
+    <div class="slide-header">
+      <span class="badge b-purple">Concept</span>
+      <div>
+        <div class="slide-title">Custom CSS vs Bootstrap — Side by Side</div>
+        <div class="slide-subtitle">See exactly how many lines Bootstrap saves you</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">❌ custom CSS way (~22 lines)</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><div class="e-label">style.css + index.html</div></div>
+          <div class="editor-body" style="font-size:11px;line-height:1.7">
+            <div><span class="e-cmt">/* CSS file */</span></div>
+            <div><span class="c-sel">nav</span> <span class="c-punc">{ </span><span class="c-prop">background</span><span class="c-punc">:</span><span class="c-hex">#1e293b</span><span class="c-punc">; </span><span class="c-prop">display</span><span class="c-punc">:</span><span class="c-val">flex</span><span class="c-punc">; </span></div>
+            <div>       <span class="c-prop">justify-content</span><span class="c-punc">:</span><span class="c-val">space-between</span><span class="c-punc">;</span></div>
+            <div>       <span class="c-prop">padding</span><span class="c-punc">:</span><span class="c-num">14px 24px</span><span class="c-punc">; }</span></div>
+            <div><span class="c-sel">.btn-custom</span> <span class="c-punc">{ </span><span class="c-prop">background</span><span class="c-punc">:</span><span class="c-hex">#2563eb</span><span class="c-punc">;</span></div>
+            <div>              <span class="c-prop">color</span><span class="c-punc">:</span><span class="c-val">white</span><span class="c-punc">;</span></div>
+            <div>              <span class="c-prop">padding</span><span class="c-punc">:</span><span class="c-num">8px 20px</span><span class="c-punc">;</span></div>
+            <div>              <span class="c-prop">border</span><span class="c-punc">:</span><span class="c-val">none</span><span class="c-punc">;</span></div>
+            <div>              <span class="c-prop">border-radius</span><span class="c-punc">:</span><span class="c-num">6px</span><span class="c-punc">;</span></div>
+            <div>              <span class="c-prop">cursor</span><span class="c-punc">:</span><span class="c-val">pointer</span><span class="c-punc">; }</span></div>
+            <div><span class="c-sel">.btn-custom:hover</span> <span class="c-punc">{</span> <span class="c-prop">background</span><span class="c-punc">:</span><span class="c-hex">#1d4ed8</span><span class="c-punc">; }</span></div>
+            <div><span class="c-sel">.card</span> <span class="c-punc">{ </span><span class="c-prop">background</span><span class="c-punc">:</span><span class="c-val">white</span><span class="c-punc">;</span></div>
+            <div>         <span class="c-prop">border-radius</span><span class="c-punc">:</span><span class="c-num">8px</span><span class="c-punc">;</span></div>
+            <div>         <span class="c-prop">box-shadow</span><span class="c-punc">:</span><span class="c-num">0 2px 8px</span> <span class="c-hex">rgba(0,0,0,.1)</span><span class="c-punc">;</span></div>
+            <div>         <span class="c-prop">padding</span><span class="c-punc">:</span><span class="c-num">20px</span><span class="c-punc">; }</span></div>
+            <div><span class="e-cmt">/* + write media queries by hand */</span></div>
+            <div><span class="e-cmt">/* + write hover states by hand */</span></div>
+            <div><span class="e-cmt">/* + write hamburger JS by hand */</span></div>
+          </div>
+        </div>
+        <div style="background:#fee2e2;border:1px solid #fca5a5;border-radius:8px;padding:8px 12px;font-size:12px;color:#991b1b;margin-top:6px;font-weight:700">
+          ≈ 22 lines CSS + manual JS for hamburger
+        </div>
+      </div>
+      <div>
+        <div class="section-label">✅ bootstrap way (~3 lines HTML)</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><div class="e-label">index.html only</div></div>
+          <div class="editor-body" style="font-size:11px;line-height:1.7">
+            <div><span class="e-cmt">&lt;!-- navbar: dark, responsive, auto hamburger --&gt;</span></div>
+            <div><span class="e-tag">&lt;nav</span> <span class="e-att">class=</span><span class="e-val">"<span class="c-cls">navbar navbar-expand-lg navbar-dark bg-dark</span>"</span><span class="e-tag">&gt;</span></div>
+            <div>  <span class="e-tag">&lt;!-- ... navbar content ... --&gt;</span></div>
+            <div><span class="e-tag">&lt;/nav&gt;</span></div>
+            <div></div>
+            <div><span class="e-cmt">&lt;!-- button with hover state built in --&gt;</span></div>
+            <div><span class="e-tag">&lt;button</span> <span class="e-att">class=</span><span class="e-val">"<span class="c-cls">btn btn-primary</span>"</span><span class="e-tag">&gt;</span><span class="e-new">Join Now</span><span class="e-tag">&lt;/button&gt;</span></div>
+            <div></div>
+            <div><span class="e-cmt">&lt;!-- card: shadow, border-radius, padding --&gt;</span></div>
+            <div><span class="e-tag">&lt;div</span> <span class="e-att">class=</span><span class="e-val">"<span class="c-cls">card shadow p-3</span>"</span><span class="e-tag">&gt;</span></div>
+            <div>  <span class="e-tag">&lt;!-- card content --&gt;</span></div>
+            <div><span class="e-tag">&lt;/div&gt;</span></div>
+            <div></div>
+            <div><span class="e-cmt">&lt;!-- zero extra CSS needed --&gt;</span></div>
+            <div><span class="e-cmt">&lt;!-- responsive built in --&gt;</span></div>
+            <div><span class="e-cmt">&lt;!-- hamburger menu built in --&gt;</span></div>
+          </div>
+        </div>
+        <div style="background:#d1fae5;border:1px solid #6ee7b7;border-radius:8px;padding:8px 12px;font-size:12px;color:#065f46;margin-top:6px;font-weight:700">
+          ≈ 3 lines HTML · zero extra CSS · hamburger free
+        </div>
+      </div>
+    </div>
+
+    <div class="success-box">
+      <i class="ti ti-sparkles" style="color:#16a34a;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+      <div style="font-size:13px;color:#166534;line-height:1.6">This is what a CSS framework does — it pre-writes thousands of lines of production-tested CSS so you never have to. What took an experienced developer hours to write custom is now <strong>a class name.</strong></div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-7"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Hero Activity <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 8  HERO ACTIVITY ═══════════ -->
+  <div class="slide" id="slide-8">
+    <div class="slide-header">
+      <span class="badge b-rose">⏱ 20-Min Activity</span>
+      <div>
+        <div class="slide-title">Redesign the Hero Section — Bootstrap Only</div>
+        <div class="slide-subtitle">Delete your old hero. Rebuild it using only Bootstrap classes — no new custom CSS allowed</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">the complete hero code</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><div class="e-label">index.html — new hero section</div></div>
+          <div class="editor-body" style="font-size:11px;line-height:1.75">
+            <div><span class="e-tag">&lt;section</span> <span class="e-att">class=</span><span class="e-val">"<span class="c-cls">bg-dark text-white py-5</span>"</span><span class="e-tag">&gt;</span></div>
+            <div>  <span class="e-tag">&lt;div</span> <span class="e-att">class=</span><span class="e-val">"<span class="c-cls">container</span>"</span><span class="e-tag">&gt;</span></div>
+            <div>    <span class="e-tag">&lt;div</span> <span class="e-att">class=</span><span class="e-val">"<span class="c-cls">row align-items-center</span>"</span><span class="e-tag">&gt;</span></div>
+            <div></div>
+            <div>      <span class="e-cmt">&lt;!-- Left column: text --&gt;</span></div>
+            <div>      <span class="e-tag">&lt;div</span> <span class="e-att">class=</span><span class="e-val">"<span class="c-cls">col-md-6</span>"</span><span class="e-tag">&gt;</span></div>
+            <div>        <span class="e-tag">&lt;h1</span> <span class="e-att">class=</span><span class="e-val">"<span class="c-cls">display-5 fw-bold</span>"</span><span class="e-tag">&gt;</span></div>
+            <div>          <span class="e-new">Master Full Stack</span></div>
+            <div>          <span class="e-new">Development</span></div>
+            <div>        <span class="e-tag">&lt;/h1&gt;</span></div>
+            <div>        <span class="e-tag">&lt;p</span> <span class="e-att">class=</span><span class="e-val">"<span class="c-cls">lead mt-3</span>"</span><span class="e-tag">&gt;</span></div>
+            <div>          <span class="e-new">Learn HTML, CSS, JavaScript,</span></div>
+            <div>          <span class="e-new">React, Node &amp; MongoDB</span></div>
+            <div>        <span class="e-tag">&lt;/p&gt;</span></div>
+            <div>        <span class="e-tag">&lt;div</span> <span class="e-att">class=</span><span class="e-val">"<span class="c-cls">d-flex gap-3 mt-4</span>"</span><span class="e-tag">&gt;</span></div>
+            <div>          <span class="e-tag">&lt;button</span> <span class="e-att">class=</span><span class="e-val">"<span class="c-cls">btn btn-primary btn-lg</span>"</span><span class="e-tag">&gt;</span><span class="e-new">Get Started</span><span class="e-tag">&lt;/button&gt;</span></div>
+            <div>          <span class="e-tag">&lt;button</span> <span class="e-att">class=</span><span class="e-val">"<span class="c-cls">btn btn-outline-light btn-lg</span>"</span><span class="e-tag">&gt;</span><span class="e-new">Learn More</span><span class="e-tag">&lt;/button&gt;</span></div>
+            <div>        <span class="e-tag">&lt;/div&gt;</span></div>
+            <div>      <span class="e-tag">&lt;/div&gt;</span></div>
+            <div></div>
+            <div>      <span class="e-cmt">&lt;!-- Right column: image --&gt;</span></div>
+            <div>      <span class="e-tag">&lt;div</span> <span class="e-att">class=</span><span class="e-val">"<span class="c-cls">col-md-6 text-center mt-4 mt-md-0</span>"</span><span class="e-tag">&gt;</span></div>
+            <div>        <span class="e-tag">&lt;img</span> <span class="e-att">src=</span><span class="e-val">"hero.png"</span></div>
+            <div>             <span class="e-att">class=</span><span class="e-val">"<span class="c-cls">img-fluid rounded</span>"</span></div>
+            <div>             <span class="e-att">alt=</span><span class="e-val">"coding"</span><span class="e-tag">&gt;</span></div>
+            <div>      <span class="e-tag">&lt;/div&gt;</span></div>
+            <div></div>
+            <div>    <span class="e-tag">&lt;/div&gt;</span></div>
+            <div>  <span class="e-tag">&lt;/div&gt;</span></div>
+            <div><span class="e-tag">&lt;/section&gt;</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="section-label">requirements checklist</div>
+        <div style="display:flex;flex-direction:column;gap:5px">
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><div>Wrap everything in <code>.container</code></div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><div>Use <code>.row</code> as the layout row</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><div>Use <code>.col-md-6</code> for two equal columns</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><div>Add a heading with <code>display-5 fw-bold</code></div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><div>Add a paragraph with <code>lead</code></div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><div>Add <code>btn btn-primary btn-lg</code> button</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><div>Add <code>btn btn-outline-light btn-lg</code> button</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><div>Add image with <code>img-fluid rounded</code></div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><div>Looks responsive on mobile (cols stack)</div></div>
+        </div>
+        <div class="info-box">
+          <i class="ti ti-info-circle info-icon"></i>
+          <div class="info-text"><strong>mt-4 mt-md-0</strong> on the image column: adds top margin on mobile (when stacked) but removes it on desktop (side-by-side). This is responsive utility usage!</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-8"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Hero Result <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 9  HERO RESULT ═══════════ -->
+  <div class="slide" id="slide-9">
+    <div class="slide-header">
+      <span class="badge b-orange">Preview</span>
+      <div>
+        <div class="slide-title">Hero Result — Desktop vs Mobile</div>
+        <div class="slide-subtitle">No custom CSS written — Bootstrap did all the layout work</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">🖥 Desktop — two columns side by side</div>
+        <div class="browser">
+          <div class="browser-bar"><div class="b-dot2 b-r"></div><div class="b-dot2 b-y"></div><div class="b-dot2 b-g"></div><div class="b-url">skillhub.html — new hero</div></div>
+          <div>
+            <div style="background:#212529;padding:8px 14px;display:flex;align-items:center;justify-content:space-between;font-size:11px;font-family:Arial,sans-serif">
+              <span style="color:#fff;font-weight:700">SkillHub LMS</span>
+              <div style="display:flex;gap:12px"><span style="color:rgba(255,255,255,.7);font-size:10px">Home</span><span style="color:rgba(255,255,255,.7);font-size:10px">Courses</span><span style="color:rgba(255,255,255,.7);font-size:10px">About</span><span style="color:rgba(255,255,255,.7);font-size:10px">Contact</span></div>
+            </div>
+            <div style="background:#212529;padding:22px 16px;font-family:Arial,sans-serif">
+              <div style="display:flex;gap:14px;align-items:center">
+                <div style="flex:1;color:white">
+                  <div style="font-size:17px;font-weight:800;line-height:1.25;margin-bottom:6px">Master Full Stack Development</div>
+                  <div style="font-size:11px;opacity:.8;margin-bottom:12px">Learn HTML, CSS, JavaScript, React, Node &amp; MongoDB</div>
+                  <div style="display:flex;gap:8px">
+                    <button style="background:#0d6efd;color:white;border:none;padding:7px 16px;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer">Get Started</button>
+                    <button style="background:transparent;color:white;border:2px solid white;padding:7px 16px;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer">Learn More</button>
+                  </div>
+                </div>
+                <div style="width:90px;height:70px;background:rgba(255,255,255,.1);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0">💻</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">📱 Mobile — columns stack vertically</div>
+        <div style="display:flex;justify-content:center">
+          <div class="phone-outer" style="width:160px">
+            <div class="phone-notch"></div>
+            <div style="font-family:Arial,sans-serif;font-size:9px">
+              <div style="background:#212529;padding:6px 10px;display:flex;justify-content:space-between;align-items:center">
+                <span style="color:#fff;font-weight:700;font-size:10px">SkillHub LMS</span>
+                <span style="color:rgba(255,255,255,.7);font-size:14px">☰</span>
+              </div>
+              <div style="background:#212529;color:white;padding:14px 12px;text-align:center">
+                <div style="font-size:13px;font-weight:800;margin-bottom:4px;line-height:1.3">Master Full Stack Development</div>
+                <div style="font-size:9px;opacity:.8;margin-bottom:8px">Learn HTML, CSS, JavaScript & more</div>
+                <div style="display:flex;gap:5px;justify-content:center;margin-bottom:10px">
+                  <button style="background:#0d6efd;color:white;border:none;padding:5px 10px;border-radius:4px;font-size:9px;font-weight:700">Get Started</button>
+                  <button style="background:transparent;color:white;border:1px solid white;padding:5px 10px;border-radius:4px;font-size:9px;font-weight:700">Learn More</button>
+                </div>
+                <div style="background:rgba(255,255,255,.1);border-radius:6px;height:40px;display:flex;align-items:center;justify-content:center;font-size:18px">💻</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="success-box" style="margin-top:8px">
+          <i class="ti ti-check" style="color:#16a34a;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+          <div style="font-size:13px;color:#166534;line-height:1.6">col-md-6 automatically stacks on mobile. mt-4 mt-md-0 adds spacing only when stacked. <strong>Zero custom CSS written.</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-9"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Assignment <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 10  ASSIGNMENT ═══════════ -->
+  <div class="slide" id="slide-10">
+    <div class="slide-header">
+      <span class="badge b-rose">Assignment</span>
+      <div>
+        <div class="slide-title">Build "Meet Our Trainers" Section</div>
+        <div class="slide-subtitle">Apply Bootstrap Grid + Card components to build a real-world trainers section</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">the starter code template</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><div class="e-label">index.html — trainers section</div></div>
+          <div class="editor-body" style="font-size:11px;line-height:1.75">
+            <div><span class="e-tag">&lt;section</span> <span class="e-att">class=</span><span class="e-val">"<span class="c-cls">py-5 bg-light</span>"</span><span class="e-tag">&gt;</span></div>
+            <div>  <span class="e-tag">&lt;div</span> <span class="e-att">class=</span><span class="e-val">"<span class="c-cls">container</span>"</span><span class="e-tag">&gt;</span></div>
+            <div>    <span class="e-tag">&lt;h2</span> <span class="e-att">class=</span><span class="e-val">"<span class="c-cls">text-center mb-5</span>"</span><span class="e-tag">&gt;</span><span class="e-new">Meet Our Trainers</span><span class="e-tag">&lt;/h2&gt;</span></div>
+            <div>    <span class="e-tag">&lt;div</span> <span class="e-att">class=</span><span class="e-val">"<span class="c-cls">row g-4</span>"</span><span class="e-tag">&gt;</span></div>
+            <div></div>
+            <div>      <span class="e-cmt">&lt;!-- Trainer Card --&gt;</span></div>
+            <div>      <span class="e-tag">&lt;div</span> <span class="e-att">class=</span><span class="e-val">"<span class="c-cls">col-md-4</span>"</span><span class="e-tag">&gt;</span></div>
+            <div>        <span class="e-tag">&lt;div</span> <span class="e-att">class=</span><span class="e-val">"<span class="c-cls">card text-center shadow h-100</span>"</span><span class="e-tag">&gt;</span></div>
+            <div>          <span class="e-tag">&lt;img</span> <span class="e-att">src=</span><span class="e-val">"trainer1.jpg"</span></div>
+            <div>               <span class="e-att">class=</span><span class="e-val">"<span class="c-cls">card-img-top</span>"</span> <span class="e-att">alt=</span><span class="e-val">"Trainer"</span><span class="e-tag">&gt;</span></div>
+            <div>          <span class="e-tag">&lt;div</span> <span class="e-att">class=</span><span class="e-val">"<span class="c-cls">card-body</span>"</span><span class="e-tag">&gt;</span></div>
+            <div>            <span class="e-tag">&lt;h5</span> <span class="e-att">class=</span><span class="e-val">"<span class="c-cls">card-title</span>"</span><span class="e-tag">&gt;</span><span class="e-new">Rahul Kumar</span><span class="e-tag">&lt;/h5&gt;</span></div>
+            <div>            <span class="e-tag">&lt;p</span> <span class="e-att">class=</span><span class="e-val">"<span class="c-cls">text-primary fw-bold</span>"</span><span class="e-tag">&gt;</span><span class="e-new">MERN Stack Lead</span><span class="e-tag">&lt;/p&gt;</span></div>
+            <div>            <span class="e-tag">&lt;p</span> <span class="e-att">class=</span><span class="e-val">"<span class="c-cls">card-text text-muted</span>"</span><span class="e-tag">&gt;</span></div>
+            <div>              <span class="e-new">5 years industry experience</span></div>
+            <div>            <span class="e-tag">&lt;/p&gt;</span></div>
+            <div>            <span class="e-tag">&lt;div</span> <span class="e-att">class=</span><span class="e-val">"<span class="c-cls">d-flex gap-2 justify-content-center</span>"</span><span class="e-tag">&gt;</span></div>
+            <div>              <span class="e-tag">&lt;a</span> <span class="e-att">href=</span><span class="e-val">"#"</span> <span class="e-att">class=</span><span class="e-val">"<span class="c-cls">btn btn-outline-primary btn-sm</span>"</span><span class="e-tag">&gt;</span><span class="e-new">LinkedIn</span><span class="e-tag">&lt;/a&gt;</span></div>
+            <div>              <span class="e-tag">&lt;a</span> <span class="e-att">href=</span><span class="e-val">"#"</span> <span class="e-att">class=</span><span class="e-val">"<span class="c-cls">btn btn-outline-dark btn-sm</span>"</span><span class="e-tag">&gt;</span><span class="e-new">GitHub</span><span class="e-tag">&lt;/a&gt;</span></div>
+            <div>            <span class="e-tag">&lt;/div&gt;</span></div>
+            <div>          <span class="e-tag">&lt;/div&gt;</span></div>
+            <div>        <span class="e-tag">&lt;/div&gt;</span></div>
+            <div>      <span class="e-tag">&lt;/div&gt;</span></div>
+            <div>      <span class="e-cmt">&lt;!-- repeat for 2 more trainers --&gt;</span></div>
+            <div>    <span class="e-tag">&lt;/div&gt;</span></div>
+            <div>  <span class="e-tag">&lt;/div&gt;</span></div>
+            <div><span class="e-tag">&lt;/section&gt;</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="section-label">target result preview</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+          <div class="trainer-card">
+            <div class="trainer-img" style="background:#dbeafe">👨‍💻</div>
+            <div class="trainer-body">
+              <div class="trainer-name">Rahul Kumar</div>
+              <div class="trainer-role">MERN Stack Lead</div>
+              <div style="font-size:9px;color:#666;margin-bottom:6px">5 yrs industry exp.</div>
+              <div class="trainer-socials">
+                <button class="trainer-social-btn" style="background:#0d6efd;color:white">in</button>
+                <button class="trainer-social-btn" style="background:#212529;color:white">gh</button>
+              </div>
+            </div>
+          </div>
+          <div class="trainer-card">
+            <div class="trainer-img" style="background:#d1fae5">👩‍💻</div>
+            <div class="trainer-body">
+              <div class="trainer-name">Priya Sharma</div>
+              <div class="trainer-role">React Specialist</div>
+              <div style="font-size:9px;color:#666;margin-bottom:6px">Ex-Google Engineer</div>
+              <div class="trainer-socials">
+                <button class="trainer-social-btn" style="background:#0d6efd;color:white">in</button>
+                <button class="trainer-social-btn" style="background:#1da1f2;color:white">tw</button>
+              </div>
+            </div>
+          </div>
+          <div class="trainer-card">
+            <div class="trainer-img" style="background:#fce7f3">👨‍🏫</div>
+            <div class="trainer-body">
+              <div class="trainer-name">Arjun Patel</div>
+              <div class="trainer-role">Node.js Expert</div>
+              <div style="font-size:9px;color:#666;margin-bottom:6px">8 yrs backend exp.</div>
+              <div class="trainer-socials">
+                <button class="trainer-social-btn" style="background:#0d6efd;color:white">in</button>
+                <button class="trainer-social-btn" style="background:#212529;color:white">gh</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-label">requirements checklist</div>
+        <div style="display:flex;flex-direction:column;gap:5px">
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><div>Bootstrap Grid — <code>col-md-4</code> for 3 columns</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><div>3 Trainer Cards using <code>card</code> component</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><div>Trainer image / emoji avatar (<code>card-img-top</code>)</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><div>Name (<code>card-title</code>) + Designation</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><div>LinkedIn + GitHub buttons (<code>btn-outline-* btn-sm</code>)</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><div>Responsive — 3 columns desktop, 1 mobile</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><div>Equal card heights using <code>h-100</code></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-10"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Quiz <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 11  QUIZ ═══════════ -->
+  <div class="slide" id="slide-11">
+    <div class="slide-header">
+      <span class="badge b-slate">Quiz</span>
+      <div>
+        <div class="slide-title">Quick-Fire Quiz</div>
+        <div class="slide-subtitle">4 questions covering Bootstrap Components from Hour 3</div>
+      </div>
+    </div>
+    <div id="quiz-container"></div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-11"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Wrap Up <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 12  WRAP UP ═══════════ -->
+  <div class="slide" id="slide-12">
+    <div class="slide-header">
+      <span class="badge b-green">Wrap-Up</span>
+      <div>
+        <div class="slide-title">Day 6 Complete! 🎉</div>
+        <div class="slide-subtitle">SkillHub is now built almost entirely with Bootstrap — professional, responsive, and fast</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">everything built in day 6</div>
+        <div style="display:flex;flex-direction:column;gap:5px">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:#dcfce7;border-radius:8px;font-size:12px;font-weight:700;color:#166534"><span><i class="ti ti-check" style="margin-right:5px"></i>Bootstrap CDN + utility classes (Hour 1)</span><span class="badge b-green" style="font-size:10px">✓</span></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:#dcfce7;border-radius:8px;font-size:12px;font-weight:700;color:#166534"><span><i class="ti ti-check" style="margin-right:5px"></i>12-column grid + course cards (Hour 2)</span><span class="badge b-green" style="font-size:10px">✓</span></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:#dcfce7;border-radius:8px;font-size:12px;font-weight:700;color:#166534"><span><i class="ti ti-check" style="margin-right:5px"></i>Bootstrap Navbar + hamburger menu</span><span class="badge b-green" style="font-size:10px">✓</span></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:#dcfce7;border-radius:8px;font-size:12px;font-weight:700;color:#166534"><span><i class="ti ti-check" style="margin-right:5px"></i>Bootstrap Buttons (8 variants + sizes)</span><span class="badge b-green" style="font-size:10px">✓</span></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:#dcfce7;border-radius:8px;font-size:12px;font-weight:700;color:#166534"><span><i class="ti ti-check" style="margin-right:5px"></i>7 essential utility classes mastered</span><span class="badge b-green" style="font-size:10px">✓</span></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:#dcfce7;border-radius:8px;font-size:12px;font-weight:700;color:#166534"><span><i class="ti ti-check" style="margin-right:5px"></i>Hero rebuilt with Bootstrap only</span><span class="badge b-green" style="font-size:10px">✓</span></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:#ede9fe;border-radius:8px;font-size:12px;font-weight:700;color:#5b21b6;border:2px dashed #a78bfa"><span><i class="ti ti-pencil" style="margin-right:5px"></i>Trainers section — assignment</span><span class="badge b-purple" style="font-size:10px">← hw</span></div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">bootstrap skills earned</div>
+        <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px">
+          <span class="bs-pill">navbar</span>
+          <span class="bs-pill">navbar-expand-lg</span>
+          <span class="bs-pill">navbar-dark</span>
+          <span class="bs-pill">bg-dark</span>
+          <span class="bs-pill">btn-primary</span>
+          <span class="bs-pill">btn-outline-*</span>
+          <span class="bs-pill">btn-sm / btn-lg</span>
+          <span class="bs-pill">p-5</span>
+          <span class="bs-pill">mt-5</span>
+          <span class="bs-pill">text-center</span>
+          <span class="bs-pill">rounded</span>
+          <span class="bs-pill">shadow</span>
+          <span class="bs-pill">bg-primary</span>
+          <span class="bs-pill">d-flex gap-3</span>
+          <span class="bs-pill">display-5</span>
+          <span class="bs-pill">fw-bold</span>
+          <span class="bs-pill">lead</span>
+          <span class="bs-pill">img-fluid</span>
+          <span class="bs-pill">h-100</span>
+        </div>
+
+        <div class="section-label">day 7 preview</div>
+        <div style="background:linear-gradient(135deg,#0f172a,#1e3a5f);border-radius:12px;padding:16px;color:white">
+          <div style="font-size:13px;font-weight:700;margin-bottom:8px">🗓️ Day 7 — Introduction to JavaScript</div>
+          <div style="font-size:12px;opacity:.8;line-height:1.8">
+            ✦ What is JavaScript? Why do we need it?<br>
+            ✦ Variables: var, let, const<br>
+            ✦ Data types: string, number, boolean<br>
+            ✦ Your first event: onclick button handler<br>
+            ✦ Connecting JS to SkillHub HTML
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="background:linear-gradient(135deg,#7952b3,#4c1d95);border-radius:12px;padding:16px;color:white;text-align:center">
+      <div style="font-size:16px;font-weight:800;margin-bottom:4px">🏆 Day 6 Complete — SkillHub is Bootstrap-Powered!</div>
+      <div style="font-size:13px;opacity:.85">Professional navbar, responsive hero, grid cards, and utility-class styling — built faster than any custom CSS ever could. Welcome to the world of frameworks.</div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-12"></div>
+      <button class="nav-btn" disabled>Done <i class="ti ti-flag"></i></button>
+    </div>
+  </div>
+
+</div><!-- /.wrapper -->
+
+<script>
+  var current  = 0;
+  var total    = 13;
+  var quizInit = false;
+
+  /* ── Navbar class explainer ── */
+  function toggleLex(row) {
+    var was = row.classList.contains('active');
+    document.querySelectorAll('.lex-row.active').forEach(function(r){ r.classList.remove('active'); });
+    if (!was) row.classList.add('active');
+  }
+
+  /* ── Button class display ── */
+  function showBtnClass(cls) {
+    var d = document.getElementById('btn-class-display');
+    var t = document.getElementById('btn-class-text');
+    d.style.display = 'block';
+    t.textContent = cls;
+  }
+
+  /* ── Utility class toggle ── */
+  function toggleUtil(row) {
+    var was = row.classList.contains('active');
+    document.querySelectorAll('.util-demo-row.active').forEach(function(r){
+      r.classList.remove('active');
+      var live = r.querySelector('.util-live');
+      if (live) live.style.display = 'none';
+    });
+    if (!was) {
+      row.classList.add('active');
+      var live = row.querySelector('.util-live');
+      if (live) live.style.display = 'block';
+    }
+  }
+
+  /* ── Checklist ── */
+  function toggleCheck(item) {
+    item.classList.toggle('done');
+    var c = item.querySelector('.check-circle');
+    if (item.classList.contains('done')) {
+      c.style.background = '#22c55e'; c.style.borderColor = '#22c55e'; c.style.color = '#fff';
+    } else {
+      c.style.background = ''; c.style.borderColor = ''; c.style.color = '';
+    }
+  }
+
+  /* ── Quiz ── */
+  var quizData = [
+    {
+      q: "What is the correct way to create a primary Bootstrap button?",
+      opts: [
+        "class=\"button-primary\"",
+        "class=\"bootstrap btn-primary\"",
+        "class=\"btn btn-primary\"",
+        "class=\"btn-primary\""
+      ],
+      ans: 2,
+      exp: "Bootstrap buttons always need TWO classes: btn (the base class that adds padding, border-radius, cursor, transition) AND btn-{variant} (the colour class). Using only btn-primary without btn gives you an unstyled element."
+    },
+    {
+      q: "In the Bootstrap Navbar, what must the data-bs-target value on the toggler button match?",
+      opts: [
+        "The class of the collapse div",
+        "The id of the collapse div (prefixed with #)",
+        "The navbar-brand text",
+        "The navbar-expand-lg breakpoint value"
+      ],
+      ans: 1,
+      exp: "data-bs-target=\"#menu\" must match the id=\"menu\" on the collapse div. Bootstrap's JS reads the data-bs-target attribute and uses it to find which element to show/hide when the ☰ button is clicked. A mismatch means the hamburger menu doesn't work."
+    },
+    {
+      q: "Which Bootstrap utility class pushes the navbar links to the right side of the navbar?",
+      opts: [
+        "float-end",
+        "text-end",
+        "ms-auto",
+        "justify-content-end"
+      ],
+      ans: 2,
+      exp: "ms-auto means margin-start: auto. In a flex container (which the navbar already is), auto margin on the left side of an element pushes it to the right. Bootstrap 5 replaced Bootstrap 4's ml-auto with ms-auto (ms = margin-start, direction-aware)."
+    },
+    {
+      q: "A student writes <button class=\"btn btn-primary btn-lg btn-outline-success\">. What's the problem?",
+      opts: [
+        "btn-lg doesn't exist in Bootstrap",
+        "You can't use btn-primary and btn-outline-success together — they conflict on colour",
+        "btn must always be the last class",
+        "Bootstrap buttons can't be large"
+      ],
+      ans: 1,
+      exp: "btn-primary sets a solid blue background and btn-outline-success sets a transparent background with a green border. They both target the same background-color property and will conflict. Choose one colour variant per button. You CAN combine btn + btn-primary + btn-lg (colour + size is fine)."
+    }
+  ];
+  var quizAnswered = [];
+
+  function renderQuiz() {
+    var c = document.getElementById('quiz-container'); c.innerHTML = '';
+    quizData.forEach(function(q, i) {
+      var d = document.createElement('div'); d.style.cssText = 'margin-bottom:18px';
+      d.innerHTML = '<div style="font-size:13px;font-weight:600;margin-bottom:6px">'+(i+1)+'. '+q.q+'</div>';
+      q.opts.forEach(function(opt, j) {
+        var btn = document.createElement('button'); btn.className = 'quiz-option';
+        btn.innerHTML = String.fromCharCode(65+j)+'. '+opt;
+        btn.onclick = function() {
+          if (quizAnswered[i]) return; quizAnswered[i] = true;
+          var btns = d.querySelectorAll('.quiz-option');
+          btns.forEach(function(b,k){ b.disabled=true; if(k===q.ans) b.classList.add('correct'); else if(k===j) b.classList.add('wrong'); });
+          var fb = d.querySelector('.quiz-feedback');
+          fb.innerHTML = (j===q.ans?'✅ Correct! ':'❌ Not quite. ')+q.exp;
+          fb.className = 'quiz-feedback '+(j===q.ans?'correct':'wrong');
+        };
+        d.appendChild(btn);
+      });
+      var fb = document.createElement('div'); fb.className = 'quiz-feedback'; d.appendChild(fb);
+      c.appendChild(d);
+    });
+  }
+
+  /* ── Navigation ── */
+  function goSlide(n) {
+    document.getElementById('slide-'+current).classList.remove('active');
+    current = n;
+    document.getElementById('slide-'+current).classList.add('active');
+    updateDots();
+    document.getElementById('slide-counter').textContent = (current+1)+' / '+total;
+    if (n===11 && !quizInit) { renderQuiz(); quizInit=true; }
+    window.scrollTo(0,0);
+  }
+  function nextSlide() { if (current < total-1) goSlide(current+1); }
+  function prevSlide() { if (current > 0) goSlide(current-1); }
+
+  function updateDots() {
+    for (var s=0; s<total; s++) {
+      var el = document.getElementById('dots-'+s); if (!el) continue;
+      el.innerHTML = '';
+      for (var d=0; d<total; d++) {
+        var dot = document.createElement('div');
+        dot.className = 'dot'+(d===current?' active':'');
+        el.appendChild(dot);
+      }
+    }
+  }
+  updateDots();
+</script>
+</body>
+</html>

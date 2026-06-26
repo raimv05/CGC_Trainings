@@ -1,0 +1,1160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Day 6 · Hour 1 – Introduction to Bootstrap</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f4f5f7; color: #1a1a1a;
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; padding: 2rem 1rem;
+  }
+  .wrapper {
+    width: 100%; max-width: 920px; background: #fff;
+    border-radius: 16px; box-shadow: 0 2px 20px rgba(0,0,0,0.09); overflow: hidden;
+  }
+  .top-bar {
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    color: #fff; padding: 14px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .top-bar-title { font-size: 15px; font-weight: 600; }
+  .top-bar-sub   { font-size: 12px; opacity: .55; margin-top: 2px; }
+  .slide-counter { font-size: 13px; opacity: .6; font-variant-numeric: tabular-nums; }
+  .slide { display: none; padding: 1.75rem 2rem; min-height: 500px; flex-direction: column; gap: 1.2rem; }
+  .slide.active { display: flex; }
+  .slide-header { display: flex; align-items: center; gap: 10px; padding-bottom: 1rem; border-bottom: 1px solid #e8e8e8; }
+  .slide-title    { font-size: 20px; font-weight: 700; color: #111; }
+  .slide-subtitle { font-size: 13px; color: #666; margin-top: 2px; }
+
+  /* ── Badges ── */
+  .badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+  .b-blue   { background:#dbeafe; color:#1d4ed8; }
+  .b-teal   { background:#d1fae5; color:#065f46; }
+  .b-purple { background:#ede9fe; color:#5b21b6; }
+  .b-amber  { background:#fef3c7; color:#92400e; }
+  .b-green  { background:#dcfce7; color:#166534; }
+  .b-slate  { background:#e2e8f0; color:#334155; }
+  .b-rose   { background:#ffe4e6; color:#9f1239; }
+  .b-orange { background:#ffedd5; color:#9a3412; }
+  .b-indigo { background:#e0e7ff; color:#3730a3; }
+  .b-cyan   { background:#cffafe; color:#164e63; }
+  .b-pink   { background:#fce7f3; color:#9d174d; }
+  .b-yellow { background:#fef9c3; color:#854d0e; }
+
+  /* ── Layout ── */
+  .section-label { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 8px; }
+  .card { background: #fff; border: 1px solid #e8e8e8; border-radius: 12px; padding: 1rem 1.25rem; }
+  .card-gray { background: #f8f9fa; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+  /* ── Code Editor (Dracula) ── */
+  .editor { background: #1e1e2e; border-radius: 12px; overflow: hidden; font-family: 'SFMono-Regular', Consolas, 'Courier New', monospace; }
+  .editor-bar { background: #13131f; padding: 9px 14px; display: flex; align-items: center; gap: 6px; }
+  .e-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .e-red { background:#ff5f57; } .e-yellow { background:#febc2e; } .e-green { background:#28c840; }
+  .e-label { font-size: 12px; color: #6272a4; margin-left: 4px; font-family: -apple-system, sans-serif; }
+  .editor-body { padding: 14px 18px; font-size: 12.5px; line-height: 1.8; }
+  .e-ln   { color: #44475a; font-size: 11px; display: inline-block; width: 22px; user-select: none; }
+  .e-tag  { color: #ff79c6; }
+  .e-att  { color: #50fa7b; }
+  .e-val  { color: #f1fa8c; }
+  .e-txt  { color: #f8f8f2; }
+  .e-cmt  { color: #6272a4; font-style: italic; }
+  .e-new  { color: #80ffea; }
+  .e-h2   { color: #ffb86c; font-weight: 700; }
+  .e-p    { color: #8be9fd; }
+  .c-sel  { color: #ff79c6; font-weight: 700; }
+  .c-prop { color: #50fa7b; }
+  .c-val  { color: #f1fa8c; }
+  .c-punc { color: #f8f8f2; }
+  .c-hex  { color: #bd93f9; }
+  .c-str  { color: #ffb86c; }
+  .c-num  { color: #ff79c6; }
+  .c-cmt  { color: #6272a4; font-style: italic; }
+  .c-cls  { color: #80ffea; }   /* bootstrap class names */
+  .c-util { color: #a4e400; }   /* bootstrap utility values */
+  .e-row  { display: flex; gap: 8px; }
+  .e-ind1 { display: inline-block; width: 20px; }
+  .e-ind2 { display: inline-block; width: 40px; }
+  .e-ind3 { display: inline-block; width: 60px; }
+
+  /* ── Browser frame ── */
+  .browser { border-radius: 12px; overflow: hidden; border: 1px solid #e0e0e0; }
+  .browser-bar { background: #f1f3f4; padding: 9px 14px; display: flex; align-items: center; gap: 7px; border-bottom: 1px solid #e0e0e0; }
+  .b-dot2 { width: 10px; height: 10px; border-radius: 50%; }
+  .b-r { background:#ff5f57; } .b-y { background:#febc2e; } .b-g { background:#28c840; }
+  .b-url { flex:1; background:#fff; border:1px solid #dadce0; border-radius:20px; padding:4px 14px; font-size:12px; color:#555; }
+
+  /* ── Tables ── */
+  .tag-table { border-collapse: collapse; width: 100%; }
+  .tag-table th { background: #f1f5f9; font-size: 12px; font-weight: 700; text-align: left; padding: 10px 14px; color: #475569; border-bottom: 2px solid #e2e8f0; }
+  .tag-table td { font-size: 13px; padding: 10px 14px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+  .tag-table tr:last-child td { border-bottom: none; }
+  .tag-table tr:hover td { background: #f8f9fa; }
+  .tag-mono { font-family: 'SFMono-Regular', Consolas, monospace; font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 5px; }
+
+  /* ── Quiz ── */
+  .quiz-option { border: 1px solid #dee2e6; border-radius: 8px; padding: 10px 14px; font-size: 13px; cursor: pointer; margin-bottom: 6px; transition: all .15s; background: transparent; width: 100%; text-align: left; color: #1a1a1a; }
+  .quiz-option:hover:not(:disabled) { background: #f8f9fa; }
+  .quiz-option.correct { background: #d1fae5; border-color: #059669; color: #065f46; }
+  .quiz-option.wrong   { background: #fee2e2; border-color: #dc2626; color: #991b1b; }
+  .quiz-feedback { display: none; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-top: 4px; }
+  .quiz-feedback.correct { background: #d1fae5; color: #065f46; display: block; }
+  .quiz-feedback.wrong   { background: #fee2e2; color: #991b1b; display: block; }
+
+  /* ── Activity / challenge ── */
+  .activity-box { border: 2px dashed #a5b4fc; background: #eef2ff; border-radius: 12px; padding: 14px 18px; }
+  .activity-title { font-size: 13px; font-weight: 700; color: #3730a3; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .challenge-box { border: 2px dashed #f9a8d4; background: #fdf2f8; border-radius: 12px; padding: 14px 18px; }
+  .challenge-title { font-size: 13px; font-weight: 700; color: #9f1239; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+
+  /* ── Tip / info / warn / success ── */
+  .tip-box   { display:flex; gap:10px; align-items:flex-start; background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:10px 14px; }
+  .tip-icon  { color:#d97706; font-size:18px; flex-shrink:0; margin-top:1px; }
+  .tip-text  { font-size:13px; color:#92400e; line-height:1.6; }
+  .info-box  { display:flex; gap:10px; align-items:flex-start; background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:10px 14px; }
+  .info-icon { color:#2563eb; font-size:18px; flex-shrink:0; margin-top:1px; }
+  .info-text { font-size:13px; color:#1e40af; line-height:1.6; }
+  .warn-box  { display:flex; gap:10px; align-items:flex-start; background:#fef9ee; border:1px solid #fcd34d; border-radius:10px; padding:10px 14px; }
+  .success-box { display:flex; gap:10px; align-items:flex-start; background:#f0fdf4; border:1px solid #86efac; border-radius:10px; padding:10px 14px; }
+
+  /* ── Line explainer ── */
+  .lex-row { display:flex; align-items:stretch; cursor:pointer; transition:background .12s; border-bottom:1px solid #f0f0f0; }
+  .lex-row:last-child { border-bottom:none; }
+  .lex-row:hover { background:#f8f9fa; }
+  .lex-row.active { background:#eff6ff; border-left:3px solid #1d4ed8; }
+  .lex-code { background:#1e1e2e; padding:10px 14px; font-family:'SFMono-Regular',Consolas,monospace; font-size:12px; min-width:200px; flex-shrink:0; display:flex; align-items:center; }
+  .lex-info { padding:10px 14px; flex:1; }
+  .lex-name   { font-size:13px; font-weight:700; color:#1d4ed8; margin-bottom:2px; }
+  .lex-desc   { font-size:12px; color:#555; line-height:1.55; }
+  .lex-detail { display:none; font-size:12px; color:#1d4ed8; margin-top:4px; padding-top:4px; border-top:1px dashed #bfdbfe; }
+  .lex-row.active .lex-detail { display:block; }
+  .line-explain { border:1px solid #e8e8e8; border-radius:10px; overflow:hidden; }
+
+  /* ── Reveal ── */
+  .reveal-btn { background:#f1f3f5; border:1px solid #dee2e6; border-radius:8px; padding:7px 14px; font-size:13px; cursor:pointer; color:#333; transition:background .15s; }
+  .reveal-btn:hover { background:#e9ecef; }
+  .reveal-content { display:none; margin-top:8px; }
+  .reveal-content.open { display:block; }
+
+  /* ── Nav ── */
+  .nav-row { display:flex; align-items:center; justify-content:space-between; margin-top:auto; padding-top:1rem; border-top:1px solid #f0f0f0; }
+  .nav-btn { display:inline-flex; align-items:center; gap:6px; padding:9px 18px; border:1px solid #dee2e6; border-radius:8px; background:transparent; font-size:13px; cursor:pointer; color:#333; transition:background .15s; }
+  .nav-btn:hover:not(:disabled) { background:#f1f3f5; }
+  .nav-btn:disabled { opacity:.35; cursor:default; }
+  .nav-btn.primary { background:#1d4ed8; border-color:transparent; color:#fff; }
+  .nav-btn.primary:hover { background:#1e40af; }
+  .progress-dots { display:flex; gap:6px; align-items:center; }
+  .dot { width:7px; height:7px; border-radius:50%; background:#dee2e6; transition:all .2s; }
+  .dot.active { width:20px; border-radius:4px; background:#1d4ed8; }
+
+  /* ── Home grid ── */
+  .home-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .home-card { background:#fff; border:1px solid #e8e8e8; border-radius:12px; padding:1rem 1.25rem; cursor:pointer; transition:all .15s; }
+  .home-card:hover { border-color:#1d4ed8; box-shadow:0 2px 8px rgba(29,78,216,.1); }
+  .home-card-title { font-size:15px; font-weight:700; margin:6px 0 2px; }
+  .home-card-sub   { font-size:12px; color:#666; }
+
+  code { font-family:'SFMono-Regular',Consolas,monospace; font-size:12px; background:#f1f3f5; padding:1px 6px; border-radius:4px; border:1px solid #dee2e6; }
+
+  /* ── Checklist ── */
+  .check-item { display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:10px; border:1px solid #e8e8e8; font-size:13px; cursor:pointer; transition:all .15s; user-select:none; }
+  .check-item:hover { background:#f8f9fa; }
+  .check-item.done { background:#f0fdf4; border-color:#86efac; }
+  .check-circle { width:22px; height:22px; border-radius:50%; border:2px solid #dee2e6; display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0; transition:all .2s; color:transparent; }
+  .check-item.done .check-circle { background:#22c55e; border-color:#22c55e; color:#fff; }
+
+  /* ══════════════════ DAY 6 HOUR 1 — BOOTSTRAP SPECIFIC ══════════════════ */
+
+  /* Bootstrap logo colours */
+  .bs-purple { color: #7952b3; }
+  .bs-bg     { background: #7952b3; }
+
+  /* CSS lines counter comparison */
+  .lines-bar { height: 10px; border-radius: 5px; transition: width .6s ease; }
+
+  /* Bootstrap class pill — styled like actual Bootstrap badge */
+  .bs-pill {
+    display: inline-block;
+    font-family: 'SFMono-Regular', Consolas, monospace;
+    font-size: 11px; font-weight: 700;
+    padding: 3px 9px; border-radius: 6px;
+    background: #7952b3; color: #fff;
+    margin: 2px;
+  }
+
+  /* CDN diagram */
+  .cdn-flow { display: flex; align-items: center; gap: 0; flex-wrap: wrap; justify-content: center; }
+  .cdn-box { padding: 10px 16px; border-radius: 10px; font-size: 12px; font-weight: 700; text-align: center; min-width: 100px; }
+  .cdn-arrow { color: #aaa; font-size: 22px; margin: 0 4px; }
+
+  /* Bootstrap feature cards */
+  .bs-feature { text-align: center; padding: 14px 10px; border-radius: 10px; border: 1px solid #e8e8e8; }
+  .bs-feature-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; }
+
+  /* Before/After comparison strip */
+  .ba-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .ba-col-head { padding: 8px 12px; border-radius: 8px 8px 0 0; font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+  .ba-col-body { border-radius: 0 0 8px 8px; overflow: hidden; }
+
+  /* Interactive Bootstrap utility builder */
+  .util-toggle { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 8px; border: 1px solid #dee2e6; cursor: pointer; font-size: 12px; margin: 4px; transition: all .15s; background: #fff; user-select: none; }
+  .util-toggle:hover { border-color: #7952b3; color: #5b21b6; }
+  .util-toggle.active { background: #ede9fe; border-color: #7952b3; color: #5b21b6; font-weight: 700; }
+
+  /* Container visual */
+  .container-demo { background: #f8f9fa; border-radius: 10px; overflow: hidden; border: 1px solid #e8e8e8; }
+  .container-outer { background: repeating-linear-gradient(90deg, #fce7f3 0px, #fce7f3 1px, transparent 1px, transparent 20px); padding: 10px; }
+  .container-inner { background: #dbeafe; border-radius: 6px; padding: 12px 16px; font-size: 12px; font-weight: 700; color: #1e40af; text-align: center; }
+
+  /* SkillHub before / after Bootstrap */
+  .sh-before { font-family: serif; background: #fff; font-size: 11px; }
+  .sh-before-h { padding: 4px 8px; font-size: 12px; font-weight: 700; background: #2563eb; color: white; }
+  .sh-before-nav { padding: 4px 8px; font-size: 10px; }
+  .sh-before-hero { padding: 10px 8px; font-size: 12px; font-weight: 700; }
+  .sh-before-p { padding: 4px 8px 8px; font-size: 10px; color: #555; }
+
+  .sh-after  { font-family: Arial, sans-serif; background: #fff; font-size: 11px; }
+  .sh-after-h { padding: 14px 24px; font-size: 14px; font-weight: 700; background: #1e293b; color: white; }
+  .sh-after-nav { padding: 8px 24px; font-size: 11px; background: #1e293b; color: #94a3b8; display: flex; gap: 16px; }
+  .sh-after-hero { padding: 28px 24px; background: linear-gradient(135deg,#1e293b,#2563eb); color: white; }
+  .sh-after-h2  { font-size: 15px; font-weight: 800; margin-bottom: 4px; }
+  .sh-after-sub { font-size: 11px; opacity: .8; }
+  .sh-after-cards { display: flex; gap: 8px; padding: 12px 24px; background: #f4f6f9; flex-wrap: wrap; }
+  .sh-after-card { background: #fff; border-radius: 8px; padding: 8px 12px; font-size: 10px; font-weight: 700; box-shadow: 0 1px 4px rgba(0,0,0,.1); }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <div>
+      <div class="top-bar-title">MERN Stack Training · Day 6 · Hour 1</div>
+      <div class="top-bar-sub">Introduction to Bootstrap — SkillHub LMS</div>
+    </div>
+    <div class="slide-counter" id="slide-counter">1 / 12</div>
+  </div>
+
+  <!-- ═══ SLIDE 0  HOME ═══ -->
+  <div class="slide active" id="slide-0">
+    <div class="slide-header">
+      <span class="badge b-purple">Day 6 · Hour 1</span>
+      <div>
+        <div class="slide-title">Introduction to Bootstrap</div>
+        <div class="slide-subtitle">Stop writing CSS from scratch — use the world's most popular CSS framework</div>
+      </div>
+    </div>
+
+    <div style="background:#ede9fe;border:1px solid #c4b5fd;border-radius:12px;padding:12px 16px;display:flex;gap:12px;align-items:flex-start">
+      <i class="ti ti-brand-bootstrap" style="color:#7952b3;font-size:22px;flex-shrink:0;margin-top:1px"></i>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#4c1d95;margin-bottom:4px">Day 6 Goal — Rebuild SkillHub with Bootstrap</div>
+        <div style="display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:#5b21b6">
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Understand what Bootstrap is</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Add via CDN</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Use .container</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Utility classes</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Bootstrap components</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="home-grid">
+      <div class="home-card" onclick="goSlide(1)">
+        <span class="badge b-green">Recap</span>
+        <div class="home-card-title">Day 5 Deliverable</div>
+        <div class="home-card-sub">Fully responsive SkillHub — where we left off</div>
+      </div>
+      <div class="home-card" onclick="goSlide(2)">
+        <span class="badge b-amber">Activity</span>
+        <div class="home-card-title">200–300 Lines of CSS Problem</div>
+        <div class="home-card-sub">Can we reduce this to 20–30 lines?</div>
+      </div>
+      <div class="home-card" onclick="goSlide(3)">
+        <span class="badge b-purple">Concept</span>
+        <div class="home-card-title">What Is Bootstrap?</div>
+        <div class="home-card-sub">CSS framework · pre-designed components</div>
+      </div>
+      <div class="home-card" onclick="goSlide(4)">
+        <span class="badge b-blue">Compare</span>
+        <div class="home-card-title">CSS vs Bootstrap Side by Side</div>
+        <div class="home-card-sub">Same result — one uses 6 lines, one uses 1</div>
+      </div>
+      <div class="home-card" onclick="goSlide(5)">
+        <span class="badge b-teal">Features</span>
+        <div class="home-card-title">Bootstrap Features</div>
+        <div class="home-card-sub">Mobile-first · Grid · Utilities · Components</div>
+      </div>
+      <div class="home-card" onclick="goSlide(6)">
+        <span class="badge b-cyan">Setup</span>
+        <div class="home-card-title">Adding Bootstrap via CDN</div>
+        <div class="home-card-sub">What CDN is + two lines in index.html</div>
+      </div>
+      <div class="home-card" onclick="goSlide(7)">
+        <span class="badge b-slate">Why</span>
+        <div class="home-card-title">Why Nothing Changes Yet</div>
+        <div class="home-card-sub">Bootstrap is loaded — but not used yet</div>
+      </div>
+      <div class="home-card" onclick="goSlide(8)">
+        <span class="badge b-orange">Container</span>
+        <div class="home-card-title">The .container Class</div>
+        <div class="home-card-sub">What it does + add it to SkillHub</div>
+      </div>
+    </div>
+    <div class="grid-2" style="gap:10px">
+      <div class="home-card" onclick="goSlide(9)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge b-indigo">Explain</span>
+          <span style="font-size:14px;font-weight:700">CDN + Container — line by line</span>
+          <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+        </div>
+      </div>
+      <div class="home-card" onclick="goSlide(10)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge b-slate">Ref</span>
+          <span style="font-size:14px;font-weight:700">Bootstrap Utilities Reference</span>
+          <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+        </div>
+      </div>
+    </div>
+    <div class="home-card" onclick="goSlide(11)" style="cursor:pointer">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="badge b-green">Quiz</span>
+        <span style="font-size:14px;font-weight:700">Quick Check — 5 Questions</span>
+        <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+      </div>
+    </div>
+    <div class="nav-row">
+      <div></div>
+      <div class="progress-dots" id="dots-0"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Start <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 1  RECAP ═══ -->
+  <div class="slide" id="slide-1">
+    <div class="slide-header">
+      <span class="badge b-green">Recap</span>
+      <div>
+        <div class="slide-title">Day 5 Deliverable</div>
+        <div class="slide-subtitle">Fully responsive SkillHub LMS — built with hand-written CSS and media queries</div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="section-label">what we built in days 3–5</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#dbeafe;border-radius:8px;font-size:12px;font-weight:700;color:#1e40af">
+            <span>HTML Structure (Days 1–2)</span><span class="badge b-green" style="font-size:10px">✓ done</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#d1fae5;border-radius:8px;font-size:12px;font-weight:700;color:#065f46">
+            <span>CSS Styling (Days 3–4)</span><span class="badge b-green" style="font-size:10px">✓ done</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#ede9fe;border-radius:8px;font-size:12px;font-weight:700;color:#5b21b6">
+            <span>Responsive Design (Day 5)</span><span class="badge b-green" style="font-size:10px">✓ done</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#ede9fe;border-radius:8px;font-size:12px;font-weight:700;color:#5b21b6;border:2px solid #c4b5fd">
+            <span>Bootstrap (Day 6 — today)</span><span class="badge b-purple" style="font-size:10px">← start</span>
+          </div>
+        </div>
+        <div style="margin-top:12px">
+          <div class="section-label">current file structure</div>
+          <div style="background:#0f172a;border-radius:10px;padding:14px 18px;font-family:monospace;font-size:12px;line-height:1.9">
+            <div style="color:#fbbf24;font-weight:700"><i class="ti ti-folder-filled"></i> SkillHub-LMS/</div>
+            <div style="margin-left:16px;color:#60a5fa"><i class="ti ti-folder"></i> frontend/</div>
+            <div style="margin-left:36px;color:#a3e635"><i class="ti ti-file-code"></i> index.html</div>
+            <div style="margin-left:36px;color:#60a5fa"><i class="ti ti-folder"></i> css/</div>
+            <div style="margin-left:56px;color:#f472b6"><i class="ti ti-file-code"></i> style.css <span style="color:#6272a4;font-size:10px">← ~250 lines</span></div>
+            <div style="margin-left:36px;color:#60a5fa"><i class="ti ti-folder"></i> images/</div>
+            <div style="margin-left:16px;color:#60a5fa"><i class="ti ti-folder"></i> backend/</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">current page preview</div>
+        <div class="browser">
+          <div class="browser-bar"><div class="b-dot2 b-r"></div><div class="b-dot2 b-y"></div><div class="b-dot2 b-g"></div><div class="b-url">index.html</div></div>
+          <div class="sh-after">
+            <div class="sh-after-h">SkillHub LMS</div>
+            <div class="sh-after-nav"><span>Home</span><span>Courses</span><span>Blog</span><span>Projects</span><span>Login</span></div>
+            <div class="sh-after-hero">
+              <div class="sh-after-h2">Become a Full Stack Developer</div>
+              <div class="sh-after-sub">Learn by building real-world MERN projects</div>
+            </div>
+            <div class="sh-after-cards">
+              <div class="sh-after-card">📘 HTML &amp; CSS</div>
+              <div class="sh-after-card">⚡ JavaScript</div>
+              <div class="sh-after-card">⚛️ React.js</div>
+              <div class="sh-after-card">🟢 Node.js</div>
+              <div class="sh-after-card">🍃 MongoDB</div>
+            </div>
+            <div style="background:#1e293b;color:#94a3b8;padding:8px 24px;font-size:10px;text-align:center">© 2026 SkillHub LMS. All rights reserved.</div>
+          </div>
+        </div>
+        <div class="warn-box" style="margin-top:8px">
+          <i class="ti ti-alert-triangle" style="color:#d97706;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+          <div style="font-size:13px;color:#92400e;line-height:1.6"><strong>The problem:</strong> This took ~250 lines of custom CSS. Bootstrap can achieve the same (or better) with far less code.</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-1"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 2  ACTIVITY — THE PROBLEM ═══ -->
+  <div class="slide" id="slide-2">
+    <div class="slide-header">
+      <span class="badge b-amber">Activity</span>
+      <div>
+        <div class="slide-title">The 200–300 Lines Problem</div>
+        <div class="slide-subtitle">Yesterday we wrote all this CSS just for a simple landing page. Can we do better?</div>
+      </div>
+    </div>
+    <div class="card card-gray">
+      <div style="font-size:14px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px">
+        <i class="ti ti-message-question" style="color:#d97706;font-size:20px"></i>
+        Yesterday we wrote around 200–300 lines of CSS. Can we reduce this to 20–30 lines?
+      </div>
+      <button class="reveal-btn" onclick="toggle('bootstrap-ans')">Reveal the answer</button>
+      <div class="reveal-content" id="bootstrap-ans">
+        <div style="margin-top:12px;padding:18px 20px;background:#fff;border-radius:12px;border:1px solid #c4b5fd">
+          <div style="font-size:20px;font-weight:800;color:#5b21b6;text-align:center;margin-bottom:8px">Yes — with Bootstrap!</div>
+          <div style="font-size:13px;color:#444;text-align:center;line-height:1.8">Bootstrap is a CSS framework that includes hundreds of pre-written CSS rules.<br>You apply them using class names on your HTML elements.</div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="section-label">lines of css comparison</div>
+      <div class="card" style="overflow:hidden">
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:13px">
+              <span style="font-weight:700;color:#dc2626">Hand-written CSS (Days 3–5)</span>
+              <span style="font-weight:700;color:#dc2626" id="raw-count">~250 lines</span>
+            </div>
+            <div style="height:12px;background:#fee2e2;border-radius:6px;overflow:hidden">
+              <div class="lines-bar" style="width:85%;background:#dc2626"></div>
+            </div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:13px">
+              <span style="font-weight:700;color:#7952b3">With Bootstrap (today)</span>
+              <span style="font-weight:700;color:#7952b3">~20–30 lines</span>
+            </div>
+            <div style="height:12px;background:#ede9fe;border-radius:6px;overflow:hidden">
+              <div class="lines-bar" style="width:10%;background:#7952b3"></div>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:14px;font-size:13px;color:#555;text-align:center;font-style:italic">Bootstrap handles the other 220+ lines invisibly — you just use class names.</div>
+      </div>
+    </div>
+    <div class="grid-3">
+      <div class="card" style="text-align:center;border-color:#fca5a5">
+        <i class="ti ti-writing" style="font-size:24px;color:#dc2626;margin-bottom:6px;display:block"></i>
+        <div style="font-size:13px;font-weight:700;margin-bottom:4px">Without Bootstrap</div>
+        <div style="font-size:12px;color:#555">Write every rule from scratch: flexbox, padding, colours, responsiveness…</div>
+      </div>
+      <div class="card" style="text-align:center;border-color:#c4b5fd">
+        <i class="ti ti-wand" style="font-size:24px;color:#7952b3;margin-bottom:6px;display:block"></i>
+        <div style="font-size:13px;font-weight:700;margin-bottom:4px">With Bootstrap</div>
+        <div style="font-size:12px;color:#555">Add class names to HTML. Bootstrap applies the CSS for you automatically.</div>
+      </div>
+      <div class="card" style="text-align:center;border-color:#86efac">
+        <i class="ti ti-rocket" style="font-size:24px;color:#16a34a;margin-bottom:6px;display:block"></i>
+        <div style="font-size:13px;font-weight:700;margin-bottom:4px">Result</div>
+        <div style="font-size:12px;color:#555">Same visual output — in a fraction of the time. Industry standard speed.</div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-2"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">What Is Bootstrap? <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 3  WHAT IS BOOTSTRAP ═══ -->
+  <div class="slide" id="slide-3">
+    <div class="slide-header">
+      <span class="badge b-purple">Concept</span>
+      <div>
+        <div class="slide-title">What Is Bootstrap?</div>
+        <div class="slide-subtitle">A CSS framework — a pre-written CSS file you add to your project</div>
+      </div>
+    </div>
+    <div class="card" style="border-color:#c4b5fd;background:#faf5ff">
+      <div style="display:flex;gap:16px;align-items:center">
+        <div style="width:56px;height:56px;background:#7952b3;border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <i class="ti ti-brand-bootstrap" style="font-size:30px;color:#fff"></i>
+        </div>
+        <div>
+          <div style="font-size:16px;font-weight:700;color:#4c1d95;margin-bottom:4px">Bootstrap 5</div>
+          <div style="font-size:13px;color:#5b21b6;line-height:1.65">The world's most popular CSS framework. Created by Twitter in 2011. Used by millions of websites worldwide — including NASA, Spotify, and LinkedIn at various points.</div>
+        </div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="section-label">the big idea — a class name does the CSS work</div>
+        <div class="ba-row" style="display:block">
+          <div style="margin-bottom:10px">
+            <div class="ba-col-head" style="background:#fee2e2;color:#991b1b"><i class="ti ti-x"></i> Without Bootstrap — 6 CSS lines</div>
+            <div class="editor" style="border-radius:0 0 8px 8px">
+              <div class="editor-body" style="font-size:12px;padding:10px 14px">
+                <div class="e-row"><span class="c-sel">.btn</span><span class="c-punc"> {</span></div>
+                <div class="e-row"><span class="e-ind1"></span><span class="c-prop">display</span><span class="c-punc">:</span><span class="c-str">flex</span><span class="c-punc">;</span></div>
+                <div class="e-row"><span class="e-ind1"></span><span class="c-prop">justify-content</span><span class="c-punc">:</span><span class="c-str">center</span><span class="c-punc">;</span></div>
+                <div class="e-row"><span class="e-ind1"></span><span class="c-prop">align-items</span><span class="c-punc">:</span><span class="c-str">center</span><span class="c-punc">;</span></div>
+                <div class="e-row"><span class="e-ind1"></span><span class="c-prop">padding</span><span class="c-punc">:</span><span class="c-num">20px</span><span class="c-punc">;</span></div>
+                <div class="e-row"><span class="e-ind1"></span><span class="c-prop">background</span><span class="c-punc">:</span><span class="c-hex">#2563eb</span><span class="c-punc">;</span></div>
+                <div class="e-row"><span class="e-ind1"></span><span class="c-prop">border-radius</span><span class="c-punc">:</span><span class="c-num">8px</span><span class="c-punc">;</span></div>
+                <div class="e-row"><span class="c-punc">}</span></div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="ba-col-head" style="background:#d1fae5;color:#065f46"><i class="ti ti-check"></i> With Bootstrap — 1 HTML line</div>
+            <div class="editor" style="border-radius:0 0 8px 8px">
+              <div class="editor-body" style="font-size:12px;padding:10px 14px">
+                <div class="e-row"><span class="e-new">&lt;div</span> <span class="e-att">class</span><span class="e-val">=</span><span style="color:#f1fa8c">"</span><span class="c-cls">d-flex</span> <span class="c-cls">justify-content-center</span></div>
+                <div class="e-row"><span class="e-ind2"></span><span class="c-cls">align-items-center</span> <span class="c-cls">p-3</span></div>
+                <div class="e-row"><span class="e-ind2"></span><span class="c-cls">bg-primary</span> <span class="c-cls">rounded</span><span style="color:#f1fa8c">"</span><span class="e-new">&gt;</span></div>
+                <div class="e-row"><span class="e-cmt">  /* Zero CSS written — Bootstrap does it all */</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;justify-content:center">
+        <div style="font-size:13px;font-weight:700;color:#555;margin-bottom:4px">Each class name maps to a CSS rule:</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#f8f9fa;border-radius:8px;font-size:12px">
+            <span class="bs-pill">d-flex</span><span style="color:#555">→ <code>display: flex</code></span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#f8f9fa;border-radius:8px;font-size:12px">
+            <span class="bs-pill">justify-content-center</span><span style="color:#555">→ <code>justify-content: center</code></span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#f8f9fa;border-radius:8px;font-size:12px">
+            <span class="bs-pill">p-3</span><span style="color:#555">→ <code>padding: 1rem (16px)</code></span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#f8f9fa;border-radius:8px;font-size:12px">
+            <span class="bs-pill">bg-primary</span><span style="color:#555">→ <code>background: #0d6efd</code></span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#f8f9fa;border-radius:8px;font-size:12px">
+            <span class="bs-pill">rounded</span><span style="color:#555">→ <code>border-radius: .375rem</code></span>
+          </div>
+        </div>
+        <div class="success-box" style="margin-top:4px">
+          <i class="ti ti-sparkles" style="color:#16a34a;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+          <div style="font-size:13px;color:#166534;line-height:1.6">This is the entire idea of Bootstrap. Class names = CSS rules. Once you know the class names, you never need to write that CSS again.</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-3"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">See More Comparisons <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 4  CSS VS BOOTSTRAP SIDE BY SIDE ═══ -->
+  <div class="slide" id="slide-4">
+    <div class="slide-header">
+      <span class="badge b-blue">Compare</span>
+      <div>
+        <div class="slide-title">CSS vs Bootstrap — Side by Side</div>
+        <div class="slide-subtitle">The same visual result — Bootstrap gets there with far less code</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+
+      <!-- comparison 1 — button -->
+      <div class="card" style="overflow:hidden;padding:0">
+        <div style="display:grid;grid-template-columns:auto 1fr 1fr;border-bottom:1px solid #f0f0f0">
+          <div style="padding:10px 14px;background:#f8f9fa;border-right:1px solid #f0f0f0;font-size:12px;font-weight:700;color:#888;writing-mode:vertical-lr;transform:rotate(180deg);text-align:center">Button</div>
+          <div>
+            <div style="padding:6px 12px;background:#fee2e2;font-size:11px;font-weight:700;color:#991b1b;border-bottom:1px solid #fca5a5">Plain CSS</div>
+            <div class="editor" style="border-radius:0">
+              <div class="editor-body" style="font-size:11px;padding:8px 12px;line-height:1.7">
+                <div class="e-row"><span class="e-tag">&lt;button</span> <span class="e-att">class</span><span class="e-val">="my-btn"</span><span class="e-tag">&gt;</span><span class="e-txt">Enroll</span><span class="e-tag">&lt;/button&gt;</span></div>
+                <div class="e-row"><span class="c-sel">.my-btn</span><span class="c-punc">{</span><span class="c-prop">background</span><span class="c-punc">:</span><span class="c-hex">#2563eb</span><span class="c-punc">;</span><span class="c-prop">color</span><span class="c-punc">:</span><span class="c-str">white</span><span class="c-punc">;</span><span class="c-prop">padding</span><span class="c-punc">:</span><span class="c-num">10px 24px</span><span class="c-punc">;</span><span class="c-prop">border</span><span class="c-punc">:</span><span class="c-str">none</span><span class="c-punc">;</span><span class="c-prop">border-radius</span><span class="c-punc">:</span><span class="c-num">6px</span><span class="c-punc">;</span><span class="c-prop">cursor</span><span class="c-punc">:</span><span class="c-str">pointer</span><span class="c-punc">;}</span></div>
+              </div>
+            </div>
+          </div>
+          <div style="border-left:1px solid #f0f0f0">
+            <div style="padding:6px 12px;background:#d1fae5;font-size:11px;font-weight:700;color:#065f46;border-bottom:1px solid #86efac">Bootstrap</div>
+            <div class="editor" style="border-radius:0">
+              <div class="editor-body" style="font-size:11px;padding:8px 12px;line-height:1.7">
+                <div class="e-row"><span class="e-tag">&lt;button</span> <span class="e-att">class</span><span class="e-val">=</span><span style="color:#f1fa8c">"</span><span class="c-cls">btn btn-primary</span><span style="color:#f1fa8c">"</span><span class="e-tag">&gt;</span><span class="e-txt">Enroll</span><span class="e-tag">&lt;/button&gt;</span></div>
+                <div class="e-row"><span class="e-cmt">/* No CSS needed at all! */</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- comparison 2 — text centering -->
+      <div class="card" style="overflow:hidden;padding:0">
+        <div style="display:grid;grid-template-columns:auto 1fr 1fr;border-bottom:1px solid #f0f0f0">
+          <div style="padding:10px 14px;background:#f8f9fa;border-right:1px solid #f0f0f0;font-size:12px;font-weight:700;color:#888;writing-mode:vertical-lr;transform:rotate(180deg);text-align:center">Center</div>
+          <div>
+            <div style="padding:6px 12px;background:#fee2e2;font-size:11px;font-weight:700;color:#991b1b;border-bottom:1px solid #fca5a5">Plain CSS</div>
+            <div class="editor" style="border-radius:0">
+              <div class="editor-body" style="font-size:11px;padding:8px 12px;line-height:1.7">
+                <div class="e-row"><span class="e-tag">&lt;div</span> <span class="e-att">class</span><span class="e-val">="hero"</span><span class="e-tag">&gt;</span></div>
+                <div class="e-row"><span class="c-sel">.hero</span><span class="c-punc">{</span><span class="c-prop">text-align</span><span class="c-punc">:</span><span class="c-str">center</span><span class="c-punc">;</span><span class="c-prop">padding</span><span class="c-punc">:</span><span class="c-num">60px</span><span class="c-punc">;</span><span class="c-prop">background</span><span class="c-punc">:</span><span class="c-hex">#1d4ed8</span><span class="c-punc">;}</span></div>
+              </div>
+            </div>
+          </div>
+          <div style="border-left:1px solid #f0f0f0">
+            <div style="padding:6px 12px;background:#d1fae5;font-size:11px;font-weight:700;color:#065f46;border-bottom:1px solid #86efac">Bootstrap</div>
+            <div class="editor" style="border-radius:0">
+              <div class="editor-body" style="font-size:11px;padding:8px 12px;line-height:1.7">
+                <div class="e-row"><span class="e-tag">&lt;div</span> <span class="e-att">class</span><span class="e-val">=</span><span style="color:#f1fa8c">"</span><span class="c-cls">text-center py-5 bg-primary</span><span style="color:#f1fa8c">"</span><span class="e-tag">&gt;</span></div>
+                <div class="e-row"><span class="e-cmt">/* No CSS needed! */</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- comparison 3 — card -->
+      <div class="card" style="overflow:hidden;padding:0">
+        <div style="display:grid;grid-template-columns:auto 1fr 1fr">
+          <div style="padding:10px 14px;background:#f8f9fa;border-right:1px solid #f0f0f0;font-size:12px;font-weight:700;color:#888;writing-mode:vertical-lr;transform:rotate(180deg);text-align:center">Card</div>
+          <div>
+            <div style="padding:6px 12px;background:#fee2e2;font-size:11px;font-weight:700;color:#991b1b;border-bottom:1px solid #fca5a5">Plain CSS</div>
+            <div class="editor" style="border-radius:0">
+              <div class="editor-body" style="font-size:11px;padding:8px 12px;line-height:1.7">
+                <div class="e-row"><span class="e-tag">&lt;div</span> <span class="e-att">class</span><span class="e-val">="card"</span><span class="e-tag">&gt;</span></div>
+                <div class="e-row"><span class="c-sel">.card</span><span class="c-punc">{</span><span class="c-prop">background</span><span class="c-punc">:</span><span class="c-hex">#fff</span><span class="c-punc">;</span><span class="c-prop">border-radius</span><span class="c-punc">:</span><span class="c-num">8px</span><span class="c-punc">;</span><span class="c-prop">padding</span><span class="c-punc">:</span><span class="c-num">16px</span><span class="c-punc">;</span><span class="c-prop">box-shadow</span><span class="c-punc">:</span><span class="c-str">0 2px 8px rgba(0,0,0,.1)</span><span class="c-punc">;}</span></div>
+              </div>
+            </div>
+          </div>
+          <div style="border-left:1px solid #f0f0f0">
+            <div style="padding:6px 12px;background:#d1fae5;font-size:11px;font-weight:700;color:#065f46;border-bottom:1px solid #86efac">Bootstrap</div>
+            <div class="editor" style="border-radius:0">
+              <div class="editor-body" style="font-size:11px;padding:8px 12px;line-height:1.7">
+                <div class="e-row"><span class="e-tag">&lt;div</span> <span class="e-att">class</span><span class="e-val">=</span><span style="color:#f1fa8c">"</span><span class="c-cls">card shadow rounded p-3</span><span style="color:#f1fa8c">"</span><span class="e-tag">&gt;</span></div>
+                <div class="e-row"><span class="e-cmt">/* No CSS! Bootstrap handles it */</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tip-box">
+      <i class="ti ti-bulb tip-icon"></i>
+      <div class="tip-text"><strong>Notice the pattern:</strong> Every Bootstrap class name describes what it does — <code>text-center</code>, <code>bg-primary</code>, <code>p-3</code>, <code>rounded</code>. Once you learn the naming convention, you can guess most class names without looking them up.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-4"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Bootstrap Features <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 5  FEATURES ═══ -->
+  <div class="slide" id="slide-5">
+    <div class="slide-header">
+      <span class="badge b-teal">Features</span>
+      <div>
+        <div class="slide-title">Bootstrap Features</div>
+        <div class="slide-subtitle">Six reasons Bootstrap is the first tool every web developer learns</div>
+      </div>
+    </div>
+    <div class="grid-3">
+      <div class="bs-feature" style="border-color:#c4b5fd">
+        <div class="bs-feature-icon" style="background:#ede9fe"><i class="ti ti-device-mobile" style="font-size:22px;color:#7952b3"></i></div>
+        <div style="font-size:13px;font-weight:700;margin-bottom:4px">Responsive by Default</div>
+        <div style="font-size:12px;color:#555;line-height:1.55">Every Bootstrap component works on mobile, tablet, and desktop out of the box. No extra media queries needed for most things.</div>
+      </div>
+      <div class="bs-feature" style="border-color:#6ee7b7">
+        <div class="bs-feature-icon" style="background:#d1fae5"><i class="ti ti-star" style="font-size:22px;color:#065f46"></i></div>
+        <div style="font-size:13px;font-weight:700;margin-bottom:4px">Mobile-First</div>
+        <div style="font-size:12px;color:#555;line-height:1.55">Built from mobile up. CSS is written for small screens first, then enhanced for larger screens — exactly the professional approach we learned in Day 5.</div>
+      </div>
+      <div class="bs-feature" style="border-color:#93c5fd">
+        <div class="bs-feature-icon" style="background:#dbeafe"><i class="ti ti-components" style="font-size:22px;color:#1d4ed8"></i></div>
+        <div style="font-size:13px;font-weight:700;margin-bottom:4px">Ready-Made Components</div>
+        <div style="font-size:12px;color:#555;line-height:1.55">Navbars, cards, modals, buttons, forms, alerts — all designed and ready. Copy, paste, customise.</div>
+      </div>
+      <div class="bs-feature" style="border-color:#fde68a">
+        <div class="bs-feature-icon" style="background:#fef3c7"><i class="ti ti-layout-grid" style="font-size:22px;color:#d97706"></i></div>
+        <div style="font-size:13px;font-weight:700;margin-bottom:4px">12-Column Grid System</div>
+        <div style="font-size:12px;color:#555;line-height:1.55">Create any layout with rows and columns. Cards in 3 columns on desktop, 1 column on mobile — one class name does it all.</div>
+      </div>
+      <div class="bs-feature" style="border-color:#fca5a5">
+        <div class="bs-feature-icon" style="background:#fee2e2"><i class="ti ti-tool" style="font-size:22px;color:#dc2626"></i></div>
+        <div style="font-size:13px;font-weight:700;margin-bottom:4px">Utility Classes</div>
+        <div style="font-size:12px;color:#555;line-height:1.55">Single-purpose classes for padding, margin, colour, text size, flex, and more. Build layouts without touching CSS.</div>
+      </div>
+      <div class="bs-feature" style="border-color:#86efac">
+        <div class="bs-feature-icon" style="background:#dcfce7"><i class="ti ti-bolt" style="font-size:22px;color:#16a34a"></i></div>
+        <div style="font-size:13px;font-weight:700;margin-bottom:4px">Faster Development</div>
+        <div style="font-size:12px;color:#555;line-height:1.55">Build production-quality UIs in hours instead of days. Used by startups and large companies to prototype rapidly.</div>
+      </div>
+    </div>
+    <div class="info-box">
+      <i class="ti ti-info-circle info-icon"></i>
+      <div class="info-text"><strong>Industry context:</strong> Bootstrap is used by <strong>21% of all websites</strong> — making it one of the most-used web technologies on earth. Knowing it is a standard expectation in any frontend developer job.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-5"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Add Bootstrap <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 6  ADDING BOOTSTRAP VIA CDN ═══ -->
+  <div class="slide" id="slide-6">
+    <div class="slide-header">
+      <span class="badge b-cyan">Setup</span>
+      <div>
+        <div class="slide-title">Adding Bootstrap via CDN</div>
+        <div class="slide-subtitle">Method 1 (recommended) — two lines, no installation, works instantly</div>
+      </div>
+    </div>
+    <div class="card card-gray">
+      <div class="section-label">what is a CDN?</div>
+      <div class="cdn-flow">
+        <div class="cdn-box" style="background:#dbeafe;color:#1e40af"><i class="ti ti-device-laptop" style="font-size:20px;display:block;margin-bottom:4px"></i>Your<br>Browser</div>
+        <span class="cdn-arrow">→</span>
+        <div class="cdn-box" style="background:#ede9fe;color:#5b21b6"><i class="ti ti-cloud" style="font-size:20px;display:block;margin-bottom:4px"></i>CDN<br>Server</div>
+        <span class="cdn-arrow">→</span>
+        <div class="cdn-box" style="background:#d1fae5;color:#065f46"><i class="ti ti-file-code" style="font-size:20px;display:block;margin-bottom:4px"></i>bootstrap<br>.min.css</div>
+      </div>
+      <div style="font-size:13px;color:#444;text-align:center;margin-top:10px;line-height:1.7">CDN = <strong>Content Delivery Network</strong> — a fast global server that hosts Bootstrap for free.<br>You link to it, and the browser downloads Bootstrap automatically. <strong>No install needed.</strong></div>
+    </div>
+    <div class="activity-box">
+      <div class="activity-title"><i class="ti ti-keyboard"></i> Add these two lines to index.html now</div>
+      <div class="editor" style="border-radius:8px">
+        <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">frontend/index.html</span></div>
+        <div class="editor-body">
+          <div class="e-row"><span class="e-ln">1</span><span class="e-tag">&lt;!DOCTYPE html&gt;</span></div>
+          <div class="e-row"><span class="e-ln">2</span><span class="e-tag">&lt;html</span> <span class="e-att">lang</span><span class="e-val">="en"</span><span class="e-tag">&gt;</span></div>
+          <div class="e-row"><span class="e-ln">3</span><span class="e-tag">&lt;head&gt;</span></div>
+          <div class="e-row"><span class="e-ln">4</span><span class="e-ind1"></span><span class="e-tag">&lt;meta</span> <span class="e-att">charset</span><span class="e-val">="UTF-8"</span><span class="e-tag">&gt;</span></div>
+          <div class="e-row"><span class="e-ln">5</span><span class="e-ind1"></span><span class="e-tag">&lt;meta</span> <span class="e-att">name</span><span class="e-val">="viewport"</span> <span class="e-att">content</span><span class="e-val">="width=device-width, initial-scale=1.0"</span><span class="e-tag">&gt;</span></div>
+          <div class="e-row"><span class="e-ln">6</span><span class="e-ind1"></span><span class="e-tag">&lt;title&gt;</span><span class="e-txt">SkillHub LMS</span><span class="e-tag">&lt;/title&gt;</span></div>
+          <div class="e-row" style="background:#1a2a1a"><span class="e-ln">7</span><span class="e-ind1"></span><span class="e-cmt">&lt;!-- Bootstrap 5.3 CSS --&gt;</span></div>
+          <div class="e-row" style="background:#1a2a1a"><span class="e-ln">8</span><span class="e-ind1"></span><span class="e-new">&lt;link</span> <span class="e-att">href</span><span class="e-val">="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"</span></div>
+          <div class="e-row" style="background:#1a2a1a"><span class="e-ln">9</span><span class="e-ind2"></span><span class="e-att">rel</span><span class="e-val">="stylesheet"</span><span class="e-new">&gt;</span></div>
+          <div class="e-row"><span class="e-ln">10</span><span class="e-ind1"></span><span class="e-tag">&lt;link</span> <span class="e-att">rel</span><span class="e-val">="stylesheet"</span> <span class="e-att">href</span><span class="e-val">="css/style.css"</span><span class="e-tag">&gt;</span></div>
+          <div class="e-row"><span class="e-ln">11</span><span class="e-tag">&lt;/head&gt;</span></div>
+          <div class="e-row"><span class="e-ln">12</span><span class="e-tag">&lt;body&gt;</span></div>
+          <div class="e-row"><span class="e-ln">…</span></div>
+          <div class="e-row" style="background:#1a2a1a"><span class="e-ln"> </span><span class="e-cmt">&lt;!-- Bootstrap 5.3 JS (before closing &lt;/body&gt;) --&gt;</span></div>
+          <div class="e-row" style="background:#1a2a1a"><span class="e-ln"> </span><span class="e-new">&lt;script</span> <span class="e-att">src</span><span class="e-val">="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"</span><span class="e-new">&gt;&lt;/script&gt;</span></div>
+          <div class="e-row"><span class="e-ln"> </span><span class="e-tag">&lt;/body&gt;</span></div>
+          <div class="e-row"><span class="e-ln"> </span><span class="e-tag">&lt;/html&gt;</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="tip-box">
+      <i class="ti ti-bulb tip-icon"></i>
+      <div class="tip-text"><strong>Order matters:</strong> Bootstrap CSS goes <em>before</em> your <code>style.css</code> — so your custom CSS can override Bootstrap's defaults. The Bootstrap JS goes <em>before</em> closing <code>&lt;/body&gt;</code> — for page performance.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-6"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Why Nothing Changes <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 7  WHY NOTHING CHANGES ═══ -->
+  <div class="slide" id="slide-7">
+    <div class="slide-header">
+      <span class="badge b-slate">Why</span>
+      <div>
+        <div class="slide-title">Why Nothing Changes Yet</div>
+        <div class="slide-subtitle">Bootstrap is loaded — but you haven't told it which elements to style</div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="section-label">open the browser — observe</div>
+        <div class="browser">
+          <div class="browser-bar"><div class="b-dot2 b-r"></div><div class="b-dot2 b-y"></div><div class="b-dot2 b-g"></div><div class="b-url">index.html (Bootstrap added)</div></div>
+          <div class="sh-after">
+            <div class="sh-after-h">SkillHub LMS</div>
+            <div class="sh-after-nav"><span>Home</span><span>Courses</span><span>Blog</span><span>Projects</span></div>
+            <div class="sh-after-hero"><div class="sh-after-h2">Become a Full Stack Developer</div><div class="sh-after-sub">Learn by building real-world MERN projects</div></div>
+            <div class="sh-after-cards"><div class="sh-after-card">📘 HTML</div><div class="sh-after-card">⚡ JS</div><div class="sh-after-card">⚛️ React</div></div>
+          </div>
+        </div>
+        <div style="margin-top:8px;padding:10px 14px;background:#fef9ee;border:1px solid #fcd34d;border-radius:10px;font-size:13px;color:#92400e">
+          ⚠ The page looks the same as before! This is expected and correct.
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;justify-content:center">
+        <div class="card card-gray">
+          <div class="section-label">why this happens</div>
+          <div style="font-size:13px;color:#444;line-height:1.75">
+            Bootstrap's CSS file contains thousands of rules — but they only apply to elements that have <strong>Bootstrap class names</strong>.<br><br>
+            Adding the <code>&lt;link&gt;</code> tag just loads Bootstrap into memory. Until you write <code>class="btn btn-primary"</code> on a button, Bootstrap has nothing to style.<br><br>
+            <strong>Think of it like this:</strong> You've delivered a paintbox. Now you need to pick up a brush.
+          </div>
+        </div>
+        <div class="card" style="border-color:#86efac;background:#f0fdf4">
+          <div style="font-size:13px;font-weight:700;color:#166534;margin-bottom:6px">✅ What is happening in the background</div>
+          <div style="display:flex;flex-direction:column;gap:4px;font-size:13px;color:#166534">
+            <div style="display:flex;align-items:center;gap:6px"><i class="ti ti-circle-check" style="font-size:14px"></i> Bootstrap CSS file downloaded (148 KB)</div>
+            <div style="display:flex;align-items:center;gap:6px"><i class="ti ti-circle-check" style="font-size:14px"></i> Bootstrap JS bundle downloaded (67 KB)</div>
+            <div style="display:flex;align-items:center;gap:6px"><i class="ti ti-circle-check" style="font-size:14px"></i> ~1,500 Bootstrap CSS rules now available</div>
+            <div style="display:flex;align-items:center;gap:6px"><i class="ti ti-circle-dashed" style="font-size:14px;color:#d97706"></i> None applied yet — waiting for class names</div>
+          </div>
+        </div>
+        <div class="info-box">
+          <i class="ti ti-info-circle info-icon"></i>
+          <div class="info-text"><strong>Next step:</strong> We'll start using Bootstrap class names, starting with <code>.container</code> — the foundation of every Bootstrap layout.</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-7"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">The Container <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 8  .container ═══ -->
+  <div class="slide" id="slide-8">
+    <div class="slide-header">
+      <span class="badge b-orange">Container</span>
+      <div>
+        <div class="slide-title">The .container Class</div>
+        <div class="slide-subtitle">The first Bootstrap class every project uses — automatic alignment and spacing</div>
+      </div>
+    </div>
+    <div class="activity-box">
+      <div class="activity-title"><i class="ti ti-keyboard"></i> Practice — create this inside &lt;body&gt;</div>
+      <div class="editor" style="border-radius:8px">
+        <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">index.html — inside &lt;body&gt;</span></div>
+        <div class="editor-body">
+          <div class="e-row"><span class="e-new">&lt;div</span> <span class="e-att">class</span><span class="e-val">=</span><span style="color:#f1fa8c">"</span><span class="c-cls">container</span><span style="color:#f1fa8c">"</span><span class="e-new">&gt;</span></div>
+          <div class="e-row"><span class="e-ind1"></span><span class="e-h2">&lt;h1&gt;</span><span class="e-txt">Welcome to SkillHub LMS</span><span class="e-h2">&lt;/h1&gt;</span></div>
+          <div class="e-row"><span class="e-new">&lt;/div&gt;</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="section-label">what .container does — visual</div>
+        <div class="container-demo">
+          <div style="background:#fce7f3;padding:8px 10px;font-size:11px;font-weight:700;color:#9d174d;text-align:center">Full browser width (may be 1440px+)</div>
+          <div class="container-outer">
+            <div class="container-inner">
+              <div style="font-size:10px;color:#888;margin-bottom:4px">🔒 .container — max-width applied</div>
+              <div>Welcome to SkillHub LMS</div>
+              <div style="font-size:10px;color:#1d4ed8;margin-top:4px">Centred with automatic left + right margins</div>
+            </div>
+          </div>
+          <div style="background:#fce7f3;height:8px"></div>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#666;text-align:center;line-height:1.7">Pink = page edges · Blue = container content area<br>The container never stretches to fill the full width</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="card card-gray">
+          <div class="section-label">what .container provides</div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:#fff;border-radius:8px;border:1px solid #e8e8e8;font-size:13px">
+              <i class="ti ti-align-center" style="color:#7952b3;font-size:16px;flex-shrink:0"></i>
+              <div><strong>Centred automatically</strong> — no margin:0 auto needed</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:#fff;border-radius:8px;border:1px solid #e8e8e8;font-size:13px">
+              <i class="ti ti-ruler" style="color:#1d4ed8;font-size:16px;flex-shrink:0"></i>
+              <div><strong>Max-width at each breakpoint</strong> — never too wide on large screens</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:#fff;border-radius:8px;border:1px solid #e8e8e8;font-size:13px">
+              <i class="ti ti-device-mobile" style="color:#065f46;font-size:16px;flex-shrink:0"></i>
+              <div><strong>Full-width on mobile</strong> — fills screen on small devices</div>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="padding:0;overflow:hidden">
+          <table class="tag-table" style="font-size:12px">
+            <thead><tr><th>Class</th><th>Max Width</th></tr></thead>
+            <tbody>
+              <tr><td><span class="bs-pill">container</span></td><td>Responsive — changes per breakpoint</td></tr>
+              <tr><td><span class="bs-pill">container-sm</span></td><td>540px on ≥sm</td></tr>
+              <tr><td><span class="bs-pill">container-md</span></td><td>720px on ≥md</td></tr>
+              <tr><td><span class="bs-pill">container-fluid</span></td><td>Always 100% wide</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="tip-box">
+          <i class="ti ti-bulb tip-icon"></i>
+          <div class="tip-text"><strong>Rule of thumb:</strong> Wrap every section's content in a <code>.container</code>. It's the equivalent of saying "keep this content aligned and readable."</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-8"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Explain Line by Line <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 9  LINE-BY-LINE EXPLAINER ═══ -->
+  <div class="slide" id="slide-9">
+    <div class="slide-header">
+      <span class="badge b-indigo">Explain</span>
+      <div>
+        <div class="slide-title">CDN + Container — Line by Line</div>
+        <div class="slide-subtitle">Click each row to expand the explanation</div>
+      </div>
+    </div>
+    <div class="line-explain">
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code" style="min-width:180px"><span class="e-new">&lt;link</span> <span class="e-att">href</span><span class="e-val">="cdn…"</span><span class="e-new">&gt;</span></div>
+        <div class="lex-info">
+          <div class="lex-name">Bootstrap CSS CDN Link — in &lt;head&gt;</div>
+          <div class="lex-desc">Loads Bootstrap's entire CSS stylesheet from a remote CDN server</div>
+          <div class="lex-detail">This single line downloads ~148 KB of production-minified CSS containing all Bootstrap utility classes, grid rules, component styles, and responsive breakpoints. It goes inside &lt;head&gt;, <strong>before</strong> your own style.css link — so your custom CSS can override Bootstrap when needed.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code" style="min-width:180px"><span class="e-att">rel</span><span class="c-punc">=</span><span class="e-val">"stylesheet"</span></div>
+        <div class="lex-info">
+          <div class="lex-name">rel attribute — same as Day 3</div>
+          <div class="lex-desc">Tells the browser this link is a stylesheet to apply</div>
+          <div class="lex-detail">Without rel="stylesheet", the browser downloads the file but doesn't apply it. This is the same attribute we used in Day 3 when linking our own style.css. Bootstrap's CDN link is identical in structure — just with a different href URL.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code" style="min-width:180px"><span class="e-tag">bootstrap@5.3.7</span></div>
+        <div class="lex-info">
+          <div class="lex-name">Version number — always use latest stable</div>
+          <div class="lex-desc">Specifies exactly which version of Bootstrap to load</div>
+          <div class="lex-detail">Bootstrap 5.3.7 is the current stable release. The @ symbol means "this specific version." Never use @latest in production (it can break if Bootstrap releases a major update with breaking changes). Always specify an exact version number.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code" style="min-width:180px"><span class="e-new">&lt;script</span> <span class="e-att">src</span><span class="e-val">="cdn…js"</span><span class="e-new">&gt;</span></div>
+        <div class="lex-info">
+          <div class="lex-name">Bootstrap JS Bundle — before &lt;/body&gt;</div>
+          <div class="lex-desc">Loads Bootstrap's JavaScript for interactive components (modals, dropdowns, navbars)</div>
+          <div class="lex-detail">The "bundle" version includes Popper.js, which powers dropdowns, tooltips, and popovers. Without this JS file, static elements (buttons, cards, containers) still work — but interactive components (hamburger menu, modal popups, dropdown navigation) won't function. Place it before &lt;/body&gt; so it loads after the HTML — improving page load speed.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code" style="min-width:180px"><span class="e-att">class</span><span class="c-punc">=</span><span style="color:#f1fa8c">"</span><span class="c-cls">container</span><span style="color:#f1fa8c">"</span></div>
+        <div class="lex-info">
+          <div class="lex-name">class="container" — first Bootstrap class you use</div>
+          <div class="lex-desc">Centres the element and sets a responsive maximum width</div>
+          <div class="lex-detail">Bootstrap's .container class adds: max-width that changes at each breakpoint (576px / 720px / 960px / 1140px / 1320px) · margin-left: auto · margin-right: auto (centres it) · padding-left: 12px · padding-right: 12px. The result: content that's always readable, never too wide, automatically centred.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code" style="min-width:180px"><span class="e-cmt">/* bootstrap.min.css */</span></div>
+        <div class="lex-info">
+          <div class="lex-name">.min.css — what "minified" means</div>
+          <div class="lex-desc">All whitespace and comments removed — same CSS, smallest possible file size</div>
+          <div class="lex-detail">The full bootstrap.css is ~200 KB with comments and spacing for readability. bootstrap.min.css is the same CSS compressed to ~148 KB by removing all spaces, line breaks, and comments. Browsers don't need formatting — only the rules. Always use .min versions in production for faster page loads. During development, the non-minified version is easier to read in DevTools.</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-9"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Reference <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 10  REFERENCE ═══ -->
+  <div class="slide" id="slide-10">
+    <div class="slide-header">
+      <span class="badge b-slate">Reference</span>
+      <div>
+        <div class="slide-title">Bootstrap Utilities Reference</div>
+        <div class="slide-subtitle">The most-used Bootstrap classes — your go-to cheat sheet for Day 6</div>
+      </div>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden;margin-bottom:.25rem">
+      <table class="tag-table">
+        <thead><tr><th>Class</th><th>CSS it applies</th><th>Used for</th></tr></thead>
+        <tbody>
+          <tr><td><span class="bs-pill">container</span></td><td><code>max-width: responsive; margin: 0 auto;</code></td><td>Wrapping page sections — automatic centering</td></tr>
+          <tr><td><span class="bs-pill">container-fluid</span></td><td><code>width: 100%; padding: 0 12px;</code></td><td>Full-width sections (hero banners)</td></tr>
+          <tr><td><span class="bs-pill">text-center</span></td><td><code>text-align: center;</code></td><td>Centring headings and paragraphs</td></tr>
+          <tr><td><span class="bs-pill">bg-primary</span></td><td><code>background-color: #0d6efd;</code></td><td>Blue background — brand colour</td></tr>
+          <tr><td><span class="bs-pill">text-white</span></td><td><code>color: #fff;</code></td><td>White text (on dark backgrounds)</td></tr>
+          <tr><td><span class="bs-pill">p-3</span> / <span class="bs-pill">py-5</span></td><td><code>padding: 1rem</code> / <code>padding-top/bottom: 3rem</code></td><td>Spacing inside elements</td></tr>
+          <tr><td><span class="bs-pill">mt-4</span> / <span class="bs-pill">mb-3</span></td><td><code>margin-top: 1.5rem</code> / <code>margin-bottom: 1rem</code></td><td>Spacing between elements</td></tr>
+          <tr><td><span class="bs-pill">d-flex</span></td><td><code>display: flex;</code></td><td>Starting a flex layout</td></tr>
+          <tr><td><span class="bs-pill">justify-content-between</span></td><td><code>justify-content: space-between;</code></td><td>Navbar logo + links layout</td></tr>
+          <tr><td><span class="bs-pill">btn btn-primary</span></td><td>Full styled button (background, padding, hover, border)</td><td>Call-to-action buttons</td></tr>
+          <tr><td><span class="bs-pill">rounded</span></td><td><code>border-radius: .375rem;</code></td><td>Rounded corners on cards/images</td></tr>
+          <tr><td><span class="bs-pill">shadow</span></td><td><code>box-shadow: 0 .5rem 1rem rgba(0,0,0,.15);</code></td><td>Depth/elevation on cards</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="grid-2">
+      <div class="tip-box">
+        <i class="ti ti-bulb tip-icon"></i>
+        <div class="tip-text"><strong>Spacing scale:</strong> Bootstrap uses a 0–5 scale. <code>p-0</code> = 0px, <code>p-1</code> = 4px, <code>p-2</code> = 8px, <code>p-3</code> = 16px, <code>p-4</code> = 24px, <code>p-5</code> = 48px. The same scale applies to <code>m</code> (margin), <code>px</code>/<code>py</code> (x/y axis), <code>pt</code>/<code>pb</code> (top/bottom).</div>
+      </div>
+      <div class="info-box">
+        <i class="ti ti-info-circle info-icon"></i>
+        <div class="info-text"><strong>Hours 2 &amp; 3 today:</strong> We'll use the Bootstrap Grid System (<code>row</code> + <code>col</code>) to rebuild the SkillHub course cards and navigation with responsive columns — all without writing new CSS.</div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-10"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Quiz <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 11  QUIZ ═══ -->
+  <div class="slide" id="slide-11">
+    <div class="slide-header">
+      <span class="badge b-green">Quiz</span>
+      <div>
+        <div class="slide-title">Quick Check — Bootstrap Intro</div>
+        <div class="slide-subtitle">5 questions — tap the correct answer</div>
+      </div>
+    </div>
+    <div id="quiz-container"></div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-11"></div>
+      <button class="nav-btn" onclick="goSlide(0)"><i class="ti ti-home"></i> Home</button>
+    </div>
+  </div>
+
+</div><!-- /.wrapper -->
+<script>
+  var current = 0, total = 12, quizInit = false;
+
+  var quizData = [
+    {
+      q: "What is Bootstrap?",
+      opts: [
+        "A JavaScript framework like React, used for building UI components",
+        "A CSS framework — a pre-written CSS file that gives you ready-made styles through class names",
+        "A Node.js module you install with npm for backend development",
+        "A browser extension that adds design tools to Chrome DevTools"
+      ],
+      ans: 1,
+      exp: "Bootstrap is a CSS framework — a large pre-written CSS file. You load it via CDN, then apply its styles by adding class names to your HTML elements. No new CSS files needed for most common layouts."
+    },
+    {
+      q: "You've added the Bootstrap CDN link to index.html and refreshed the browser. The page looks the same. What is the most likely reason?",
+      opts: [
+        "The CDN URL is wrong and Bootstrap didn't load",
+        "Bootstrap is loaded but hasn't been applied yet — no Bootstrap class names have been added to HTML elements",
+        "Bootstrap only works with a local copy, not CDN",
+        "You must also add the Bootstrap JS before the CSS works"
+      ],
+      ans: 1,
+      exp: "Bootstrap CSS is loaded into memory, but its rules only apply to elements that have Bootstrap class names. Until you write class='container' or class='btn btn-primary', Bootstrap has nothing to style. The page looking unchanged is expected."
+    },
+    {
+      q: "What is a CDN and why do we use it for Bootstrap?",
+      opts: [
+        "A local folder — faster because it avoids internet requests",
+        "A Content Delivery Network — a global server that hosts Bootstrap for free, so browsers download it without you hosting the file",
+        "A JavaScript API that generates Bootstrap CSS dynamically at runtime",
+        "A package manager, similar to npm but specialised for CSS libraries"
+      ],
+      ans: 1,
+      exp: "CDN = Content Delivery Network. A fast global network of servers that hosts files like Bootstrap. When a user loads your page, their browser downloads Bootstrap from the nearest CDN server — fast, free, and requires zero setup on your end."
+    },
+    {
+      q: "What does <code>class=\"container\"</code> do in Bootstrap?",
+      opts: [
+        "Creates a &lt;div&gt; with display:flex and gap:20px",
+        "Wraps content in a centred responsive block with automatic max-width and margins",
+        "Makes the element 100% wide on all screen sizes",
+        "Adds a dark background and white text to any element"
+      ],
+      ans: 1,
+      exp: ".container adds: a responsive max-width that changes at each breakpoint, margin:0 auto (centres the element), and 12px left/right padding. It keeps content readable and aligned — never stretching to fill the full browser width on large screens."
+    },
+    {
+      q: "Where should the Bootstrap JS &lt;script&gt; tag be placed in index.html?",
+      opts: [
+        "Inside &lt;head&gt;, before the Bootstrap CSS link",
+        "Inside &lt;head&gt;, after the Bootstrap CSS link",
+        "Immediately after the opening &lt;body&gt; tag",
+        "Just before the closing &lt;/body&gt; tag"
+      ],
+      ans: 3,
+      exp: "Bootstrap JS goes just before &lt;/body&gt;. This is the recommended placement because: the browser parses HTML top-to-bottom, so placing JS at the bottom lets the page content load first — improving perceived performance. The CSS link goes in &lt;head&gt; so styles apply before the user sees content."
+    }
+  ];
+  var quizAnswered = [];
+
+  function renderQuiz() {
+    var c = document.getElementById('quiz-container'); c.innerHTML = '';
+    quizData.forEach(function(q, i) {
+      var d = document.createElement('div'); d.style.cssText = 'margin-bottom:18px';
+      d.innerHTML = '<div style="font-size:13px;font-weight:600;margin-bottom:6px">'+(i+1)+'. '+q.q+'</div>';
+      q.opts.forEach(function(opt, j) {
+        var btn = document.createElement('button'); btn.className = 'quiz-option';
+        btn.innerHTML = String.fromCharCode(65+j)+'. '+opt;
+        btn.onclick = function() {
+          if (quizAnswered[i]) return; quizAnswered[i] = true;
+          var btns = d.querySelectorAll('.quiz-option');
+          btns.forEach(function(b,k){ b.disabled=true; if(k===q.ans) b.classList.add('correct'); else if(k===j) b.classList.add('wrong'); });
+          var fb = d.querySelector('.quiz-feedback');
+          fb.innerHTML = (j===q.ans?'✅ Correct! ':'❌ Not quite. ')+q.exp;
+          fb.className = 'quiz-feedback '+(j===q.ans?'correct':'wrong');
+        };
+        d.appendChild(btn);
+      });
+      var fb = document.createElement('div'); fb.className = 'quiz-feedback'; d.appendChild(fb);
+      c.appendChild(d);
+    });
+  }
+
+  function toggleLex(row) {
+    var was = row.classList.contains('active');
+    document.querySelectorAll('.lex-row.active').forEach(function(r){ r.classList.remove('active'); });
+    if (!was) row.classList.add('active');
+  }
+
+  function toggle(id) {
+    var el = document.getElementById(id); el.classList.toggle('open');
+    el.previousElementSibling.textContent = el.classList.contains('open') ? 'Hide the answer' : 'Reveal the answer';
+  }
+
+  function goSlide(n) {
+    document.getElementById('slide-'+current).classList.remove('active');
+    current = n;
+    document.getElementById('slide-'+current).classList.add('active');
+    updateDots();
+    document.getElementById('slide-counter').textContent = (current+1)+' / '+total;
+    if (n===11 && !quizInit) { renderQuiz(); quizInit=true; }
+    window.scrollTo(0,0);
+  }
+  function nextSlide() { if (current < total-1) goSlide(current+1); }
+  function prevSlide() { if (current > 0) goSlide(current-1); }
+
+  function updateDots() {
+    for (var s=0; s<total; s++) {
+      var el = document.getElementById('dots-'+s); if (!el) continue;
+      el.innerHTML = '';
+      for (var d=0; d<total; d++) {
+        var dot = document.createElement('div');
+        dot.className = 'dot'+(d===current?' active':'');
+        el.appendChild(dot);
+      }
+    }
+  }
+  updateDots();
+</script>
+</body>
+</html>

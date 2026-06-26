@@ -1,0 +1,1238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Day 5 · Hour 1 – Responsive Web Design</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f4f5f7; color: #1a1a1a;
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; padding: 2rem 1rem;
+  }
+  .wrapper {
+    width: 100%; max-width: 920px; background: #fff;
+    border-radius: 16px; box-shadow: 0 2px 20px rgba(0,0,0,0.09); overflow: hidden;
+  }
+  .top-bar {
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    color: #fff; padding: 14px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .top-bar-title { font-size: 15px; font-weight: 600; }
+  .top-bar-sub   { font-size: 12px; opacity: .55; margin-top: 2px; }
+  .slide-counter { font-size: 13px; opacity: .6; font-variant-numeric: tabular-nums; }
+  .slide { display: none; padding: 1.75rem 2rem; min-height: 500px; flex-direction: column; gap: 1.2rem; }
+  .slide.active { display: flex; }
+  .slide-header { display: flex; align-items: center; gap: 10px; padding-bottom: 1rem; border-bottom: 1px solid #e8e8e8; }
+  .slide-title    { font-size: 20px; font-weight: 700; color: #111; }
+  .slide-subtitle { font-size: 13px; color: #666; margin-top: 2px; }
+
+  /* ── Badges ── */
+  .badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+  .b-blue   { background:#dbeafe; color:#1d4ed8; }
+  .b-teal   { background:#d1fae5; color:#065f46; }
+  .b-purple { background:#ede9fe; color:#5b21b6; }
+  .b-amber  { background:#fef3c7; color:#92400e; }
+  .b-green  { background:#dcfce7; color:#166534; }
+  .b-slate  { background:#e2e8f0; color:#334155; }
+  .b-rose   { background:#ffe4e6; color:#9f1239; }
+  .b-orange { background:#ffedd5; color:#9a3412; }
+  .b-indigo { background:#e0e7ff; color:#3730a3; }
+  .b-cyan   { background:#cffafe; color:#164e63; }
+  .b-pink   { background:#fce7f3; color:#9d174d; }
+  .b-yellow { background:#fef9c3; color:#854d0e; }
+
+  /* ── Layout ── */
+  .section-label { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 8px; }
+  .card { background: #fff; border: 1px solid #e8e8e8; border-radius: 12px; padding: 1rem 1.25rem; }
+  .card-gray { background: #f8f9fa; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+  /* ── Code Editor (Dracula — identical to reference) ── */
+  .editor { background: #1e1e2e; border-radius: 12px; overflow: hidden; font-family: 'SFMono-Regular', Consolas, 'Courier New', monospace; }
+  .editor-bar { background: #13131f; padding: 9px 14px; display: flex; align-items: center; gap: 6px; }
+  .e-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .e-red { background:#ff5f57; } .e-yellow { background:#febc2e; } .e-green { background:#28c840; }
+  .e-label { font-size: 12px; color: #6272a4; margin-left: 4px; font-family: -apple-system, sans-serif; }
+  .editor-body { padding: 14px 18px; font-size: 12.5px; line-height: 1.8; }
+  .e-ln   { color: #44475a; font-size: 11px; display: inline-block; width: 22px; user-select: none; }
+  .e-tag  { color: #ff79c6; }
+  .e-att  { color: #50fa7b; }
+  .e-val  { color: #f1fa8c; }
+  .e-txt  { color: #f8f8f2; }
+  .e-cmt  { color: #6272a4; font-style: italic; }
+  .e-new  { color: #80ffea; }
+  .e-h2   { color: #ffb86c; font-weight: 700; }
+  .e-p    { color: #8be9fd; }
+  .c-sel  { color: #ff79c6; font-weight: 700; }
+  .c-prop { color: #50fa7b; }
+  .c-val  { color: #f1fa8c; }
+  .c-punc { color: #f8f8f2; }
+  .c-hex  { color: #bd93f9; }
+  .c-str  { color: #ffb86c; }
+  .c-num  { color: #ff79c6; }
+  .c-cmt  { color: #6272a4; font-style: italic; }
+  .e-row  { display: flex; gap: 8px; }
+  .e-ind1 { display: inline-block; width: 20px; }
+  .e-ind2 { display: inline-block; width: 40px; }
+  .e-ind3 { display: inline-block; width: 60px; }
+
+  /* ── Browser frame ── */
+  .browser { border-radius: 12px; overflow: hidden; border: 1px solid #e0e0e0; }
+  .browser-bar { background: #f1f3f4; padding: 9px 14px; display: flex; align-items: center; gap: 7px; border-bottom: 1px solid #e0e0e0; }
+  .b-dot2 { width: 10px; height: 10px; border-radius: 50%; }
+  .b-r { background:#ff5f57; } .b-y { background:#febc2e; } .b-g { background:#28c840; }
+  .b-url { flex:1; background:#fff; border:1px solid #dadce0; border-radius:20px; padding:4px 14px; font-size:12px; color:#555; }
+
+  /* ── Tables ── */
+  .tag-table { border-collapse: collapse; width: 100%; }
+  .tag-table th { background: #f1f5f9; font-size: 12px; font-weight: 700; text-align: left; padding: 10px 14px; color: #475569; border-bottom: 2px solid #e2e8f0; }
+  .tag-table td { font-size: 13px; padding: 10px 14px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+  .tag-table tr:last-child td { border-bottom: none; }
+  .tag-table tr:hover td { background: #f8f9fa; }
+  .tag-mono { font-family: 'SFMono-Regular', Consolas, monospace; font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 5px; }
+
+  /* ── Quiz ── */
+  .quiz-option { border: 1px solid #dee2e6; border-radius: 8px; padding: 10px 14px; font-size: 13px; cursor: pointer; margin-bottom: 6px; transition: all .15s; background: transparent; width: 100%; text-align: left; color: #1a1a1a; }
+  .quiz-option:hover:not(:disabled) { background: #f8f9fa; }
+  .quiz-option.correct { background: #d1fae5; border-color: #059669; color: #065f46; }
+  .quiz-option.wrong   { background: #fee2e2; border-color: #dc2626; color: #991b1b; }
+  .quiz-feedback { display: none; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-top: 4px; }
+  .quiz-feedback.correct { background: #d1fae5; color: #065f46; display: block; }
+  .quiz-feedback.wrong   { background: #fee2e2; color: #991b1b; display: block; }
+
+  /* ── Activity / challenge ── */
+  .activity-box { border: 2px dashed #a5b4fc; background: #eef2ff; border-radius: 12px; padding: 14px 18px; }
+  .activity-title { font-size: 13px; font-weight: 700; color: #3730a3; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .challenge-box { border: 2px dashed #f9a8d4; background: #fdf2f8; border-radius: 12px; padding: 14px 18px; }
+  .challenge-title { font-size: 13px; font-weight: 700; color: #9f1239; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+
+  /* ── Tip / info / warn / success ── */
+  .tip-box   { display:flex; gap:10px; align-items:flex-start; background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:10px 14px; }
+  .tip-icon  { color:#d97706; font-size:18px; flex-shrink:0; margin-top:1px; }
+  .tip-text  { font-size:13px; color:#92400e; line-height:1.6; }
+  .info-box  { display:flex; gap:10px; align-items:flex-start; background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:10px 14px; }
+  .info-icon { color:#2563eb; font-size:18px; flex-shrink:0; margin-top:1px; }
+  .info-text { font-size:13px; color:#1e40af; line-height:1.6; }
+  .warn-box  { display:flex; gap:10px; align-items:flex-start; background:#fef9ee; border:1px solid #fcd34d; border-radius:10px; padding:10px 14px; }
+  .success-box { display:flex; gap:10px; align-items:flex-start; background:#f0fdf4; border:1px solid #86efac; border-radius:10px; padding:10px 14px; }
+
+  /* ── Line explainer ── */
+  .lex-row { display:flex; align-items:stretch; cursor:pointer; transition:background .12s; border-bottom:1px solid #f0f0f0; }
+  .lex-row:last-child { border-bottom:none; }
+  .lex-row:hover { background:#f8f9fa; }
+  .lex-row.active { background:#eff6ff; border-left:3px solid #1d4ed8; }
+  .lex-code { background:#1e1e2e; padding:10px 14px; font-family:'SFMono-Regular',Consolas,monospace; font-size:12px; min-width:220px; flex-shrink:0; display:flex; align-items:center; }
+  .lex-info { padding:10px 14px; flex:1; }
+  .lex-name   { font-size:13px; font-weight:700; color:#1d4ed8; margin-bottom:2px; }
+  .lex-desc   { font-size:12px; color:#555; line-height:1.55; }
+  .lex-detail { display:none; font-size:12px; color:#1d4ed8; margin-top:4px; padding-top:4px; border-top:1px dashed #bfdbfe; }
+  .lex-row.active .lex-detail { display:block; }
+  .line-explain { border:1px solid #e8e8e8; border-radius:10px; overflow:hidden; }
+
+  /* ── Reveal ── */
+  .reveal-btn { background:#f1f3f5; border:1px solid #dee2e6; border-radius:8px; padding:7px 14px; font-size:13px; cursor:pointer; color:#333; transition:background .15s; }
+  .reveal-btn:hover { background:#e9ecef; }
+  .reveal-content { display:none; margin-top:8px; }
+  .reveal-content.open { display:block; }
+
+  /* ── Nav ── */
+  .nav-row { display:flex; align-items:center; justify-content:space-between; margin-top:auto; padding-top:1rem; border-top:1px solid #f0f0f0; }
+  .nav-btn { display:inline-flex; align-items:center; gap:6px; padding:9px 18px; border:1px solid #dee2e6; border-radius:8px; background:transparent; font-size:13px; cursor:pointer; color:#333; transition:background .15s; }
+  .nav-btn:hover:not(:disabled) { background:#f1f3f5; }
+  .nav-btn:disabled { opacity:.35; cursor:default; }
+  .nav-btn.primary { background:#1d4ed8; border-color:transparent; color:#fff; }
+  .nav-btn.primary:hover { background:#1e40af; }
+  .progress-dots { display:flex; gap:6px; align-items:center; }
+  .dot { width:7px; height:7px; border-radius:50%; background:#dee2e6; transition:all .2s; }
+  .dot.active { width:20px; border-radius:4px; background:#1d4ed8; }
+
+  /* ── Home grid ── */
+  .home-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .home-card { background:#fff; border:1px solid #e8e8e8; border-radius:12px; padding:1rem 1.25rem; cursor:pointer; transition:all .15s; }
+  .home-card:hover { border-color:#1d4ed8; box-shadow:0 2px 8px rgba(29,78,216,.1); }
+  .home-card-title { font-size:15px; font-weight:700; margin:6px 0 2px; }
+  .home-card-sub   { font-size:12px; color:#666; }
+
+  code { font-family:'SFMono-Regular',Consolas,monospace; font-size:12px; background:#f1f3f5; padding:1px 6px; border-radius:4px; border:1px solid #dee2e6; }
+
+  /* ── Checklist ── */
+  .check-item { display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:10px; border:1px solid #e8e8e8; font-size:13px; cursor:pointer; transition:all .15s; user-select:none; }
+  .check-item:hover { background:#f8f9fa; }
+  .check-item.done { background:#f0fdf4; border-color:#86efac; }
+  .check-circle { width:22px; height:22px; border-radius:50%; border:2px solid #dee2e6; display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0; transition:all .2s; color:transparent; }
+  .check-item.done .check-circle { background:#22c55e; border-color:#22c55e; color:#fff; }
+
+  /* ══ DAY 5 HOUR 1 — RESPONSIVE SPECIFIC ══ */
+
+  /* Device mockup frames */
+  .device-row { display: flex; gap: 14px; align-items: flex-end; justify-content: center; }
+
+  /* Desktop mockup */
+  .desk-frame { border: 3px solid #334155; border-radius: 8px; overflow: hidden; background: #fff; width: 320px; flex-shrink: 0; }
+  .desk-bar   { background: #1e293b; padding: 5px 10px; display: flex; align-items: center; gap: 5px; }
+  .desk-dot   { width: 7px; height: 7px; border-radius: 50%; }
+  .desk-url   { flex: 1; background: #334155; border-radius: 4px; padding: 2px 8px; font-size: 10px; color: #94a3b8; }
+
+  /* Phone mockup */
+  .phone-outer { border: 4px solid #334155; border-radius: 20px; overflow: hidden; background: #fff; width: 120px; flex-shrink: 0; padding-top: 8px; padding-bottom: 8px; position: relative; }
+  .phone-notch { width: 40px; height: 8px; background: #334155; border-radius: 0 0 8px 8px; margin: 0 auto 0; }
+
+  /* Tablet mockup */
+  .tablet-outer { border: 4px solid #334155; border-radius: 14px; overflow: hidden; background: #fff; width: 200px; flex-shrink: 0; }
+
+  /* SkillHub inside mockups */
+  .sh-desk-nav  { background:#1e293b; color:#fff; padding:6px 10px; display:flex; justify-content:space-between; align-items:center; font-size:10px; font-weight:700; }
+  .sh-desk-nav-links { display:flex; gap:8px; font-size:9px; font-weight:400; }
+  .sh-desk-hero { background:linear-gradient(135deg,#1e293b,#2563eb); color:#fff; padding:14px 10px; text-align:center; }
+  .sh-desk-hero h2 { font-size:12px; font-weight:800; margin-bottom:2px; }
+  .sh-desk-hero p  { font-size:9px; opacity:.8; }
+  .sh-desk-cards { display:flex; gap:6px; padding:8px; background:#f4f6f9; justify-content:center; flex-wrap:wrap; }
+  .sh-desk-card { background:#fff; padding:6px 8px; border-radius:6px; font-size:9px; box-shadow:0 1px 4px rgba(0,0,0,.12); text-align:center; width:70px; }
+
+  .sh-mob-nav  { background:#1e293b; color:#fff; padding:5px 8px; display:flex; justify-content:space-between; align-items:center; font-size:9px; font-weight:700; }
+  .sh-mob-hero { background:linear-gradient(135deg,#1e293b,#2563eb); color:#fff; padding:10px 8px; text-align:center; }
+  .sh-mob-hero h2 { font-size:9px; font-weight:800; margin-bottom:2px; }
+  .sh-mob-hero p  { font-size:7px; opacity:.8; }
+  .sh-mob-card { background:#fff; margin:4px; padding:6px 8px; border-radius:6px; font-size:8px; box-shadow:0 1px 4px rgba(0,0,0,.12); }
+
+  /* Viewport meta visualiser */
+  .meta-compare { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .meta-box { border-radius: 10px; overflow: hidden; border: 2px solid #e8e8e8; }
+  .meta-label { padding: 8px 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
+  .meta-phone { width: 80px; border: 3px solid #334155; border-radius: 14px; margin: 0 auto 0; overflow: hidden; background: #fff; }
+  .meta-phone-bar { background: #334155; height: 6px; }
+
+  /* Image responsive demo */
+  .img-resize-demo { background: #f4f6f9; border-radius: 10px; padding: 14px; overflow: hidden; }
+  .demo-img { background: linear-gradient(135deg, #2563eb, #7c3aed); border-radius: 6px; height: 60px; display: flex; align-items: center; justify-content: center; color: white; font-size: 11px; font-weight: 700; transition: width .4s ease; }
+
+  /* DevTools simulation */
+  .devtools-mock { background: #1e1e2e; border-radius: 10px; overflow: hidden; font-family: 'SFMono-Regular', Consolas, monospace; }
+  .devtools-tab  { background: #13131f; padding: 7px 14px; display: flex; gap: 14px; border-bottom: 1px solid #2d2d3f; }
+  .devtools-tab span { font-size: 11px; color: #6272a4; cursor: pointer; }
+  .devtools-tab span.active { color: #80ffea; border-bottom: 2px solid #80ffea; padding-bottom: 2px; }
+  .devtools-body { padding: 12px 16px; font-size: 11.5px; color: #f8f8f2; line-height: 1.7; }
+  .dt-key  { color: #50fa7b; }
+  .dt-val  { color: #f1fa8c; }
+  .dt-px   { color: #ff79c6; }
+  .dt-str  { color: #ffb86c; }
+
+  /* Interactive width slider */
+  .width-slider-wrap { background: #f4f6f9; border-radius: 10px; border: 1px solid #e0e0e0; padding: 14px; }
+  .slider-track { display: flex; align-items: center; gap: 10px; }
+  .slider-track input[type=range] { flex: 1; accent-color: #2563eb; }
+  .slider-val { font-family: monospace; font-size: 13px; font-weight: 700; color: #2563eb; min-width: 54px; }
+
+  /* Breakpoint ruler */
+  .breakpoint-ruler { position: relative; height: 40px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e8e8e8; overflow: hidden; }
+  .bp-tick { position: absolute; top: 0; bottom: 0; width: 2px; }
+  .bp-label { position: absolute; top: 50%; transform: translateY(-50%); font-size: 10px; font-weight: 700; white-space: nowrap; }
+  .bp-zone { position: absolute; top: 0; bottom: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <div>
+      <div class="top-bar-title">MERN Stack Training · Day 5 · Hour 1</div>
+      <div class="top-bar-sub">Responsive Web Design — SkillHub LMS</div>
+    </div>
+    <div class="slide-counter" id="slide-counter">1 / 12</div>
+  </div>
+
+  <!-- ═══ SLIDE 0  HOME ═══ -->
+  <div class="slide active" id="slide-0">
+    <div class="slide-header">
+      <span class="badge b-teal">Day 5 · Hour 1</span>
+      <div>
+        <div class="slide-title">Understanding Responsive Web Design</div>
+        <div class="slide-subtitle">One website, every screen size — the fundamental skill of modern web development</div>
+      </div>
+    </div>
+
+    <div style="background:#d1fae5;border:1px solid #6ee7b7;border-radius:12px;padding:12px 16px;display:flex;gap:12px;align-items:flex-start">
+      <i class="ti ti-device-mobile" style="color:#065f46;font-size:22px;flex-shrink:0;margin-top:1px"></i>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#065f46;margin-bottom:4px">Day 5 Goal — Make SkillHub Fully Responsive</div>
+        <div style="display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:#065f46">
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Understand what responsive means</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Use Browser DevTools</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Add viewport meta tag</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Responsive images (width:100%)</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Media queries in Hours 2 &amp; 3</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="home-grid">
+      <div class="home-card" onclick="goSlide(1)">
+        <span class="badge b-green">Recap</span>
+        <div class="home-card-title">Where We Left Off</div>
+        <div class="home-card-sub">Day 4 deliverable — fully styled SkillHub page</div>
+      </div>
+      <div class="home-card" onclick="goSlide(2)">
+        <span class="badge b-amber">Question</span>
+        <div class="home-card-title">Is Amazon's Code Different on Phone?</div>
+        <div class="home-card-sub">The big opening question — and a surprising answer</div>
+      </div>
+      <div class="home-card" onclick="goSlide(3)">
+        <span class="badge b-blue">Concept</span>
+        <div class="home-card-title">What Is Responsive Design?</div>
+        <div class="home-card-sub">Definition + why every website needs it</div>
+      </div>
+      <div class="home-card" onclick="goSlide(4)">
+        <span class="badge b-purple">Visual</span>
+        <div class="home-card-title">Desktop vs Mobile Layout</div>
+        <div class="home-card-sub">Same website — different layout side by side</div>
+      </div>
+      <div class="home-card" onclick="goSlide(5)">
+        <span class="badge b-slate">DevTools</span>
+        <div class="home-card-title">Browser Developer Tools</div>
+        <div class="home-card-sub">F12 → Device Toolbar — simulate iPhone, iPad, Pixel</div>
+      </div>
+      <div class="home-card" onclick="goSlide(6)">
+        <span class="badge b-cyan">Meta Tag</span>
+        <div class="home-card-title">Viewport Meta Tag</div>
+        <div class="home-card-sub">Why it's mandatory — what happens without it</div>
+      </div>
+      <div class="home-card" onclick="goSlide(7)">
+        <span class="badge b-teal">Code</span>
+        <div class="home-card-title">Responsive Images</div>
+        <div class="home-card-sub">Add class="hero-image" + width:100% to SkillHub</div>
+      </div>
+      <div class="home-card" onclick="goSlide(8)">
+        <span class="badge b-blue">Explain</span>
+        <div class="home-card-title">width:100% vs height:auto</div>
+        <div class="home-card-sub">Click each property to expand the explanation</div>
+      </div>
+    </div>
+    <div class="grid-2" style="gap:10px">
+      <div class="home-card" onclick="goSlide(9)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge b-orange">Activity</span>
+          <span style="font-size:14px;font-weight:700">Resize browser — observe image</span>
+          <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+        </div>
+      </div>
+      <div class="home-card" onclick="goSlide(10)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge b-slate">Ref</span>
+          <span style="font-size:14px;font-weight:700">Responsive Properties Reference</span>
+          <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+        </div>
+      </div>
+    </div>
+    <div class="home-card" onclick="goSlide(11)" style="cursor:pointer">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="badge b-green">Quiz</span>
+        <span style="font-size:14px;font-weight:700">Quick Check — 5 Questions</span>
+        <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+      </div>
+    </div>
+    <div class="nav-row">
+      <div></div>
+      <div class="progress-dots" id="dots-0"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Start <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 1  RECAP ═══ -->
+  <div class="slide" id="slide-1">
+    <div class="slide-header">
+      <span class="badge b-green">Recap</span>
+      <div>
+        <div class="slide-title">Where We Left Off</div>
+        <div class="slide-subtitle">Day 4 deliverable — fully styled SkillHub with Flexbox, Cards, and Hover effects</div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="section-label">style.css — end of day 4</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">frontend/css/style.css (summary)</span></div>
+          <div class="editor-body" style="font-size:11.5px">
+            <div class="e-row"><span class="e-ln"> </span><span class="c-cmt">/* global */</span></div>
+            <div class="e-row"><span class="e-ln"> </span><span class="c-sel">*</span><span class="c-punc"> { </span><span class="c-prop">box-sizing</span><span class="c-punc">:</span><span class="c-str">border-box</span><span class="c-punc">; }</span></div>
+            <div class="e-row"><span class="e-ln"> </span><span class="c-sel">body</span><span class="c-punc"> { </span><span class="c-prop">font-family</span><span class="c-punc">:</span><span class="c-str">Arial</span><span class="c-punc">; </span><span class="c-prop">margin</span><span class="c-punc">:</span><span class="c-num">0</span><span class="c-punc">; }</span></div>
+            <div class="e-row"><span class="e-ln"> </span><span class="c-cmt">/* header + nav — flexbox */</span></div>
+            <div class="e-row"><span class="e-ln"> </span><span class="c-sel">nav</span><span class="c-punc"> { </span><span class="c-prop">display</span><span class="c-punc">:</span><span class="c-str">flex</span><span class="c-punc">; </span><span class="c-prop">justify-content</span><span class="c-punc">:</span><span class="c-str">space-between</span><span class="c-punc">; }</span></div>
+            <div class="e-row"><span class="e-ln"> </span><span class="c-cmt">/* hero section */</span></div>
+            <div class="e-row"><span class="e-ln"> </span><span class="c-sel">.hero</span><span class="c-punc"> { </span><span class="c-prop">padding</span><span class="c-punc">:</span><span class="c-num">60px 20px</span><span class="c-punc">; </span><span class="c-prop">text-align</span><span class="c-punc">:</span><span class="c-str">center</span><span class="c-punc">; }</span></div>
+            <div class="e-row"><span class="e-ln"> </span><span class="c-cmt">/* course cards — flex */</span></div>
+            <div class="e-row"><span class="e-ln"> </span><span class="c-sel">.cards-grid</span><span class="c-punc"> { </span><span class="c-prop">display</span><span class="c-punc">:</span><span class="c-str">flex</span><span class="c-punc">; </span><span class="c-prop">flex-wrap</span><span class="c-punc">:</span><span class="c-str">wrap</span><span class="c-punc">; </span><span class="c-prop">gap</span><span class="c-punc">:</span><span class="c-num">20px</span><span class="c-punc">; }</span></div>
+            <div class="e-row"><span class="e-ln"> </span><span class="c-sel">.course-card</span><span class="c-punc"> { </span><span class="c-prop">border-radius</span><span class="c-punc">:</span><span class="c-num">12px</span><span class="c-punc">; </span><span class="c-prop">padding</span><span class="c-punc">:</span><span class="c-num">20px</span><span class="c-punc">; }</span></div>
+            <div class="e-row"><span class="e-ln"> </span><span class="c-sel">.course-card:hover</span><span class="c-punc"> { </span><span class="c-prop">transform</span><span class="c-punc">:</span><span class="c-str">scale(1.05)</span><span class="c-punc">; }</span></div>
+            <div class="e-row"><span class="e-ln"> </span><span class="c-cmt">/* footer */</span></div>
+            <div class="e-row"><span class="e-ln"> </span><span class="c-sel">footer</span><span class="c-punc"> { </span><span class="c-prop">background</span><span class="c-punc">:</span><span class="c-hex">#1e293b</span><span class="c-punc">; </span><span class="c-prop">color</span><span class="c-punc">:</span><span class="c-str">white</span><span class="c-punc">; }</span></div>
+            <div class="e-row"><span class="e-ln"> </span><span class="c-cmt">/* ← Day 5: responsive rules go here */</span></div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="section-label">the problem we solve today</div>
+        <div class="browser">
+          <div class="browser-bar"><div class="b-dot2 b-r"></div><div class="b-dot2 b-y"></div><div class="b-dot2 b-g"></div><div class="b-url">index.html on mobile 📱</div></div>
+          <div style="background:#f4f6f9;padding:10px;font-family:Arial,sans-serif">
+            <div style="background:#1e293b;color:#fff;padding:8px 10px;font-size:11px;display:flex;justify-content:space-between">
+              <span>SkillHub LMS</span>
+              <div style="display:flex;gap:8px;font-size:9px">Home Courses Blog Projects Login</div>
+            </div>
+            <div style="overflow:hidden;font-size:9px;color:#555;padding:6px;background:#fff">
+              <div style="width:200%;background:#dbeafe;padding:10px;border-radius:6px;font-size:8px;color:#1e40af;margin-bottom:4px">Become a Full Stack Developer — this text overflows the screen...</div>
+              <div style="display:flex;gap:4px;width:200%">
+                <div style="background:#fff;border:1px solid #e8e8e8;padding:6px;border-radius:6px;width:80px;font-size:7px">HTML</div>
+                <div style="background:#fff;border:1px solid #e8e8e8;padding:6px;border-radius:6px;width:80px;font-size:7px">CSS</div>
+                <div style="background:#fff;border:1px solid #e8e8e8;padding:6px;border-radius:6px;width:80px;font-size:7px">JS</div>
+              </div>
+            </div>
+            <div style="font-size:9px;color:#dc2626;padding:4px 6px;background:#fee2e2">⚠ Content overflows — user must scroll sideways!</div>
+          </div>
+        </div>
+        <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:10px 14px">
+          <div style="font-size:12px;font-weight:700;color:#166534;margin-bottom:4px">After Day 5 — fully responsive:</div>
+          <div style="font-size:12px;color:#166534">✓ No sideways scroll &nbsp;·&nbsp; ✓ Cards stack vertically &nbsp;·&nbsp; ✓ Images fit the screen &nbsp;·&nbsp; ✓ Hamburger menu</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-1"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 2  BIG QUESTION ═══ -->
+  <div class="slide" id="slide-2">
+    <div class="slide-header">
+      <span class="badge b-amber">Question</span>
+      <div>
+        <div class="slide-title">Is Amazon's Code Different on Phone?</div>
+        <div class="slide-subtitle">Open Amazon on your phone. Now open it on your laptop. Is the code different?</div>
+      </div>
+    </div>
+    <div class="card card-gray">
+      <div style="font-size:14px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:8px">
+        <i class="ti ti-message-question" style="color:#d97706;font-size:20px"></i>
+        Ask the class — collect their guesses first, then reveal.
+      </div>
+      <button class="reveal-btn" onclick="toggle('amazon-ans')">Reveal the answer</button>
+      <div class="reveal-content" id="amazon-ans">
+        <div style="margin-top:12px;padding:18px 20px;background:#fff;border-radius:12px;border:1px solid #e8e8e8">
+          <div style="font-size:22px;font-weight:800;color:#166534;text-align:center;margin-bottom:10px">No! The HTML and CSS code is the same.</div>
+          <div style="font-size:14px;color:#444;text-align:center;line-height:1.8">Only the <strong>layout</strong> changes — not the code.<br>CSS contains rules that say:<br><em>"When the screen is narrow, stack the cards. When it's wide, show them in a row."</em></div>
+        </div>
+      </div>
+    </div>
+    <div class="grid-3">
+      <div class="card" style="text-align:center;border-color:#93c5fd">
+        <i class="ti ti-device-desktop" style="font-size:28px;color:#1d4ed8;margin-bottom:8px;display:block"></i>
+        <div style="font-size:13px;font-weight:700;color:#1e40af;margin-bottom:4px">Desktop</div>
+        <div style="font-size:12px;color:#555">Wide screen → navigation in a row, cards in a grid</div>
+      </div>
+      <div class="card" style="text-align:center;border-color:#6ee7b7">
+        <i class="ti ti-device-tablet" style="font-size:28px;color:#065f46;margin-bottom:8px;display:block"></i>
+        <div style="font-size:13px;font-weight:700;color:#065f46;margin-bottom:4px">Tablet</div>
+        <div style="font-size:12px;color:#555">Medium screen → 2-column layout, some things stack</div>
+      </div>
+      <div class="card" style="text-align:center;border-color:#c4b5fd">
+        <i class="ti ti-device-mobile" style="font-size:28px;color:#5b21b6;margin-bottom:8px;display:block"></i>
+        <div style="font-size:13px;font-weight:700;color:#5b21b6;margin-bottom:4px">Mobile</div>
+        <div style="font-size:12px;color:#555">Narrow screen → everything stacks vertically, hamburger menu</div>
+      </div>
+    </div>
+    <div style="background:#1e1e2e;border-radius:12px;padding:16px 20px;font-family:monospace;font-size:13px;text-align:center">
+      <span style="color:#6272a4">/* The same HTML + CSS file serves ALL three */</span><br>
+      <span style="color:#ff79c6">index.html</span> <span style="color:#f8f8f2">+</span> <span style="color:#50fa7b">style.css</span>
+      <span style="color:#f8f8f2"> → </span>
+      <span style="color:#80ffea">Desktop</span> <span style="color:#6272a4">|</span>
+      <span style="color:#ffb86c">Tablet</span> <span style="color:#6272a4">|</span>
+      <span style="color:#bd93f9">Mobile</span>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-2"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 3  WHAT IS RESPONSIVE ═══ -->
+  <div class="slide" id="slide-3">
+    <div class="slide-header">
+      <span class="badge b-blue">Concept</span>
+      <div>
+        <div class="slide-title">What Is Responsive Design?</div>
+        <div class="slide-subtitle">The definition, the why, and the three techniques we'll use</div>
+      </div>
+    </div>
+    <div class="card" style="border-color:#a5b4fc">
+      <div style="font-size:16px;font-weight:700;color:#3730a3;text-align:center;padding:10px 0">
+        Responsive Design means a website automatically adjusts itself according to the screen size.
+      </div>
+    </div>
+    <div class="grid-3">
+      <div class="card" style="border-color:#86efac">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          <div style="width:32px;height:32px;background:#dcfce7;border-radius:8px;display:flex;align-items:center;justify-content:center"><i class="ti ti-phone" style="color:#16a34a;font-size:16px"></i></div>
+          <div style="font-size:13px;font-weight:700">60% Mobile Traffic</div>
+        </div>
+        <div style="font-size:12px;color:#555;line-height:1.6">Over 60% of global web traffic comes from mobile devices. A non-responsive site loses most of its users.</div>
+      </div>
+      <div class="card" style="border-color:#93c5fd">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          <div style="width:32px;height:32px;background:#dbeafe;border-radius:8px;display:flex;align-items:center;justify-content:center"><i class="ti ti-brand-google" style="color:#1d4ed8;font-size:16px"></i></div>
+          <div style="font-size:13px;font-weight:700">Google Ranks Mobile First</div>
+        </div>
+        <div style="font-size:12px;color:#555;line-height:1.6">Google uses "mobile-first indexing" — non-responsive sites rank lower in search results.</div>
+      </div>
+      <div class="card" style="border-color:#c4b5fd">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          <div style="width:32px;height:32px;background:#ede9fe;border-radius:8px;display:flex;align-items:center;justify-content:center"><i class="ti ti-briefcase" style="color:#5b21b6;font-size:16px"></i></div>
+          <div style="font-size:13px;font-weight:700">Job Requirement</div>
+        </div>
+        <div style="font-size:12px;color:#555;line-height:1.6">Every real-world MERN project must be responsive. It's a baseline expectation in any job interview.</div>
+      </div>
+    </div>
+    <div class="card card-gray">
+      <div class="section-label">three techniques we'll use in day 5</div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px">
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:#fff;border-radius:10px;border:1px solid #e8e8e8">
+          <span style="width:28px;height:28px;background:#dbeafe;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#1d4ed8;flex-shrink:0">1</span>
+          <div><div style="font-size:13px;font-weight:700">Viewport Meta Tag</div><div style="font-size:12px;color:#555">Tells the browser to use the device's actual width — Hour 1</div></div>
+          <span class="badge b-cyan" style="margin-left:auto">Hour 1</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:#fff;border-radius:10px;border:1px solid #e8e8e8">
+          <span style="width:28px;height:28px;background:#d1fae5;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#065f46;flex-shrink:0">2</span>
+          <div><div style="font-size:13px;font-weight:700">Flexible Units (%, width:100%)</div><div style="font-size:12px;color:#555">Elements stretch to fill available space — Hour 1</div></div>
+          <span class="badge b-teal" style="margin-left:auto">Hour 1</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:#fff;border-radius:10px;border:1px solid #e8e8e8">
+          <span style="width:28px;height:28px;background:#ede9fe;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#5b21b6;flex-shrink:0">3</span>
+          <div><div style="font-size:13px;font-weight:700">Media Queries (@media)</div><div style="font-size:12px;color:#555">Apply different CSS at different screen widths — Hours 2 &amp; 3</div></div>
+          <span class="badge b-purple" style="margin-left:auto">Hours 2–3</span>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-3"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">See the Layouts <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 4  DESKTOP VS MOBILE ═══ -->
+  <div class="slide" id="slide-4">
+    <div class="slide-header">
+      <span class="badge b-purple">Visual</span>
+      <div>
+        <div class="slide-title">Desktop vs Mobile Layout</div>
+        <div class="slide-subtitle">Same SkillHub page — different layout at different widths</div>
+      </div>
+    </div>
+    <div class="device-row">
+      <!-- DESKTOP -->
+      <div style="flex:1">
+        <div style="font-size:11px;font-weight:700;color:#1d4ed8;text-align:center;margin-bottom:6px;text-transform:uppercase;letter-spacing:.07em"><i class="ti ti-device-desktop"></i> Desktop — wide layout</div>
+        <div class="desk-frame">
+          <div class="desk-bar">
+            <div class="desk-dot" style="background:#ff5f57"></div>
+            <div class="desk-dot" style="background:#febc2e"></div>
+            <div class="desk-dot" style="background:#28c840"></div>
+            <div class="desk-url">skillhub.com</div>
+          </div>
+          <div class="sh-desk-nav">
+            <span>SkillHub LMS</span>
+            <div class="sh-desk-nav-links"><span>Home</span><span>Courses</span><span>Blog</span><span>Login</span></div>
+          </div>
+          <div class="sh-desk-hero">
+            <h2>Become a Full Stack Developer</h2>
+            <p>Learn by building real-world MERN projects</p>
+          </div>
+          <div class="sh-desk-cards">
+            <div class="sh-desk-card">📘 HTML</div>
+            <div class="sh-desk-card">🎨 CSS</div>
+            <div class="sh-desk-card">⚡ JS</div>
+            <div class="sh-desk-card">⚛️ React</div>
+          </div>
+        </div>
+        <div style="margin-top:6px;text-align:center;font-size:11px;color:#888">≥ 768px — horizontal layout</div>
+      </div>
+      <!-- PHONE -->
+      <div style="display:flex;flex-direction:column;align-items:center">
+        <div style="font-size:11px;font-weight:700;color:#5b21b6;text-align:center;margin-bottom:6px;text-transform:uppercase;letter-spacing:.07em"><i class="ti ti-device-mobile"></i> Mobile — stacked</div>
+        <div class="phone-outer">
+          <div class="phone-notch"></div>
+          <div class="sh-mob-nav">
+            <span>SkillHub</span>
+            <i class="ti ti-menu-2" style="font-size:12px"></i>
+          </div>
+          <div class="sh-mob-hero">
+            <h2>Full Stack Dev</h2>
+            <p>Learn MERN</p>
+          </div>
+          <div style="background:#f4f6f9;padding:4px">
+            <div class="sh-mob-card">📘 HTML &amp; CSS</div>
+            <div class="sh-mob-card">⚡ JavaScript</div>
+            <div class="sh-mob-card">⚛️ React.js</div>
+          </div>
+        </div>
+        <div style="margin-top:6px;text-align:center;font-size:11px;color:#888">&lt; 768px — stacked</div>
+      </div>
+    </div>
+    <div class="card card-gray">
+      <div class="section-label">what changes between layouts</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px">
+        <div style="padding:10px 14px;background:#dbeafe;border-radius:8px;border:1px solid #93c5fd;font-size:12px"><strong style="color:#1e40af">Desktop:</strong> Nav links in a row · Cards in a grid · Wide hero · Larger text</div>
+        <div style="padding:10px 14px;background:#ede9fe;border-radius:8px;border:1px solid #c4b5fd;font-size:12px"><strong style="color:#5b21b6">Mobile:</strong> Hamburger menu ☰ · Cards stacked · Full-width hero · Smaller text</div>
+      </div>
+    </div>
+    <div class="tip-box">
+      <i class="ti ti-bulb tip-icon"></i>
+      <div class="tip-text"><strong>Same HTML, different CSS rules.</strong> We add <code>@media</code> queries to style.css that say "when the screen is less than 768px wide, switch to this layout." You'll build this in Hours 2 &amp; 3 today.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-4"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">DevTools <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 5  DEVTOOLS ═══ -->
+  <div class="slide" id="slide-5">
+    <div class="slide-header">
+      <span class="badge b-slate">DevTools</span>
+      <div>
+        <div class="slide-title">Browser Developer Tools</div>
+        <div class="slide-subtitle">F12 → Device Toolbar — simulate any device without owning it</div>
+      </div>
+    </div>
+    <div class="activity-box">
+      <div class="activity-title"><i class="ti ti-keyboard"></i> Do this now — open your SkillHub index.html in Chrome</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#fff;border-radius:8px;border:1px solid #c7d2fe;font-size:13px">
+          <span style="width:24px;height:24px;background:#4f46e5;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">1</span>
+          Open <strong>Chrome</strong> → press <code>F12</code> (or right-click → Inspect)
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#fff;border-radius:8px;border:1px solid #c7d2fe;font-size:13px">
+          <span style="width:24px;height:24px;background:#4f46e5;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">2</span>
+          Click the <strong>Toggle Device Toolbar</strong> icon <code>Ctrl + Shift + M</code> — top-left of DevTools
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#fff;border-radius:8px;border:1px solid #c7d2fe;font-size:13px">
+          <span style="width:24px;height:24px;background:#4f46e5;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">3</span>
+          Select <strong>iPhone SE</strong> from the device dropdown at the top
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#fff;border-radius:8px;border:1px solid #c7d2fe;font-size:13px">
+          <span style="width:24px;height:24px;background:#4f46e5;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">4</span>
+          Try: <strong>Pixel 7</strong> → <strong>iPad Mini</strong> → <strong>Surface Pro</strong> — observe layout changes
+        </div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="section-label">devtools panel (simulated)</div>
+        <div class="devtools-mock">
+          <div class="devtools-tab">
+            <span>Elements</span>
+            <span>Console</span>
+            <span class="active">Device</span>
+            <span>Network</span>
+          </div>
+          <div class="devtools-body">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+              <i class="ti ti-device-mobile" style="color:#80ffea;font-size:14px"></i>
+              <span style="color:#80ffea;font-size:12px;font-weight:700">Responsive ▼</span>
+              <span style="color:#6272a4;font-size:11px">375</span>
+              <span style="color:#6272a4">×</span>
+              <span style="color:#6272a4;font-size:11px">812</span>
+              <span style="color:#fbbf24;font-size:11px;margin-left:6px">DPR: 3</span>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+              <span style="background:#2d2d3f;padding:3px 8px;border-radius:4px;font-size:10px;color:#80ffea;cursor:pointer">iPhone SE</span>
+              <span style="background:#2d2d3f;padding:3px 8px;border-radius:4px;font-size:10px;color:#f8f8f2;cursor:pointer">Pixel 7</span>
+              <span style="background:#2d2d3f;padding:3px 8px;border-radius:4px;font-size:10px;color:#f8f8f2;cursor:pointer">iPad Mini</span>
+              <span style="background:#2d2d3f;padding:3px 8px;border-radius:4px;font-size:10px;color:#f8f8f2;cursor:pointer">Galaxy S20</span>
+            </div>
+            <div style="font-size:11px;color:#6272a4;margin-bottom:4px">/* what DevTools tells you */</div>
+            <div><span class="dt-key">viewport-width</span>: <span class="dt-px">375px</span></div>
+            <div><span class="dt-key">viewport-height</span>: <span class="dt-px">812px</span></div>
+            <div><span class="dt-key">device-pixel-ratio</span>: <span class="dt-val">3</span></div>
+            <div><span class="dt-key">user-agent</span>: <span class="dt-str">iPhone</span></div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="section-label">common devices to test</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;border:1px solid #e8e8e8;font-size:13px">
+            <i class="ti ti-device-mobile" style="color:#5b21b6;font-size:16px;flex-shrink:0"></i>
+            <div><div style="font-weight:700">iPhone SE</div><div style="font-size:11px;color:#888">375 × 667px — smallest common phone</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;border:1px solid #e8e8e8;font-size:13px">
+            <i class="ti ti-brand-android" style="color:#16a34a;font-size:16px;flex-shrink:0"></i>
+            <div><div style="font-weight:700">Pixel 7</div><div style="font-size:11px;color:#888">412 × 915px — popular Android</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;border:1px solid #e8e8e8;font-size:13px">
+            <i class="ti ti-device-tablet" style="color:#1d4ed8;font-size:16px;flex-shrink:0"></i>
+            <div><div style="font-weight:700">iPad Mini</div><div style="font-size:11px;color:#888">768 × 1024px — tablet breakpoint</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;border:1px solid #e8e8e8;font-size:13px">
+            <i class="ti ti-device-laptop" style="color:#d97706;font-size:16px;flex-shrink:0"></i>
+            <div><div style="font-weight:700">Laptop (1280px+)</div><div style="font-size:11px;color:#888">Full desktop layout — all cards in a row</div></div>
+          </div>
+        </div>
+        <div class="info-box">
+          <i class="ti ti-info-circle info-icon"></i>
+          <div class="info-text"><strong>Pro tip:</strong> Drag the blue handle in device mode to resize freely and watch your CSS respond in real time. This is how professionals test responsiveness every day.</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-5"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Viewport Meta Tag <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 6  VIEWPORT META TAG ═══ -->
+  <div class="slide" id="slide-6">
+    <div class="slide-header">
+      <span class="badge b-cyan">Meta Tag</span>
+      <div>
+        <div class="slide-title">The Viewport Meta Tag</div>
+        <div class="slide-subtitle">One line that makes or breaks mobile display — always include it</div>
+      </div>
+    </div>
+    <div class="activity-box">
+      <div class="activity-title"><i class="ti ti-keyboard"></i> Check your index.html &lt;head&gt; — make sure this line is there</div>
+      <div class="editor" style="border-radius:8px">
+        <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">frontend/index.html — &lt;head&gt; section</span></div>
+        <div class="editor-body">
+          <div class="e-row"><span class="e-ln">1</span><span class="e-tag">&lt;head&gt;</span></div>
+          <div class="e-row"><span class="e-ln">2</span><span class="e-ind1"></span><span class="e-tag">&lt;title&gt;</span><span class="e-txt">SkillHub LMS</span><span class="e-tag">&lt;/title&gt;</span></div>
+          <div class="e-row" style="background:#1a2a1a"><span class="e-ln">3</span><span class="e-ind1"></span><span class="e-new">&lt;meta</span> <span class="e-att">name</span><span class="e-val">="viewport"</span></div>
+          <div class="e-row" style="background:#1a2a1a"><span class="e-ln">4</span><span class="e-ind2"></span><span class="e-att">content</span><span class="e-val">="width=device-width, initial-scale=1.0"</span><span class="e-new">&gt;</span></div>
+          <div class="e-row"><span class="e-ln">5</span><span class="e-ind1"></span><span class="e-tag">&lt;link</span> <span class="e-att">rel</span><span class="e-val">="stylesheet"</span> <span class="e-att">href</span><span class="e-val">="css/style.css"</span><span class="e-tag">&gt;</span></div>
+          <div class="e-row"><span class="e-ln">6</span><span class="e-tag">&lt;/head&gt;</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="section-label">without viewport meta tag ❌</div>
+        <div class="meta-compare" style="display:block">
+          <div style="text-align:center;padding:12px;background:#fef2f2;border-radius:10px;border:1px solid #fca5a5">
+            <div class="meta-phone" style="border-color:#dc2626">
+              <div class="meta-phone-bar" style="background:#dc2626"></div>
+              <div style="transform:scale(0.33);transform-origin:top left;width:300%;height:auto;overflow:hidden">
+                <div style="background:#1e293b;color:#fff;padding:10px;font-size:13px;font-weight:700;display:flex;justify-content:space-between"><span>SkillHub LMS</span><span style="font-size:11px">Home Courses Blog Projects</span></div>
+                <div style="background:#2563eb;color:#fff;padding:30px;text-align:center;font-size:20px;font-weight:800">Become a Full Stack Developer</div>
+              </div>
+            </div>
+            <div style="font-size:11px;color:#dc2626;margin-top:8px;font-weight:700">Browser renders desktop width on phone → tiny, unreadable</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">with viewport meta tag ✅</div>
+        <div style="text-align:center;padding:12px;background:#f0fdf4;border-radius:10px;border:1px solid #86efac">
+          <div class="meta-phone" style="border-color:#16a34a;width:70px">
+            <div class="meta-phone-bar" style="background:#16a34a"></div>
+            <div style="background:#1e293b;color:#fff;padding:5px 6px;font-size:6px;font-weight:700;display:flex;justify-content:space-between"><span>SkillHub LMS</span><span>☰</span></div>
+            <div style="background:#2563eb;color:#fff;padding:10px 6px;text-align:center;font-size:6px;font-weight:800">Become a Full Stack Developer</div>
+            <div style="background:#f4f6f9;padding:4px"><div style="background:#fff;margin:2px;padding:4px;border-radius:3px;font-size:5px">📘 HTML &amp; CSS</div><div style="background:#fff;margin:2px;padding:4px;border-radius:3px;font-size:5px">⚡ JavaScript</div></div>
+          </div>
+          <div style="font-size:11px;color:#16a34a;margin-top:8px;font-weight:700">Browser uses device width → readable, responsive layout</div>
+        </div>
+      </div>
+    </div>
+    <div class="line-explain">
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="e-att">width</span><span class="c-punc">=</span><span class="e-val">device-width</span></div>
+        <div class="lex-info">
+          <div class="lex-name">width=device-width</div>
+          <div class="lex-desc">Sets the viewport width to match the physical screen width of the device</div>
+          <div class="lex-detail">Without this, browsers pretend the screen is 980px wide (desktop default) and shrink everything to fit. A phone is only 375px wide — so text becomes microscopic. This attribute tells the browser to use the device's actual width instead.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="e-att">initial-scale</span><span class="c-punc">=</span><span class="e-val">1.0</span></div>
+        <div class="lex-info">
+          <div class="lex-name">initial-scale=1.0</div>
+          <div class="lex-desc">Sets the initial zoom level to 100% — no zoom-in or zoom-out on first load</div>
+          <div class="lex-detail">1.0 = no zoom (100%). 2.0 = 200% zoom (everything appears double size). Without initial-scale, some browsers zoom in or out by default, breaking your carefully designed layout. Always set it to 1.0.</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-6"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Responsive Images <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 7  RESPONSIVE IMAGES ═══ -->
+  <div class="slide" id="slide-7">
+    <div class="slide-header">
+      <span class="badge b-teal">Code</span>
+      <div>
+        <div class="slide-title">Responsive Images</div>
+        <div class="slide-subtitle">Two changes — one in index.html, one in style.css — that's all it takes</div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div>
+          <div class="section-label">step 1 — update index.html image tag</div>
+          <div style="margin-bottom:8px">
+            <div style="font-size:12px;font-weight:700;color:#dc2626;margin-bottom:4px">Before ❌</div>
+            <div class="editor" style="border-radius:8px">
+              <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div></div>
+              <div class="editor-body" style="font-size:12px">
+                <div class="e-row"><span class="e-new">&lt;img</span> <span class="e-att">src</span><span class="e-val">="images/banner.jpg"</span><span class="e-new">&gt;</span></div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:12px;font-weight:700;color:#16a34a;margin-bottom:4px">After ✅</div>
+            <div class="editor" style="border-radius:8px">
+              <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div></div>
+              <div class="editor-body" style="font-size:12px">
+                <div class="e-row"><span class="e-new">&lt;img</span> <span class="e-att">src</span><span class="e-val">="images/banner.jpg"</span></div>
+                <div class="e-row"><span class="e-ind2"></span><span class="e-att" style="color:#80ffea">class</span><span class="e-val" style="color:#80ffea">="hero-image"</span><span class="e-new">&gt;</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="section-label">step 2 — add to style.css</div>
+          <div class="editor" style="border-radius:8px">
+            <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">style.css — add at bottom</span></div>
+            <div class="editor-body">
+              <div class="e-row"><span class="e-ln">…</span><span class="c-cmt">/* ── Responsive Images ── */</span></div>
+              <div class="e-row"><span class="e-ln">1</span><span class="c-sel">.hero-image</span><span class="c-punc"> {</span></div>
+              <div class="e-row"><span class="e-ln">2</span><span class="e-ind1"></span><span class="c-prop">width</span><span class="c-punc">:</span> <span class="c-num">100%</span><span class="c-punc">;</span></div>
+              <div class="e-row"><span class="e-ln">3</span><span class="e-ind1"></span><span class="c-prop">height</span><span class="c-punc">:</span> <span class="c-str">auto</span><span class="c-punc">;</span></div>
+              <div class="e-row"><span class="e-ln">4</span><span class="c-punc">}</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">interactive width demo — drag to resize</div>
+        <div class="width-slider-wrap">
+          <div style="font-size:12px;font-weight:700;color:#555;margin-bottom:8px">Container width: <span id="cont-label">100%</span></div>
+          <div class="slider-track" style="margin-bottom:12px">
+            <input type="range" min="30" max="100" value="100" oninput="resizeImgDemo(this.value)">
+            <span class="slider-val" id="cont-val">100%</span>
+          </div>
+          <div id="img-demo-container" style="width:100%;transition:width .3s;overflow:hidden">
+            <div class="img-resize-demo">
+              <div class="demo-img" id="responsive-img" style="width:100%">
+                🖼 banner.jpg — width: 100%
+              </div>
+            </div>
+            <div style="font-size:11px;color:#888;text-align:center;margin-top:6px">Image always fills its container</div>
+          </div>
+        </div>
+        <div class="success-box" style="margin-top:10px">
+          <i class="ti ti-sparkles" style="color:#16a34a;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+          <div style="font-size:13px;color:#166534;line-height:1.65">Notice: the image stretches and shrinks smoothly with the container. <code>height:auto</code> keeps the aspect ratio correct — no squishing!</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-7"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Explain Properties <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 8  EXPLAIN width:100% ═══ -->
+  <div class="slide" id="slide-8">
+    <div class="slide-header">
+      <span class="badge b-blue">Explain</span>
+      <div>
+        <div class="slide-title">width:100% vs height:auto</div>
+        <div class="slide-subtitle">Click each property to expand — the most important responsive CSS pair</div>
+      </div>
+    </div>
+    <div class="line-explain">
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="c-prop">width</span><span class="c-punc">:</span> <span class="c-num">100%</span></div>
+        <div class="lex-info">
+          <div class="lex-name">width: 100% — take full width of parent</div>
+          <div class="lex-desc">Makes the image stretch to fill 100% of its parent container's width</div>
+          <div class="lex-detail">100% is relative — it always means "100% of the parent element." So if the parent is 375px (phone), the image is 375px. If the parent is 1200px (desktop), the image is 1200px. This is why it's "responsive" — it adapts to whatever container it lives in. Never overflows. Always fits.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="c-prop">height</span><span class="c-punc">:</span> <span class="c-str">auto</span></div>
+        <div class="lex-info">
+          <div class="lex-name">height: auto — maintain aspect ratio</div>
+          <div class="lex-desc">Lets the browser calculate the height automatically based on the image's original proportions</div>
+          <div class="lex-detail">If you set width:100% but leave height fixed (e.g. height:200px), the image gets squished or stretched as the width changes. height:auto says "calculate the correct height to keep the original width:height ratio." A 1920×1080 image (16:9 ratio) will always stay 16:9, no matter how wide it is displayed.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="c-prop">max-width</span><span class="c-punc">:</span> <span class="c-num">100%</span></div>
+        <div class="lex-info">
+          <div class="lex-name">max-width: 100% — the safer alternative</div>
+          <div class="lex-desc">Image grows up to its natural size, but never overflows the container</div>
+          <div class="lex-detail">width:100% forces the image to always stretch to full container width — even if the image is smaller than the container (causing blurry upscaling). max-width:100% is gentler: the image stays its natural size on large screens but shrinks on small screens. Use max-width for most images, width:100% for hero banners.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="c-prop">display</span><span class="c-punc">:</span> <span class="c-str">block</span></div>
+        <div class="lex-info">
+          <div class="lex-name">display: block — remove the bottom gap</div>
+          <div class="lex-desc">Images are inline by default — this creates a small gap below them</div>
+          <div class="lex-detail">Browsers treat &lt;img&gt; as inline elements (like text), which adds a small gap at the bottom (the "descender" space for letters like p, y, g). Adding display:block removes this gap. When width:100% and display:block are combined, images behave perfectly in responsive layouts.</div>
+        </div>
+      </div>
+    </div>
+    <div class="card card-gray" style="margin-top:.25rem">
+      <div class="section-label">complete responsive image rule — best practice</div>
+      <div class="editor" style="border-radius:8px;margin-top:4px">
+        <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">style.css</span></div>
+        <div class="editor-body">
+          <div class="e-row"><span class="c-sel">.hero-image</span><span class="c-punc"> {</span></div>
+          <div class="e-row"><span class="e-ind1"></span><span class="c-prop">width</span><span class="c-punc">:</span> <span class="c-num">100%</span><span class="c-punc">;</span> <span class="c-cmt">/* fills the container */</span></div>
+          <div class="e-row"><span class="e-ind1"></span><span class="c-prop">height</span><span class="c-punc">:</span> <span class="c-str">auto</span><span class="c-punc">;</span> <span class="c-cmt">/* keeps aspect ratio */</span></div>
+          <div class="e-row"><span class="e-ind1"></span><span class="c-prop">display</span><span class="c-punc">:</span> <span class="c-str">block</span><span class="c-punc">;</span> <span class="c-cmt">/* removes bottom gap */</span></div>
+          <div class="e-row"><span class="c-punc">}</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-8"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Activity <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 9  ACTIVITY ═══ -->
+  <div class="slide" id="slide-9">
+    <div class="slide-header">
+      <span class="badge b-orange">Activity</span>
+      <div>
+        <div class="slide-title">Resize Browser — Observe Image</div>
+        <div class="slide-subtitle">Two-step activity — students observe responsiveness in action</div>
+      </div>
+    </div>
+    <div class="challenge-box">
+      <div class="challenge-title"><i class="ti ti-target"></i> Make your SkillHub image responsive — then resize the browser and observe</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div style="display:flex;gap:10px">
+        <div style="flex:1;background:#fff;border:1px solid #e8e8e8;border-radius:10px;padding:14px">
+          <div style="font-size:12px;font-weight:700;color:#3730a3;margin-bottom:8px;display:flex;align-items:center;gap:6px"><span style="width:22px;height:22px;background:#4f46e5;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700">1</span> Add class to image</div>
+          <div class="editor" style="border-radius:6px">
+            <div class="editor-bar" style="padding:6px 10px"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div></div>
+            <div class="editor-body" style="font-size:11.5px;padding:8px 12px">
+              <div class="e-row"><span class="e-new">&lt;img</span> <span class="e-att">src</span><span class="e-val">="images/banner.jpg"</span></div>
+              <div class="e-row" style="background:#1a2a1a"><span class="e-ind1"></span><span class="e-att">class</span><span class="e-val">="hero-image"</span><span class="e-new">&gt;</span></div>
+            </div>
+          </div>
+        </div>
+        <div style="flex:1;background:#fff;border:1px solid #e8e8e8;border-radius:10px;padding:14px">
+          <div style="font-size:12px;font-weight:700;color:#3730a3;margin-bottom:8px;display:flex;align-items:center;gap:6px"><span style="width:22px;height:22px;background:#4f46e5;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700">2</span> Add CSS rule</div>
+          <div class="editor" style="border-radius:6px">
+            <div class="editor-bar" style="padding:6px 10px"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div></div>
+            <div class="editor-body" style="font-size:11.5px;padding:8px 12px">
+              <div class="e-row"><span class="c-sel">.hero-image</span><span class="c-punc"> {</span></div>
+              <div class="e-row" style="background:#1a2a1a"><span class="e-ind1"></span><span class="c-prop">width</span><span class="c-punc">:</span><span class="c-num">100%</span><span class="c-punc">;</span></div>
+              <div class="e-row" style="background:#1a2a1a"><span class="e-ind1"></span><span class="c-prop">height</span><span class="c-punc">:</span><span class="c-str">auto</span><span class="c-punc">;</span></div>
+              <div class="e-row"><span class="c-punc">}</span></div>
+            </div>
+          </div>
+        </div>
+        <div style="flex:1;background:#fff;border:1px solid #e8e8e8;border-radius:10px;padding:14px">
+          <div style="font-size:12px;font-weight:700;color:#3730a3;margin-bottom:8px;display:flex;align-items:center;gap:6px"><span style="width:22px;height:22px;background:#4f46e5;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700">3</span> Open DevTools &amp; resize</div>
+          <div style="display:flex;flex-direction:column;gap:5px;font-size:12px;color:#555;line-height:1.7">
+            <div><code>F12</code> → Device Toolbar</div>
+            <div>Drag the blue width handle left and right</div>
+            <div>Observe: image shrinks &amp; grows with the viewport</div>
+            <div style="color:#16a34a;font-weight:700;margin-top:4px">✓ No horizontal scroll!</div>
+          </div>
+        </div>
+      </div>
+      <div class="card card-gray">
+        <div class="section-label">what to look for — observation checklist</div>
+        <div style="display:flex;flex-direction:column;gap:6px;margin-top:4px" id="obs-checklist">
+          <div class="check-item" onclick="toggleCheck(this)">
+            <div class="check-circle"><i class="ti ti-check" style="font-size:12px"></i></div>
+            <div style="font-size:13px">At 375px (phone width) — image fills the full screen width</div>
+          </div>
+          <div class="check-item" onclick="toggleCheck(this)">
+            <div class="check-circle"><i class="ti ti-check" style="font-size:12px"></i></div>
+            <div style="font-size:13px">At 768px (tablet width) — image still fills the section correctly</div>
+          </div>
+          <div class="check-item" onclick="toggleCheck(this)">
+            <div class="check-circle"><i class="ti ti-check" style="font-size:12px"></i></div>
+            <div style="font-size:13px">At 1280px (desktop) — image fills the container but doesn't overflow</div>
+          </div>
+          <div class="check-item" onclick="toggleCheck(this)">
+            <div class="check-circle"><i class="ti ti-check" style="font-size:12px"></i></div>
+            <div style="font-size:13px">Aspect ratio is maintained at every size — image is never squished</div>
+          </div>
+          <div class="check-item" onclick="toggleCheck(this)">
+            <div class="check-circle"><i class="ti ti-check" style="font-size:12px"></i></div>
+            <div style="font-size:13px">No horizontal scrollbar appears when the browser is narrow</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="info-box">
+      <i class="ti ti-info-circle info-icon"></i>
+      <div class="info-text"><strong>Hours 2 &amp; 3 preview:</strong> Next we'll add <code>@media</code> queries to make the navigation, cards, and hero section also respond to screen size. By end of Day 5, SkillHub will be fully mobile-responsive.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-9"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Reference <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 10 REFERENCE ═══ -->
+  <div class="slide" id="slide-10">
+    <div class="slide-header">
+      <span class="badge b-slate">Reference</span>
+      <div>
+        <div class="slide-title">Responsive Properties Reference</div>
+        <div class="slide-subtitle">All techniques covered today — and a preview of what's coming in Hours 2 &amp; 3</div>
+      </div>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <table class="tag-table">
+        <thead>
+          <tr><th>Technique / Property</th><th>What it does</th><th>Example</th><th>Hour</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="tag-mono" style="background:#cffafe;color:#164e63">viewport meta tag</span></td>
+            <td>Tells mobile browsers to use device width instead of 980px desktop default</td>
+            <td><code>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</code></td>
+            <td><span class="badge b-cyan">1</span></td>
+          </tr>
+          <tr>
+            <td><span class="tag-mono" style="background:#d1fae5;color:#065f46">width: 100%</span></td>
+            <td>Element fills 100% of its parent container's width — responsive</td>
+            <td><code>.hero-image { width: 100%; }</code></td>
+            <td><span class="badge b-teal">1</span></td>
+          </tr>
+          <tr>
+            <td><span class="tag-mono" style="background:#dbeafe;color:#1e40af">height: auto</span></td>
+            <td>Browser calculates height to maintain the original aspect ratio</td>
+            <td><code>.hero-image { height: auto; }</code></td>
+            <td><span class="badge b-teal">1</span></td>
+          </tr>
+          <tr>
+            <td><span class="tag-mono" style="background:#fef3c7;color:#92400e">max-width: 100%</span></td>
+            <td>Image grows up to natural size but never overflows container</td>
+            <td><code>img { max-width: 100%; }</code></td>
+            <td><span class="badge b-teal">1</span></td>
+          </tr>
+          <tr>
+            <td><span class="tag-mono" style="background:#ede9fe;color:#5b21b6">@media query</span></td>
+            <td>Applies different CSS at specific screen widths (breakpoints)</td>
+            <td><code>@media (max-width: 768px) { nav { flex-direction: column; } }</code></td>
+            <td><span class="badge b-purple">2</span></td>
+          </tr>
+          <tr>
+            <td><span class="tag-mono" style="background:#ffedd5;color:#9a3412">flex-wrap: wrap</span></td>
+            <td>Flex children wrap to next line when they run out of space</td>
+            <td><code>.cards { display: flex; flex-wrap: wrap; }</code></td>
+            <td><span class="badge b-orange">2</span></td>
+          </tr>
+          <tr>
+            <td><span class="tag-mono" style="background:#dcfce7;color:#166534">flex-direction: column</span></td>
+            <td>Switches flex layout from horizontal to vertical (stacking)</td>
+            <td><code>@media (max-width:768px) { nav { flex-direction: column; } }</code></td>
+            <td><span class="badge b-purple">3</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="grid-2" style="margin-top:.25rem">
+      <div class="tip-box">
+        <i class="ti ti-bulb tip-icon"></i>
+        <div class="tip-text"><strong>Mobile-first approach:</strong> Professional developers write CSS for mobile screens first, then add media queries for larger screens. This is called "mobile-first" and is the industry standard approach we'll use in Hour 2.</div>
+      </div>
+      <div class="info-box">
+        <i class="ti ti-info-circle info-icon"></i>
+        <div class="info-text"><strong>Common breakpoints:</strong> <code>480px</code> (small phone) · <code>768px</code> (tablet/large phone) · <code>1024px</code> (small laptop) · <code>1280px</code> (desktop). We'll use 768px as the main breakpoint for SkillHub.</div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-10"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Quiz <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 11 QUIZ ═══ -->
+  <div class="slide" id="slide-11">
+    <div class="slide-header">
+      <span class="badge b-green">Quiz</span>
+      <div>
+        <div class="slide-title">Quick Check — Responsive Design</div>
+        <div class="slide-subtitle">5 questions — tap the correct answer</div>
+      </div>
+    </div>
+    <div id="quiz-container"></div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-11"></div>
+      <button class="nav-btn" onclick="goSlide(0)"><i class="ti ti-home"></i> Home</button>
+    </div>
+  </div>
+
+</div><!-- /.wrapper -->
+<script>
+  var current = 0, total = 12, quizInit = false;
+
+  var quizData = [
+    {
+      q: "You open Amazon on a phone and a laptop. The code (HTML + CSS) is…",
+      opts: [
+        "Different — mobile sites use a separate m.amazon.com file",
+        "The same — only the CSS layout rules respond to screen size",
+        "Different — React renders a different component tree on mobile",
+        "The same — but the server sends different data"
+      ],
+      ans: 1,
+      exp: "The same HTML and CSS file is served to all devices. Media queries inside CSS change the layout at different screen widths. No separate mobile code needed — that's the beauty of responsive design."
+    },
+    {
+      q: "What does <code>width=device-width</code> in the viewport meta tag do?",
+      opts: [
+        "Sets the image width to match the device screen",
+        "Tells the browser to use the device's actual screen width instead of the default 980px desktop width",
+        "Makes all elements 100% wide automatically",
+        "Enables responsive design without any CSS needed"
+      ],
+      ans: 1,
+      exp: "Without this, mobile browsers pretend the screen is 980px wide (desktop default) and shrink everything to fit — making text tiny. width=device-width tells the browser to use the device's real screen width (e.g. 375px for iPhone)."
+    },
+    {
+      q: "An image has <code>width:100%</code> and <code>height:auto</code>. What happens when the parent container shrinks from 800px to 400px?",
+      opts: [
+        "The image stays 800px — width:100% is calculated once on load",
+        "The image shrinks to 400px wide and height adjusts to maintain the original aspect ratio",
+        "The image becomes 400px wide but height stays the same, causing squishing",
+        "The image disappears because it overflows"
+      ],
+      ans: 1,
+      exp: "width:100% = always fill 100% of parent (400px). height:auto = browser recalculates height to keep the original aspect ratio. So a 1600×900 image (16:9) displayed at 400px wide will be 225px tall — perfectly proportioned."
+    },
+    {
+      q: "How do you open Device Toolbar in Chrome DevTools to simulate mobile devices?",
+      opts: [
+        "Ctrl + D",
+        "View → Developer → Mobile Mode",
+        "F12 (open DevTools) → then Ctrl+Shift+M or click the device icon",
+        "Right-click → Mobile View"
+      ],
+      ans: 2,
+      exp: "F12 opens Chrome DevTools. Then Ctrl+Shift+M (or click the device icon in the top-left of DevTools) toggles the Device Toolbar. You can then select specific phones, tablets, or drag to set a custom width."
+    },
+    {
+      q: "What is the difference between <code>width:100%</code> and <code>max-width:100%</code> for images?",
+      opts: [
+        "They are identical — both make the image 100% of the screen",
+        "width:100% always stretches the image to fill the parent (even if smaller); max-width:100% lets small images stay small but prevents overflow",
+        "max-width:100% stretches images; width:100% only shrinks them",
+        "max-width:100% only works on desktop; width:100% works everywhere"
+      ],
+      ans: 1,
+      exp: "width:100% forces the image to always fill 100% of the parent — a 200px image in a 1200px container will be upscaled and look blurry. max-width:100% is gentler: the image displays at its natural size on large screens but shrinks on small screens to prevent overflow. Use max-width for most images; width:100% for full-width hero banners."
+    }
+  ];
+  var quizAnswered = [];
+
+  function renderQuiz() {
+    var c = document.getElementById('quiz-container'); c.innerHTML = '';
+    quizData.forEach(function(q, i) {
+      var d = document.createElement('div'); d.style.cssText = 'margin-bottom:18px';
+      d.innerHTML = '<div style="font-size:13px;font-weight:600;margin-bottom:6px">'+(i+1)+'. '+q.q+'</div>';
+      q.opts.forEach(function(opt, j) {
+        var btn = document.createElement('button'); btn.className = 'quiz-option';
+        btn.innerHTML = String.fromCharCode(65+j)+'. '+opt;
+        btn.onclick = function() {
+          if (quizAnswered[i]) return; quizAnswered[i] = true;
+          var btns = d.querySelectorAll('.quiz-option');
+          btns.forEach(function(b,k){ b.disabled=true; if(k===q.ans) b.classList.add('correct'); else if(k===j) b.classList.add('wrong'); });
+          var fb = d.querySelector('.quiz-feedback');
+          fb.innerHTML = (j===q.ans?'✅ Correct! ':'❌ Not quite. ')+q.exp;
+          fb.className = 'quiz-feedback '+(j===q.ans?'correct':'wrong');
+        };
+        d.appendChild(btn);
+      });
+      var fb = document.createElement('div'); fb.className = 'quiz-feedback'; d.appendChild(fb);
+      c.appendChild(d);
+    });
+  }
+
+  function toggleLex(row) {
+    var was = row.classList.contains('active');
+    document.querySelectorAll('.lex-row.active').forEach(function(r){ r.classList.remove('active'); });
+    if (!was) row.classList.add('active');
+  }
+
+  function toggle(id) {
+    var el = document.getElementById(id); el.classList.toggle('open');
+    el.previousElementSibling.textContent = el.classList.contains('open') ? 'Hide the answer' : 'Reveal the answer';
+  }
+
+  /* ── Responsive image slider ── */
+  function resizeImgDemo(val) {
+    var pct = val + '%';
+    document.getElementById('img-demo-container').style.width = pct;
+    document.getElementById('cont-val').textContent = pct;
+    document.getElementById('cont-label').textContent = pct;
+  }
+
+  function toggleCheck(el) {
+    el.classList.toggle('done');
+    var c = el.querySelector('.check-circle');
+    if (el.classList.contains('done')) {
+      c.style.background='#22c55e'; c.style.borderColor='#22c55e'; c.style.color='#fff';
+    } else {
+      c.style.background=''; c.style.borderColor=''; c.style.color='';
+    }
+  }
+
+  function goSlide(n) {
+    document.getElementById('slide-'+current).classList.remove('active');
+    current = n;
+    document.getElementById('slide-'+current).classList.add('active');
+    updateDots();
+    document.getElementById('slide-counter').textContent = (current+1)+' / '+total;
+    if (n===11 && !quizInit) { renderQuiz(); quizInit=true; }
+    window.scrollTo(0,0);
+  }
+  function nextSlide() { if (current < total-1) goSlide(current+1); }
+  function prevSlide() { if (current > 0) goSlide(current-1); }
+
+  function updateDots() {
+    for (var s=0; s<total; s++) {
+      var el = document.getElementById('dots-'+s); if (!el) continue;
+      el.innerHTML = '';
+      for (var d=0; d<total; d++) {
+        var dot = document.createElement('div');
+        dot.className = 'dot'+(d===current?' active':'');
+        el.appendChild(dot);
+      }
+    }
+  }
+  updateDots();
+</script>
+</body>
+</html>

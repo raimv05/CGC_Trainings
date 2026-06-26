@@ -1,0 +1,1369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Day 6 · Hour 2 – Bootstrap Grid System</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f4f5f7; color: #1a1a1a;
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; padding: 2rem 1rem;
+  }
+  .wrapper {
+    width: 100%; max-width: 920px; background: #fff;
+    border-radius: 16px; box-shadow: 0 2px 20px rgba(0,0,0,0.09); overflow: hidden;
+  }
+  .top-bar {
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    color: #fff; padding: 14px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .top-bar-title { font-size: 15px; font-weight: 600; }
+  .top-bar-sub   { font-size: 12px; opacity: .55; margin-top: 2px; }
+  .slide-counter { font-size: 13px; opacity: .6; font-variant-numeric: tabular-nums; }
+  .slide { display: none; padding: 1.75rem 2rem; min-height: 500px; flex-direction: column; gap: 1.2rem; }
+  .slide.active { display: flex; }
+  .slide-header { display: flex; align-items: center; gap: 10px; padding-bottom: 1rem; border-bottom: 1px solid #e8e8e8; }
+  .slide-title    { font-size: 20px; font-weight: 700; color: #111; }
+  .slide-subtitle { font-size: 13px; color: #666; margin-top: 2px; }
+
+  /* ── Badges ── */
+  .badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+  .b-blue   { background:#dbeafe; color:#1d4ed8; }
+  .b-teal   { background:#d1fae5; color:#065f46; }
+  .b-purple { background:#ede9fe; color:#5b21b6; }
+  .b-amber  { background:#fef3c7; color:#92400e; }
+  .b-green  { background:#dcfce7; color:#166534; }
+  .b-slate  { background:#e2e8f0; color:#334155; }
+  .b-rose   { background:#ffe4e6; color:#9f1239; }
+  .b-orange { background:#ffedd5; color:#9a3412; }
+  .b-indigo { background:#e0e7ff; color:#3730a3; }
+  .b-cyan   { background:#cffafe; color:#164e63; }
+  .b-pink   { background:#fce7f3; color:#9d174d; }
+  .b-yellow { background:#fef9c3; color:#854d0e; }
+
+  /* ── Layout ── */
+  .section-label { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 8px; }
+  .card { background: #fff; border: 1px solid #e8e8e8; border-radius: 12px; padding: 1rem 1.25rem; }
+  .card-gray { background: #f8f9fa; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+  /* ── Code Editor (Dracula) ── */
+  .editor { background: #1e1e2e; border-radius: 12px; overflow: hidden; font-family: 'SFMono-Regular', Consolas, 'Courier New', monospace; }
+  .editor-bar { background: #13131f; padding: 9px 14px; display: flex; align-items: center; gap: 6px; }
+  .e-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .e-red { background:#ff5f57; } .e-yellow { background:#febc2e; } .e-green { background:#28c840; }
+  .e-label { font-size: 12px; color: #6272a4; margin-left: 4px; font-family: -apple-system, sans-serif; }
+  .editor-body { padding: 14px 18px; font-size: 12.5px; line-height: 1.8; }
+  .e-ln   { color: #44475a; font-size: 11px; display: inline-block; width: 22px; user-select: none; }
+  .e-tag  { color: #ff79c6; }
+  .e-att  { color: #50fa7b; }
+  .e-val  { color: #f1fa8c; }
+  .e-txt  { color: #f8f8f2; }
+  .e-cmt  { color: #6272a4; font-style: italic; }
+  .e-new  { color: #80ffea; }
+  .e-h2   { color: #ffb86c; font-weight: 700; }
+  .e-p    { color: #8be9fd; }
+  .c-sel  { color: #ff79c6; font-weight: 700; }
+  .c-prop { color: #50fa7b; }
+  .c-val  { color: #f1fa8c; }
+  .c-punc { color: #f8f8f2; }
+  .c-hex  { color: #bd93f9; }
+  .c-str  { color: #ffb86c; }
+  .c-num  { color: #ff79c6; }
+  .c-cmt  { color: #6272a4; font-style: italic; }
+  .c-cls  { color: #80ffea; }   /* bootstrap class names */
+  .c-util { color: #a4e400; }   /* bootstrap utility values */
+  .e-row  { display: flex; gap: 8px; }
+  .e-ind1 { display: inline-block; width: 20px; }
+  .e-ind2 { display: inline-block; width: 40px; }
+  .e-ind3 { display: inline-block; width: 60px; }
+  .e-ind4 { display: inline-block; width: 80px; }
+
+  /* ── Browser frame ── */
+  .browser { border-radius: 12px; overflow: hidden; border: 1px solid #e0e0e0; }
+  .browser-bar { background: #f1f3f4; padding: 9px 14px; display: flex; align-items: center; gap: 7px; border-bottom: 1px solid #e0e0e0; }
+  .b-dot2 { width: 10px; height: 10px; border-radius: 50%; }
+  .b-r { background:#ff5f57; } .b-y { background:#febc2e; } .b-g { background:#28c840; }
+  .b-url { flex:1; background:#fff; border:1px solid #dadce0; border-radius:20px; padding:4px 14px; font-size:12px; color:#555; }
+
+  /* ── Tables ── */
+  .tag-table { border-collapse: collapse; width: 100%; }
+  .tag-table th { background: #f1f5f9; font-size: 12px; font-weight: 700; text-align: left; padding: 10px 14px; color: #475569; border-bottom: 2px solid #e2e8f0; }
+  .tag-table td { font-size: 13px; padding: 10px 14px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+  .tag-table tr:last-child td { border-bottom: none; }
+  .tag-table tr:hover td { background: #f8f9fa; }
+  .tag-mono { font-family: 'SFMono-Regular', Consolas, monospace; font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 5px; }
+
+  /* ── Quiz ── */
+  .quiz-option { border: 1px solid #dee2e6; border-radius: 8px; padding: 10px 14px; font-size: 13px; cursor: pointer; margin-bottom: 6px; transition: all .15s; background: transparent; width: 100%; text-align: left; color: #1a1a1a; }
+  .quiz-option:hover:not(:disabled) { background: #f8f9fa; }
+  .quiz-option.correct { background: #d1fae5; border-color: #059669; color: #065f46; }
+  .quiz-option.wrong   { background: #fee2e2; border-color: #dc2626; color: #991b1b; }
+  .quiz-feedback { display: none; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-top: 4px; }
+  .quiz-feedback.correct { background: #d1fae5; color: #065f46; display: block; }
+  .quiz-feedback.wrong   { background: #fee2e2; color: #991b1b; display: block; }
+
+  /* ── Activity / challenge ── */
+  .activity-box { border: 2px dashed #a5b4fc; background: #eef2ff; border-radius: 12px; padding: 14px 18px; }
+  .activity-title { font-size: 13px; font-weight: 700; color: #3730a3; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .challenge-box { border: 2px dashed #f9a8d4; background: #fdf2f8; border-radius: 12px; padding: 14px 18px; }
+  .challenge-title { font-size: 13px; font-weight: 700; color: #9f1239; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+
+  /* ── Tip / info / warn / success ── */
+  .tip-box   { display:flex; gap:10px; align-items:flex-start; background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:10px 14px; }
+  .tip-icon  { color:#d97706; font-size:18px; flex-shrink:0; margin-top:1px; }
+  .tip-text  { font-size:13px; color:#92400e; line-height:1.6; }
+  .info-box  { display:flex; gap:10px; align-items:flex-start; background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:10px 14px; }
+  .info-icon { color:#2563eb; font-size:18px; flex-shrink:0; margin-top:1px; }
+  .info-text { font-size:13px; color:#1e40af; line-height:1.6; }
+  .warn-box  { display:flex; gap:10px; align-items:flex-start; background:#fef9ee; border:1px solid #fcd34d; border-radius:10px; padding:10px 14px; }
+  .success-box { display:flex; gap:10px; align-items:flex-start; background:#f0fdf4; border:1px solid #86efac; border-radius:10px; padding:10px 14px; }
+
+  /* ── Line explainer ── */
+  .lex-row { display:flex; align-items:stretch; cursor:pointer; transition:background .12s; border-bottom:1px solid #f0f0f0; }
+  .lex-row:last-child { border-bottom:none; }
+  .lex-row:hover { background:#f8f9fa; }
+  .lex-row.active { background:#eff6ff; border-left:3px solid #1d4ed8; }
+  .lex-code { background:#1e1e2e; padding:10px 14px; font-family:'SFMono-Regular',Consolas,monospace; font-size:12px; min-width:200px; flex-shrink:0; display:flex; align-items:center; }
+  .lex-info { padding:10px 14px; flex:1; }
+  .lex-name   { font-size:13px; font-weight:700; color:#1d4ed8; margin-bottom:2px; }
+  .lex-desc   { font-size:12px; color:#555; line-height:1.55; }
+  .lex-detail { display:none; font-size:12px; color:#1d4ed8; margin-top:4px; padding-top:4px; border-top:1px dashed #bfdbfe; }
+  .lex-row.active .lex-detail { display:block; }
+  .line-explain { border:1px solid #e8e8e8; border-radius:10px; overflow:hidden; }
+
+  /* ── Reveal ── */
+  .reveal-btn { background:#f1f3f5; border:1px solid #dee2e6; border-radius:8px; padding:7px 14px; font-size:13px; cursor:pointer; color:#333; transition:background .15s; }
+  .reveal-btn:hover { background:#e9ecef; }
+  .reveal-content { display:none; margin-top:8px; }
+  .reveal-content.open { display:block; }
+
+  /* ── Nav ── */
+  .nav-row { display:flex; align-items:center; justify-content:space-between; margin-top:auto; padding-top:1rem; border-top:1px solid #f0f0f0; }
+  .nav-btn { display:inline-flex; align-items:center; gap:6px; padding:9px 18px; border:1px solid #dee2e6; border-radius:8px; background:transparent; font-size:13px; cursor:pointer; color:#333; transition:background .15s; }
+  .nav-btn:hover:not(:disabled) { background:#f1f3f5; }
+  .nav-btn:disabled { opacity:.35; cursor:default; }
+  .nav-btn.primary { background:#1d4ed8; border-color:transparent; color:#fff; }
+  .nav-btn.primary:hover { background:#1e40af; }
+  .progress-dots { display:flex; gap:6px; align-items:center; }
+  .dot { width:7px; height:7px; border-radius:50%; background:#dee2e6; transition:all .2s; }
+  .dot.active { width:20px; border-radius:4px; background:#1d4ed8; }
+
+  /* ── Home grid ── */
+  .home-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .home-card { background:#fff; border:1px solid #e8e8e8; border-radius:12px; padding:1rem 1.25rem; cursor:pointer; transition:all .15s; }
+  .home-card:hover { border-color:#1d4ed8; box-shadow:0 2px 8px rgba(29,78,216,.1); }
+  .home-card-title { font-size:15px; font-weight:700; margin:6px 0 2px; }
+  .home-card-sub   { font-size:12px; color:#666; }
+
+  code { font-family:'SFMono-Regular',Consolas,monospace; font-size:12px; background:#f1f3f5; padding:1px 6px; border-radius:4px; border:1px solid #dee2e6; }
+
+  /* ── Checklist ── */
+  .check-item { display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:10px; border:1px solid #e8e8e8; font-size:13px; cursor:pointer; transition:all .15s; user-select:none; }
+  .check-item:hover { background:#f8f9fa; }
+  .check-item.done { background:#f0fdf4; border-color:#86efac; }
+  .check-circle { width:22px; height:22px; border-radius:50%; border:2px solid #dee2e6; display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0; transition:all .2s; color:transparent; }
+  .check-item.done .check-circle { background:#22c55e; border-color:#22c55e; color:#fff; }
+
+  /* ══ BOOTSTRAP SPECIFIC (from Hour 1) ══ */
+  .bs-purple { color: #7952b3; }
+  .bs-bg     { background: #7952b3; }
+  .bs-pill {
+    display: inline-block;
+    font-family: 'SFMono-Regular', Consolas, monospace;
+    font-size: 11px; font-weight: 700;
+    padding: 3px 9px; border-radius: 6px;
+    background: #7952b3; color: #fff;
+    margin: 2px;
+  }
+
+  /* ══ GRID SYSTEM SPECIFIC ══ */
+
+  /* The 12-column ruler */
+  .col-ruler { display: flex; border: 2px solid #334155; border-radius: 8px; overflow: hidden; }
+  .col-cell  { flex: 1; text-align: center; font-size: 10px; font-weight: 700; padding: 8px 0; border-right: 1px solid #334155; }
+  .col-cell:last-child { border-right: none; }
+
+  /* Grid demo blocks */
+  .gd-row { display: flex; gap: 6px; margin-bottom: 6px; }
+  .gd-col { border-radius: 6px; padding: 10px 8px; font-size: 10px; font-weight: 700; text-align: center; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all .3s; }
+
+  /* Breakpoint selector tabs */
+  .bp-tab { padding: 6px 14px; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 12px; font-weight: 600; cursor: pointer; transition: all .15s; background: white; color: #555; }
+  .bp-tab:hover { border-color: #7952b3; color: #5b21b6; }
+  .bp-tab.active { background: #7952b3; border-color: #7952b3; color: white; }
+
+  /* SkillHub Bootstrap card preview */
+  .sh-bs-card { background: #fff; border-radius: 8px; box-shadow: 0 1px 6px rgba(0,0,0,.1); overflow: hidden; font-family: Arial, sans-serif; }
+  .sh-bs-card-body { padding: 14px; }
+  .sh-bs-card-title { font-size: 13px; font-weight: 700; margin-bottom: 5px; }
+  .sh-bs-card-text  { font-size: 11px; color: #555; margin-bottom: 10px; line-height: 1.5; }
+  .sh-bs-btn { display: inline-block; padding: 5px 14px; border-radius: 5px; font-size: 11px; font-weight: 700; text-align: center; }
+  .sh-bs-btn-primary { background: #0d6efd; color: #fff; }
+  .sh-bs-btn-success { background: #198754; color: #fff; }
+  .sh-bs-btn-outline { background: transparent; color: #0d6efd; border: 1px solid #0d6efd; }
+
+  /* Column span visualiser */
+  .span-demo { display: flex; gap: 0; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; height: 36px; }
+  .span-unit { flex: 1; border-right: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 9px; color: #aaa; }
+  .span-unit:last-child { border-right: none; }
+  .span-fill { background: #7952b3; color: white; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; border-right: 1px solid rgba(255,255,255,.2); }
+
+  /* Interactive column builder */
+  .col-btn { padding: 5px 12px; border-radius: 6px; border: 1px solid #dee2e6; font-size: 12px; cursor: pointer; background: white; color: #333; transition: all .15s; font-weight: 600; }
+  .col-btn:hover { border-color: #7952b3; color: #5b21b6; }
+  .col-btn.sel { background: #7952b3; border-color: #7952b3; color: white; }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <div>
+      <div class="top-bar-title">MERN Stack Training · Day 6 · Hour 2</div>
+      <div class="top-bar-sub">Bootstrap Grid System — SkillHub LMS</div>
+    </div>
+    <div class="slide-counter" id="slide-counter">1 / 13</div>
+  </div>
+
+  <!-- ═══════════ SLIDE 0  HOME ═══════════ -->
+  <div class="slide active" id="slide-0">
+    <div class="slide-header">
+      <span class="badge b-purple">Day 6 · Hour 2</span>
+      <div>
+        <div class="slide-title">Bootstrap Grid System</div>
+        <div class="slide-subtitle">The most important Bootstrap topic — how Amazon, Flipkart, and every modern site lay out their pages</div>
+      </div>
+    </div>
+
+    <div style="background:#ede9fe;border:1px solid #c4b5fd;border-radius:12px;padding:12px 16px;display:flex;gap:12px;align-items:flex-start">
+      <i class="ti ti-layout-grid" style="color:#7952b3;font-size:22px;flex-shrink:0;margin-top:1px"></i>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#4c1d95;margin-bottom:4px">Hour 2 Goal — Convert SkillHub Courses Section to Bootstrap Grid Cards</div>
+        <div style="display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:#5b21b6">
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Understand the 12-column system</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>container → row → col</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>col-md-4 breakpoints</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Bootstrap card component</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>6 course cards built</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="home-grid">
+      <div class="home-card" onclick="goSlide(1)">
+        <span class="badge b-green">Recap</span>
+        <div class="home-card-title">Where We Left Off</div>
+        <div class="home-card-sub">Hour 1 wins + what the grid solves</div>
+      </div>
+      <div class="home-card" onclick="goSlide(2)">
+        <span class="badge b-amber">Hook</span>
+        <div class="home-card-title">Opening Question</div>
+        <div class="home-card-sub">How do Amazon &amp; Flipkart layout products in columns?</div>
+      </div>
+      <div class="home-card" onclick="goSlide(3)">
+        <span class="badge b-purple">Concept</span>
+        <div class="home-card-title">The 12-Column System</div>
+        <div class="home-card-sub">Every Bootstrap row is divided into 12 equal columns</div>
+      </div>
+      <div class="home-card" onclick="goSlide(4)">
+        <span class="badge b-blue">Code</span>
+        <div class="home-card-title">First Grid — container → row → col</div>
+        <div class="home-card-sub">The three-level HTML structure every grid uses</div>
+      </div>
+      <div class="home-card" onclick="goSlide(5)">
+        <span class="badge b-teal">Code</span>
+        <div class="home-card-title">Three Equal Columns — col-md-4</div>
+        <div class="home-card-sub">4+4+4=12 — desktop row, mobile stack</div>
+      </div>
+      <div class="home-card" onclick="goSlide(6)">
+        <span class="badge b-indigo">Explain</span>
+        <div class="home-card-title">Breakpoints — sm / md / lg / xl</div>
+        <div class="home-card-sub">Interactive table + live column builder</div>
+      </div>
+      <div class="home-card" onclick="goSlide(7)">
+        <span class="badge b-orange">Live Lab</span>
+        <div class="home-card-title">Interactive Column Builder</div>
+        <div class="home-card-sub">Click to build any column split — see it live</div>
+      </div>
+      <div class="home-card" onclick="goSlide(8)">
+        <span class="badge b-cyan">Component</span>
+        <div class="home-card-title">Bootstrap Card Component</div>
+        <div class="home-card-sub">card · card-body · card-title · btn btn-primary</div>
+      </div>
+      <div class="home-card" onclick="goSlide(9)">
+        <span class="badge b-blue">Code</span>
+        <div class="home-card-title">Build One Course Card</div>
+        <div class="home-card-sub">Full card inside a grid column — HTML complete</div>
+      </div>
+      <div class="home-card" onclick="goSlide(10)">
+        <span class="badge b-rose">Practical</span>
+        <div class="home-card-title">Complete Courses Section — All 6 Cards</div>
+        <div class="home-card-sub">JS, React, Node.js, MongoDB, Express duplicated</div>
+      </div>
+      <div class="home-card" onclick="goSlide(11)">
+        <span class="badge b-slate">Quiz</span>
+        <div class="home-card-title">Quick-Fire Quiz</div>
+        <div class="home-card-sub">5 questions on Bootstrap Grid</div>
+      </div>
+      <div class="home-card" onclick="goSlide(12)">
+        <span class="badge b-green">Wrap-Up</span>
+        <div class="home-card-title">Day 6 Complete</div>
+        <div class="home-card-sub">What you built + Day 7 preview</div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" disabled><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-0"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Start <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 1  RECAP ═══════════ -->
+  <div class="slide" id="slide-1">
+    <div class="slide-header">
+      <span class="badge b-green">Recap</span>
+      <div>
+        <div class="slide-title">Where We Left Off</div>
+        <div class="slide-subtitle">Hour 1 covered Bootstrap basics — Hour 2 is where it gets powerful</div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="section-label">hour 1 wins</div>
+        <div class="check-item done"><div class="check-circle">✓</div><span>Bootstrap CDN added to &lt;head&gt; and &lt;/body&gt;</span></div>
+        <div class="check-item done"><div class="check-circle">✓</div><span>Bootstrap class names = instant CSS rules</span></div>
+        <div class="check-item done"><div class="check-circle">✓</div><span>Utility classes: <code>d-flex</code>, <code>p-3</code>, <code>text-center</code></span></div>
+        <div class="check-item done"><div class="check-circle">✓</div><span>Navbar rebuilt with <code>navbar</code> classes</span></div>
+        <div class="check-item done"><div class="check-circle">✓</div><span>Hero section styled with Bootstrap utilities</span></div>
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;border:2px dashed #a78bfa;background:#ede9fe;font-size:13px;margin-top:4px">
+          <i class="ti ti-clock-play" style="color:#7c3aed;font-size:18px;flex-shrink:0"></i>
+          <span style="color:#5b21b6;font-weight:600">Now: Layout the <strong>Courses section</strong> using Bootstrap's Grid System</span>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">the problem bootstrap grid solves</div>
+        <div class="browser">
+          <div class="browser-bar"><div class="b-dot2 b-r"></div><div class="b-dot2 b-y"></div><div class="b-dot2 b-g"></div><div class="b-url">skillhub.com — courses section now</div></div>
+          <div style="background:#f4f6f9;padding:10px;font-family:Arial,sans-serif">
+            <div style="font-size:11px;font-weight:700;margin-bottom:8px">Our Courses</div>
+            <div style="background:white;padding:8px;border-radius:5px;margin-bottom:5px;font-size:10px;box-shadow:0 1px 3px rgba(0,0,0,.1)">HTML &amp; CSS — Build beautiful websites</div>
+            <div style="background:white;padding:8px;border-radius:5px;margin-bottom:5px;font-size:10px;box-shadow:0 1px 3px rgba(0,0,0,.1)">JavaScript — Make pages interactive</div>
+            <div style="background:white;padding:8px;border-radius:5px;font-size:10px;box-shadow:0 1px 3px rgba(0,0,0,.1)">React — Build modern UIs</div>
+            <div style="font-size:9px;color:#dc2626;margin-top:6px;background:#fee2e2;padding:5px;border-radius:4px">⚠ Cards stacked — not in a professional grid layout</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="info-box">
+      <i class="ti ti-info-circle info-icon"></i>
+      <div class="info-text"><strong>Bootstrap Grid</strong> lets you say "show 3 cards per row on desktop, 1 per row on mobile" — using only HTML class names. No Flexbox CSS to write, no media queries to code. Bootstrap handles all of it.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-1"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Opening Hook <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 2  HOOK ═══════════ -->
+  <div class="slide" id="slide-2">
+    <div class="slide-header">
+      <span class="badge b-amber">Hook</span>
+      <div>
+        <div class="slide-title">Opening Question</div>
+        <div class="slide-subtitle">Ask the class before revealing the answer</div>
+      </div>
+    </div>
+
+    <div style="background:linear-gradient(135deg,#1e1b4b,#312e81);border-radius:16px;padding:32px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:16px">
+      <div style="font-size:13px;font-weight:700;color:#a5b4fc;letter-spacing:.08em;text-transform:uppercase">Ask The Class</div>
+      <div style="font-size:24px;font-weight:800;color:#fff;line-height:1.3">How do Amazon and Flipkart<br>display products in neat columns?</div>
+      <div style="font-size:13px;color:#818cf8">Wait for students to answer…</div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">what students usually say</div>
+        <div style="background:#fef3c7;border:1px solid #fde68a;border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px">
+          <i class="ti ti-message" style="color:#d97706;font-size:24px;flex-shrink:0"></i>
+          <div>
+            <div style="font-size:14px;font-weight:700;color:#92400e">"Flexbox" or "CSS Grid"</div>
+            <div style="font-size:12px;color:#a16207;margin-top:2px">Not wrong — but Bootstrap has it pre-built.</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">correct answer</div>
+        <div style="background:#ede9fe;border:2px solid #7952b3;border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px">
+          <i class="ti ti-layout-grid" style="color:#7952b3;font-size:24px;flex-shrink:0"></i>
+          <div>
+            <div style="font-size:16px;font-weight:800;color:#4c1d95;font-family:'SFMono-Regular',Consolas,monospace">Grid System</div>
+            <div style="font-size:12px;color:#5b21b6;margin-top:2px">Bootstrap's 12-column grid, used industry-wide.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-3">
+      <div style="text-align:center;padding:14px 10px;background:white;border-radius:10px;border:1px solid #e8e8e8">
+        <i class="ti ti-brand-amazon" style="font-size:28px;color:#f97316;margin-bottom:6px;display:block"></i>
+        <div style="font-size:11px;font-weight:700">Amazon</div>
+        <div style="font-size:10px;color:#666;margin-top:2px">Product cards in rows of 4–5</div>
+      </div>
+      <div style="text-align:center;padding:14px 10px;background:white;border-radius:10px;border:1px solid #e8e8e8">
+        <i class="ti ti-shopping-bag" style="font-size:28px;color:#2563eb;margin-bottom:6px;display:block"></i>
+        <div style="font-size:11px;font-weight:700">Flipkart</div>
+        <div style="font-size:10px;color:#666;margin-top:2px">Products in a 3-column grid</div>
+      </div>
+      <div style="text-align:center;padding:14px 10px;background:white;border-radius:10px;border:1px solid #e8e8e8">
+        <i class="ti ti-building-store" style="font-size:28px;color:#7952b3;margin-bottom:6px;display:block"></i>
+        <div style="font-size:11px;font-weight:700">SkillHub</div>
+        <div style="font-size:10px;color:#666;margin-top:2px">Course cards in rows of 3 — we build this today</div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-2"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">The 12-Column System <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 3  12-COLUMN SYSTEM ═══════════ -->
+  <div class="slide" id="slide-3">
+    <div class="slide-header">
+      <span class="badge b-purple">Concept</span>
+      <div>
+        <div class="slide-title">The 12-Column System</div>
+        <div class="slide-subtitle">Bootstrap invisibly divides every row into 12 equal columns — you decide how many each element takes</div>
+      </div>
+    </div>
+
+    <!-- The ruler -->
+    <div>
+      <div class="section-label">every bootstrap row — 12 invisible columns</div>
+      <div class="col-ruler">
+        <div class="col-cell" style="background:#ede9fe;color:#5b21b6">1</div>
+        <div class="col-cell" style="background:#dbeafe;color:#1d4ed8">2</div>
+        <div class="col-cell" style="background:#d1fae5;color:#065f46">3</div>
+        <div class="col-cell" style="background:#fef3c7;color:#92400e">4</div>
+        <div class="col-cell" style="background:#ffe4e6;color:#9f1239">5</div>
+        <div class="col-cell" style="background:#ffedd5;color:#9a3412">6</div>
+        <div class="col-cell" style="background:#e0e7ff;color:#3730a3">7</div>
+        <div class="col-cell" style="background:#cffafe;color:#164e63">8</div>
+        <div class="col-cell" style="background:#fce7f3;color:#9d174d">9</div>
+        <div class="col-cell" style="background:#fef9c3;color:#854d0e">10</div>
+        <div class="col-cell" style="background:#dcfce7;color:#166534">11</div>
+        <div class="col-cell" style="background:#e2e8f0;color:#334155">12</div>
+      </div>
+    </div>
+
+    <!-- Column split examples -->
+    <div class="card card-gray">
+      <div class="section-label">common column splits — they must always add up to 12</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+
+        <!-- 4+4+4 -->
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="min-width:70px;font-size:11px;font-weight:700;color:#555">4+4+4=12</div>
+          <div style="flex:1;display:flex;gap:4px">
+            <div style="flex:4;background:#7952b3;color:#fff;padding:8px;border-radius:5px;font-size:11px;font-weight:700;text-align:center">col-md-4</div>
+            <div style="flex:4;background:#7952b3;color:#fff;padding:8px;border-radius:5px;font-size:11px;font-weight:700;text-align:center">col-md-4</div>
+            <div style="flex:4;background:#7952b3;color:#fff;padding:8px;border-radius:5px;font-size:11px;font-weight:700;text-align:center">col-md-4</div>
+          </div>
+          <div style="min-width:80px;font-size:11px;color:#888">3 columns</div>
+        </div>
+
+        <!-- 6+6 -->
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="min-width:70px;font-size:11px;font-weight:700;color:#555">6+6=12</div>
+          <div style="flex:1;display:flex;gap:4px">
+            <div style="flex:6;background:#2563eb;color:#fff;padding:8px;border-radius:5px;font-size:11px;font-weight:700;text-align:center">col-md-6</div>
+            <div style="flex:6;background:#2563eb;color:#fff;padding:8px;border-radius:5px;font-size:11px;font-weight:700;text-align:center">col-md-6</div>
+          </div>
+          <div style="min-width:80px;font-size:11px;color:#888">2 columns</div>
+        </div>
+
+        <!-- 3+3+3+3 -->
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="min-width:70px;font-size:11px;font-weight:700;color:#555">3×4=12</div>
+          <div style="flex:1;display:flex;gap:4px">
+            <div style="flex:3;background:#059669;color:#fff;padding:8px;border-radius:5px;font-size:10px;font-weight:700;text-align:center">col-md-3</div>
+            <div style="flex:3;background:#059669;color:#fff;padding:8px;border-radius:5px;font-size:10px;font-weight:700;text-align:center">col-md-3</div>
+            <div style="flex:3;background:#059669;color:#fff;padding:8px;border-radius:5px;font-size:10px;font-weight:700;text-align:center">col-md-3</div>
+            <div style="flex:3;background:#059669;color:#fff;padding:8px;border-radius:5px;font-size:10px;font-weight:700;text-align:center">col-md-3</div>
+          </div>
+          <div style="min-width:80px;font-size:11px;color:#888">4 columns</div>
+        </div>
+
+        <!-- 8+4 -->
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="min-width:70px;font-size:11px;font-weight:700;color:#555">8+4=12</div>
+          <div style="flex:1;display:flex;gap:4px">
+            <div style="flex:8;background:#dc2626;color:#fff;padding:8px;border-radius:5px;font-size:11px;font-weight:700;text-align:center">col-md-8 — Main Content</div>
+            <div style="flex:4;background:#d97706;color:#fff;padding:8px;border-radius:5px;font-size:11px;font-weight:700;text-align:center">col-md-4 — Sidebar</div>
+          </div>
+          <div style="min-width:80px;font-size:11px;color:#888">Sidebar layout</div>
+        </div>
+
+        <!-- 12 -->
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="min-width:70px;font-size:11px;font-weight:700;color:#555">12=12</div>
+          <div style="flex:1;display:flex;gap:4px">
+            <div style="flex:12;background:#334155;color:#fff;padding:8px;border-radius:5px;font-size:11px;font-weight:700;text-align:center">col-12 — Full Width</div>
+          </div>
+          <div style="min-width:80px;font-size:11px;color:#888">Full width</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tip-box">
+      <i class="ti ti-bulb tip-icon"></i>
+      <div class="tip-text"><strong>The golden rule:</strong> Columns inside a single <code>&lt;div class="row"&gt;</code> must always add up to 12 (or less). 4+4+4=12 ✓ &nbsp; 6+6=12 ✓ &nbsp; 4+4+5=13 ✗ (overflows)</div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-3"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">First Grid <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 4  FIRST GRID ═══════════ -->
+  <div class="slide" id="slide-4">
+    <div class="slide-header">
+      <span class="badge b-blue">Code</span>
+      <div>
+        <div class="slide-title">First Grid — container → row → col</div>
+        <div class="slide-subtitle">Three nested divs — this structure is the foundation of every Bootstrap layout</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="activity-box">
+        <div class="activity-title"><i class="ti ti-keyboard"></i> Type this into index.html now</div>
+        <div class="editor" style="border-radius:8px">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">frontend/index.html</span></div>
+          <div class="editor-body" style="font-size:12px">
+            <div class="e-row"><span class="e-ln">1</span><span class="e-new">&lt;div</span> <span class="e-att">class</span><span class="e-val">=</span><span style="color:#f1fa8c">"</span><span class="c-cls">container</span><span style="color:#f1fa8c">"</span><span class="e-new">&gt;</span></div>
+            <div class="e-row"><span class="e-ln">2</span></div>
+            <div class="e-row"><span class="e-ln">3</span><span class="e-ind1"></span><span class="e-new">&lt;div</span> <span class="e-att">class</span><span class="e-val">=</span><span style="color:#f1fa8c">"</span><span class="c-cls">row</span><span style="color:#f1fa8c">"</span><span class="e-new">&gt;</span></div>
+            <div class="e-row"><span class="e-ln">4</span></div>
+            <div class="e-row"><span class="e-ln">5</span><span class="e-ind2"></span><span class="e-new">&lt;div</span> <span class="e-att">class</span><span class="e-val">=</span><span style="color:#f1fa8c">"</span><span class="c-cls">col</span><span style="color:#f1fa8c">"</span><span class="e-new">&gt;</span></div>
+            <div class="e-row"><span class="e-ln">6</span><span class="e-ind3"></span><span class="e-txt">Column 1</span></div>
+            <div class="e-row"><span class="e-ln">7</span><span class="e-ind2"></span><span class="e-new">&lt;/div&gt;</span></div>
+            <div class="e-row"><span class="e-ln">8</span></div>
+            <div class="e-row"><span class="e-ln">9</span><span class="e-ind2"></span><span class="e-new">&lt;div</span> <span class="e-att">class</span><span class="e-val">=</span><span style="color:#f1fa8c">"</span><span class="c-cls">col</span><span style="color:#f1fa8c">"</span><span class="e-new">&gt;</span></div>
+            <div class="e-row"><span class="e-ln">10</span><span class="e-ind3"></span><span class="e-txt">Column 2</span></div>
+            <div class="e-row"><span class="e-ln">11</span><span class="e-ind2"></span><span class="e-new">&lt;/div&gt;</span></div>
+            <div class="e-row"><span class="e-ln">12</span></div>
+            <div class="e-row"><span class="e-ln">13</span><span class="e-ind1"></span><span class="e-new">&lt;/div&gt;</span><span class="e-cmt"> &lt;!-- end .row --&gt;</span></div>
+            <div class="e-row"><span class="e-ln">14</span></div>
+            <div class="e-row"><span class="e-ln">15</span><span class="e-new">&lt;/div&gt;</span><span class="e-cmt"> &lt;!-- end .container --&gt;</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="section-label">result in browser</div>
+        <div class="browser">
+          <div class="browser-bar"><div class="b-dot2 b-r"></div><div class="b-dot2 b-y"></div><div class="b-dot2 b-g"></div><div class="b-url">index.html</div></div>
+          <div style="background:#f4f6f9;padding:14px;display:flex;gap:10px;font-family:Arial,sans-serif">
+            <div style="flex:1;background:#dbeafe;border:2px solid #93c5fd;border-radius:6px;padding:12px;font-size:11px;font-weight:700;text-align:center;color:#1e40af">Column 1</div>
+            <div style="flex:1;background:#d1fae5;border:2px solid #6ee7b7;border-radius:6px;padding:12px;font-size:11px;font-weight:700;text-align:center;color:#065f46">Column 2</div>
+          </div>
+        </div>
+        <div class="line-explain">
+          <div class="lex-row" onclick="toggleLex(this)">
+            <div class="lex-code"><span class="c-cls">container</span></div>
+            <div class="lex-info">
+              <div class="lex-name">Centers content + adds max-width</div>
+              <div class="lex-desc">Wraps everything in a centered block. Adds automatic left/right padding.</div>
+              <div class="lex-detail">Without .container, your grid rows stretch to the full window width. .container applies a responsive max-width and auto margins to keep content readable on widescreen monitors.</div>
+            </div>
+          </div>
+          <div class="lex-row" onclick="toggleLex(this)">
+            <div class="lex-code"><span class="c-cls">row</span></div>
+            <div class="lex-info">
+              <div class="lex-name">Creates one horizontal "shelf"</div>
+              <div class="lex-desc">Each .row is a flex container that holds its .col children side by side.</div>
+              <div class="lex-detail">.row applies display:flex and negative horizontal margins to offset the column gutters. Every group of columns that should sit on the same line needs its own .row.</div>
+            </div>
+          </div>
+          <div class="lex-row" onclick="toggleLex(this)">
+            <div class="lex-code"><span class="c-cls">col</span></div>
+            <div class="lex-info">
+              <div class="lex-name">Auto-equal column — splits space evenly</div>
+              <div class="lex-desc">Plain .col divides the row equally between all .col siblings — no number needed.</div>
+              <div class="lex-detail">Two .col siblings → each gets 50%. Three .col siblings → each gets 33.3%. This is the quickest way to create equal columns without thinking about numbers.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-4"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Three Columns <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 5  COL-MD-4 ═══════════ -->
+  <div class="slide" id="slide-5">
+    <div class="slide-header">
+      <span class="badge b-teal">Code</span>
+      <div>
+        <div class="slide-title">Three Equal Columns — col-md-4</div>
+        <div class="slide-subtitle">4+4+4=12 — three columns on desktop, stacks automatically on mobile</div>
+      </div>
+    </div>
+
+    <div class="activity-box">
+      <div class="activity-title"><i class="ti ti-keyboard"></i> Update to col-md-4 and resize browser</div>
+      <div class="editor" style="border-radius:8px">
+        <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">frontend/index.html — courses row</span></div>
+        <div class="editor-body" style="font-size:12px">
+          <div class="e-row"><span class="e-ln">1</span><span class="e-new">&lt;div</span> <span class="e-att">class</span><span class="e-val">=</span><span style="color:#f1fa8c">"</span><span class="c-cls">row</span><span style="color:#f1fa8c">"</span><span class="e-new">&gt;</span></div>
+          <div class="e-row"><span class="e-ln">2</span></div>
+          <div class="e-row"><span class="e-ln">3</span><span class="e-ind1"></span><span class="e-new">&lt;div</span> <span class="e-att">class</span><span class="e-val">=</span><span style="color:#f1fa8c">"</span><span class="c-cls">col-md-4</span><span style="color:#f1fa8c">"</span><span class="e-new">&gt;</span></div>
+          <div class="e-row"><span class="e-ln">4</span><span class="e-ind2"></span><span class="e-txt">HTML</span></div>
+          <div class="e-row"><span class="e-ln">5</span><span class="e-ind1"></span><span class="e-new">&lt;/div&gt;</span></div>
+          <div class="e-row"><span class="e-ln">6</span></div>
+          <div class="e-row"><span class="e-ln">7</span><span class="e-ind1"></span><span class="e-new">&lt;div</span> <span class="e-att">class</span><span class="e-val">=</span><span style="color:#f1fa8c">"</span><span class="c-cls">col-md-4</span><span style="color:#f1fa8c">"</span><span class="e-new">&gt;</span></div>
+          <div class="e-row"><span class="e-ln">8</span><span class="e-ind2"></span><span class="e-txt">CSS</span></div>
+          <div class="e-row"><span class="e-ln">9</span><span class="e-ind1"></span><span class="e-new">&lt;/div&gt;</span></div>
+          <div class="e-row"><span class="e-ln">10</span></div>
+          <div class="e-row"><span class="e-ln">11</span><span class="e-ind1"></span><span class="e-new">&lt;div</span> <span class="e-att">class</span><span class="e-val">=</span><span style="color:#f1fa8c">"</span><span class="c-cls">col-md-4</span><span style="color:#f1fa8c">"</span><span class="e-new">&gt;</span></div>
+          <div class="e-row"><span class="e-ln">12</span><span class="e-ind2"></span><span class="e-txt">JavaScript</span></div>
+          <div class="e-row"><span class="e-ln">13</span><span class="e-ind1"></span><span class="e-new">&lt;/div&gt;</span></div>
+          <div class="e-row"><span class="e-ln">14</span></div>
+          <div class="e-row"><span class="e-ln">15</span><span class="e-new">&lt;/div&gt;</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label" style="color:#1d4ed8">desktop (≥768px) — 3 columns</div>
+        <div class="browser">
+          <div class="browser-bar"><div class="b-dot2 b-r"></div><div class="b-dot2 b-y"></div><div class="b-dot2 b-g"></div><div class="b-url">1280px wide</div></div>
+          <div style="background:#f4f6f9;padding:12px;display:flex;gap:8px;font-family:Arial,sans-serif">
+            <div style="flex:1;background:#7952b3;color:white;border-radius:6px;padding:14px;font-size:11px;font-weight:700;text-align:center">HTML</div>
+            <div style="flex:1;background:#7952b3;color:white;border-radius:6px;padding:14px;font-size:11px;font-weight:700;text-align:center">CSS</div>
+            <div style="flex:1;background:#7952b3;color:white;border-radius:6px;padding:14px;font-size:11px;font-weight:700;text-align:center">JavaScript</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label" style="color:#7c3aed">mobile (&lt;768px) — auto-stacks, no code needed!</div>
+        <div style="display:flex;justify-content:center">
+          <div style="width:180px;border:4px solid #334155;border-radius:18px;overflow:hidden">
+            <div style="background:#334155;height:12px"></div>
+            <div style="background:#f4f6f9;padding:8px;display:flex;flex-direction:column;gap:6px;font-family:Arial,sans-serif">
+              <div style="background:#7952b3;color:white;border-radius:5px;padding:10px;font-size:10px;font-weight:700;text-align:center">HTML</div>
+              <div style="background:#7952b3;color:white;border-radius:5px;padding:10px;font-size:10px;font-weight:700;text-align:center">CSS</div>
+              <div style="background:#7952b3;color:white;border-radius:5px;padding:10px;font-size:10px;font-weight:700;text-align:center">JavaScript</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="success-box">
+      <i class="ti ti-sparkles" style="color:#16a34a;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+      <div style="font-size:13px;color:#166534;line-height:1.65"><strong>Resize the browser now.</strong> On wide screens: 3 columns. Below 768px: they stack automatically. You wrote zero media queries. Bootstrap's <code>col-md-4</code> class handled all of it.</div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-5"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Breakpoints <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 6  BREAKPOINTS ═══════════ -->
+  <div class="slide" id="slide-6">
+    <div class="slide-header">
+      <span class="badge b-indigo">Explain</span>
+      <div>
+        <div class="slide-title">Breakpoints — sm / md / lg / xl</div>
+        <div class="slide-subtitle">The prefix in col-md-4 tells Bootstrap when to switch from columns to stacked</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-label">breakpoint reference table</div>
+      <table class="tag-table">
+        <thead>
+          <tr><th>Class prefix</th><th>Applies when screen is…</th><th>Typical device</th><th>Example use</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="tag-mono" style="background:#ede9fe;color:#5b21b6">col-</span> (no prefix)</td>
+            <td style="font-size:12px">All screen sizes — always columns</td>
+            <td style="font-size:12px">All</td>
+            <td style="font-size:12px">Icons that always sit side by side</td>
+          </tr>
+          <tr>
+            <td><span class="tag-mono" style="background:#d1fae5;color:#065f46">col-sm-*</span></td>
+            <td style="font-size:12px">≥ 576px</td>
+            <td style="font-size:12px">Large phones, small tablets</td>
+            <td style="font-size:12px">Social media cards</td>
+          </tr>
+          <tr style="background:#ede9fe10">
+            <td><span class="tag-mono" style="background:#dbeafe;color:#1d4ed8">col-md-*</span></td>
+            <td style="font-size:12px">≥ 768px</td>
+            <td style="font-size:12px">Tablets, laptops <span class="badge b-purple" style="font-size:10px">← We use this</span></td>
+            <td style="font-size:12px">Course cards, product grids</td>
+          </tr>
+          <tr>
+            <td><span class="tag-mono" style="background:#fef3c7;color:#92400e">col-lg-*</span></td>
+            <td style="font-size:12px">≥ 992px</td>
+            <td style="font-size:12px">Laptops, desktops</td>
+            <td style="font-size:12px">Dashboard side-by-side panels</td>
+          </tr>
+          <tr>
+            <td><span class="tag-mono" style="background:#ffedd5;color:#9a3412">col-xl-*</span></td>
+            <td style="font-size:12px">≥ 1200px</td>
+            <td style="font-size:12px">Wide desktop monitors</td>
+            <td style="font-size:12px">Admin panels, data tables</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card card-gray">
+      <div style="font-size:13px;font-weight:700;margin-bottom:10px">Breaking down <code>col-md-4</code></div>
+      <div style="display:flex;gap:0;border-radius:10px;overflow:hidden;border:2px solid #7952b3">
+        <div style="background:#7952b3;color:white;padding:14px 18px;text-align:center;flex-shrink:0">
+          <div style="font-family:'SFMono-Regular',Consolas,monospace;font-size:16px;font-weight:800">col</div>
+          <div style="font-size:10px;margin-top:4px;opacity:.8">Column</div>
+        </div>
+        <div style="background:#5b21b6;color:white;padding:14px 18px;text-align:center;flex-shrink:0;border-left:2px solid rgba(255,255,255,.2);border-right:2px solid rgba(255,255,255,.2)">
+          <div style="font-family:'SFMono-Regular',Consolas,monospace;font-size:16px;font-weight:800">-md-</div>
+          <div style="font-size:10px;margin-top:4px;opacity:.8">From ≥768px</div>
+        </div>
+        <div style="background:#4c1d95;color:white;padding:14px 18px;text-align:center;flex:1">
+          <div style="font-family:'SFMono-Regular',Consolas,monospace;font-size:16px;font-weight:800">4</div>
+          <div style="font-size:10px;margin-top:4px;opacity:.8">Spans 4 of 12 columns</div>
+        </div>
+      </div>
+      <div class="info-box" style="margin-top:10px">
+        <i class="ti ti-info-circle info-icon"></i>
+        <div class="info-text">On screens <strong>≥768px</strong>: element spans 4 columns → 3 items fit per row (4+4+4=12). On screens <strong>&lt;768px</strong>: automatically becomes <code>col-12</code> (full width) → items stack vertically. Bootstrap writes the media query for you.</div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-6"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Column Builder <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 7  INTERACTIVE COLUMN BUILDER ═══════════ -->
+  <div class="slide" id="slide-7">
+    <div class="slide-header">
+      <span class="badge b-orange">Live Lab</span>
+      <div>
+        <div class="slide-title">Interactive Column Builder</div>
+        <div class="slide-subtitle">Choose a split — see the HTML class and visual instantly update</div>
+      </div>
+    </div>
+
+    <div class="card card-gray">
+      <div class="section-label">choose a column split</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+        <button class="col-btn" onclick="setCol(12,1,'col-12')">12 — 1 col</button>
+        <button class="col-btn" onclick="setCol(6,2,'col-md-6')">6+6 — 2 cols</button>
+        <button class="col-btn sel" onclick="setCol(4,3,'col-md-4')">4+4+4 — 3 cols</button>
+        <button class="col-btn" onclick="setCol(3,4,'col-md-3')">3+3+3+3 — 4 cols</button>
+        <button class="col-btn" onclick="setCol(2,6,'col-md-2')">2×6 — 6 cols</button>
+        <button class="col-btn" onclick="setColCustom(8,4)">8+4 — Sidebar</button>
+      </div>
+
+      <!-- 12-col ruler with fill -->
+      <div class="section-label">column ruler</div>
+      <div id="col-ruler-fill" class="span-demo" style="height:44px">
+        <!-- filled by JS -->
+      </div>
+      <div style="margin-top:6px;font-size:11px;color:#888;text-align:center" id="col-ruler-label">4 columns of 4 each (4+4+4=12)</div>
+
+      <!-- Preview row -->
+      <div class="section-label" style="margin-top:12px">browser preview</div>
+      <div id="col-preview" style="display:flex;gap:8px;background:#f8fafc;border-radius:8px;padding:10px;border:1px solid #e2e8f0">
+        <!-- filled by JS -->
+      </div>
+
+      <!-- Generated HTML -->
+      <div class="section-label" style="margin-top:12px">generated html</div>
+      <div class="editor" style="border-radius:8px">
+        <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div></div>
+        <div class="editor-body" style="font-size:12px;padding:10px 14px" id="col-code">
+          <!-- filled by JS -->
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-7"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Bootstrap Card <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 8  BOOTSTRAP CARD COMPONENT ═══════════ -->
+  <div class="slide" id="slide-8">
+    <div class="slide-header">
+      <span class="badge b-cyan">Component</span>
+      <div>
+        <div class="slide-title">Bootstrap Card Component</div>
+        <div class="slide-subtitle">The most-used Bootstrap component — card, card-body, card-title, card-text, btn</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">the html structure</div>
+        <div class="editor" style="border-radius:8px">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">Bootstrap card pattern</span></div>
+          <div class="editor-body" style="font-size:12px">
+            <div class="e-row"><span class="e-new">&lt;div</span> <span class="e-att">class</span><span class="e-val">=</span><span style="color:#f1fa8c">"</span><span class="c-cls">card</span><span style="color:#f1fa8c">"</span><span class="e-new">&gt;</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="e-new">&lt;div</span> <span class="e-att">class</span><span class="e-val">=</span><span style="color:#f1fa8c">"</span><span class="c-cls">card-body</span><span style="color:#f1fa8c">"</span><span class="e-new">&gt;</span></div>
+            <div class="e-row"><span class="e-ind2"></span><span class="e-h2">&lt;h4</span> <span class="e-att">class</span><span class="e-val">=</span><span style="color:#f1fa8c">"</span><span class="c-cls">card-title</span><span style="color:#f1fa8c">"</span><span class="e-h2">&gt;</span></div>
+            <div class="e-row"><span class="e-ind3"></span><span class="e-txt">HTML &amp; CSS</span></div>
+            <div class="e-row"><span class="e-ind2"></span><span class="e-h2">&lt;/h4&gt;</span></div>
+            <div class="e-row"><span class="e-ind2"></span><span class="e-p">&lt;p</span> <span class="e-att">class</span><span class="e-val">=</span><span style="color:#f1fa8c">"</span><span class="c-cls">card-text</span><span style="color:#f1fa8c">"</span><span class="e-p">&gt;</span></div>
+            <div class="e-row"><span class="e-ind3"></span><span class="e-txt">Build beautiful websites.</span></div>
+            <div class="e-row"><span class="e-ind2"></span><span class="e-p">&lt;/p&gt;</span></div>
+            <div class="e-row"><span class="e-ind2"></span><span class="e-new">&lt;a</span> <span class="e-att">class</span><span class="e-val">=</span><span style="color:#f1fa8c">"</span><span class="c-cls">btn btn-primary</span><span style="color:#f1fa8c">"</span><span class="e-new">&gt;</span></div>
+            <div class="e-row"><span class="e-ind3"></span><span class="e-txt">Learn More</span></div>
+            <div class="e-row"><span class="e-ind2"></span><span class="e-new">&lt;/a&gt;</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="e-new">&lt;/div&gt;</span></div>
+            <div class="e-row"><span class="e-new">&lt;/div&gt;</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="section-label">live preview</div>
+        <div class="sh-bs-card" style="max-width:260px">
+          <div class="sh-bs-card-body">
+            <div class="sh-bs-card-title">HTML &amp; CSS</div>
+            <div class="sh-bs-card-text">Build beautiful websites from scratch using modern standards.</div>
+            <span class="sh-bs-btn sh-bs-btn-primary">Learn More</span>
+          </div>
+        </div>
+
+        <div class="line-explain">
+          <div class="lex-row" onclick="toggleLex(this)">
+            <div class="lex-code"><span class="c-cls">card</span></div>
+            <div class="lex-info">
+              <div class="lex-name">Outer wrapper — adds border + shadow</div>
+              <div class="lex-desc">Gives the element a white background, 1px border, border-radius, and subtle shadow.</div>
+              <div class="lex-detail">Bootstrap's .card replaces ~8 CSS lines you wrote manually in Days 3–4 (border-radius, box-shadow, background, overflow). One class name does it all.</div>
+            </div>
+          </div>
+          <div class="lex-row" onclick="toggleLex(this)">
+            <div class="lex-code"><span class="c-cls">card-body</span></div>
+            <div class="lex-info">
+              <div class="lex-name">Inner padding — gives content breathing room</div>
+              <div class="lex-desc">Adds 1rem (16px) padding on all sides inside the card.</div>
+              <div class="lex-detail">Always nest card-body directly inside card. It's the padding container. Without it, text and buttons would touch the card's edges.</div>
+            </div>
+          </div>
+          <div class="lex-row" onclick="toggleLex(this)">
+            <div class="lex-code"><span class="c-cls">btn btn-primary</span></div>
+            <div class="lex-info">
+              <div class="lex-name">Blue Bootstrap button — two classes needed</div>
+              <div class="lex-desc">btn applies base button styles; btn-primary sets the blue (#0d6efd) colour.</div>
+              <div class="lex-detail">Other colour variants: btn-success (green), btn-danger (red), btn-outline-primary (bordered). Both classes are required — btn alone gives no colour.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-8"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Build First Card <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 9  FIRST CARD IN GRID ═══════════ -->
+  <div class="slide" id="slide-9">
+    <div class="slide-header">
+      <span class="badge b-blue">Code</span>
+      <div>
+        <div class="slide-title">Build the First Course Card — Grid + Card Together</div>
+        <div class="slide-subtitle">Nest a Bootstrap card inside a col-md-4 — this is the complete pattern</div>
+      </div>
+    </div>
+
+    <div class="activity-box">
+      <div class="activity-title"><i class="ti ti-keyboard"></i> Replace the Courses section with this</div>
+      <div class="editor" style="border-radius:8px">
+        <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">frontend/index.html — courses section</span></div>
+        <div class="editor-body" style="font-size:12px">
+          <div class="e-row"><span class="e-ln">1</span><span class="e-new">&lt;section</span> <span class="e-att">class</span><span class="e-val">="courses py-5"</span><span class="e-new">&gt;</span></div>
+          <div class="e-row"><span class="e-ln">2</span><span class="e-ind1"></span><span class="e-new">&lt;div</span> <span class="e-att">class</span><span class="e-val">=</span><span style="color:#f1fa8c">"</span><span class="c-cls">container</span><span style="color:#f1fa8c">"</span><span class="e-new">&gt;</span></div>
+          <div class="e-row"><span class="e-ln">3</span></div>
+          <div class="e-row"><span class="e-ln">4</span><span class="e-ind2"></span><span class="e-h2">&lt;h2</span> <span class="e-att">class</span><span class="e-val">="text-center mb-4"</span><span class="e-h2">&gt;</span><span class="e-txt">Our Courses</span><span class="e-h2">&lt;/h2&gt;</span></div>
+          <div class="e-row"><span class="e-ln">5</span></div>
+          <div class="e-row"><span class="e-ln">6</span><span class="e-ind2"></span><span class="e-new">&lt;div</span> <span class="e-att">class</span><span class="e-val">=</span><span style="color:#f1fa8c">"</span><span class="c-cls">row g-4</span><span style="color:#f1fa8c">"</span><span class="e-new">&gt;</span></div>
+          <div class="e-row"><span class="e-ln">7</span></div>
+          <div class="e-row"><span class="e-ln">8</span><span class="e-ind3"></span><span class="e-cmt">&lt;!-- Card 1 --&gt;</span></div>
+          <div class="e-row"><span class="e-ln">9</span><span class="e-ind3"></span><span class="e-new">&lt;div</span> <span class="e-att">class</span><span class="e-val">=</span><span style="color:#f1fa8c">"</span><span class="c-cls">col-md-4</span><span style="color:#f1fa8c">"</span><span class="e-new">&gt;</span></div>
+          <div class="e-row"><span class="e-ln">10</span><span class="e-ind4"></span><span class="e-new">&lt;div</span> <span class="e-att">class</span><span class="e-val">=</span><span style="color:#f1fa8c">"</span><span class="c-cls">card h-100</span><span style="color:#f1fa8c">"</span><span class="e-new">&gt;</span></div>
+          <div class="e-row"><span class="e-ln">11</span><span class="e-ind4"></span><span class="e-ind1"></span><span class="e-new">&lt;div</span> <span class="e-att">class</span><span class="e-val">=</span><span style="color:#f1fa8c">"</span><span class="c-cls">card-body</span><span style="color:#f1fa8c">"</span><span class="e-new">&gt;</span></div>
+          <div class="e-row"><span class="e-ln">12</span><span class="e-ind4"></span><span class="e-ind2"></span><span class="e-h2">&lt;h4</span> <span class="e-att">class</span><span class="e-val">="card-title"</span><span class="e-h2">&gt;</span><span class="e-txt">HTML &amp;amp; CSS</span><span class="e-h2">&lt;/h4&gt;</span></div>
+          <div class="e-row"><span class="e-ln">13</span><span class="e-ind4"></span><span class="e-ind2"></span><span class="e-p">&lt;p</span> <span class="e-att">class</span><span class="e-val">="card-text"</span><span class="e-p">&gt;</span><span class="e-txt">Build beautiful websites.</span><span class="e-p">&lt;/p&gt;</span></div>
+          <div class="e-row"><span class="e-ln">14</span><span class="e-ind4"></span><span class="e-ind2"></span><span class="e-new">&lt;a</span> <span class="e-att">class</span><span class="e-val">=</span><span style="color:#f1fa8c">"</span><span class="c-cls">btn btn-primary</span><span style="color:#f1fa8c">"</span><span class="e-new">&gt;</span><span class="e-txt">Learn More</span><span class="e-new">&lt;/a&gt;</span></div>
+          <div class="e-row"><span class="e-ln">15</span><span class="e-ind4"></span><span class="e-ind1"></span><span class="e-new">&lt;/div&gt;</span></div>
+          <div class="e-row"><span class="e-ln">16</span><span class="e-ind4"></span><span class="e-new">&lt;/div&gt;</span></div>
+          <div class="e-row"><span class="e-ln">17</span><span class="e-ind3"></span><span class="e-new">&lt;/div&gt;</span><span class="e-cmt"> &lt;!-- duplicate this block for more cards --&gt;</span></div>
+          <div class="e-row"><span class="e-ln">18</span></div>
+          <div class="e-row"><span class="e-ln">19</span><span class="e-ind2"></span><span class="e-new">&lt;/div&gt;</span><span class="e-cmt"> &lt;!-- end .row --&gt;</span></div>
+          <div class="e-row"><span class="e-ln">20</span><span class="e-ind1"></span><span class="e-new">&lt;/div&gt;</span><span class="e-cmt"> &lt;!-- end .container --&gt;</span></div>
+          <div class="e-row"><span class="e-ln">21</span><span class="e-new">&lt;/section&gt;</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="tip-box">
+        <i class="ti ti-bulb tip-icon"></i>
+        <div class="tip-text"><strong>row g-4</strong> — the <code>g-4</code> adds a gutter (gap) between columns. <code>g-4</code> = 1.5rem gap. Without it, columns sit right next to each other with no breathing room.</div>
+      </div>
+      <div class="info-box">
+        <i class="ti ti-info-circle info-icon"></i>
+        <div class="info-text"><strong>h-100</strong> on the card makes all cards in the row the same height — so shorter cards don't look mismatched next to taller ones. Always add it to cards inside grids.</div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-9"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">All 6 Cards <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 10  ALL 6 CARDS ═══════════ -->
+  <div class="slide" id="slide-10">
+    <div class="slide-header">
+      <span class="badge b-rose">Practical</span>
+      <div>
+        <div class="slide-title">Complete Courses Section — All 6 Cards</div>
+        <div class="slide-subtitle">Duplicate the col-md-4 block for each course — Bootstrap grid handles the layout automatically</div>
+      </div>
+    </div>
+
+    <div class="challenge-box">
+      <div class="challenge-title"><i class="ti ti-trophy"></i> Duplicate for these 5 more courses (6 total)</div>
+      <div class="grid-3" style="gap:8px">
+        <div style="background:#fef3c7;border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:8px">
+          <i class="ti ti-brand-javascript" style="color:#d97706;font-size:20px"></i>
+          <div><div style="font-size:12px;font-weight:700;color:#92400e">JavaScript</div><div style="font-size:11px;color:#555">Make pages interactive</div></div>
+        </div>
+        <div style="background:#dbeafe;border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:8px">
+          <i class="ti ti-brand-react" style="color:#2563eb;font-size:20px"></i>
+          <div><div style="font-size:12px;font-weight:700;color:#1e40af">React</div><div style="font-size:11px;color:#555">Build modern UIs</div></div>
+        </div>
+        <div style="background:#d1fae5;border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:8px">
+          <i class="ti ti-brand-nodejs" style="color:#16a34a;font-size:20px"></i>
+          <div><div style="font-size:12px;font-weight:700;color:#166534">Node.js</div><div style="font-size:11px;color:#555">Run JS on the server</div></div>
+        </div>
+        <div style="background:#dcfce7;border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:8px">
+          <i class="ti ti-database" style="color:#15803d;font-size:20px"></i>
+          <div><div style="font-size:12px;font-weight:700;color:#166534">MongoDB</div><div style="font-size:11px;color:#555">Store data in the cloud</div></div>
+        </div>
+        <div style="background:#ffe4e6;border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:8px">
+          <i class="ti ti-server" style="color:#e11d48;font-size:20px"></i>
+          <div><div style="font-size:12px;font-weight:700;color:#9f1239">Express.js</div><div style="font-size:11px;color:#555">Build REST APIs</div></div>
+        </div>
+        <div style="background:#ede9fe;border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:8px">
+          <i class="ti ti-layout-grid" style="color:#7952b3;font-size:20px"></i>
+          <div><div style="font-size:12px;font-weight:700;color:#5b21b6">MERN Full Stack</div><div style="font-size:11px;color:#555">Ship a full app</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Final result preview -->
+    <div>
+      <div class="section-label">final result in browser</div>
+      <div class="browser">
+        <div class="browser-bar"><div class="b-dot2 b-r"></div><div class="b-dot2 b-y"></div><div class="b-dot2 b-g"></div><div class="b-url">skillhub.com — courses section (Bootstrap Grid)</div></div>
+        <div style="background:#f4f6f9;padding:14px;font-family:Arial,sans-serif">
+          <div style="text-align:center;font-size:14px;font-weight:700;color:#1a1a1a;margin-bottom:12px">Our Courses</div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
+            <div class="sh-bs-card" style="width:140px">
+              <div class="sh-bs-card-body">
+                <div style="font-size:14px;margin-bottom:4px">📘</div>
+                <div class="sh-bs-card-title">HTML &amp; CSS</div>
+                <div class="sh-bs-card-text">Build beautiful websites.</div>
+                <span class="sh-bs-btn sh-bs-btn-primary">Learn More</span>
+              </div>
+            </div>
+            <div class="sh-bs-card" style="width:140px">
+              <div class="sh-bs-card-body">
+                <div style="font-size:14px;margin-bottom:4px">⚡</div>
+                <div class="sh-bs-card-title">JavaScript</div>
+                <div class="sh-bs-card-text">Make pages interactive.</div>
+                <span class="sh-bs-btn sh-bs-btn-primary">Learn More</span>
+              </div>
+            </div>
+            <div class="sh-bs-card" style="width:140px">
+              <div class="sh-bs-card-body">
+                <div style="font-size:14px;margin-bottom:4px">⚛️</div>
+                <div class="sh-bs-card-title">React</div>
+                <div class="sh-bs-card-text">Build modern UIs.</div>
+                <span class="sh-bs-btn sh-bs-btn-success">Learn More</span>
+              </div>
+            </div>
+            <div class="sh-bs-card" style="width:140px">
+              <div class="sh-bs-card-body">
+                <div style="font-size:14px;margin-bottom:4px">🟢</div>
+                <div class="sh-bs-card-title">Node.js</div>
+                <div class="sh-bs-card-text">Run JS on the server.</div>
+                <span class="sh-bs-btn sh-bs-btn-success">Learn More</span>
+              </div>
+            </div>
+            <div class="sh-bs-card" style="width:140px">
+              <div class="sh-bs-card-body">
+                <div style="font-size:14px;margin-bottom:4px">🍃</div>
+                <div class="sh-bs-card-title">MongoDB</div>
+                <div class="sh-bs-card-text">Store data in the cloud.</div>
+                <span class="sh-bs-btn sh-bs-btn-outline">Learn More</span>
+              </div>
+            </div>
+            <div class="sh-bs-card" style="width:140px">
+              <div class="sh-bs-card-body">
+                <div style="font-size:14px;margin-bottom:4px">🚀</div>
+                <div class="sh-bs-card-title">Express.js</div>
+                <div class="sh-bs-card-text">Build REST APIs fast.</div>
+                <span class="sh-bs-btn sh-bs-btn-outline">Learn More</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <div class="section-label">student checklist</div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><span>Added .container → .row g-4 wrapper in courses section</span></div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><span>Each course is in its own col-md-4 div</span></div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><span>Each card has: .card .card-body .card-title .card-text .btn.btn-primary</span></div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><span>All 6 courses added: HTML, JS, React, Node, MongoDB, Express</span></div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><span>Resized browser — cards wrap to next row automatically on mobile</span></div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-10"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Quiz <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 11  QUIZ ═══════════ -->
+  <div class="slide" id="slide-11">
+    <div class="slide-header">
+      <span class="badge b-slate">Quiz</span>
+      <div>
+        <div class="slide-title">Quick Check — Bootstrap Grid</div>
+        <div class="slide-subtitle">5 questions — tap the correct answer</div>
+      </div>
+    </div>
+    <div id="quiz-container"></div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-11"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Wrap Up <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 12  WRAP UP ═══════════ -->
+  <div class="slide" id="slide-12">
+    <div class="slide-header">
+      <span class="badge b-green">Wrap-Up</span>
+      <div>
+        <div class="slide-title">Day 6 Complete — SkillHub Has a Professional Grid!</div>
+        <div class="slide-subtitle">Bootstrap CDN + Grid System = a production-ready layout in minutes</div>
+      </div>
+    </div>
+
+    <div style="background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);border-radius:14px;padding:24px;text-align:center;color:white">
+      <i class="ti ti-layout-grid" style="font-size:40px;color:#a5b4fc;margin-bottom:10px;display:block"></i>
+      <div style="font-size:20px;font-weight:800;margin-bottom:6px">SkillHub LMS — Day 6 Done!</div>
+      <div style="font-size:13px;opacity:.75">Your courses section now looks like Amazon and Flipkart — responsive grid, professional cards.</div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">what you built today</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div class="check-item done"><div class="check-circle">✓</div><span>Bootstrap CDN linked (CSS + JS)</span></div>
+          <div class="check-item done"><div class="check-circle">✓</div><span>Understood Bootstrap utility classes</span></div>
+          <div class="check-item done"><div class="check-circle">✓</div><span>12-column grid system mastered</span></div>
+          <div class="check-item done"><div class="check-circle">✓</div><span>container → row → col-md-4 pattern</span></div>
+          <div class="check-item done"><div class="check-circle">✓</div><span>Bootstrap card component used</span></div>
+          <div class="check-item done"><div class="check-circle">✓</div><span>6 course cards built — responsive by default</span></div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">bootstrap grid cheat sheet</div>
+        <div class="editor" style="border-radius:8px;margin-bottom:10px">
+          <div class="editor-body" style="font-size:12px;padding:12px 16px">
+            <div class="e-row"><span class="c-cmt">/* Always: container → row → col */</span></div>
+            <div class="e-row"><span class="e-new">&lt;div</span> <span class="e-att">class</span><span class="e-val">=</span><span style="color:#f1fa8c">"</span><span class="c-cls">container</span><span style="color:#f1fa8c">"</span><span class="e-new">&gt;</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="e-new">&lt;div</span> <span class="e-att">class</span><span class="e-val">=</span><span style="color:#f1fa8c">"</span><span class="c-cls">row g-4</span><span style="color:#f1fa8c">"</span><span class="e-new">&gt;</span></div>
+            <div class="e-row"><span class="e-ind2"></span><span class="e-new">&lt;div</span> <span class="e-att">class</span><span class="e-val">=</span><span style="color:#f1fa8c">"</span><span class="c-cls">col-md-4</span><span style="color:#f1fa8c">"</span><span class="e-new">&gt;</span></div>
+            <div class="e-row"><span class="e-ind3"></span><span class="e-cmt">/* your card here */</span></div>
+            <div class="e-row"><span class="e-ind2"></span><span class="e-new">&lt;/div&gt;</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="e-new">&lt;/div&gt;</span></div>
+            <div class="e-row"><span class="e-new">&lt;/div&gt;</span></div>
+          </div>
+        </div>
+        <div style="background:#fef3c7;border:1px solid #fde68a;border-radius:10px;padding:12px 14px">
+          <div style="font-size:13px;font-weight:700;color:#92400e;margin-bottom:4px"><i class="ti ti-brand-javascript" style="margin-right:5px"></i>Day 7 Preview — JavaScript Basics</div>
+          <div style="font-size:12px;color:#a16207;line-height:1.7">Variables, functions, DOM manipulation — making SkillHub interactive with enroll buttons, counters, and form validation.</div>
+        </div>
+        <div class="tip-box" style="margin-top:8px">
+          <i class="ti ti-bulb tip-icon"></i>
+          <div class="tip-text"><strong>Homework:</strong> Open any website (Flipkart, Zomato, Swiggy) and inspect with F12. Find .container, .row, and .col classes in the HTML — Bootstrap is everywhere.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-12"></div>
+      <button class="nav-btn" onclick="goSlide(0)"><i class="ti ti-home"></i> Home</button>
+    </div>
+  </div>
+
+</div><!-- /.wrapper -->
+
+<script>
+  var current = 0, total = 13, quizInit = false;
+
+  /* ── Column Builder ── */
+  var colColors = ['#7952b3','#2563eb','#059669','#dc2626','#d97706','#0891b2'];
+
+  function renderColBuilder(span, count, cls) {
+    // ruler
+    var ruler = document.getElementById('col-ruler-fill');
+    if (!ruler) return;
+    ruler.innerHTML = '';
+    var colsPerItem = span;
+    var items = count;
+    for (var i = 0; i < 12; i++) {
+      var itemIdx = Math.floor(i / colsPerItem);
+      var isFill = itemIdx < items && i < items * colsPerItem;
+      var el = document.createElement('div');
+      if (isFill) {
+        el.className = 'span-fill';
+        el.style.flex = '1';
+        el.style.background = colColors[itemIdx % colColors.length];
+        el.style.opacity = (i % colsPerItem === 0 || colsPerItem === 1) ? '1' : '0.7';
+        el.textContent = (i % colsPerItem === Math.floor(colsPerItem/2)) ? (i+1) : '';
+      } else {
+        el.className = 'span-unit';
+        el.textContent = (i+1);
+      }
+      ruler.appendChild(el);
+    }
+    document.getElementById('col-ruler-label').textContent =
+      count + ' column' + (count > 1 ? 's' : '') + ' of ' + span + ' each (' + Array(count).fill(span).join('+') + '=12)';
+
+    // preview
+    var prev = document.getElementById('col-preview');
+    prev.innerHTML = '';
+    var names = ['Column 1','Column 2','Column 3','Column 4','Column 5','Column 6'];
+    for (var j = 0; j < count; j++) {
+      var d = document.createElement('div');
+      d.style.cssText = 'flex:1;border-radius:6px;padding:14px 8px;font-size:11px;font-weight:700;text-align:center;color:white;background:'+colColors[j%colColors.length];
+      d.textContent = names[j] || ('Col '+(j+1));
+      prev.appendChild(d);
+    }
+
+    // code
+    var code = document.getElementById('col-code');
+    var html = '<div class="e-row"><span class="e-new">&lt;div</span> <span class="e-att">class</span><span class="e-val">=</span><span style="color:#f1fa8c">"</span><span class="c-cls">row g-4</span><span style="color:#f1fa8c">"</span><span class="e-new">&gt;</span></div>';
+    for (var k = 0; k < count; k++) {
+      html += '<div class="e-row"><span class="e-ind1"></span><span class="e-new">&lt;div</span> <span class="e-att">class</span><span class="e-val">=</span><span style="color:#f1fa8c">"</span><span class="c-cls">'+cls+'</span><span style="color:#f1fa8c">"</span><span class="e-new">&gt;</span><span class="e-txt">&nbsp;'+(names[k]||'Col '+(k+1))+'&nbsp;</span><span class="e-new">&lt;/div&gt;</span></div>';
+    }
+    html += '<div class="e-row"><span class="e-new">&lt;/div&gt;</span></div>';
+    code.innerHTML = html;
+  }
+
+  function setCol(span, count, cls) {
+    document.querySelectorAll('.col-btn').forEach(function(b){ b.classList.remove('sel'); });
+    event.target.classList.add('sel');
+    renderColBuilder(span, count, cls);
+  }
+
+  function setColCustom(span1, span2) {
+    document.querySelectorAll('.col-btn').forEach(function(b){ b.classList.remove('sel'); });
+    event.target.classList.add('sel');
+    // special sidebar layout
+    var ruler = document.getElementById('col-ruler-fill');
+    ruler.innerHTML = '';
+    for (var i = 0; i < 12; i++) {
+      var el = document.createElement('div');
+      if (i < span1) {
+        el.className = 'span-fill'; el.style.flex='1'; el.style.background='#dc2626';
+        el.textContent = i===3?'Main':'';
+      } else {
+        el.className = 'span-fill'; el.style.flex='1'; el.style.background='#d97706';
+        el.textContent = i===9?'Side':'';
+      }
+      ruler.appendChild(el);
+    }
+    document.getElementById('col-ruler-label').textContent = '2 columns: 8 (main) + 4 (sidebar) = 12';
+    var prev = document.getElementById('col-preview');
+    prev.innerHTML = '<div style="flex:2;border-radius:6px;padding:14px 8px;font-size:11px;font-weight:700;text-align:center;color:white;background:#dc2626">Main Content (col-md-8)</div><div style="flex:1;border-radius:6px;padding:14px 8px;font-size:11px;font-weight:700;text-align:center;color:white;background:#d97706">Sidebar (col-md-4)</div>';
+    var code = document.getElementById('col-code');
+    code.innerHTML = '<div class="e-row"><span class="e-new">&lt;div</span> <span class="e-att">class</span><span class="e-val">=</span><span style="color:#f1fa8c">"</span><span class="c-cls">row</span><span style="color:#f1fa8c">"</span><span class="e-new">&gt;</span></div><div class="e-row"><span class="e-ind1"></span><span class="e-new">&lt;div</span> <span class="e-att">class</span><span class="e-val">=</span><span style="color:#f1fa8c">"</span><span class="c-cls">col-md-8</span><span style="color:#f1fa8c">"</span><span class="e-new">&gt;</span><span class="e-txt">&nbsp;Main Content&nbsp;</span><span class="e-new">&lt;/div&gt;</span></div><div class="e-row"><span class="e-ind1"></span><span class="e-new">&lt;div</span> <span class="e-att">class</span><span class="e-val">=</span><span style="color:#f1fa8c">"</span><span class="c-cls">col-md-4</span><span style="color:#f1fa8c">"</span><span class="e-new">&gt;</span><span class="e-txt">&nbsp;Sidebar&nbsp;</span><span class="e-new">&lt;/div&gt;</span></div><div class="e-row"><span class="e-new">&lt;/div&gt;</span></div>';
+  }
+
+  /* ── Line explainer ── */
+  function toggleLex(row) {
+    var was = row.classList.contains('active');
+    document.querySelectorAll('.lex-row.active').forEach(function(r){ r.classList.remove('active'); });
+    if (!was) row.classList.add('active');
+  }
+
+  /* ── Checklist ── */
+  function toggleCheck(el) {
+    el.classList.toggle('done');
+    var c = el.querySelector('.check-circle');
+    if (el.classList.contains('done')) {
+      c.style.background='#22c55e'; c.style.borderColor='#22c55e'; c.style.color='#fff';
+    } else {
+      c.style.background=''; c.style.borderColor=''; c.style.color='';
+    }
+  }
+
+  /* ── Quiz ── */
+  var quizData = [
+    {
+      q: "Bootstrap divides every row into how many columns?",
+      opts: [
+        "10 columns — matching the decimal system",
+        "12 columns — because 12 is divisible by 2, 3, 4, and 6",
+        "16 columns — to support up to 16 equal sections",
+        "24 columns — for maximum layout flexibility"
+      ],
+      ans: 1,
+      exp: "Bootstrap uses 12 columns because 12 is divisible by 2, 3, 4, and 6 — making it easy to create 2-column (6+6), 3-column (4+4+4), 4-column (3+3+3+3), and 6-column (2×6) layouts without fractions."
+    },
+    {
+      q: "What is the correct nesting order for Bootstrap grid?",
+      opts: [
+        "row → container → col",
+        "col → row → container",
+        "container → col → row",
+        "container → row → col"
+      ],
+      ans: 3,
+      exp: "Always: container (centred wrapper) → row (horizontal line of columns) → col (individual column). This three-level hierarchy is non-negotiable — Bootstrap's grid math breaks if these are out of order."
+    },
+    {
+      q: "What does <code>col-md-4</code> mean?",
+      opts: [
+        "On medium screens and above, this element spans 4% of the row width",
+        "On screens ≥768px, this element spans 4 of Bootstrap's 12 columns",
+        "On mobile devices, this element displays 4 items per row",
+        "This element has a margin-bottom of 4px on medium screens"
+      ],
+      ans: 1,
+      exp: "col-md-4 = 'column, at medium breakpoint (≥768px), spanning 4 of 12 columns.' Three col-md-4 items = 4+4+4=12 = 3 equal columns per row. Below 768px, each col-md-4 automatically becomes full-width (col-12) and items stack."
+    },
+    {
+      q: "You have three <code>col-md-4</code> divs in a row. What happens when you resize the browser below 768px?",
+      opts: [
+        "All three columns remain in a row but shrink to fit the smaller screen",
+        "Each column becomes full-width and stacks vertically — no extra CSS needed",
+        "The columns overflow the screen horizontally",
+        "Bootstrap hides the extra columns with display:none"
+      ],
+      ans: 1,
+      exp: "col-md-4 means 'be a 4-column block on md screens and above.' Below 768px (md breakpoint), Bootstrap resets each col-md-* to col-12 (full width), so they stack vertically. This responsive behaviour is built into Bootstrap — you write zero media queries."
+    },
+    {
+      q: "What does <code>class=\"row g-4\"</code> do?",
+      opts: [
+        "Creates a grid with 4 rows and adds a grey background",
+        "Adds display:grid and 4px padding to all columns",
+        "Creates a horizontal flex container and adds a 1.5rem gutter (gap) between columns",
+        "Limits the row to 4 columns maximum"
+      ],
+      ans: 2,
+      exp: "row makes the div a flex container that holds columns. g-4 is a Bootstrap 5 gutter class — it adds a 1.5rem (24px) gap between all columns using CSS gap. Without g-4, columns sit directly against each other with no breathing room."
+    }
+  ];
+  var quizAnswered = [];
+
+  function renderQuiz() {
+    var c = document.getElementById('quiz-container'); c.innerHTML = '';
+    quizData.forEach(function(q, i) {
+      var d = document.createElement('div'); d.style.cssText = 'margin-bottom:18px';
+      d.innerHTML = '<div style="font-size:13px;font-weight:600;margin-bottom:6px">'+(i+1)+'. '+q.q+'</div>';
+      q.opts.forEach(function(opt, j) {
+        var btn = document.createElement('button'); btn.className = 'quiz-option';
+        btn.innerHTML = String.fromCharCode(65+j)+'. '+opt;
+        btn.onclick = function() {
+          if (quizAnswered[i]) return; quizAnswered[i] = true;
+          var btns = d.querySelectorAll('.quiz-option');
+          btns.forEach(function(b,k){ b.disabled=true; if(k===q.ans) b.classList.add('correct'); else if(k===j) b.classList.add('wrong'); });
+          var fb = d.querySelector('.quiz-feedback');
+          fb.innerHTML = (j===q.ans?'✅ Correct! ':'❌ Not quite. ')+q.exp;
+          fb.className = 'quiz-feedback '+(j===q.ans?'correct':'wrong');
+        };
+        d.appendChild(btn);
+      });
+      var fb = document.createElement('div'); fb.className = 'quiz-feedback'; d.appendChild(fb);
+      c.appendChild(d);
+    });
+  }
+
+  function goSlide(n) {
+    document.getElementById('slide-'+current).classList.remove('active');
+    current = n;
+    document.getElementById('slide-'+current).classList.add('active');
+    updateDots();
+    document.getElementById('slide-counter').textContent = (current+1)+' / '+total;
+    if (n===7) { setTimeout(function(){ renderColBuilder(4,3,'col-md-4'); }, 50); }
+    if (n===11 && !quizInit) { renderQuiz(); quizInit=true; }
+    window.scrollTo(0,0);
+  }
+  function nextSlide() { if (current < total-1) goSlide(current+1); }
+  function prevSlide() { if (current > 0) goSlide(current-1); }
+
+  function updateDots() {
+    for (var s=0; s<total; s++) {
+      var el = document.getElementById('dots-'+s); if (!el) continue;
+      el.innerHTML = '';
+      for (var d=0; d<total; d++) {
+        var dot = document.createElement('div');
+        dot.className = 'dot'+(d===current?' active':'');
+        el.appendChild(dot);
+      }
+    }
+  }
+  updateDots();
+</script>
+</body>
+</html>
