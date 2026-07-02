@@ -1,0 +1,1407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Day 8 · Hour 2 – Conditional Statements</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f4f5f7; color: #1a1a1a;
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; padding: 2rem 1rem;
+  }
+  .wrapper {
+    width: 100%; max-width: 920px; background: #fff;
+    border-radius: 16px; box-shadow: 0 2px 20px rgba(0,0,0,0.09); overflow: hidden;
+  }
+  .top-bar {
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    color: #fff; padding: 14px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .top-bar-title { font-size: 15px; font-weight: 600; }
+  .top-bar-sub   { font-size: 12px; opacity: .55; margin-top: 2px; }
+  .slide-counter { font-size: 13px; opacity: .6; font-variant-numeric: tabular-nums; }
+  .slide { display: none; padding: 1.75rem 2rem; min-height: 500px; flex-direction: column; gap: 1.2rem; }
+  .slide.active { display: flex; }
+  .slide-header { display: flex; align-items: center; gap: 10px; padding-bottom: 1rem; border-bottom: 1px solid #e8e8e8; }
+  .slide-title    { font-size: 20px; font-weight: 700; color: #111; }
+  .slide-subtitle { font-size: 13px; color: #666; margin-top: 2px; }
+
+  /* ── Badges ── */
+  .badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+  .b-blue   { background:#dbeafe; color:#1d4ed8; }
+  .b-teal   { background:#d1fae5; color:#065f46; }
+  .b-purple { background:#ede9fe; color:#5b21b6; }
+  .b-amber  { background:#fef3c7; color:#92400e; }
+  .b-green  { background:#dcfce7; color:#166534; }
+  .b-slate  { background:#e2e8f0; color:#334155; }
+  .b-rose   { background:#ffe4e6; color:#9f1239; }
+  .b-orange { background:#ffedd5; color:#9a3412; }
+  .b-indigo { background:#e0e7ff; color:#3730a3; }
+  .b-cyan   { background:#cffafe; color:#164e63; }
+  .b-pink   { background:#fce7f3; color:#9d174d; }
+  .b-yellow { background:#fef9c3; color:#854d0e; }
+  .b-js     { background:#fef9c3; color:#854d0e; }
+
+  /* ── Layout ── */
+  .section-label { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 8px; }
+  .card { background: #fff; border: 1px solid #e8e8e8; border-radius: 12px; padding: 1rem 1.25rem; }
+  .card-gray { background: #f8f9fa; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+  /* ── Code Editor (Dracula) ── */
+  .editor { background: #1e1e2e; border-radius: 12px; overflow: hidden; font-family: 'SFMono-Regular', Consolas, 'Courier New', monospace; }
+  .editor-bar { background: #13131f; padding: 9px 14px; display: flex; align-items: center; gap: 6px; }
+  .e-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .e-red { background:#ff5f57; } .e-yellow { background:#febc2e; } .e-green { background:#28c840; }
+  .e-label { font-size: 12px; color: #6272a4; margin-left: 4px; font-family: -apple-system, sans-serif; }
+  .editor-body { padding: 14px 18px; font-size: 12.5px; line-height: 1.8; }
+  .e-ln   { color: #44475a; font-size: 11px; display: inline-block; width: 22px; user-select: none; }
+  .e-tag  { color: #ff79c6; }
+  .e-att  { color: #50fa7b; }
+  .e-val  { color: #f1fa8c; }
+  .e-txt  { color: #f8f8f2; }
+  .e-cmt  { color: #6272a4; font-style: italic; }
+  .e-new  { color: #80ffea; }
+  .e-h2   { color: #ffb86c; font-weight: 700; }
+  .j-kw   { color: #ff79c6; font-weight: 700; }
+  .j-fn   { color: #50fa7b; }
+  .j-str  { color: #f1fa8c; }
+  .j-num  { color: #bd93f9; }
+  .j-var  { color: #80ffea; }
+  .j-op   { color: #ff79c6; }
+  .j-dom  { color: #8be9fd; }
+  .j-prop { color: #50fa7b; }
+  .j-com  { color: #6272a4; font-style: italic; }
+  .j-ret  { color: #ff79c6; font-weight: 700; }
+  .j-cls  { color: #80ffea; }   /* bootstrap class names */
+  .c-punc { color: #f8f8f2; }
+  .e-ind1 { display: inline-block; width: 20px; }
+  .e-ind2 { display: inline-block; width: 40px; }
+  .e-ind3 { display: inline-block; width: 60px; }
+  .e-ind4 { display: inline-block; width: 80px; }
+
+  /* ── Browser frame ── */
+  .browser { border-radius: 12px; overflow: hidden; border: 1px solid #e0e0e0; }
+  .browser-bar { background: #f1f3f4; padding: 9px 14px; display: flex; align-items: center; gap: 7px; border-bottom: 1px solid #e0e0e0; }
+  .b-dot2 { width: 10px; height: 10px; border-radius: 50%; }
+  .b-r { background:#ff5f57; } .b-y { background:#febc2e; } .b-g { background:#28c840; }
+  .b-url { flex:1; background:#fff; border:1px solid #dadce0; border-radius:20px; padding:4px 14px; font-size:12px; color:#555; }
+
+  /* ── Tables ── */
+  .tag-table { border-collapse: collapse; width: 100%; }
+  .tag-table th { background: #f1f5f9; font-size: 12px; font-weight: 700; text-align: left; padding: 10px 14px; color: #475569; border-bottom: 2px solid #e2e8f0; }
+  .tag-table td { font-size: 13px; padding: 10px 14px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+  .tag-table tr:last-child td { border-bottom: none; }
+  .tag-table tr:hover td { background: #f8f9fa; }
+  .tag-mono { font-family: 'SFMono-Regular', Consolas, monospace; font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 5px; }
+
+  /* ── Quiz ── */
+  .quiz-option { border: 1px solid #dee2e6; border-radius: 8px; padding: 10px 14px; font-size: 13px; cursor: pointer; margin-bottom: 6px; transition: all .15s; background: transparent; width: 100%; text-align: left; color: #1a1a1a; }
+  .quiz-option:hover:not(:disabled) { background: #f8f9fa; }
+  .quiz-option.correct { background: #d1fae5; border-color: #059669; color: #065f46; }
+  .quiz-option.wrong   { background: #fee2e2; border-color: #dc2626; color: #991b1b; }
+  .quiz-feedback { display: none; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-top: 4px; }
+  .quiz-feedback.correct { background: #d1fae5; color: #065f46; display: block; }
+  .quiz-feedback.wrong   { background: #fee2e2; color: #991b1b; display: block; }
+
+  /* ── Activity / challenge ── */
+  .activity-box { border: 2px dashed #a5b4fc; background: #eef2ff; border-radius: 12px; padding: 14px 18px; }
+  .activity-title { font-size: 13px; font-weight: 700; color: #3730a3; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .challenge-box { border: 2px dashed #f9a8d4; background: #fdf2f8; border-radius: 12px; padding: 14px 18px; }
+  .challenge-title { font-size: 13px; font-weight: 700; color: #9f1239; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+
+  /* ── Tip / info / warn / success ── */
+  .tip-box   { display:flex; gap:10px; align-items:flex-start; background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:10px 14px; }
+  .tip-icon  { color:#d97706; font-size:18px; flex-shrink:0; margin-top:1px; }
+  .tip-text  { font-size:13px; color:#92400e; line-height:1.6; }
+  .info-box  { display:flex; gap:10px; align-items:flex-start; background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:10px 14px; }
+  .info-icon { color:#2563eb; font-size:18px; flex-shrink:0; margin-top:1px; }
+  .info-text { font-size:13px; color:#1e40af; line-height:1.6; }
+  .warn-box  { display:flex; gap:10px; align-items:flex-start; background:#fef9ee; border:1px solid #fcd34d; border-radius:10px; padding:10px 14px; }
+  .success-box { display:flex; gap:10px; align-items:flex-start; background:#f0fdf4; border:1px solid #86efac; border-radius:10px; padding:10px 14px; }
+
+  /* ── Line explainer (JS amber accent) ── */
+  .lex-row { display:flex; align-items:stretch; cursor:pointer; transition:background .12s; border-bottom:1px solid #f0f0f0; }
+  .lex-row:last-child { border-bottom:none; }
+  .lex-row:hover { background:#f8f9fa; }
+  .lex-row.active { background:#fefce8; border-left:3px solid #d97706; }
+  .lex-code { background:#1e1e2e; padding:10px 14px; font-family:'SFMono-Regular',Consolas,monospace; font-size:12px; min-width:200px; flex-shrink:0; display:flex; align-items:center; }
+  .lex-info { padding:10px 14px; flex:1; }
+  .lex-name   { font-size:13px; font-weight:700; color:#d97706; margin-bottom:2px; }
+  .lex-desc   { font-size:12px; color:#555; line-height:1.55; }
+  .lex-detail { display:none; font-size:12px; color:#92400e; margin-top:4px; padding-top:4px; border-top:1px dashed #fde68a; }
+  .lex-row.active .lex-detail { display:block; }
+  .line-explain { border:1px solid #e8e8e8; border-radius:10px; overflow:hidden; }
+
+  /* ── Reveal ── */
+  .reveal-btn { background:#f1f3f5; border:1px solid #dee2e6; border-radius:8px; padding:7px 14px; font-size:13px; cursor:pointer; color:#333; transition:background .15s; }
+  .reveal-btn:hover { background:#e9ecef; }
+  .reveal-content { display:none; margin-top:8px; }
+  .reveal-content.open { display:block; }
+
+  /* ── Nav (JS amber) ── */
+  .nav-row { display:flex; align-items:center; justify-content:space-between; margin-top:auto; padding-top:1rem; border-top:1px solid #f0f0f0; }
+  .nav-btn { display:inline-flex; align-items:center; gap:6px; padding:9px 18px; border:1px solid #dee2e6; border-radius:8px; background:transparent; font-size:13px; cursor:pointer; color:#333; transition:background .15s; }
+  .nav-btn:hover:not(:disabled) { background:#f1f3f5; }
+  .nav-btn:disabled { opacity:.35; cursor:default; }
+  .nav-btn.primary { background:#d97706; border-color:transparent; color:#fff; }
+  .nav-btn.primary:hover { background:#b45309; }
+  .progress-dots { display:flex; gap:6px; align-items:center; }
+  .dot { width:7px; height:7px; border-radius:50%; background:#dee2e6; transition:all .2s; }
+  .dot.active { width:20px; border-radius:4px; background:#d97706; }
+
+  /* ── Home grid ── */
+  .home-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .home-card { background:#fff; border:1px solid #e8e8e8; border-radius:12px; padding:1rem 1.25rem; cursor:pointer; transition:all .15s; }
+  .home-card:hover { border-color:#d97706; box-shadow:0 2px 8px rgba(217,119,6,.12); }
+  .home-card-title { font-size:15px; font-weight:700; margin:6px 0 2px; }
+  .home-card-sub   { font-size:12px; color:#666; }
+
+  code { font-family:'SFMono-Regular',Consolas,monospace; font-size:12px; background:#f1f3f5; padding:1px 6px; border-radius:4px; border:1px solid #dee2e6; }
+
+  /* ── Checklist ── */
+  .check-item { display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:10px; border:1px solid #e8e8e8; font-size:13px; cursor:pointer; transition:all .15s; user-select:none; }
+  .check-item:hover { background:#f8f9fa; }
+  .check-item.done { background:#f0fdf4; border-color:#86efac; }
+  .check-circle { width:22px; height:22px; border-radius:50%; border:2px solid #dee2e6; display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0; transition:all .2s; color:transparent; }
+  .check-item.done .check-circle { background:#22c55e; border-color:#22c55e; color:#fff; }
+
+  /* ── Console panel ── */
+  .console-panel { background: #0d1117; border-radius: 12px; overflow: hidden; font-family: 'SFMono-Regular', Consolas, monospace; }
+  .console-bar   { background: #161b22; padding: 9px 14px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #30363d; }
+  .console-tab   { font-size: 12px; color: #8b949e; padding-bottom: 3px; }
+  .console-tab.active { color: #f0f6fc; border-bottom: 2px solid #d97706; }
+  .console-body  { padding: 12px 16px; font-size: 12.5px; line-height: 2; }
+  .con-log  { color: #f0f6fc; }
+  .con-str  { color: #a5d6ff; }
+  .con-num  { color: #79c0ff; }
+  .con-arrow { color: #3fb950; font-size: 11px; }
+  .con-prompt-row { display: flex; align-items: center; gap: 8px; }
+  .js-logo { width: 44px; height: 44px; background: #f0db4f; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-family: 'SFMono-Regular', Consolas, monospace; font-size: 18px; font-weight: 900; color: #323330; flex-shrink: 0; }
+
+  /* ══ DAY 8 HOUR 2 — CONDITIONALS SPECIFIC ══ */
+
+  /* Decision diamond / flow */
+  .flow-step { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; border-bottom: 1px dashed #e2e8f0; }
+  .flow-step:last-child { border-bottom: none; }
+  .flow-num { width: 28px; height: 28px; border-radius: 50%; background: #d97706; color: white; font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+  .flow-content { flex: 1; font-size: 13px; color: #333; line-height: 1.6; }
+  .flow-label { font-weight: 700; color: #d97706; margin-bottom: 2px; }
+
+  /* Operator pill grid */
+  .op-pill { background: #1e1e2e; border-radius: 8px; padding: 10px 8px; text-align: center; font-family: monospace; }
+  .op-symbol { font-size: 18px; font-weight: 800; color: #f1fa8c; }
+  .op-name { font-size: 10px; color: #8b949e; margin-top: 4px; font-family: -apple-system, sans-serif; }
+
+  /* Logical operator visual */
+  .logic-box { border-radius: 10px; padding: 14px; text-align: center; }
+  .logic-symbol { font-size: 24px; font-weight: 800; font-family: monospace; margin-bottom: 6px; }
+
+  /* Interactive eligibility checker */
+  .elig-sandbox { background: #0f172a; border-radius: 12px; padding: 18px 20px; }
+  .elig-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .elig-input { background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 8px 14px; font-family: monospace; font-size: 16px; color: #f0db4f; width: 90px; text-align: center; }
+  .elig-input:focus { outline: none; border-color: #d97706; }
+  .elig-run { background: #d97706; border: none; border-radius: 8px; padding: 9px 20px; font-size: 13px; font-weight: 700; color: #fff; cursor: pointer; }
+  .elig-run:hover { background: #b45309; }
+  .elig-result { padding: 14px 18px; border-radius: 10px; font-size: 14px; font-weight: 700; text-align: center; transition: all .2s; }
+
+  /* Grade calculator */
+  .grade-bar { display: flex; height: 28px; border-radius: 6px; overflow: hidden; }
+  .grade-seg { display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: white; }
+
+  /* Bootstrap form mockup (Day 6 style) */
+  .bs-form-group { margin-bottom: 14px; }
+  .bs-label { display: block; font-size: 12px; font-weight: 600; color: #333; margin-bottom: 4px; }
+  .bs-input { width: 100%; padding: 7px 12px; border: 1px solid #ced4da; border-radius: 5px; font-size: 13px; font-family: -apple-system, sans-serif; color: #333; }
+  .bs-input:focus { outline: none; border-color: #86b7fe; }
+  .bs-input.is-invalid { border-color: #dc2626; }
+  .bs-input.is-valid { border-color: #16a34a; }
+  .bs-feedback-invalid { font-size: 11px; color: #dc2626; margin-top: 3px; display: none; }
+  .bs-feedback-invalid.show { display: block; }
+  .bs-feedback-valid { font-size: 11px; color: #16a34a; margin-top: 3px; display: none; }
+  .bs-feedback-valid.show { display: block; }
+  .bs-btn-submit { background: #0d6efd; color: white; border: none; border-radius: 5px; padding: 8px 22px; font-size: 13px; font-weight: 700; cursor: pointer; width: 100%; }
+  .bs-btn-submit:hover { background: #0b5ed7; }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <div>
+      <div class="top-bar-title">MERN Stack Training · Day 8 · Hour 2</div>
+      <div class="top-bar-sub">Conditional Statements — SkillHub LMS</div>
+    </div>
+    <div class="slide-counter" id="slide-counter">1 / 14</div>
+  </div>
+
+  <!-- ═══════════ SLIDE 0  HOME ═══════════ -->
+  <div class="slide active" id="slide-0">
+    <div class="slide-header">
+      <span class="badge b-js">Day 8 · Hour 2</span>
+      <div>
+        <div class="slide-title">Conditional Statements</div>
+        <div class="slide-subtitle">Now we solve a real problem — should everyone be allowed to register?</div>
+      </div>
+    </div>
+
+    <div style="background:#fef9c3;border:1px solid #fde68a;border-radius:12px;padding:12px 16px;display:flex;gap:12px;align-items:flex-start">
+      <div class="js-logo">if</div>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#854d0e;margin-bottom:4px">Hour 2 Goal — Add Validation Logic to SkillHub</div>
+        <div style="display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:#92400e">
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>if statement</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>if / else</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>else if chains</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Comparison &amp; logical operators</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Registration form validation</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="home-grid">
+      <div class="home-card" onclick="goSlide(1)">
+        <span class="badge b-green">Recap</span>
+        <div class="home-card-title">Where We Left Off</div>
+        <div class="home-card-sub">Functions built — but no decision-making yet</div>
+      </div>
+      <div class="home-card" onclick="goSlide(2)">
+        <span class="badge b-amber">Question</span>
+        <div class="home-card-title">Should Everyone Register?</div>
+        <div class="home-card-sub">No. Validation is required.</div>
+      </div>
+      <div class="home-card" onclick="goSlide(3)">
+        <span class="badge b-blue">Code</span>
+        <div class="home-card-title">if Statement</div>
+        <div class="home-card-sub">Run code only when a condition is true</div>
+      </div>
+      <div class="home-card" onclick="goSlide(4)">
+        <span class="badge b-teal">Code</span>
+        <div class="home-card-title">if / else</div>
+        <div class="home-card-sub">Two paths — eligible or not eligible</div>
+      </div>
+      <div class="home-card" onclick="goSlide(5)">
+        <span class="badge b-purple">Code</span>
+        <div class="home-card-title">else if Chains</div>
+        <div class="home-card-sub">Grading system — A, B, C grades</div>
+      </div>
+      <div class="home-card" onclick="goSlide(6)">
+        <span class="badge b-indigo">Reference</span>
+        <div class="home-card-title">Comparison Operators</div>
+        <div class="home-card-sub">==, ===, &gt;, &lt;, &gt;=, &lt;=, !=</div>
+      </div>
+      <div class="home-card" onclick="goSlide(7)">
+        <span class="badge b-rose">Reference</span>
+        <div class="home-card-title">Logical Operators</div>
+        <div class="home-card-sub">&amp;&amp;, ||, ! — combine conditions</div>
+      </div>
+      <div class="home-card" onclick="goSlide(8)">
+        <span class="badge b-orange">Live Lab</span>
+        <div class="home-card-title">Eligibility Checker Sandbox</div>
+        <div class="home-card-sub">Type an age — see if/else run live</div>
+      </div>
+      <div class="home-card" onclick="goSlide(9)">
+        <span class="badge b-cyan">Project Task</span>
+        <div class="home-card-title">Registration Form — HTML</div>
+        <div class="home-card-sub">Bootstrap form structure for SkillHub</div>
+      </div>
+      <div class="home-card" onclick="goSlide(10)">
+        <span class="badge b-blue">Project Task</span>
+        <div class="home-card-title">Registration Form — Validation</div>
+        <div class="home-card-sub">if/else checks before allowing submit</div>
+      </div>
+      <div class="home-card" onclick="goSlide(11)">
+        <span class="badge b-rose">Live Lab</span>
+        <div class="home-card-title">Try the Live Form</div>
+        <div class="home-card-sub">Submit with errors — see validation fire</div>
+      </div>
+      <div class="home-card" onclick="goSlide(12)">
+        <span class="badge b-slate">Quiz</span>
+        <div class="home-card-title">Quick-Fire Quiz</div>
+        <div class="home-card-sub">5 questions on conditionals</div>
+      </div>
+      <div class="home-card" onclick="goSlide(13)">
+        <span class="badge b-green">Wrap-Up</span>
+        <div class="home-card-title">Day 8 Complete</div>
+        <div class="home-card-sub">What you built + Day 9 preview</div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" disabled><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-0"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Start <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 1  RECAP ═══════════ -->
+  <div class="slide" id="slide-1">
+    <div class="slide-header">
+      <span class="badge b-green">Recap</span>
+      <div>
+        <div class="slide-title">Where We Left Off</div>
+        <div class="slide-subtitle">Hour 1 gave us reusable functions — but they always ran the same way, every time</div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="section-label">hour 1 wins</div>
+        <div class="check-item done"><div class="check-circle">✓</div><span>function keyword — write code once</span></div>
+        <div class="check-item done"><div class="check-circle">✓</div><span>Parameters — pass data into functions</span></div>
+        <div class="check-item done"><div class="check-circle">✓</div><span>Arguments — actual values at call time</span></div>
+        <div class="check-item done"><div class="check-circle">✓</div><span>return — send a value back out</span></div>
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;border:2px dashed #fde68a;background:#fef9c3;font-size:13px;margin-top:4px">
+          <i class="ti ti-clock-play" style="color:#d97706;font-size:18px;flex-shrink:0"></i>
+          <span style="color:#92400e;font-weight:600">Now: Make code make <strong>decisions</strong> — different inputs, different outcomes</span>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">the gap — functions can't decide anything yet</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">script.js — Day 8 Hour 1 style</span></div>
+          <div class="editor-body" style="font-size:12px">
+            <div class="e-row"><span class="j-kw">function</span> <span class="j-fn">registerStudent</span><span class="c-punc">(</span><span class="j-var">age</span><span class="c-punc">)</span> <span class="c-punc">{</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="j-fn">console</span><span class="c-punc">.</span><span class="j-fn">log</span><span class="c-punc">(</span><span class="j-str">"Registered!"</span><span class="c-punc">);</span></div>
+            <div class="e-row"><span class="c-punc">}</span></div>
+            <div class="e-row"></div>
+            <div class="e-row"><span class="j-fn" style="color:#80ffea">registerStudent</span><span class="c-punc">(</span><span class="j-num">12</span><span class="c-punc">);</span> <span class="j-com">// a 12-year-old also gets registered!</span></div>
+          </div>
+        </div>
+        <div class="warn-box" style="margin-top:8px">
+          <i class="ti ti-alert-triangle" style="color:#d97706;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+          <div style="font-size:13px;color:#92400e;line-height:1.6"><strong>The problem:</strong> This function registers EVERYONE — no matter their age. We need a way to check conditions before running code. That's what <code>if</code> statements do.</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-1"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Should Everyone Register? <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 2  QUESTION ═══════════ -->
+  <div class="slide" id="slide-2">
+    <div class="slide-header">
+      <span class="badge b-amber">Question</span>
+      <div>
+        <div class="slide-title">Should Everyone Be Allowed to Register?</div>
+        <div class="slide-subtitle">Ask the class — wait for an answer before revealing</div>
+      </div>
+    </div>
+    <div class="card card-gray">
+      <div style="font-size:14px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px">
+        <i class="ti ti-message-question" style="color:#d97706;font-size:20px"></i>
+        SkillHub LMS has a registration form. Should the website accept EVERY submission — no matter what's typed in?
+      </div>
+      <button class="reveal-btn" onclick="toggle('q-ans')">Reveal the answer</button>
+      <div class="reveal-content" id="q-ans">
+        <div style="margin-top:12px;padding:18px 20px;background:#fff;border-radius:12px;border:1px solid #fde68a">
+          <div style="font-size:20px;font-weight:800;color:#854d0e;text-align:center;margin-bottom:8px">No.</div>
+          <div style="font-size:13px;color:#444;text-align:center;line-height:1.8">A real website must check: Is the name filled in? Is the email valid? Is the age old enough?<br><strong>This checking is called validation — and it's powered entirely by conditional statements.</strong></div>
+        </div>
+      </div>
+    </div>
+    <div class="grid-3">
+      <div style="text-align:center;padding:14px 10px;background:#fee2e2;border-radius:10px;border:2px solid #fca5a5">
+        <i class="ti ti-x" style="font-size:26px;color:#dc2626;margin-bottom:6px;display:block"></i>
+        <div style="font-size:12px;font-weight:700;color:#dc2626">Empty name field</div>
+        <div style="font-size:11px;color:#991b1b;margin-top:2px">Should be rejected</div>
+      </div>
+      <div style="text-align:center;padding:14px 10px;background:#fee2e2;border-radius:10px;border:2px solid #fca5a5">
+        <i class="ti ti-x" style="font-size:26px;color:#dc2626;margin-bottom:6px;display:block"></i>
+        <div style="font-size:12px;font-weight:700;color:#dc2626">Invalid email format</div>
+        <div style="font-size:11px;color:#991b1b;margin-top:2px">Should be rejected</div>
+      </div>
+      <div style="text-align:center;padding:14px 10px;background:#d1fae5;border-radius:10px;border:2px solid #6ee7b7">
+        <i class="ti ti-check" style="font-size:26px;color:#059669;margin-bottom:6px;display:block"></i>
+        <div style="font-size:12px;font-weight:700;color:#065f46">All fields valid</div>
+        <div style="font-size:11px;color:#065f46;margin-top:2px">Should be accepted</div>
+      </div>
+    </div>
+    <div class="info-box">
+      <i class="ti ti-info-circle info-icon"></i>
+      <div class="info-text"><strong>This IS conditional logic:</strong> "IF this condition is true, do X. OTHERWISE, do Y." Today's entire hour teaches you exactly this pattern — and we'll use it to build real validation for SkillHub's registration form.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-2"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">if Statement <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 3  IF STATEMENT ═══════════ -->
+  <div class="slide" id="slide-3">
+    <div class="slide-header">
+      <span class="badge b-blue">Code</span>
+      <div>
+        <div class="slide-title">if Statement — Run Code Only When True</div>
+        <div class="slide-subtitle">The simplest decision a program can make: do something, but only under a condition</div>
+      </div>
+    </div>
+
+    <div class="activity-box">
+      <div class="activity-title"><i class="ti ti-keyboard"></i> Type this into script.js</div>
+      <div class="editor" style="border-radius:8px">
+        <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">frontend/js/script.js</span></div>
+        <div class="editor-body">
+          <div class="e-row"><span class="e-ln">1</span><span class="j-kw">let</span> <span class="j-var">age</span> <span class="j-op">=</span> <span class="j-num">20</span><span class="c-punc">;</span></div>
+          <div class="e-row"><span class="e-ln">2</span></div>
+          <div class="e-row"><span class="e-ln">3</span><span class="j-kw">if</span><span class="c-punc">(</span><span class="j-var">age</span> <span class="j-op">&gt;=</span> <span class="j-num">18</span><span class="c-punc">) {</span></div>
+          <div class="e-row"><span class="e-ln">4</span><span class="e-ind1"></span><span class="j-fn">console</span><span class="c-punc">.</span><span class="j-fn">log</span><span class="c-punc">(</span><span class="j-str">"Eligible"</span><span class="c-punc">);</span></div>
+          <div class="e-row"><span class="e-ln">5</span><span class="c-punc">}</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">how the browser reads this</div>
+        <div style="display:flex;flex-direction:column;gap:0;border:1px solid #e8e8e8;border-radius:10px;overflow:hidden">
+          <div class="flow-step" style="padding:10px 14px">
+            <div class="flow-num">1</div>
+            <div class="flow-content"><div class="flow-label">age = 20</div>The variable holds the Number 20.</div>
+          </div>
+          <div class="flow-step" style="padding:10px 14px">
+            <div class="flow-num">2</div>
+            <div class="flow-content"><div class="flow-label">Check the condition: age &gt;= 18</div>Is 20 greater than or equal to 18? Yes — <strong>true</strong>.</div>
+          </div>
+          <div class="flow-step" style="padding:10px 14px">
+            <div class="flow-num">3</div>
+            <div class="flow-content"><div class="flow-label">Condition is true → run the block</div>The code inside { } executes: console.log("Eligible") runs.</div>
+          </div>
+        </div>
+        <div class="console-panel" style="margin-top:10px">
+          <div class="console-bar"><span class="console-tab active">Console</span></div>
+          <div class="console-body">
+            <div class="con-prompt-row"><span class="con-arrow">▶</span> <span class="con-str">Eligible</span></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">what if age was 15 instead?</div>
+        <div class="editor" style="border-radius:8px;margin-bottom:10px">
+          <div class="editor-body" style="font-size:12px;padding:10px 14px">
+            <div class="e-row"><span class="j-kw">let</span> <span class="j-var">age</span> <span class="j-op">=</span> <span class="j-num">15</span><span class="c-punc">;</span></div>
+            <div class="e-row"><span class="j-kw">if</span><span class="c-punc">(</span><span class="j-var">age</span> <span class="j-op">&gt;=</span> <span class="j-num">18</span><span class="c-punc">) {</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="j-fn">console</span><span class="c-punc">.</span><span class="j-fn">log</span><span class="c-punc">(</span><span class="j-str">"Eligible"</span><span class="c-punc">);</span></div>
+            <div class="e-row"><span class="c-punc">}</span></div>
+          </div>
+        </div>
+        <div class="console-panel">
+          <div class="console-bar"><span class="console-tab active">Console</span></div>
+          <div class="console-body">
+            <div class="con-prompt-row"><span class="con-arrow">▶</span> <span style="color:#6e7681">(nothing printed)</span></div>
+          </div>
+        </div>
+        <div class="warn-box" style="margin-top:10px">
+          <i class="ti ti-alert-triangle" style="color:#d97706;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+          <div style="font-size:13px;color:#92400e;line-height:1.6"><strong>15 &gt;= 18 is false.</strong> The code inside { } is simply skipped — nothing runs, nothing prints. The console stays empty. This is the key behaviour of a plain <code>if</code> with no <code>else</code>.</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-3"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">if / else <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 4  IF ELSE ═══════════ -->
+  <div class="slide" id="slide-4">
+    <div class="slide-header">
+      <span class="badge b-teal">Code</span>
+      <div>
+        <div class="slide-title">if / else — Two Paths, One Decision</div>
+        <div class="slide-subtitle">Now we handle BOTH outcomes — eligible AND not eligible</div>
+      </div>
+    </div>
+
+    <div class="activity-box">
+      <div class="activity-title"><i class="ti ti-keyboard"></i> Update script.js — add the else block</div>
+      <div class="editor" style="border-radius:8px">
+        <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">frontend/js/script.js</span></div>
+        <div class="editor-body">
+          <div class="e-row"><span class="e-ln">1</span><span class="j-kw">let</span> <span class="j-var">age</span> <span class="j-op">=</span> <span class="j-num">16</span><span class="c-punc">;</span></div>
+          <div class="e-row"><span class="e-ln">2</span></div>
+          <div class="e-row"><span class="e-ln">3</span><span class="j-kw">if</span><span class="c-punc">(</span><span class="j-var">age</span> <span class="j-op">&gt;=</span> <span class="j-num">18</span><span class="c-punc">) {</span></div>
+          <div class="e-row"><span class="e-ln">4</span><span class="e-ind1"></span><span class="j-fn">console</span><span class="c-punc">.</span><span class="j-fn">log</span><span class="c-punc">(</span><span class="j-str">"Eligible"</span><span class="c-punc">);</span></div>
+          <div class="e-row"><span class="e-ln">5</span><span class="c-punc">}</span> <span class="j-kw">else</span> <span class="c-punc">{</span></div>
+          <div class="e-row"><span class="e-ln">6</span><span class="e-ind1"></span><span class="j-fn">console</span><span class="c-punc">.</span><span class="j-fn">log</span><span class="c-punc">(</span><span class="j-str">"Not Eligible"</span><span class="c-punc">);</span></div>
+          <div class="e-row"><span class="e-ln">7</span><span class="c-punc">}</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">visual decision flow</div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:0">
+          <div style="background:#1e293b;color:white;border-radius:8px;padding:10px 18px;font-size:12px;font-weight:700;font-family:monospace">age = 16</div>
+          <div style="font-size:18px;color:#888;margin:4px 0">↓</div>
+          <div style="background:#ede9fe;border:2px solid #c4b5fd;color:#5b21b6;border-radius:8px;padding:10px 18px;font-size:12px;font-weight:700;font-family:monospace">age &gt;= 18 ?</div>
+          <div style="display:flex;gap:30px;margin-top:8px;width:100%;justify-content:center">
+            <div style="display:flex;flex-direction:column;align-items:center">
+              <div style="font-size:11px;color:#dc2626;font-weight:700;margin-bottom:4px">false ↙</div>
+              <div style="background:#fee2e2;border:2px solid #fca5a5;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:700;color:#dc2626;text-align:center">else block runs<br><span style="font-family:monospace;font-size:11px">"Not Eligible"</span></div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:center;opacity:.35">
+              <div style="font-size:11px;color:#059669;font-weight:700;margin-bottom:4px">true ↘</div>
+              <div style="background:#d1fae5;border:2px solid #6ee7b7;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:700;color:#059669;text-align:center">if block runs<br><span style="font-family:monospace;font-size:11px">"Eligible"</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="console-panel" style="margin-top:14px">
+          <div class="console-bar"><span class="console-tab active">Console</span></div>
+          <div class="console-body">
+            <div class="con-prompt-row"><span class="con-arrow">▶</span> <span style="color:#ff7b72">Not Eligible</span></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">why else matters</div>
+        <div class="line-explain">
+          <div class="lex-row" onclick="toggleLex(this)">
+            <div class="lex-code"><span class="j-kw">if</span><span class="c-punc">(…) {…}</span></div>
+            <div class="lex-info">
+              <div class="lex-name">Runs ONLY when condition is true</div>
+              <div class="lex-desc">If false, this entire block is skipped completely.</div>
+              <div class="lex-detail">This is exactly the same if block from the previous slide — nothing new here.</div>
+            </div>
+          </div>
+          <div class="lex-row" onclick="toggleLex(this)">
+            <div class="lex-code"><span class="j-kw">else {…}</span></div>
+            <div class="lex-info">
+              <div class="lex-name">Runs ONLY when the if condition is false</div>
+              <div class="lex-desc">else has no condition of its own — it's the "anything that didn't match the if" branch.</div>
+              <div class="lex-detail">A program always runs EITHER the if block OR the else block — never both, never neither. This guarantees you always handle both outcomes of a yes/no decision.</div>
+            </div>
+          </div>
+        </div>
+        <div class="success-box" style="margin-top:10px">
+          <i class="ti ti-sparkles" style="color:#16a34a;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+          <div style="font-size:13px;color:#166534;line-height:1.65"><strong>This is real validation logic.</strong> Every form, every login system, every age check on the internet uses exactly this if/else pattern under the hood.</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-4"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">else if Chains <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 5  ELSE IF ═══════════ -->
+  <div class="slide" id="slide-5">
+    <div class="slide-header">
+      <span class="badge b-purple">Code</span>
+      <div>
+        <div class="slide-title">else if — More Than Two Outcomes</div>
+        <div class="slide-subtitle">A grading system needs more than yes/no — chain multiple conditions together</div>
+      </div>
+    </div>
+
+    <div class="activity-box">
+      <div class="activity-title"><i class="ti ti-keyboard"></i> Type this grading logic into script.js</div>
+      <div class="editor" style="border-radius:8px">
+        <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">frontend/js/script.js</span></div>
+        <div class="editor-body">
+          <div class="e-row"><span class="e-ln">1</span><span class="j-kw">let</span> <span class="j-var">marks</span> <span class="j-op">=</span> <span class="j-num">85</span><span class="c-punc">;</span></div>
+          <div class="e-row"><span class="e-ln">2</span></div>
+          <div class="e-row"><span class="e-ln">3</span><span class="j-kw">if</span><span class="c-punc">(</span><span class="j-var">marks</span> <span class="j-op">&gt;=</span> <span class="j-num">90</span><span class="c-punc">) {</span></div>
+          <div class="e-row"><span class="e-ln">4</span><span class="e-ind1"></span><span class="j-fn">console</span><span class="c-punc">.</span><span class="j-fn">log</span><span class="c-punc">(</span><span class="j-str">"A Grade"</span><span class="c-punc">);</span></div>
+          <div class="e-row"><span class="e-ln">5</span><span class="c-punc">}</span> <span class="j-kw">else if</span><span class="c-punc">(</span><span class="j-var">marks</span> <span class="j-op">&gt;=</span> <span class="j-num">75</span><span class="c-punc">) {</span></div>
+          <div class="e-row"><span class="e-ln">6</span><span class="e-ind1"></span><span class="j-fn">console</span><span class="c-punc">.</span><span class="j-fn">log</span><span class="c-punc">(</span><span class="j-str">"B Grade"</span><span class="c-punc">);</span></div>
+          <div class="e-row"><span class="e-ln">7</span><span class="c-punc">}</span> <span class="j-kw">else</span> <span class="c-punc">{</span></div>
+          <div class="e-row"><span class="e-ln">8</span><span class="e-ind1"></span><span class="j-fn">console</span><span class="c-punc">.</span><span class="j-fn">log</span><span class="c-punc">(</span><span class="j-str">"C Grade"</span><span class="c-punc">);</span></div>
+          <div class="e-row"><span class="e-ln">9</span><span class="c-punc">}</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">how javascript checks this, top to bottom</div>
+        <div style="display:flex;flex-direction:column;gap:0;border:1px solid #e8e8e8;border-radius:10px;overflow:hidden">
+          <div class="flow-step" style="padding:10px 14px">
+            <div class="flow-num">1</div>
+            <div class="flow-content"><div class="flow-label">marks = 85. Check marks &gt;= 90 first</div>Is 85 ≥ 90? No — false. Skip this block, move to the next check.</div>
+          </div>
+          <div class="flow-step" style="padding:10px 14px">
+            <div class="flow-num">2</div>
+            <div class="flow-content"><div class="flow-label">Check marks &gt;= 75</div>Is 85 ≥ 75? Yes — true! Run this block: "B Grade". <strong>Stop checking further conditions.</strong></div>
+          </div>
+          <div class="flow-step" style="padding:10px 14px">
+            <div class="flow-num">3</div>
+            <div class="flow-content"><div class="flow-label">else block is skipped entirely</div>Once a match is found, JavaScript never checks the remaining conditions — even the final else.</div>
+          </div>
+        </div>
+        <div class="console-panel" style="margin-top:10px">
+          <div class="console-bar"><span class="console-tab active">Console</span></div>
+          <div class="console-body">
+            <div class="con-prompt-row"><span class="con-arrow">▶</span> <span style="color:#a5d6ff">B Grade</span></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">live grade calculator — try different marks</div>
+        <div class="elig-sandbox">
+          <div class="elig-row">
+            <input type="number" class="elig-input" id="grade-input" value="85" min="0" max="100">
+            <button class="elig-run" onclick="runGrade()">▶ Check Grade</button>
+          </div>
+          <div class="elig-result" id="grade-result" style="background:#1e293b;color:#8b949e">Enter marks and click Check</div>
+          <div style="margin-top:10px">
+            <div class="grade-bar">
+              <div class="grade-seg" style="flex:75;background:#dc2626">0–74 → C</div>
+              <div class="grade-seg" style="flex:15;background:#d97706">75–89 → B</div>
+              <div class="grade-seg" style="flex:10;background:#16a34a">90–100 → A</div>
+            </div>
+          </div>
+        </div>
+        <div class="tip-box" style="margin-top:10px">
+          <i class="ti ti-bulb tip-icon"></i>
+          <div class="tip-text"><strong>Order matters in else-if chains.</strong> Always write the highest/most-specific condition FIRST. If you checked >=75 before >=90, a mark of 95 would incorrectly stop at "B Grade".</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-5"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Comparison Operators <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 6  COMPARISON OPERATORS ═══════════ -->
+  <div class="slide" id="slide-6">
+    <div class="slide-header">
+      <span class="badge b-indigo">Reference</span>
+      <div>
+        <div class="slide-title">Comparison Operators</div>
+        <div class="slide-subtitle">The building blocks of every condition you write</div>
+      </div>
+    </div>
+
+    <div class="grid-3" style="gap:8px">
+      <div class="op-pill"><div class="op-symbol">==</div><div class="op-name">Loose equal</div></div>
+      <div class="op-pill"><div class="op-symbol">===</div><div class="op-name">Strict equal</div></div>
+      <div class="op-pill"><div class="op-symbol">!=</div><div class="op-name">Not equal</div></div>
+      <div class="op-pill"><div class="op-symbol">&gt;</div><div class="op-name">Greater than</div></div>
+      <div class="op-pill"><div class="op-symbol">&lt;</div><div class="op-name">Less than</div></div>
+      <div class="op-pill"><div class="op-symbol">&gt;=</div><div class="op-name">Greater or equal</div></div>
+    </div>
+    <div style="display:flex;justify-content:center">
+      <div class="op-pill" style="width:140px"><div class="op-symbol">&lt;=</div><div class="op-name">Less or equal</div></div>
+    </div>
+
+    <table class="tag-table">
+      <thead><tr><th>Operator</th><th>Meaning</th><th>Example</th><th>Result</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><span class="tag-mono" style="background:#dbeafe;color:#1d4ed8">==</span></td>
+          <td style="font-size:12px">Equal value (ignores data type)</td>
+          <td><code>5 == "5"</code></td>
+          <td style="font-size:12px;color:#059669;font-weight:700">true</td>
+        </tr>
+        <tr style="background:#fef9c310">
+          <td><span class="tag-mono" style="background:#fef3c7;color:#92400e">===</span></td>
+          <td style="font-size:12px">Equal value AND equal type — <strong>always prefer this</strong></td>
+          <td><code>5 === "5"</code></td>
+          <td style="font-size:12px;color:#dc2626;font-weight:700">false</td>
+        </tr>
+        <tr>
+          <td><span class="tag-mono" style="background:#ffe4e6;color:#9f1239">!=</span></td>
+          <td style="font-size:12px">Not equal</td>
+          <td><code>age != 18</code></td>
+          <td style="font-size:12px;color:#555">depends on age</td>
+        </tr>
+        <tr>
+          <td><span class="tag-mono" style="background:#d1fae5;color:#065f46">&gt;</span></td>
+          <td style="font-size:12px">Strictly greater than</td>
+          <td><code>marks &gt; 90</code></td>
+          <td style="font-size:12px;color:#555">depends on marks</td>
+        </tr>
+        <tr>
+          <td><span class="tag-mono" style="background:#ede9fe;color:#5b21b6">&gt;=</span></td>
+          <td style="font-size:12px">Greater than or equal to</td>
+          <td><code>age &gt;= 18</code></td>
+          <td style="font-size:12px;color:#555">true if 18 or older</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="warn-box">
+      <i class="ti ti-alert-triangle" style="color:#d97706;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+      <div style="font-size:13px;color:#92400e;line-height:1.6"><strong>Use <code>===</code>, not <code>==</code>, in your code.</strong> <code>==</code> converts types before comparing (causing confusing bugs like <code>0 == false</code> being true). <code>===</code> checks value AND type together — predictable and safe. This is a strict industry rule.</div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-6"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Logical Operators <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 7  LOGICAL OPERATORS ═══════════ -->
+  <div class="slide" id="slide-7">
+    <div class="slide-header">
+      <span class="badge b-rose">Reference</span>
+      <div>
+        <div class="slide-title">Logical Operators — Combine Conditions</div>
+        <div class="slide-subtitle">&amp;&amp; (AND), || (OR), ! (NOT) — chain multiple checks into one condition</div>
+      </div>
+    </div>
+
+    <div class="grid-3">
+      <div class="logic-box" style="background:#dbeafe;border:2px solid #93c5fd">
+        <div class="logic-symbol" style="color:#1d4ed8">&amp;&amp;</div>
+        <div style="font-size:12px;font-weight:700;color:#1e40af;margin-bottom:6px">AND</div>
+        <div style="font-size:11px;color:#1e40af;line-height:1.6">Both sides must be true</div>
+      </div>
+      <div class="logic-box" style="background:#fef3c7;border:2px solid #fbbf24">
+        <div class="logic-symbol" style="color:#92400e">||</div>
+        <div style="font-size:12px;font-weight:700;color:#92400e;margin-bottom:6px">OR</div>
+        <div style="font-size:11px;color:#92400e;line-height:1.6">At least one side must be true</div>
+      </div>
+      <div class="logic-box" style="background:#fee2e2;border:2px solid #fca5a5">
+        <div class="logic-symbol" style="color:#dc2626">!</div>
+        <div style="font-size:12px;font-weight:700;color:#dc2626;margin-bottom:6px">NOT</div>
+        <div style="font-size:11px;color:#dc2626;line-height:1.6">Flips true ↔ false</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">&amp;&amp; example — registration needs BOTH conditions</div>
+        <div class="editor" style="border-radius:8px">
+          <div class="editor-body" style="font-size:12px;padding:10px 14px">
+            <div class="e-row"><span class="j-kw">let</span> <span class="j-var">age</span> <span class="j-op">=</span> <span class="j-num">20</span><span class="c-punc">;</span></div>
+            <div class="e-row"><span class="j-kw">let</span> <span class="j-var">hasEmail</span> <span class="j-op">=</span> <span style="color:#ffb86c">true</span><span class="c-punc">;</span></div>
+            <div class="e-row"></div>
+            <div class="e-row"><span class="j-kw">if</span><span class="c-punc">(</span><span class="j-var">age</span> <span class="j-op">&gt;=</span> <span class="j-num">18</span> <span class="j-op">&amp;&amp;</span> <span class="j-var">hasEmail</span><span class="c-punc">) {</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="j-fn">console</span><span class="c-punc">.</span><span class="j-fn">log</span><span class="c-punc">(</span><span class="j-str">"Can register"</span><span class="c-punc">);</span></div>
+            <div class="e-row"><span class="c-punc">}</span></div>
+          </div>
+        </div>
+        <div class="info-box" style="margin-top:8px">
+          <i class="ti ti-info-circle info-icon"></i>
+          <div class="info-text">Needs to be 18+ <strong>AND</strong> have an email. If either is false, registration fails.</div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">|| example — accept EITHER login method</div>
+        <div class="editor" style="border-radius:8px">
+          <div class="editor-body" style="font-size:12px;padding:10px 14px">
+            <div class="e-row"><span class="j-kw">let</span> <span class="j-var">hasGoogle</span> <span class="j-op">=</span> <span style="color:#ffb86c">false</span><span class="c-punc">;</span></div>
+            <div class="e-row"><span class="j-kw">let</span> <span class="j-var">hasEmail</span> <span class="j-op">=</span> <span style="color:#ffb86c">true</span><span class="c-punc">;</span></div>
+            <div class="e-row"></div>
+            <div class="e-row"><span class="j-kw">if</span><span class="c-punc">(</span><span class="j-var">hasGoogle</span> <span class="j-op">||</span> <span class="j-var">hasEmail</span><span class="c-punc">) {</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="j-fn">console</span><span class="c-punc">.</span><span class="j-fn">log</span><span class="c-punc">(</span><span class="j-str">"Login allowed"</span><span class="c-punc">);</span></div>
+            <div class="e-row"><span class="c-punc">}</span></div>
+          </div>
+        </div>
+        <div class="info-box" style="margin-top:8px">
+          <i class="ti ti-info-circle info-icon"></i>
+          <div class="info-text">Just ONE needs to be true. Even though hasGoogle is false, hasEmail being true makes the whole condition true.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card card-gray">
+      <div class="section-label">! (not) — flips the value</div>
+      <div class="editor" style="border-radius:8px">
+        <div class="editor-body" style="font-size:12px;padding:10px 14px">
+          <div class="e-row"><span class="j-kw">let</span> <span class="j-var">isLoggedIn</span> <span class="j-op">=</span> <span style="color:#ffb86c">false</span><span class="c-punc">;</span></div>
+          <div class="e-row"></div>
+          <div class="e-row"><span class="j-kw">if</span><span class="c-punc">(</span><span class="j-op">!</span><span class="j-var">isLoggedIn</span><span class="c-punc">) {</span></div>
+          <div class="e-row"><span class="e-ind1"></span><span class="j-fn">console</span><span class="c-punc">.</span><span class="j-fn">log</span><span class="c-punc">(</span><span class="j-str">"Please log in"</span><span class="c-punc">);</span> <span class="j-com">// runs, because !false = true</span></div>
+          <div class="e-row"><span class="c-punc">}</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-7"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Eligibility Sandbox <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 8  ELIGIBILITY SANDBOX ═══════════ -->
+  <div class="slide" id="slide-8">
+    <div class="slide-header">
+      <span class="badge b-orange">Live Lab</span>
+      <div>
+        <div class="slide-title">Eligibility Checker Sandbox</div>
+        <div class="slide-subtitle">Type an age — see the if/else logic decide in real time</div>
+      </div>
+    </div>
+
+    <div class="elig-sandbox">
+      <div style="font-size:12px;color:#8b949e;margin-bottom:10px;font-family:monospace">if (age &gt;= 18) { "Eligible" } else { "Not Eligible" }</div>
+      <div class="elig-row">
+        <span style="color:#8b949e;font-size:13px;font-family:monospace">age =</span>
+        <input type="number" class="elig-input" id="elig-input" value="18" min="0" max="120">
+        <button class="elig-run" onclick="runEligibility()">▶ Run Check</button>
+      </div>
+      <div class="elig-result" id="elig-result" style="background:#1e293b;color:#8b949e">Enter an age and click Run Check</div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card card-gray">
+        <div class="section-label">try these specific ages</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button onclick="quickElig(13)" style="background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer">13</button>
+          <button onclick="quickElig(17)" style="background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer">17</button>
+          <button onclick="quickElig(18)" style="background:#d1fae5;color:#059669;border:1px solid #6ee7b7;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer">18</button>
+          <button onclick="quickElig(25)" style="background:#d1fae5;color:#059669;border:1px solid #6ee7b7;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer">25</button>
+          <button onclick="quickElig(60)" style="background:#d1fae5;color:#059669;border:1px solid #6ee7b7;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer">60</button>
+        </div>
+        <div style="font-size:11px;color:#888;margin-top:8px">Notice: exactly 18 counts as eligible — because we used <code>&gt;=</code> not <code>&gt;</code>.</div>
+      </div>
+      <div class="tip-box">
+        <i class="ti ti-bulb tip-icon"></i>
+        <div class="tip-text"><strong>Edge cases matter.</strong> Always test the boundary value (here, exactly 18). A common bug is using <code>&gt;</code> instead of <code>&gt;=</code>, accidentally excluding people who are exactly the minimum age.</div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-8"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Registration Form HTML <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 9  PROJECT TASK — FORM HTML ═══════════ -->
+  <div class="slide" id="slide-9">
+    <div class="slide-header">
+      <span class="badge b-cyan">Project Task</span>
+      <div>
+        <div class="slide-title">Student Registration Form — HTML</div>
+        <div class="slide-subtitle">Build the Bootstrap form structure — validation comes next</div>
+      </div>
+    </div>
+
+    <div class="activity-box">
+      <div class="activity-title"><i class="ti ti-keyboard"></i> Add this section to index.html</div>
+      <div class="editor" style="border-radius:8px">
+        <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">frontend/index.html</span></div>
+        <div class="editor-body" style="font-size:12px">
+          <div class="e-row"><span class="e-ln">1</span><span class="e-new">&lt;section</span> <span class="e-att">class</span><span class="e-val">=</span><span style="color:#f1fa8c">"</span><span class="j-cls">container mt-5</span><span style="color:#f1fa8c">"</span><span class="e-new">&gt;</span></div>
+          <div class="e-row"><span class="e-ln">2</span></div>
+          <div class="e-row"><span class="e-ln">3</span><span class="e-ind1"></span><span class="e-h2">&lt;h2</span> <span class="e-att">class</span><span class="e-val">="text-center"</span><span class="e-h2">&gt;</span></div>
+          <div class="e-row"><span class="e-ln">4</span><span class="e-ind2"></span><span class="e-txt">Student Registration</span></div>
+          <div class="e-row"><span class="e-ln">5</span><span class="e-ind1"></span><span class="e-h2">&lt;/h2&gt;</span></div>
+          <div class="e-row"><span class="e-ln">6</span></div>
+          <div class="e-row"><span class="e-ln">7</span><span class="e-ind1"></span><span class="e-new">&lt;form</span> <span class="e-att">id</span><span class="e-val">="registrationForm"</span><span class="e-new">&gt;</span></div>
+          <div class="e-row"><span class="e-ln">8</span></div>
+          <div class="e-row"><span class="e-ln">9</span><span class="e-ind2"></span><span class="e-new">&lt;div</span> <span class="e-att">class</span><span class="e-val">=</span><span style="color:#f1fa8c">"</span><span class="j-cls">mb-3</span><span style="color:#f1fa8c">"</span><span class="e-new">&gt;</span></div>
+          <div class="e-row"><span class="e-ln">10</span><span class="e-ind3"></span><span class="e-tag">&lt;label&gt;</span><span class="e-txt">Name</span><span class="e-tag">&lt;/label&gt;</span></div>
+          <div class="e-row"><span class="e-ln">11</span><span class="e-ind3"></span><span class="e-new">&lt;input</span></div>
+          <div class="e-row"><span class="e-ln">12</span><span class="e-ind4"></span><span class="e-att">type</span><span class="e-val">="text"</span></div>
+          <div class="e-row"><span class="e-ln">13</span><span class="e-ind4"></span><span class="e-att">id</span><span class="e-val">="name"</span></div>
+          <div class="e-row"><span class="e-ln">14</span><span class="e-ind4"></span><span class="e-att">class</span><span class="e-val">=</span><span style="color:#f1fa8c">"</span><span class="j-cls">form-control</span><span style="color:#f1fa8c">"</span><span class="e-new">&gt;</span></div>
+          <div class="e-row"><span class="e-ln">15</span><span class="e-ind2"></span><span class="e-new">&lt;/div&gt;</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">live preview so far</div>
+        <div class="browser">
+          <div class="browser-bar"><div class="b-dot2 b-r"></div><div class="b-dot2 b-y"></div><div class="b-dot2 b-g"></div><div class="b-url">skillhub.com — registration</div></div>
+          <div style="background:white;padding:18px;font-family:Arial,sans-serif">
+            <div style="text-align:center;font-size:14px;font-weight:700;margin-bottom:14px">Student Registration</div>
+            <div class="bs-form-group">
+              <label class="bs-label">Name</label>
+              <input type="text" class="bs-input" placeholder="">
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">what's still needed</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#f8f9fa;border-radius:8px;font-size:12px"><i class="ti ti-circle-dashed" style="color:#888"></i>Email field — <code>id="email"</code></div>
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#f8f9fa;border-radius:8px;font-size:12px"><i class="ti ti-circle-dashed" style="color:#888"></i>Age field — <code>id="age"</code>, type="number"</div>
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#f8f9fa;border-radius:8px;font-size:12px"><i class="ti ti-circle-dashed" style="color:#888"></i>Submit button — <code>type="submit"</code></div>
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#fef9c3;border-radius:8px;font-size:12px;border:1px solid #fde68a"><i class="ti ti-bolt" style="color:#d97706"></i>JavaScript validation — next slide</div>
+        </div>
+        <div class="info-box" style="margin-top:10px">
+          <i class="ti ti-info-circle info-icon"></i>
+          <div class="info-text">Every input needs a matching <code>id</code> — this is exactly how Day 7's <code>getElementById</code> will grab the values for validation.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-9"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Add Validation <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 10  PROJECT TASK — VALIDATION JS ═══════════ -->
+  <div class="slide" id="slide-10">
+    <div class="slide-header">
+      <span class="badge b-blue">Project Task</span>
+      <div>
+        <div class="slide-title">Registration Form — Add Validation Logic</div>
+        <div class="slide-subtitle">Use everything from today — if/else, comparison &amp; logical operators — to validate real input</div>
+      </div>
+    </div>
+
+    <div class="activity-box">
+      <div class="activity-title"><i class="ti ti-keyboard"></i> Add to script.js — runs when the form is submitted</div>
+      <div class="editor" style="border-radius:8px">
+        <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">frontend/js/script.js</span></div>
+        <div class="editor-body" style="font-size:11.5px">
+          <div class="e-row"><span class="e-ln">1</span><span class="j-kw">function</span> <span class="j-fn">validateForm</span><span class="c-punc">() {</span></div>
+          <div class="e-row"><span class="e-ln">2</span></div>
+          <div class="e-row"><span class="e-ln">3</span><span class="e-ind1"></span><span class="j-kw">let</span> <span class="j-var">name</span> <span class="j-op">=</span> <span class="j-dom">document</span><span class="c-punc">.</span><span class="j-fn">getElementById</span><span class="c-punc">(</span><span class="j-str">"name"</span><span class="c-punc">).</span><span class="j-prop">value</span><span class="c-punc">;</span></div>
+          <div class="e-row"><span class="e-ln">4</span><span class="e-ind1"></span><span class="j-kw">let</span> <span class="j-var">age</span> <span class="j-op">=</span> <span class="j-dom">document</span><span class="c-punc">.</span><span class="j-fn">getElementById</span><span class="c-punc">(</span><span class="j-str">"age"</span><span class="c-punc">).</span><span class="j-prop">value</span><span class="c-punc">;</span></div>
+          <div class="e-row"><span class="e-ln">5</span></div>
+          <div class="e-row"><span class="e-ln">6</span><span class="e-ind1"></span><span class="j-kw">if</span><span class="c-punc">(</span><span class="j-var">name</span> <span class="j-op">===</span> <span class="j-str">""</span><span class="c-punc">) {</span></div>
+          <div class="e-row"><span class="e-ln">7</span><span class="e-ind2"></span><span class="j-fn">alert</span><span class="c-punc">(</span><span class="j-str">"Name is required"</span><span class="c-punc">);</span></div>
+          <div class="e-row"><span class="e-ln">8</span><span class="e-ind2"></span><span class="j-ret">return</span><span class="c-punc">;</span> <span class="j-com">// stop here — don't continue</span></div>
+          <div class="e-row"><span class="e-ln">9</span><span class="e-ind1"></span><span class="c-punc">}</span></div>
+          <div class="e-row"><span class="e-ln">10</span></div>
+          <div class="e-row"><span class="e-ln">11</span><span class="e-ind1"></span><span class="j-kw">if</span><span class="c-punc">(</span><span class="j-var">age</span> <span class="j-op">&lt;</span> <span class="j-num">18</span><span class="c-punc">) {</span></div>
+          <div class="e-row"><span class="e-ln">12</span><span class="e-ind2"></span><span class="j-fn">alert</span><span class="c-punc">(</span><span class="j-str">"You must be 18 or older"</span><span class="c-punc">);</span></div>
+          <div class="e-row"><span class="e-ln">13</span><span class="e-ind2"></span><span class="j-ret">return</span><span class="c-punc">;</span></div>
+          <div class="e-row"><span class="e-ln">14</span><span class="e-ind1"></span><span class="c-punc">}</span></div>
+          <div class="e-row"><span class="e-ln">15</span></div>
+          <div class="e-row"><span class="e-ln">16</span><span class="e-ind1"></span><span class="j-fn">alert</span><span class="c-punc">(</span><span class="j-str">"Registration successful, "</span> <span class="j-op">+</span> <span class="j-var">name</span><span class="c-punc">);</span></div>
+          <div class="e-row"><span class="e-ln">17</span><span class="c-punc">}</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">line-by-line — click to expand</div>
+        <div class="line-explain">
+          <div class="lex-row" onclick="toggleLex(this)">
+            <div class="lex-code"><span class="j-var">name</span> <span class="j-op">===</span> <span class="j-str">""</span></div>
+            <div class="lex-info">
+              <div class="lex-name">Check for an empty string</div>
+              <div class="lex-desc">If the user submitted without typing a name, .value will be exactly "" (empty).</div>
+              <div class="lex-detail">We use === (strict equal) here, not ==, following the rule from earlier in this hour. Always compare with === for predictable results.</div>
+            </div>
+          </div>
+          <div class="lex-row" onclick="toggleLex(this)">
+            <div class="lex-code"><span class="j-ret">return</span><span class="c-punc">;</span></div>
+            <div class="lex-info">
+              <div class="lex-name">Exit the function immediately</div>
+              <div class="lex-desc">return with no value just stops the function — none of the code after it runs.</div>
+              <div class="lex-detail">This is critical for validation: if the name is empty, we show the alert and STOP — we never want to reach "Registration successful" with bad data.</div>
+            </div>
+          </div>
+          <div class="lex-row" onclick="toggleLex(this)">
+            <div class="lex-code"><span class="j-var">age</span> <span class="j-op">&lt;</span> <span class="j-num">18</span></div>
+            <div class="lex-info">
+              <div class="lex-name">Reject under-18 registrations</div>
+              <div class="lex-desc">If age (as typed by the user) is below 18, block registration with an alert.</div>
+              <div class="lex-detail">Note: .value from an input always returns a String, even for type="number" inputs. In real production code we'd convert it with Number(age) before comparing — we'll cover that conversion in a later lesson.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">html — connect the submit event</div>
+        <div class="editor" style="border-radius:8px">
+          <div class="editor-body" style="font-size:12px;padding:10px 14px">
+            <div class="e-row"><span class="e-new">&lt;button</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="e-att">type</span><span class="e-val">="button"</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="e-att">class</span><span class="e-val">=</span><span style="color:#f1fa8c">"</span><span class="j-cls">btn btn-primary</span><span style="color:#f1fa8c">"</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="e-att">onclick</span><span class="e-val">="validateForm()"</span><span class="e-new">&gt;</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="e-txt">Register</span></div>
+            <div class="e-row"><span class="e-new">&lt;/button&gt;</span></div>
+          </div>
+        </div>
+        <div class="success-box" style="margin-top:10px">
+          <i class="ti ti-sparkles" style="color:#16a34a;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+          <div style="font-size:13px;color:#166534;line-height:1.65">This is everything from today combined: <code>getElementById</code> (Day 7) + <code>function</code> (Day 8 Hour 1) + <code>if/else</code> with <code>===</code> and <code>&lt;</code> (Day 8 Hour 2). A real validated form!</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-10"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Try the Live Form <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 11  LIVE FORM DEMO ═══════════ -->
+  <div class="slide" id="slide-11">
+    <div class="slide-header">
+      <span class="badge b-rose">Live Lab</span>
+      <div>
+        <div class="slide-title">Try It — Live Registration Form</div>
+        <div class="slide-subtitle">Submit with errors, then fix them — watch the validation logic run for real</div>
+      </div>
+    </div>
+
+    <div class="browser">
+      <div class="browser-bar"><div class="b-dot2 b-r"></div><div class="b-dot2 b-y"></div><div class="b-dot2 b-g"></div><div class="b-url">skillhub.com — registration (live)</div></div>
+      <div style="background:white;padding:22px;font-family:Arial,sans-serif">
+        <div style="text-align:center;font-size:15px;font-weight:700;margin-bottom:16px">Student Registration</div>
+
+        <div class="bs-form-group">
+          <label class="bs-label">Name</label>
+          <input type="text" class="bs-input" id="live-name" placeholder="Enter your name">
+          <div class="bs-feedback-invalid" id="err-name">Name is required.</div>
+        </div>
+
+        <div class="bs-form-group">
+          <label class="bs-label">Email</label>
+          <input type="email" class="bs-input" id="live-email" placeholder="you@example.com">
+          <div class="bs-feedback-invalid" id="err-email">Please enter a valid email address.</div>
+        </div>
+
+        <div class="bs-form-group">
+          <label class="bs-label">Age</label>
+          <input type="number" class="bs-input" id="live-age" placeholder="e.g. 20">
+          <div class="bs-feedback-invalid" id="err-age">You must be 18 or older to register.</div>
+        </div>
+
+        <button class="bs-btn-submit" onclick="liveValidate()">Register</button>
+
+        <div id="live-success" style="display:none;margin-top:12px;padding:10px 14px;background:#d1fae5;border:1px solid #6ee7b7;border-radius:6px;font-size:13px;color:#065f46;text-align:center;font-weight:700"></div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card card-gray">
+        <div class="section-label">try these scenarios</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="font-size:12px;color:#444">1. Click <strong>Register</strong> with everything empty → see the name error</div>
+          <div style="font-size:12px;color:#444">2. Type a name, leave age empty or under 18 → see the age error</div>
+          <div style="font-size:12px;color:#444">3. Fill everything correctly → see the success message</div>
+        </div>
+      </div>
+      <div class="info-box">
+        <i class="ti ti-info-circle info-icon"></i>
+        <div class="info-text">This is the exact <code>if/else</code> pattern from the previous slide, wired to real Bootstrap form classes (<code>is-invalid</code>, <code>is-valid</code>) instead of alert popups — closer to what a production form looks like.</div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-11"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Quiz <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 12  QUIZ ═══════════ -->
+  <div class="slide" id="slide-12">
+    <div class="slide-header">
+      <span class="badge b-slate">Quiz</span>
+      <div>
+        <div class="slide-title">Quick Check — Conditionals</div>
+        <div class="slide-subtitle">5 questions — tap the correct answer</div>
+      </div>
+    </div>
+    <div id="quiz-container"></div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-12"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Wrap Up <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 13  WRAP UP ═══════════ -->
+  <div class="slide" id="slide-13">
+    <div class="slide-header">
+      <span class="badge b-green">Wrap-Up</span>
+      <div>
+        <div class="slide-title">Day 8 Complete — SkillHub Now Validates Input!</div>
+        <div class="slide-subtitle">Functions + Conditionals = real-world decision-making logic</div>
+      </div>
+    </div>
+
+    <div style="background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);border-radius:14px;padding:24px;text-align:center;color:white">
+      <div class="js-logo" style="margin:0 auto 10px">if</div>
+      <div style="font-size:20px;font-weight:800;margin-bottom:6px">SkillHub LMS — Day 8 Done!</div>
+      <div style="font-size:13px;opacity:.75">From functions to full registration validation — JavaScript can now make real decisions.</div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">what you built today</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div class="check-item done"><div class="check-circle">✓</div><span>if statement — conditional execution</span></div>
+          <div class="check-item done"><div class="check-circle">✓</div><span>if / else — handle both outcomes</span></div>
+          <div class="check-item done"><div class="check-circle">✓</div><span>else if chains — multi-grade logic</span></div>
+          <div class="check-item done"><div class="check-circle">✓</div><span>Comparison operators: ==, ===, &gt;, &lt;, &gt;=, &lt;=, !=</span></div>
+          <div class="check-item done"><div class="check-circle">✓</div><span>Logical operators: &amp;&amp;, ||, !</span></div>
+          <div class="check-item done"><div class="check-circle">✓</div><span>Registration form HTML (Bootstrap)</span></div>
+          <div class="check-item done"><div class="check-circle">✓</div><span>Real validateForm() function with if/else</span></div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">conditionals cheat sheet</div>
+        <div class="editor" style="border-radius:8px;margin-bottom:10px">
+          <div class="editor-body" style="font-size:12px;padding:12px 16px">
+            <div class="e-row"><span class="j-kw">if</span><span class="c-punc">(</span><span class="j-var">condition</span><span class="c-punc">) {</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="j-com">// runs if true</span></div>
+            <div class="e-row"><span class="c-punc">}</span> <span class="j-kw">else if</span><span class="c-punc">(</span><span class="j-var">condition2</span><span class="c-punc">) {</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="j-com">// runs if condition2 is true</span></div>
+            <div class="e-row"><span class="c-punc">}</span> <span class="j-kw">else</span> <span class="c-punc">{</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="j-com">// runs otherwise</span></div>
+            <div class="e-row"><span class="c-punc">}</span></div>
+          </div>
+        </div>
+        <div style="background:#fef9c3;border:1px solid #fde68a;border-radius:10px;padding:12px 14px">
+          <div style="font-size:13px;font-weight:700;color:#92400e;margin-bottom:4px"><i class="ti ti-arrow-right" style="margin-right:5px"></i>Day 9 Preview — Loops</div>
+          <div style="font-size:12px;color:#a16207;line-height:1.7">for and while loops — display all 6 SkillHub courses automatically instead of writing each card by hand.</div>
+        </div>
+        <div class="tip-box" style="margin-top:8px">
+          <i class="ti ti-bulb tip-icon"></i>
+          <div class="tip-text"><strong>Homework:</strong> Add a third field check to validateForm() — email must contain "@". Hint: you'll learn the full method (includes()) next week, but try researching it yourself first.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-13"></div>
+      <button class="nav-btn" onclick="goSlide(0)"><i class="ti ti-home"></i> Home</button>
+    </div>
+  </div>
+
+</div><!-- /.wrapper -->
+
+<script>
+  var current = 0, total = 14, quizInit = false;
+
+  /* ── Eligibility sandbox ── */
+  function runEligibility() {
+    var age = parseInt(document.getElementById('elig-input').value);
+    var result = document.getElementById('elig-result');
+    if (isNaN(age)) {
+      result.style.background = '#1e293b'; result.style.color = '#8b949e';
+      result.textContent = 'Please enter a valid age';
+      return;
+    }
+    if (age >= 18) {
+      result.style.background = '#0f3d24'; result.style.color = '#3fb950';
+      result.innerHTML = '✅ Eligible — age ' + age + ' &gt;= 18 is true';
+    } else {
+      result.style.background = '#3d0f17'; result.style.color = '#ff7b72';
+      result.innerHTML = '❌ Not Eligible — age ' + age + ' &gt;= 18 is false';
+    }
+  }
+  function quickElig(val) {
+    document.getElementById('elig-input').value = val;
+    runEligibility();
+  }
+
+  /* ── Grade calculator ── */
+  function runGrade() {
+    var marks = parseInt(document.getElementById('grade-input').value);
+    var result = document.getElementById('grade-result');
+    if (isNaN(marks) || marks < 0 || marks > 100) {
+      result.style.background = '#1e293b'; result.style.color = '#8b949e';
+      result.textContent = 'Enter marks between 0 and 100';
+      return;
+    }
+    if (marks >= 90) {
+      result.style.background = '#0f3d24'; result.style.color = '#3fb950';
+      result.innerHTML = '🏆 A Grade — marks ' + marks + ' &gt;= 90';
+    } else if (marks >= 75) {
+      result.style.background = '#3d2c0f'; result.style.color = '#f0db4f';
+      result.innerHTML = '⭐ B Grade — marks ' + marks + ' &gt;= 75 (but &lt; 90)';
+    } else {
+      result.style.background = '#3d0f17'; result.style.color = '#ff7b72';
+      result.innerHTML = '📘 C Grade — marks ' + marks + ' &lt; 75';
+    }
+  }
+
+  /* ── Live registration form ── */
+  function liveValidate() {
+    var name = document.getElementById('live-name').value.trim();
+    var email = document.getElementById('live-email').value.trim();
+    var age = document.getElementById('live-age').value;
+    var nameInput = document.getElementById('live-name');
+    var emailInput = document.getElementById('live-email');
+    var ageInput = document.getElementById('live-age');
+    var errName = document.getElementById('err-name');
+    var errEmail = document.getElementById('err-email');
+    var errAge = document.getElementById('err-age');
+    var success = document.getElementById('live-success');
+
+    success.style.display = 'none';
+    [nameInput, emailInput, ageInput].forEach(function(el){ el.classList.remove('is-invalid','is-valid'); });
+    [errName, errEmail, errAge].forEach(function(el){ el.classList.remove('show'); });
+
+    var hasError = false;
+
+    if (name === "") {
+      nameInput.classList.add('is-invalid'); errName.classList.add('show'); hasError = true;
+    } else {
+      nameInput.classList.add('is-valid');
+    }
+
+    if (email === "" || email.indexOf('@') === -1) {
+      emailInput.classList.add('is-invalid'); errEmail.classList.add('show'); hasError = true;
+    } else {
+      emailInput.classList.add('is-valid');
+    }
+
+    if (age === "" || parseInt(age) < 18) {
+      ageInput.classList.add('is-invalid'); errAge.classList.add('show'); hasError = true;
+    } else {
+      ageInput.classList.add('is-valid');
+    }
+
+    if (!hasError) {
+      success.style.display = 'block';
+      success.textContent = '✅ Registration successful, ' + name + '!';
+    }
+  }
+
+  /* ── Line explainer ── */
+  function toggleLex(row) {
+    var was = row.classList.contains('active');
+    document.querySelectorAll('.lex-row.active').forEach(function(r){ r.classList.remove('active'); });
+    if (!was) row.classList.add('active');
+  }
+
+  /* ── Reveal ── */
+  function toggle(id) {
+    var el = document.getElementById(id); el.classList.toggle('open');
+    if (el.previousElementSibling && el.previousElementSibling.tagName === 'BUTTON') {
+      el.previousElementSibling.textContent = el.classList.contains('open') ? 'Hide the answer' : 'Reveal the answer';
+    }
+  }
+
+  /* ── Checklist ── */
+  function toggleCheck(el) {
+    el.classList.toggle('done');
+    var c = el.querySelector('.check-circle');
+    if (el.classList.contains('done')) {
+      c.style.background='#22c55e'; c.style.borderColor='#22c55e'; c.style.color='#fff';
+    } else {
+      c.style.background=''; c.style.borderColor=''; c.style.color='';
+    }
+  }
+
+  /* ── Quiz data ── */
+  var quizData = [
+    {
+      q: "What does this print? <code>let age = 16; if (age >= 18) { console.log(\"Eligible\"); }</code>",
+      opts: [
+        "Eligible",
+        "Not Eligible",
+        "Nothing is printed — the condition is false and there's no else block",
+        "16"
+      ],
+      ans: 2,
+      exp: "16 >= 18 is false. With only an if (no else), when the condition is false the block is simply skipped — nothing runs, nothing prints. To handle the false case too, you need an else block."
+    },
+    {
+      q: "In an if / else if / else chain, what happens once JavaScript finds a TRUE condition?",
+      opts: [
+        "It runs that block, then continues checking the remaining conditions anyway",
+        "It runs that block and immediately stops checking any further conditions",
+        "It runs ALL blocks whose conditions are true",
+        "It throws an error because only one condition is allowed to be true"
+      ],
+      ans: 1,
+      exp: "Once a condition evaluates to true, JavaScript runs that block and skips everything else in the chain — including the final else. This is why order matters: always check the most specific/highest condition first."
+    },
+    {
+      q: "Why should you use === instead of == when comparing values?",
+      opts: [
+        "=== is just shorter to type and means the same thing",
+        "== only works with numbers, === works with all types",
+        "=== checks both value AND data type, avoiding confusing type-conversion bugs that == can cause",
+        "There is no real difference — both are interchangeable in modern JavaScript"
+      ],
+      ans: 2,
+      exp: "== converts types before comparing, which causes surprising results like 0 == false being true. === compares value and type together with no conversion — predictable and the recommended industry standard for almost all comparisons."
+    },
+    {
+      q: "A registration form requires the user to be 18+ AND have filled in an email. Which operator combines these two conditions correctly?",
+      opts: [
+        "age >= 18 || hasEmail",
+        "age >= 18 && hasEmail",
+        "age >= 18 ! hasEmail",
+        "age >= 18 == hasEmail"
+      ],
+      ans: 1,
+      exp: "&& (AND) requires BOTH sides to be true for the whole condition to be true — exactly what's needed when two requirements must both be satisfied. || (OR) would incorrectly allow registration if only ONE condition was true."
+    },
+    {
+      q: "Inside a function, what does a bare <code>return;</code> (with no value) do?",
+      opts: [
+        "Causes a syntax error — return always needs a value",
+        "Restarts the function from the beginning",
+        "Immediately exits the function — none of the code after it runs",
+        "Returns the value undefined and also prints it to the console"
+      ],
+      ans: 2,
+      exp: "return immediately exits the function, regardless of whether a value follows it. This is exactly why validateForm() uses return; after each alert — it stops the function so the next checks (and the success message) never execute when validation has already failed."
+    }
+  ];
+  var quizAnswered = [];
+
+  function renderQuiz() {
+    var c = document.getElementById('quiz-container'); c.innerHTML = '';
+    quizData.forEach(function(q, i) {
+      var d = document.createElement('div'); d.style.cssText = 'margin-bottom:18px';
+      d.innerHTML = '<div style="font-size:13px;font-weight:600;margin-bottom:6px">'+(i+1)+'. '+q.q+'</div>';
+      q.opts.forEach(function(opt, j) {
+        var btn = document.createElement('button'); btn.className = 'quiz-option';
+        btn.innerHTML = String.fromCharCode(65+j)+'. '+opt;
+        btn.onclick = function() {
+          if (quizAnswered[i]) return; quizAnswered[i] = true;
+          var btns = d.querySelectorAll('.quiz-option');
+          btns.forEach(function(b,k){ b.disabled=true; if(k===q.ans) b.classList.add('correct'); else if(k===j) b.classList.add('wrong'); });
+          var fb = d.querySelector('.quiz-feedback');
+          fb.innerHTML = (j===q.ans?'✅ Correct! ':'❌ Not quite. ')+q.exp;
+          fb.className = 'quiz-feedback '+(j===q.ans?'correct':'wrong');
+        };
+        d.appendChild(btn);
+      });
+      var fb = document.createElement('div'); fb.className = 'quiz-feedback'; d.appendChild(fb);
+      c.appendChild(d);
+    });
+  }
+
+  function goSlide(n) {
+    document.getElementById('slide-'+current).classList.remove('active');
+    current = n;
+    document.getElementById('slide-'+current).classList.add('active');
+    updateDots();
+    document.getElementById('slide-counter').textContent = (current+1)+' / '+total;
+    if (n===12 && !quizInit) { renderQuiz(); quizInit=true; }
+    window.scrollTo(0,0);
+  }
+  function nextSlide() { if (current < total-1) goSlide(current+1); }
+  function prevSlide() { if (current > 0) goSlide(current-1); }
+
+  function updateDots() {
+    for (var s=0; s<total; s++) {
+      var el = document.getElementById('dots-'+s); if (!el) continue;
+      el.innerHTML = '';
+      for (var d=0; d<total; d++) {
+        var dot = document.createElement('div');
+        dot.className = 'dot'+(d===current?' active':'');
+        el.appendChild(dot);
+      }
+    }
+  }
+  updateDots();
+</script>
+</body>
+</html>

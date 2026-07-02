@@ -1,0 +1,1368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Day 9 · Part 2 (90 min) – Update, Search &amp; Dashboard Statistics</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f4f5f7; color: #1a1a1a;
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; padding: 2rem 1rem;
+  }
+  .wrapper {
+    width: 100%; max-width: 920px; background: #fff;
+    border-radius: 16px; box-shadow: 0 2px 20px rgba(0,0,0,0.09); overflow: hidden;
+  }
+  .top-bar {
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    color: #fff; padding: 14px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .top-bar-title { font-size: 15px; font-weight: 600; }
+  .top-bar-sub   { font-size: 12px; opacity: .55; margin-top: 2px; }
+  .slide-counter { font-size: 13px; opacity: .6; font-variant-numeric: tabular-nums; }
+  .slide { display: none; padding: 1.75rem 2rem; min-height: 500px; flex-direction: column; gap: 1.2rem; }
+  .slide.active { display: flex; }
+  .slide-header { display: flex; align-items: center; gap: 10px; padding-bottom: 1rem; border-bottom: 1px solid #e8e8e8; }
+  .slide-title    { font-size: 20px; font-weight: 700; color: #111; }
+  .slide-subtitle { font-size: 13px; color: #666; margin-top: 2px; }
+
+  /* ── Badges ── */
+  .badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+  .b-blue   { background:#dbeafe; color:#1d4ed8; }
+  .b-teal   { background:#d1fae5; color:#065f46; }
+  .b-purple { background:#ede9fe; color:#5b21b6; }
+  .b-amber  { background:#fef3c7; color:#92400e; }
+  .b-green  { background:#dcfce7; color:#166534; }
+  .b-slate  { background:#e2e8f0; color:#334155; }
+  .b-rose   { background:#ffe4e6; color:#9f1239; }
+  .b-orange { background:#ffedd5; color:#9a3412; }
+  .b-indigo { background:#e0e7ff; color:#3730a3; }
+  .b-cyan   { background:#cffafe; color:#164e63; }
+  .b-pink   { background:#fce7f3; color:#9d174d; }
+  .b-yellow { background:#fef9c3; color:#854d0e; }
+  .b-js     { background:#fef9c3; color:#854d0e; }
+
+  /* ── Layout ── */
+  .section-label { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 8px; }
+  .card { background: #fff; border: 1px solid #e8e8e8; border-radius: 12px; padding: 1rem 1.25rem; }
+  .card-gray { background: #f8f9fa; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+  /* ── Code Editor (Dracula) ── */
+  .editor { background: #1e1e2e; border-radius: 12px; overflow: hidden; font-family: 'SFMono-Regular', Consolas, 'Courier New', monospace; }
+  .editor-bar { background: #13131f; padding: 9px 14px; display: flex; align-items: center; gap: 6px; }
+  .e-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .e-red { background:#ff5f57; } .e-yellow { background:#febc2e; } .e-green { background:#28c840; }
+  .e-label { font-size: 12px; color: #6272a4; margin-left: 4px; font-family: -apple-system, sans-serif; }
+  .editor-body { padding: 14px 18px; font-size: 12.5px; line-height: 1.8; }
+  .e-ln   { color: #44475a; font-size: 11px; display: inline-block; width: 22px; user-select: none; }
+  .e-txt  { color: #f8f8f2; }
+  .e-cmt  { color: #6272a4; font-style: italic; }
+  .j-kw   { color: #ff79c6; font-weight: 700; }
+  .j-fn   { color: #50fa7b; }
+  .j-str  { color: #f1fa8c; }
+  .j-num  { color: #bd93f9; }
+  .j-var  { color: #80ffea; }
+  .j-op   { color: #ff79c6; }
+  .j-dom  { color: #8be9fd; }
+  .j-prop { color: #50fa7b; }
+  .j-com  { color: #6272a4; font-style: italic; }
+  .j-ret  { color: #ff79c6; font-weight: 700; }
+  .j-key  { color: #ff79c6; }
+  .c-punc { color: #f8f8f2; }
+  .e-ind1 { display: inline-block; width: 20px; }
+  .e-ind2 { display: inline-block; width: 40px; }
+  .e-ind3 { display: inline-block; width: 60px; }
+  .e-row  { display: flex; gap: 8px; }
+
+  /* ── Tables ── */
+  .tag-table { border-collapse: collapse; width: 100%; }
+  .tag-table th { background: #f1f5f9; font-size: 12px; font-weight: 700; text-align: left; padding: 10px 14px; color: #475569; border-bottom: 2px solid #e2e8f0; }
+  .tag-table td { font-size: 13px; padding: 10px 14px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+  .tag-table tr:last-child td { border-bottom: none; }
+  .tag-table tr:hover td { background: #f8f9fa; }
+
+  /* ── Quiz ── */
+  .quiz-option { border: 1px solid #dee2e6; border-radius: 8px; padding: 10px 14px; font-size: 13px; cursor: pointer; margin-bottom: 6px; transition: all .15s; background: transparent; width: 100%; text-align: left; color: #1a1a1a; }
+  .quiz-option:hover:not(:disabled) { background: #f8f9fa; }
+  .quiz-option.correct { background: #d1fae5; border-color: #059669; color: #065f46; }
+  .quiz-option.wrong   { background: #fee2e2; border-color: #dc2626; color: #991b1b; }
+  .quiz-feedback { display: none; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-top: 4px; }
+  .quiz-feedback.correct { background: #d1fae5; color: #065f46; display: block; }
+  .quiz-feedback.wrong   { background: #fee2e2; color: #991b1b; display: block; }
+
+  /* ── Activity / challenge ── */
+  .activity-box { border: 2px dashed #a5b4fc; background: #eef2ff; border-radius: 12px; padding: 14px 18px; }
+  .activity-title { font-size: 13px; font-weight: 700; color: #3730a3; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .challenge-box { border: 2px dashed #f9a8d4; background: #fdf2f8; border-radius: 12px; padding: 14px 18px; }
+  .challenge-title { font-size: 13px; font-weight: 700; color: #9f1239; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+
+  /* ── Tip / info / warn / success ── */
+  .tip-box   { display:flex; gap:10px; align-items:flex-start; background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:10px 14px; }
+  .tip-icon  { color:#d97706; font-size:18px; flex-shrink:0; margin-top:1px; }
+  .tip-text  { font-size:13px; color:#92400e; line-height:1.6; }
+  .info-box  { display:flex; gap:10px; align-items:flex-start; background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:10px 14px; }
+  .info-icon { color:#2563eb; font-size:18px; flex-shrink:0; margin-top:1px; }
+  .info-text { font-size:13px; color:#1e40af; line-height:1.6; }
+  .warn-box  { display:flex; gap:10px; align-items:flex-start; background:#fef9ee; border:1px solid #fcd34d; border-radius:10px; padding:10px 14px; }
+  .success-box { display:flex; gap:10px; align-items:flex-start; background:#f0fdf4; border:1px solid #86efac; border-radius:10px; padding:10px 14px; }
+
+  /* ── Line explainer (JS amber accent) ── */
+  .lex-row { display:flex; align-items:stretch; cursor:pointer; transition:background .12s; border-bottom:1px solid #f0f0f0; }
+  .lex-row:last-child { border-bottom:none; }
+  .lex-row:hover { background:#f8f9fa; }
+  .lex-row.active { background:#fefce8; border-left:3px solid #d97706; }
+  .lex-code { background:#1e1e2e; padding:10px 14px; font-family:'SFMono-Regular',Consolas,monospace; font-size:12px; min-width:200px; flex-shrink:0; display:flex; align-items:center; }
+  .lex-info { padding:10px 14px; flex:1; }
+  .lex-name   { font-size:13px; font-weight:700; color:#d97706; margin-bottom:2px; }
+  .lex-desc   { font-size:12px; color:#555; line-height:1.55; }
+  .lex-detail { display:none; font-size:12px; color:#92400e; margin-top:4px; padding-top:4px; border-top:1px dashed #fde68a; }
+  .lex-row.active .lex-detail { display:block; }
+  .line-explain { border:1px solid #e8e8e8; border-radius:10px; overflow:hidden; }
+
+  /* ── Reveal ── */
+  .reveal-btn { background:#f1f3f5; border:1px solid #dee2e6; border-radius:8px; padding:7px 14px; font-size:13px; cursor:pointer; color:#333; transition:background .15s; }
+  .reveal-btn:hover { background:#e9ecef; }
+  .reveal-content { display:none; margin-top:8px; }
+  .reveal-content.open { display:block; }
+
+  /* ── Nav (JS amber) ── */
+  .nav-row { display:flex; align-items:center; justify-content:space-between; margin-top:auto; padding-top:1rem; border-top:1px solid #f0f0f0; }
+  .nav-btn { display:inline-flex; align-items:center; gap:6px; padding:9px 18px; border:1px solid #dee2e6; border-radius:8px; background:transparent; font-size:13px; cursor:pointer; color:#333; transition:background .15s; }
+  .nav-btn:hover:not(:disabled) { background:#f1f3f5; }
+  .nav-btn:disabled { opacity:.35; cursor:default; }
+  .nav-btn.primary { background:#d97706; border-color:transparent; color:#fff; }
+  .nav-btn.primary:hover { background:#b45309; }
+  .progress-dots { display:flex; gap:6px; align-items:center; }
+  .dot { width:7px; height:7px; border-radius:50%; background:#dee2e6; transition:all .2s; }
+  .dot.active { width:20px; border-radius:4px; background:#d97706; }
+
+  /* ── Home grid ── */
+  .home-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .home-card { background:#fff; border:1px solid #e8e8e8; border-radius:12px; padding:1rem 1.25rem; cursor:pointer; transition:all .15s; }
+  .home-card:hover { border-color:#d97706; box-shadow:0 2px 8px rgba(217,119,6,.12); }
+  .home-card-title { font-size:15px; font-weight:700; margin:6px 0 2px; }
+  .home-card-sub   { font-size:12px; color:#666; }
+
+  code { font-family:'SFMono-Regular',Consolas,monospace; font-size:12px; background:#f1f3f5; padding:1px 6px; border-radius:4px; border:1px solid #dee2e6; }
+
+  /* ── Checklist ── */
+  .check-item { display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:10px; border:1px solid #e8e8e8; font-size:13px; cursor:pointer; transition:all .15s; user-select:none; }
+  .check-item:hover { background:#f8f9fa; }
+  .check-item.done { background:#f0fdf4; border-color:#86efac; }
+  .check-circle { width:22px; height:22px; border-radius:50%; border:2px solid #dee2e6; display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0; transition:all .2s; color:transparent; }
+  .check-item.done .check-circle { background:#22c55e; border-color:#22c55e; color:#fff; }
+
+  /* ── Console panel ── */
+  .console-panel { background: #0d1117; border-radius: 12px; overflow: hidden; font-family: 'SFMono-Regular', Consolas, monospace; }
+  .console-bar   { background: #161b22; padding: 9px 14px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #30363d; }
+  .console-tab   { font-size: 12px; color: #8b949e; padding-bottom: 3px; }
+  .console-tab.active { color: #f0f6fc; border-bottom: 2px solid #d97706; }
+  .console-body  { padding: 12px 16px; font-size: 12.5px; line-height: 2; }
+  .con-log  { color: #f0f6fc; }
+  .con-str  { color: #a5d6ff; }
+  .con-num  { color: #79c0ff; }
+  .con-arrow { color: #3fb950; font-size: 11px; }
+  .con-prompt-row { display: flex; align-items: center; gap: 8px; }
+  .con-arr  { color: #d2a8ff; }
+  .con-key  { color: #7ee787; }
+  .js-logo { width: 44px; height: 44px; background: #1d4ed8; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px; color:#fff; flex-shrink: 0; }
+
+  /* ── Flow steps ── */
+  .flow-step { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; border-bottom: 1px dashed #e2e8f0; }
+  .flow-step:last-child { border-bottom: none; }
+  .flow-num { width: 28px; height: 28px; border-radius: 50%; background: #d97706; color: white; font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+  .flow-content { flex: 1; font-size: 13px; color: #333; line-height: 1.6; }
+  .flow-label { font-weight: 700; color: #d97706; margin-bottom: 2px; }
+
+  /* ── Bootstrap form mockup ── */
+  .bs-form-group { margin-bottom: 14px; }
+  .bs-label { display: block; font-size: 12px; font-weight: 600; color: #333; margin-bottom: 4px; }
+  .bs-input { width: 100%; padding: 7px 12px; border: 1px solid #ced4da; border-radius: 5px; font-size: 13px; font-family: -apple-system, sans-serif; color: #333; }
+  .bs-input:focus { outline: none; border-color: #86b7fe; }
+  .bs-btn-submit { background: #0d6efd; color: white; border: none; border-radius: 5px; padding: 8px 22px; font-size: 13px; font-weight: 700; cursor: pointer; width: 100%; }
+  .bs-btn-submit:hover { background: #0b5ed7; }
+
+  /* ══ DAY 9 PART 2 — UPDATE / SEARCH / STATS SPECIFIC ══ */
+
+  .stu-table { width:100%; border-collapse:collapse; font-size:12px; }
+  .stu-table th { background:#f1f5f9; padding:8px 10px; text-align:left; font-weight:700; color:#475569; }
+  .stu-table td { padding:8px 10px; border-bottom:1px solid #f0f0f0; vertical-align:middle; color:#e2e8f0; }
+  .stu-table th { border-radius: 0; }
+
+  .act-btn { font-size:11px; font-weight:700; padding:4px 10px; border-radius:6px; border:none; cursor:pointer; margin-right:4px; }
+  .act-edit { background:#dbeafe; color:#1d4ed8; }
+  .act-edit:hover { background:#bfdbfe; }
+  .act-delete { background:#fee2e2; color:#dc2626; }
+  .act-delete:hover { background:#fecaca; }
+
+  .bs-badge { font-size:10px; font-weight:700; padding:3px 9px; border-radius:10px; display:inline-block; }
+  .bs-badge-active { background:#198754; color:#fff; }
+  .bs-badge-inactive { background:#6c757d; color:#fff; }
+
+  .stat-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+  .stat-card { background:#fff; border:1px solid #e8e8e8; border-radius:12px; padding:14px 10px; text-align:center; }
+  .stat-num { font-size:26px; font-weight:800; }
+  .stat-label { font-size:10.5px; color:#666; margin-top:2px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; }
+  .stat-card.c-total .stat-num { color:#0f172a; }
+  .stat-card.c-mern  .stat-num { color:#1d4ed8; }
+  .stat-card.c-java  .stat-num { color:#b45309; }
+  .stat-card.c-python .stat-num { color:#15803d; }
+
+  .demo-panel { background:#0f172a; border-radius:12px; padding:16px 18px; }
+  .demo-label { font-size:11px; color:#94a3b8; font-family:monospace; margin-bottom:10px; }
+  .ab-btn { background:#1e293b; border:1px solid #334155; color:#f0db4f; font-family:monospace; font-size:12px; font-weight:700; padding:6px 14px; border-radius:6px; cursor:pointer; transition:all .15s; }
+  .ab-btn:hover { background:#334155; border-color:#d97706; }
+  .ab-btn.danger { color:#ff7b86; }
+
+  .edit-demo-form { background:#1e1e2e; border-radius:10px; padding:14px 16px; margin-top:12px; }
+  .edit-demo-row { display:flex; gap:8px; margin-bottom:8px; }
+  .edit-demo-input { flex:1; background:#13131f; border:1px solid #334155; color:#f8f8f2; padding:7px 10px; border-radius:6px; font-family:monospace; font-size:12px; }
+  .edit-demo-input::placeholder { color:#6272a4; }
+
+  .search-input { width:100%; padding:9px 14px 9px 36px; border:1px solid #334155; background:#13131f; color:#f8f8f2; border-radius:8px; font-size:13px; font-family:monospace; }
+  .search-input::placeholder { color:#6272a4; }
+  .search-wrap { position:relative; }
+  .search-icon { position:absolute; left:12px; top:50%; transform:translateY(-50%); color:#6272a4; font-size:15px; }
+
+  .search-chip { background:#2563eb; color:#fff; padding:6px 12px; border-radius:6px; font-size:11.5px; font-weight:700; display:inline-flex; gap:6px; align-items:center; }
+  .search-chip .crs { opacity:.75; font-weight:400; font-size:10px; }
+  .search-chip.hidden { display:none; }
+  .chip-wrap { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; min-height:36px; }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <div>
+      <div class="top-bar-title">MERN Stack Training · Day 9 · Second 90 Minutes</div>
+      <div class="top-bar-sub">Update, Search &amp; Dashboard Statistics — SkillHub LMS</div>
+    </div>
+    <div class="slide-counter" id="slide-counter">1 / 15</div>
+  </div>
+
+  <!-- ═══ SLIDE 0  HOME ═══ -->
+  <div class="slide active" id="slide-0">
+    <div class="slide-header">
+      <div class="js-logo"><i class="ti ti-edit"></i></div>
+      <div>
+        <div class="slide-title">Update, Search &amp; Dashboard Statistics</div>
+        <div class="slide-subtitle">Turn the persistent dashboard into a real Admin Panel</div>
+      </div>
+    </div>
+
+    <div style="background:#fef9c3;border:1px solid #fde68a;border-radius:12px;padding:12px 16px;display:flex;gap:12px;align-items:flex-start">
+      <i class="ti ti-adjustments" style="color:#d97706;font-size:22px;flex-shrink:0;margin-top:1px"></i>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#854d0e;margin-bottom:4px">Second 90 Minutes — From Static List to Admin Dashboard</div>
+        <div style="display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:#92400e">
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Edit &amp; Update records</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Live Search with filter()</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Dashboard statistics</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Clear All + confirmations</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="home-grid">
+      <div class="home-card" onclick="goSlide(1)">
+        <span class="badge b-green">Recap</span>
+        <div class="home-card-title">First 90 Min Recap</div>
+        <div class="home-card-sub">Local Storage, JSON &amp; the persistent dashboard</div>
+      </div>
+      <div class="home-card" onclick="goSlide(2)">
+        <span class="badge b-amber">Part 1</span>
+        <div class="home-card-title">Why Do We Need Update?</div>
+        <div class="home-card-sub">Fixing a typo shouldn't mean delete + re-register</div>
+      </div>
+      <div class="home-card" onclick="goSlide(3)">
+        <span class="badge b-js">Concept</span>
+        <div class="home-card-title">The Edit Button</div>
+        <div class="home-card-sub">Add Edit next to Delete in the table</div>
+      </div>
+      <div class="home-card" onclick="goSlide(4)">
+        <span class="badge b-blue">Part 2</span>
+        <div class="home-card-title">editStudent() &amp; editIndex</div>
+        <div class="home-card-sub">Load existing data back into the form</div>
+      </div>
+      <div class="home-card" onclick="goSlide(5)">
+        <span class="badge b-rose">Part 2 · continued</span>
+        <div class="home-card-title">Create OR Update</div>
+        <div class="home-card-sub">One submit handler, two jobs</div>
+      </div>
+      <div class="home-card" onclick="goSlide(6)">
+        <span class="badge b-purple">Part 3</span>
+        <div class="home-card-title">Why Do We Need Search?</div>
+        <div class="home-card-sub">Finding one student among hundreds</div>
+      </div>
+      <div class="home-card" onclick="goSlide(7)">
+        <span class="badge b-cyan">Concept</span>
+        <div class="home-card-title">Live Search with filter()</div>
+        <div class="home-card-sub">keyup → filter() → displayStudents()</div>
+      </div>
+      <div class="home-card" onclick="goSlide(8)">
+        <span class="badge b-teal">Part 4</span>
+        <div class="home-card-title">Dashboard Statistics</div>
+        <div class="home-card-sub">Total, MERN, Java &amp; Python counters</div>
+      </div>
+    </div>
+    <div class="grid-2" style="gap:10px">
+      <div class="home-card" onclick="goSlide(9)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge b-teal">Part 4 · continued</span>
+          <span style="font-size:14px;font-weight:700">Calculating the Stats</span>
+          <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+        </div>
+      </div>
+      <div class="home-card" onclick="goSlide(10)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge b-blue">Explain</span>
+          <span style="font-size:14px;font-weight:700">Line-by-Line — All Concepts</span>
+          <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+        </div>
+      </div>
+    </div>
+    <div class="grid-2" style="gap:10px">
+      <div class="home-card" onclick="goSlide(11)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge b-orange">Bonus</span>
+          <span style="font-size:14px;font-weight:700">Clear All, Confirm &amp; Badges</span>
+          <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+        </div>
+      </div>
+      <div class="home-card" onclick="goSlide(12)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge b-slate">Reference</span>
+          <span style="font-size:14px;font-weight:700">Update &amp; Search Reference</span>
+          <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+        </div>
+      </div>
+    </div>
+    <div class="home-card" onclick="goSlide(13)" style="cursor:pointer">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="badge b-indigo">Assignment</span>
+        <span style="font-size:14px;font-weight:700">Build Your Admin Dashboard + Project Timeline</span>
+        <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+      </div>
+    </div>
+    <div class="home-card" onclick="goSlide(14)" style="cursor:pointer">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="badge b-green">Quiz</span>
+        <span style="font-size:14px;font-weight:700">Quick Check — 5 Questions</span>
+        <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+      </div>
+    </div>
+    <div class="nav-row">
+      <div></div>
+      <div class="progress-dots" id="dots-0"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Start <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 1  RECAP ═══ -->
+  <div class="slide" id="slide-1">
+    <div class="slide-header">
+      <span class="badge b-green">Recap</span>
+      <div>
+        <div class="slide-title">First 90 Minutes Deliverable</div>
+        <div class="slide-subtitle">Local Storage, JSON, and a dashboard that survives a refresh</div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="section-label">what we built in the first 90 minutes</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#dbeafe;border-radius:8px;font-size:12px;font-weight:700;color:#1e40af">
+            <span>localStorage — setItem, getItem, removeItem</span><span class="badge b-green" style="font-size:10px">✓</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#ede9fe;border-radius:8px;font-size:12px;font-weight:700;color:#5b21b6">
+            <span>JSON.stringify() &amp; JSON.parse()</span><span class="badge b-green" style="font-size:10px">✓</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#d1fae5;border-radius:8px;font-size:12px;font-weight:700;color:#065f46">
+            <span>Save students[] after every registration</span><span class="badge b-green" style="font-size:10px">✓</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#fef9c3;border-radius:8px;font-size:12px;font-weight:700;color:#854d0e;border:2px solid #fde68a">
+            <span>Data survives a refresh (today — continued)</span><span class="badge b-js" style="font-size:10px">← start here</span>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">the gap we close in this 90 minutes</div>
+        <div class="card card-gray">
+          <div style="font-size:13px;color:#444;line-height:1.7">
+            Data now <strong>persists</strong> — a huge win. But the dashboard is still missing the basics admins expect:
+          </div>
+          <div style="display:flex;flex-direction:column;gap:5px;margin-top:8px">
+            <div style="font-size:12px;color:#888"><i class="ti ti-x" style="color:#dc2626;font-size:12px;margin-right:4px"></i>Can't fix a typo without deleting</div>
+            <div style="font-size:12px;color:#888"><i class="ti ti-x" style="color:#dc2626;font-size:12px;margin-right:4px"></i>Can't find one student among hundreds</div>
+            <div style="font-size:12px;color:#888"><i class="ti ti-x" style="color:#dc2626;font-size:12px;margin-right:4px"></i>No "how many chose MERN?" at a glance</div>
+          </div>
+        </div>
+        <div class="info-box" style="margin-top:10px">
+          <i class="ti ti-info-circle info-icon"></i>
+          <div class="info-text"><strong>Today's fix:</strong> Edit (update an existing record in place), Search (filter the list live), and Statistics (count by course) — the three features every real admin panel needs.</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-1"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Why Update? <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 2  WHY UPDATE ═══ -->
+  <div class="slide" id="slide-2">
+    <div class="slide-header">
+      <span class="badge b-amber">Part 1 · 10 min</span>
+      <div>
+        <div class="slide-title">Why Do We Need "Update"?</div>
+        <div class="slide-subtitle">A student registers with a typo in their email. What now?</div>
+      </div>
+    </div>
+    <div class="card card-gray">
+      <div style="font-size:14px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px">
+        <i class="ti ti-message-question" style="color:#d97706;font-size:20px"></i>
+        Rahul registers as "rahul@gmial.com" by mistake. How do we fix it right now?
+      </div>
+      <div class="editor" style="border-radius:8px;margin-bottom:12px">
+        <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">the only option right now</span></div>
+        <div class="editor-body">
+          <div class="e-row"><span class="j-fn">deleteStudent</span><span class="c-punc">(</span><span class="j-num">3</span><span class="c-punc">);</span> <span class="j-com">// remove the student entirely</span></div>
+          <div class="e-row"><span class="j-com">// ...then they fill the ENTIRE form again</span></div>
+          <div class="e-row"><span class="j-com">// just to fix one typo in the email</span></div>
+        </div>
+      </div>
+      <button class="reveal-btn" onclick="toggle('upd-ans')">Reveal why this is a problem</button>
+      <div class="reveal-content" id="upd-ans">
+        <div style="margin-top:10px;padding:14px 16px;background:#fff;border-radius:10px;border:1px solid #fde68a">
+          <div style="font-size:18px;font-weight:800;color:#854d0e;text-align:center;margin-bottom:6px">Terrible user experience.</div>
+          <div style="font-size:13px;color:#444;text-align:center;line-height:1.7">Deleting and re-registering loses the original registration date, risks the admin mis-typing something else, and frustrates the student.<br>We need a way to <strong>edit a record in place</strong> — that's the difference between Delete and Update.</div>
+        </div>
+      </div>
+    </div>
+    <div class="grid-3">
+      <div class="card" style="text-align:center;border-color:#fca5a5">
+        <i class="ti ti-x" style="font-size:24px;color:#dc2626;margin-bottom:6px;display:block"></i>
+        <div style="font-size:13px;font-weight:700;margin-bottom:4px">Frustrating</div>
+        <div style="font-size:12px;color:#555">Re-typing name, email, AND course just to fix one field</div>
+      </div>
+      <div class="card" style="text-align:center;border-color:#fca5a5">
+        <i class="ti ti-x" style="font-size:24px;color:#dc2626;margin-bottom:6px;display:block"></i>
+        <div style="font-size:13px;font-weight:700;margin-bottom:4px">Risky</div>
+        <div style="font-size:12px;color:#555">Easy to delete the wrong row by accident</div>
+      </div>
+      <div class="card" style="text-align:center;border-color:#fca5a5">
+        <i class="ti ti-x" style="font-size:24px;color:#dc2626;margin-bottom:6px;display:block"></i>
+        <div style="font-size:13px;font-weight:700;margin-bottom:4px">Unprofessional</div>
+        <div style="font-size:12px;color:#555">No real admin tool works this way</div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-2"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">The Edit Button <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 3  THE EDIT BUTTON ═══ -->
+  <div class="slide" id="slide-3">
+    <div class="slide-header">
+      <span class="badge b-js">Concept</span>
+      <div>
+        <div class="slide-title">The Edit Button</div>
+        <div class="slide-subtitle">Add an Edit button next to Delete — click it to load the row back into the form</div>
+      </div>
+    </div>
+    <div class="activity-box">
+      <div class="activity-title"><i class="ti ti-keyboard"></i> Update displayStudents() — add an Edit button per row</div>
+      <div class="editor" style="border-radius:8px">
+        <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">frontend/js/script.js</span></div>
+        <div class="editor-body" style="font-size:11.5px">
+          <div class="e-row"><span class="j-var">tbody</span><span class="c-punc">.</span><span class="j-prop">innerHTML</span> <span class="j-op">+=</span> <span class="c-punc">`</span></div>
+          <div class="e-row"><span class="e-ind1"></span><span class="c-punc">&lt;tr&gt;</span></div>
+          <div class="e-row"><span class="e-ind2"></span><span class="c-punc">&lt;td&gt;</span><span class="j-op">${</span><span class="j-var">s</span><span class="c-punc">.</span><span class="j-key">name</span><span class="j-op">}</span><span class="c-punc">&lt;/td&gt;</span></div>
+          <div class="e-row"><span class="e-ind2"></span><span class="c-punc">&lt;td&gt;</span><span class="j-op">${</span><span class="j-var">s</span><span class="c-punc">.</span><span class="j-key">course</span><span class="j-op">}</span><span class="c-punc">&lt;/td&gt;</span></div>
+          <div class="e-row"><span class="e-ind2"></span><span class="c-punc">&lt;td&gt;</span></div>
+          <div class="e-row" style="background:#1a2a40"><span class="e-ind3"></span><span class="c-punc">&lt;button onclick="</span><span class="j-fn" style="color:#80ffea">editStudent</span><span class="c-punc">(</span><span class="j-op">${</span><span class="j-var">index</span><span class="j-op">}</span><span class="c-punc">)"&gt;</span>Edit<span class="c-punc">&lt;/button&gt;</span></div>
+          <div class="e-row"><span class="e-ind3"></span><span class="c-punc">&lt;button onclick="</span><span class="j-fn">deleteStudent</span><span class="c-punc">(</span><span class="j-op">${</span><span class="j-var">index</span><span class="j-op">}</span><span class="c-punc">)"&gt;</span>Delete<span class="c-punc">&lt;/button&gt;</span></div>
+          <div class="e-row"><span class="e-ind2"></span><span class="c-punc">&lt;/td&gt;</span></div>
+          <div class="e-row"><span class="e-ind1"></span><span class="c-punc">&lt;/tr&gt;</span></div>
+          <div class="e-row"><span class="c-punc">`;</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="section-label">try it — click edit on any row below</div>
+    <div class="demo-panel">
+      <div class="demo-label">// live demo — 3 sample students, real edit + delete</div>
+      <table class="stu-table">
+        <thead><tr><th>Name</th><th>Course</th><th>Actions</th></tr></thead>
+        <tbody id="ed-tbody"></tbody>
+      </table>
+      <div class="edit-demo-form">
+        <div style="font-size:11px;color:#6272a4;margin-bottom:8px">editIndex = <span class="j-var" id="ed-index-display" style="color:#80ffea">-1</span></div>
+        <div class="edit-demo-row">
+          <input class="edit-demo-input" id="ed-name" placeholder="name" readonly>
+          <input class="edit-demo-input" id="ed-course" placeholder="course" readonly>
+        </div>
+        <button class="ab-btn" id="ed-btn" disabled>Register Student</button>
+      </div>
+    </div>
+    <div class="tip-box">
+      <i class="ti ti-bulb tip-icon"></i>
+      <div class="tip-text"><strong>Notice:</strong> the Edit button passes the student's <code>index</code>, not their name. That index is exactly what we'll use to find — and later overwrite — the right student.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-3"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">editStudent() &amp; editIndex <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 4  editStudent() & editIndex ═══ -->
+  <div class="slide" id="slide-4">
+    <div class="slide-header">
+      <span class="badge b-blue">Part 2 · 20 min</span>
+      <div>
+        <div class="slide-title">editStudent() &amp; the editIndex Variable</div>
+        <div class="slide-subtitle">How JavaScript remembers WHICH student you're editing</div>
+      </div>
+    </div>
+    <div class="activity-box">
+      <div class="activity-title"><i class="ti ti-keyboard"></i> Add this near the top of script.js, then below your functions</div>
+      <div class="editor" style="border-radius:8px">
+        <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">frontend/js/script.js</span></div>
+        <div class="editor-body">
+          <div class="e-row"><span class="j-kw">let</span> <span class="j-var">editIndex</span> <span class="j-op">=</span> <span class="j-num">-1</span><span class="c-punc">;</span> <span class="j-com">// -1 = "not editing, adding new"</span></div>
+          <div class="e-row"><span class="e-ln"> </span></div>
+          <div class="e-row"><span class="j-kw">function</span> <span class="j-fn">editStudent</span><span class="c-punc">(</span><span class="j-var">index</span><span class="c-punc">) {</span></div>
+          <div class="e-row" style="background:#1a2a40"><span class="e-ind1"></span><span class="j-var" style="color:#80ffea">editIndex</span> <span class="j-op">=</span> <span class="j-var">index</span><span class="c-punc">;</span></div>
+          <div class="e-row"><span class="e-ind1"></span><span class="j-dom">document</span><span class="c-punc">.</span><span class="j-fn">getElementById</span><span class="c-punc">(</span><span class="j-str">"name"</span><span class="c-punc">).</span><span class="j-prop">value</span> <span class="j-op">=</span></div>
+          <div class="e-row"><span class="e-ind2"></span><span class="j-var">students</span><span class="c-punc">[</span><span class="j-var">index</span><span class="c-punc">].</span><span class="j-key">name</span><span class="c-punc">;</span></div>
+          <div class="e-row"><span class="e-ind1"></span><span class="j-dom">document</span><span class="c-punc">.</span><span class="j-fn">getElementById</span><span class="c-punc">(</span><span class="j-str">"email"</span><span class="c-punc">).</span><span class="j-prop">value</span> <span class="j-op">=</span></div>
+          <div class="e-row"><span class="e-ind2"></span><span class="j-var">students</span><span class="c-punc">[</span><span class="j-var">index</span><span class="c-punc">].</span><span class="j-key">email</span><span class="c-punc">;</span></div>
+          <div class="e-row"><span class="e-ind1"></span><span class="j-dom">document</span><span class="c-punc">.</span><span class="j-fn">getElementById</span><span class="c-punc">(</span><span class="j-str">"course"</span><span class="c-punc">).</span><span class="j-prop">value</span> <span class="j-op">=</span></div>
+          <div class="e-row"><span class="e-ind2"></span><span class="j-var">students</span><span class="c-punc">[</span><span class="j-var">index</span><span class="c-punc">].</span><span class="j-key">course</span><span class="c-punc">;</span></div>
+          <div class="e-row"><span class="e-ind1"></span><span class="j-dom">document</span><span class="c-punc">.</span><span class="j-fn">getElementById</span><span class="c-punc">(</span><span class="j-str">"submitBtn"</span><span class="c-punc">).</span><span class="j-prop">textContent</span> <span class="j-op">=</span> <span class="j-str">"Update Student"</span><span class="c-punc">;</span></div>
+          <div class="e-row"><span class="c-punc">}</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="section-label">why a single number, -1?</div>
+        <div class="card card-gray">
+          <div style="font-size:13px;color:#444;line-height:1.7">
+            <code>editIndex</code> is a "memory slot" that holds either:<br><br>
+            <strong>-1</strong> → no student is being edited, the form is for a NEW registration.<br><br>
+            <strong>0, 1, 2…</strong> → the exact position in <code>students[]</code> currently loaded into the form.
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">after clicking edit on row 1</div>
+        <div class="console-panel">
+          <div class="console-bar"><span class="console-tab active">Console</span></div>
+          <div class="console-body">
+            <div class="con-prompt-row"><span style="color:#3fb950;font-size:11px">▶</span><span class="con-arr">editStudent(1)</span></div>
+            <div class="con-prompt-row" style="margin-top:2px"><span style="color:#3fb950;font-size:11px">▶</span><span class="con-num">editIndex: 1</span></div>
+          </div>
+        </div>
+        <div class="warn-box" style="margin-top:8px">
+          <i class="ti ti-alert-triangle" style="color:#d97706;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+          <div style="font-size:13px;color:#92400e;line-height:1.6"><strong>Note:</strong> this only fills the form — it doesn't change <code>students[]</code> yet. The actual update happens on Submit, in the next step.</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-4"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Create OR Update <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 5  UPDATE LOGIC ═══ -->
+  <div class="slide" id="slide-5">
+    <div class="slide-header">
+      <span class="badge b-rose">Part 2 · continued</span>
+      <div>
+        <div class="slide-title">The Submit Handler — Create OR Update</div>
+        <div class="slide-subtitle">One function, two jobs: add a NEW student, or REPLACE an existing one</div>
+      </div>
+    </div>
+    <div class="editor">
+      <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">frontend/js/script.js — registerStudent()</span></div>
+      <div class="editor-body" style="font-size:11.5px">
+        <div class="e-row"><span class="j-kw">function</span> <span class="j-fn">registerStudent</span><span class="c-punc">(</span><span class="j-var">e</span><span class="c-punc">) {</span></div>
+        <div class="e-row"><span class="e-ind1"></span><span class="j-var">e</span><span class="c-punc">.</span><span class="j-fn">preventDefault</span><span class="c-punc">();</span></div>
+        <div class="e-row"><span class="e-ln"> </span></div>
+        <div class="e-row"><span class="e-ind1"></span><span class="j-kw">let</span> <span class="j-var">student</span> <span class="j-op">=</span> <span class="c-punc">{</span></div>
+        <div class="e-row"><span class="e-ind2"></span><span class="j-key">name</span><span class="c-punc">:</span> <span class="j-dom">document</span><span class="c-punc">.</span><span class="j-fn">getElementById</span><span class="c-punc">(</span><span class="j-str">"name"</span><span class="c-punc">).</span><span class="j-prop">value</span><span class="c-punc">,</span></div>
+        <div class="e-row"><span class="e-ind2"></span><span class="j-key">email</span><span class="c-punc">:</span> <span class="j-dom">document</span><span class="c-punc">.</span><span class="j-fn">getElementById</span><span class="c-punc">(</span><span class="j-str">"email"</span><span class="c-punc">).</span><span class="j-prop">value</span><span class="c-punc">,</span></div>
+        <div class="e-row"><span class="e-ind2"></span><span class="j-key">course</span><span class="c-punc">:</span> <span class="j-dom">document</span><span class="c-punc">.</span><span class="j-fn">getElementById</span><span class="c-punc">(</span><span class="j-str">"course"</span><span class="c-punc">).</span><span class="j-prop">value</span></div>
+        <div class="e-row"><span class="e-ind1"></span><span class="c-punc">};</span></div>
+        <div class="e-row"><span class="e-ln"> </span></div>
+        <div class="e-row"><span class="e-ind1"></span><span class="j-kw">if</span><span class="c-punc">(</span><span class="j-var">editIndex</span> <span class="j-op">==</span> <span class="j-num">-1</span><span class="c-punc">) {</span></div>
+        <div class="e-row" style="background:#1a2a1a"><span class="e-ind2"></span><span class="j-var" style="color:#80ffea">students</span><span class="c-punc">.</span><span class="j-fn" style="color:#80ffea">push</span><span class="c-punc">(</span><span class="j-var">student</span><span class="c-punc">);</span> <span class="j-com">// CREATE</span></div>
+        <div class="e-row"><span class="e-ind1"></span><span class="c-punc">} </span><span class="j-kw">else</span><span class="c-punc"> {</span></div>
+        <div class="e-row" style="background:#2a1a1a"><span class="e-ind2"></span><span class="j-var" style="color:#ff7b86">students</span><span class="c-punc">[</span><span class="j-var">editIndex</span><span class="c-punc">]</span> <span class="j-op">=</span> <span class="j-var">student</span><span class="c-punc">;</span> <span class="j-com">// UPDATE</span></div>
+        <div class="e-row"><span class="e-ind2"></span><span class="j-var">editIndex</span> <span class="j-op">=</span> <span class="j-num">-1</span><span class="c-punc">;</span></div>
+        <div class="e-row"><span class="e-ind1"></span><span class="c-punc">}</span></div>
+        <div class="e-row"><span class="e-ln"> </span></div>
+        <div class="e-row"><span class="e-ind1"></span><span class="j-fn">saveData</span><span class="c-punc">();</span> <span class="j-com">// localStorage.setItem(...)</span></div>
+        <div class="e-row"><span class="e-ind1"></span><span class="j-fn">displayStudents</span><span class="c-punc">();</span></div>
+        <div class="e-row"><span class="e-ind1"></span><span class="j-dom">document</span><span class="c-punc">.</span><span class="j-fn">getElementById</span><span class="c-punc">(</span><span class="j-str">"regForm"</span><span class="c-punc">).</span><span class="j-fn">reset</span><span class="c-punc">();</span></div>
+        <div class="e-row"><span class="e-ind1"></span><span class="j-dom">document</span><span class="c-punc">.</span><span class="j-fn">getElementById</span><span class="c-punc">(</span><span class="j-str">"submitBtn"</span><span class="c-punc">).</span><span class="j-prop">textContent</span> <span class="j-op">=</span> <span class="j-str">"Register Student"</span><span class="c-punc">;</span></div>
+        <div class="e-row"><span class="c-punc">}</span></div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="flow-step">
+          <div class="flow-num">1</div>
+          <div class="flow-content"><span class="flow-label">Read</span>the form values into a fresh <code>student</code> object</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num">2</div>
+          <div class="flow-content"><span class="flow-label">Decide</span><code>editIndex == -1</code> ? push() a new one : replace the existing one</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num">3</div>
+          <div class="flow-content"><span class="flow-label">Save</span>write the updated array back to localStorage</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num">4</div>
+          <div class="flow-content"><span class="flow-label">Render</span>call displayStudents() again so the table reflects reality</div>
+        </div>
+      </div>
+      <div class="info-box">
+        <i class="ti ti-info-circle info-icon"></i>
+        <div class="info-text"><strong><code>students[editIndex] = student;</code></strong> replaces the WHOLE object at that array position in one line — no need to update name, email, and course separately. The object at that index is simply swapped out.</div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-5"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Why Search? <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 6  WHY SEARCH ═══ -->
+  <div class="slide" id="slide-6">
+    <div class="slide-header">
+      <span class="badge b-purple">Part 3 · 10 min</span>
+      <div>
+        <div class="slide-title">Why Do We Need Search?</div>
+        <div class="slide-subtitle">SkillHub now has 200 registered students. Finding "Priya" means...</div>
+      </div>
+    </div>
+    <div class="card card-gray">
+      <div style="font-size:14px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px">
+        <i class="ti ti-message-question" style="color:#d97706;font-size:20px"></i>
+        With 200 rows in the table, how does an admin find one specific student?
+      </div>
+      <button class="reveal-btn" onclick="toggle('search-ans')">Reveal the answer</button>
+      <div class="reveal-content" id="search-ans">
+        <div style="margin-top:10px;padding:14px 16px;background:#fff;border-radius:10px;border:1px solid #c4b5fd">
+          <div style="font-size:18px;font-weight:800;color:#5b21b6;text-align:center;margin-bottom:6px">Not by scrolling.</div>
+          <div style="font-size:13px;color:#444;text-align:center;line-height:1.7">We need to type a few letters and instantly narrow the list down to matching records.<br><strong>That's Search</strong> — and JavaScript's array <code>filter()</code> method does exactly this.</div>
+        </div>
+      </div>
+    </div>
+    <div class="grid-3">
+      <div class="card" style="text-align:center;border-color:#fca5a5">
+        <i class="ti ti-x" style="font-size:24px;color:#dc2626;margin-bottom:6px;display:block"></i>
+        <div style="font-size:13px;font-weight:700;margin-bottom:4px">Slow</div>
+        <div style="font-size:12px;color:#555">Scrolling through 200 rows by eye takes real time</div>
+      </div>
+      <div class="card" style="text-align:center;border-color:#fca5a5">
+        <i class="ti ti-x" style="font-size:24px;color:#dc2626;margin-bottom:6px;display:block"></i>
+        <div style="font-size:13px;font-weight:700;margin-bottom:4px">Error-Prone</div>
+        <div style="font-size:12px;color:#555">Easy to miss the row you're actually looking for</div>
+      </div>
+      <div class="card" style="text-align:center;border-color:#fca5a5">
+        <i class="ti ti-x" style="font-size:24px;color:#dc2626;margin-bottom:6px;display:block"></i>
+        <div style="font-size:13px;font-weight:700;margin-bottom:4px">Doesn't Scale</div>
+        <div style="font-size:12px;color:#555">What happens at 2,000 students instead of 200?</div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-6"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Live Search <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 7  LIVE SEARCH ═══ -->
+  <div class="slide" id="slide-7">
+    <div class="slide-header">
+      <span class="badge b-cyan">Concept</span>
+      <div>
+        <div class="slide-title">Live Search with filter()</div>
+        <div class="slide-subtitle">Every keystroke narrows the array down to matching records</div>
+      </div>
+    </div>
+    <div class="activity-box">
+      <div class="activity-title"><i class="ti ti-keyboard"></i> Add this below your other functions</div>
+      <div class="editor" style="border-radius:8px">
+        <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">frontend/js/script.js</span></div>
+        <div class="editor-body">
+          <div class="e-row"><span class="j-dom">document</span><span class="c-punc">.</span><span class="j-fn">getElementById</span><span class="c-punc">(</span><span class="j-str">"searchBox"</span><span class="c-punc">).</span><span class="j-fn">addEventListener</span><span class="c-punc">(</span><span class="j-str">"keyup"</span><span class="c-punc">, </span><span class="j-kw">function</span><span class="c-punc">() {</span></div>
+          <div class="e-row"><span class="e-ind1"></span><span class="j-kw">let</span> <span class="j-var">keyword</span> <span class="j-op">=</span> <span class="j-kw">this</span><span class="c-punc">.</span><span class="j-prop">value</span><span class="c-punc">.</span><span class="j-fn">toLowerCase</span><span class="c-punc">();</span></div>
+          <div class="e-row"><span class="e-ln"> </span></div>
+          <div class="e-row" style="background:#1a2a40"><span class="e-ind1"></span><span class="j-kw">let</span> <span class="j-var" style="color:#80ffea">filtered</span> <span class="j-op">=</span> <span class="j-var">students</span><span class="c-punc">.</span><span class="j-fn" style="color:#80ffea">filter</span><span class="c-punc">(</span><span class="j-kw">function</span><span class="c-punc">(</span><span class="j-var">s</span><span class="c-punc">) {</span></div>
+          <div class="e-row" style="background:#1a2a40"><span class="e-ind2"></span><span class="j-ret">return</span> <span class="j-var">s</span><span class="c-punc">.</span><span class="j-key">name</span><span class="c-punc">.</span><span class="j-fn">toLowerCase</span><span class="c-punc">().</span><span class="j-fn">includes</span><span class="c-punc">(</span><span class="j-var">keyword</span><span class="c-punc">);</span></div>
+          <div class="e-row" style="background:#1a2a40"><span class="e-ind1"></span><span class="c-punc">});</span></div>
+          <div class="e-row"><span class="e-ln"> </span></div>
+          <div class="e-row"><span class="e-ind1"></span><span class="j-fn">displayStudents</span><span class="c-punc">(</span><span class="j-var">filtered</span><span class="c-punc">);</span></div>
+          <div class="e-row"><span class="c-punc">});</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="section-label">what filter() does</div>
+        <div style="text-align:center;padding:14px 0;font-size:14px;font-weight:700;color:#164e63;line-height:2">
+          students.filter()<br>↓<br>checks EVERY student<br>↓<br>keeps only the matches<br>↓<br>returns a brand-new array
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="console-panel">
+          <div class="console-bar"><span class="console-tab active">Console</span></div>
+          <div class="console-body">
+            <div class="con-prompt-row"><span style="color:#3fb950;font-size:11px">▶</span><span class="con-arr">filtered = students.filter(...)</span></div>
+            <div class="con-prompt-row" style="margin-top:2px"><span style="color:#3fb950;font-size:11px">▶</span><span class="con-arr">[{name: "Priya", ...}]</span></div>
+          </div>
+        </div>
+        <div class="tip-box">
+          <i class="ti ti-bulb tip-icon"></i>
+          <div class="tip-text"><strong>Key idea:</strong> filter() never changes the original array — it returns a brand-new one with just the matches. <code>students</code> itself stays completely untouched.</div>
+        </div>
+      </div>
+    </div>
+    <div class="section-label">try it — type a name below</div>
+    <div class="demo-panel">
+      <div class="demo-label">// 8 sample students — matches: <span id="search-demo-count">8</span> of 8</div>
+      <div class="search-wrap">
+        <i class="ti ti-search search-icon"></i>
+        <input class="search-input" id="search-demo-input" placeholder="Type a name… e.g. ri" oninput="liveSearch()">
+      </div>
+      <div class="chip-wrap" id="search-chip-wrap"></div>
+    </div>
+    <div class="warn-box">
+      <i class="ti ti-alert-triangle" style="color:#d97706;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+      <div style="font-size:13px;color:#92400e;line-height:1.6"><strong>Gotcha:</strong> in this simple version, Edit/Delete buttons on a FILTERED list still carry the index from the ORIGINAL array — so they can point at the wrong row. Production apps usually search by a unique <code>id</code> instead of a raw array index, which we'll explore later in the course.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-7"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Dashboard Statistics <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 8  DASHBOARD STATISTICS ═══ -->
+  <div class="slide" id="slide-8">
+    <div class="slide-header">
+      <span class="badge b-teal">Part 4 · 20 min</span>
+      <div>
+        <div class="slide-title">Dashboard Statistics</div>
+        <div class="slide-subtitle">Turn the array into numbers admins actually care about</div>
+      </div>
+    </div>
+    <div class="card card-gray">
+      <div style="font-size:13px;font-weight:700;margin-bottom:10px">What we're building — four live counters</div>
+      <div class="stat-grid">
+        <div class="stat-card c-total"><div class="stat-num">42</div><div class="stat-label">Total Students</div></div>
+        <div class="stat-card c-mern"><div class="stat-num">18</div><div class="stat-label">Total MERN</div></div>
+        <div class="stat-card c-java"><div class="stat-num">14</div><div class="stat-label">Total Java</div></div>
+        <div class="stat-card c-python"><div class="stat-num">10</div><div class="stat-label">Total Python</div></div>
+      </div>
+    </div>
+    <div class="section-label">try it — add sample students and watch the counters move</div>
+    <div class="demo-panel">
+      <div class="demo-label">// statsDemoData — live array, counted with filter()</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+        <button class="ab-btn" onclick="statsAdd('MERN')">+ MERN Student</button>
+        <button class="ab-btn" onclick="statsAdd('Java')">+ Java Student</button>
+        <button class="ab-btn" onclick="statsAdd('Python')">+ Python Student</button>
+        <button class="ab-btn danger" onclick="statsReset()">Reset</button>
+      </div>
+      <div class="stat-grid">
+        <div class="stat-card c-total" style="background:#13131f;border-color:#334155"><div class="stat-num" id="sd-total" style="color:#f8f8f2">0</div><div class="stat-label" style="color:#94a3b8">Total Students</div></div>
+        <div class="stat-card c-mern" style="background:#13131f;border-color:#334155"><div class="stat-num" id="sd-mern">0</div><div class="stat-label" style="color:#94a3b8">Total MERN</div></div>
+        <div class="stat-card c-java" style="background:#13131f;border-color:#334155"><div class="stat-num" id="sd-java">0</div><div class="stat-label" style="color:#94a3b8">Total Java</div></div>
+        <div class="stat-card c-python" style="background:#13131f;border-color:#334155"><div class="stat-num" id="sd-python">0</div><div class="stat-label" style="color:#94a3b8">Total Python</div></div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-8"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Calculate the Stats <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 9  CALCULATE STATS CODE ═══ -->
+  <div class="slide" id="slide-9">
+    <div class="slide-header">
+      <span class="badge b-teal">Part 4 · continued</span>
+      <div>
+        <div class="slide-title">Calculating the Stats with filter()</div>
+        <div class="slide-subtitle">The same method we used for search — counting instead of filtering rows</div>
+      </div>
+    </div>
+    <div class="editor">
+      <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">frontend/js/script.js</span></div>
+      <div class="editor-body">
+        <div class="e-row"><span class="j-kw">function</span> <span class="j-fn">updateStats</span><span class="c-punc">() {</span></div>
+        <div class="e-row"><span class="e-ind1"></span><span class="j-dom">document</span><span class="c-punc">.</span><span class="j-fn">getElementById</span><span class="c-punc">(</span><span class="j-str">"totalCount"</span><span class="c-punc">).</span><span class="j-prop">textContent</span> <span class="j-op">=</span> <span class="j-var">students</span><span class="c-punc">.</span><span class="j-prop">length</span><span class="c-punc">;</span></div>
+        <div class="e-row"><span class="e-ln"> </span></div>
+        <div class="e-row"><span class="e-ind1"></span><span class="j-dom">document</span><span class="c-punc">.</span><span class="j-fn">getElementById</span><span class="c-punc">(</span><span class="j-str">"mernCount"</span><span class="c-punc">).</span><span class="j-prop">textContent</span> <span class="j-op">=</span></div>
+        <div class="e-row"><span class="e-ind2"></span><span class="j-var">students</span><span class="c-punc">.</span><span class="j-fn">filter</span><span class="c-punc">(</span><span class="j-var">s</span> <span class="j-op">=&gt;</span> <span class="j-var">s</span><span class="c-punc">.</span><span class="j-key">course</span> <span class="j-op">===</span> <span class="j-str">"MERN"</span><span class="c-punc">).</span><span class="j-prop">length</span><span class="c-punc">;</span></div>
+        <div class="e-row"><span class="e-ln"> </span></div>
+        <div class="e-row"><span class="e-ind1"></span><span class="j-dom">document</span><span class="c-punc">.</span><span class="j-fn">getElementById</span><span class="c-punc">(</span><span class="j-str">"javaCount"</span><span class="c-punc">).</span><span class="j-prop">textContent</span> <span class="j-op">=</span></div>
+        <div class="e-row"><span class="e-ind2"></span><span class="j-var">students</span><span class="c-punc">.</span><span class="j-fn">filter</span><span class="c-punc">(</span><span class="j-var">s</span> <span class="j-op">=&gt;</span> <span class="j-var">s</span><span class="c-punc">.</span><span class="j-key">course</span> <span class="j-op">===</span> <span class="j-str">"Java"</span><span class="c-punc">).</span><span class="j-prop">length</span><span class="c-punc">;</span></div>
+        <div class="e-row"><span class="e-ln"> </span></div>
+        <div class="e-row"><span class="e-ind1"></span><span class="j-dom">document</span><span class="c-punc">.</span><span class="j-fn">getElementById</span><span class="c-punc">(</span><span class="j-str">"pythonCount"</span><span class="c-punc">).</span><span class="j-prop">textContent</span> <span class="j-op">=</span></div>
+        <div class="e-row"><span class="e-ind2"></span><span class="j-var">students</span><span class="c-punc">.</span><span class="j-fn">filter</span><span class="c-punc">(</span><span class="j-var">s</span> <span class="j-op">=&gt;</span> <span class="j-var">s</span><span class="c-punc">.</span><span class="j-key">course</span> <span class="j-op">===</span> <span class="j-str">"Python"</span><span class="c-punc">).</span><span class="j-prop">length</span><span class="c-punc">;</span></div>
+        <div class="e-row"><span class="c-punc">}</span></div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="card card-gray">
+        <div class="section-label">the pattern</div>
+        <div style="font-size:13px;color:#444;line-height:1.75">
+          <code>filter()</code> keeps only the matching students.<br>
+          <code>.length</code> turns that filtered array into a single number.<br><br>
+          Call <code>updateStats()</code> at the end of <code>displayStudents()</code> so the cards refresh automatically — every add, edit, delete, and search keeps the dashboard honest.
+        </div>
+      </div>
+      <div class="tip-box">
+        <i class="ti ti-bulb tip-icon"></i>
+        <div class="tip-text"><strong>Remember:</strong> <code>length</code> is a property, not a method — <code>students.filter(...).length</code>, no parentheses after <code>length</code>. The same rule from Day 9's first 90 minutes still applies.</div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-9"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Explain All <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 10  LINE-BY-LINE EXPLAINER ═══ -->
+  <div class="slide" id="slide-10">
+    <div class="slide-header">
+      <span class="badge b-blue">Explain</span>
+      <div>
+        <div class="slide-title">Line-by-Line — Update, Search &amp; Stats</div>
+        <div class="slide-subtitle">Click any row to expand — every concept from this 90 minutes</div>
+      </div>
+    </div>
+    <div class="line-explain">
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="j-var">editIndex</span> <span class="j-op">=</span> <span class="j-num">-1</span></div>
+        <div class="lex-info">
+          <div class="lex-name">editIndex — "what am I editing?"</div>
+          <div class="lex-desc">A variable that tracks whether the form is creating a new record or updating an old one</div>
+          <div class="lex-detail">-1 means "add mode." Any other number is the exact index of the student currently loaded into the form. It gets reset to -1 right after a successful update.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="j-fn">editStudent(i)</span></div>
+        <div class="lex-info">
+          <div class="lex-name">editStudent(index) — load a record into the form</div>
+          <div class="lex-desc">Sets editIndex and copies the student's existing data into the input fields</div>
+          <div class="lex-detail">This function never touches the students array. It only reads from it — the actual write happens later, in registerStudent().</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="j-var">students[i]</span> <span class="j-op">=</span> <span class="j-var">s</span></div>
+        <div class="lex-info">
+          <div class="lex-name">students[editIndex] = student — overwrite in place</div>
+          <div class="lex-desc">Replaces the object at that position with the freshly-edited one</div>
+          <div class="lex-detail">Unlike push() (which adds a NEW item), assigning to an existing index swaps out the object that's already there. The array's length doesn't change.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="j-fn">.filter(cb)</span></div>
+        <div class="lex-info">
+          <div class="lex-name">filter() — keep only what matches</div>
+          <div class="lex-desc">Runs a test function against every item and returns a NEW array of the ones that passed</div>
+          <div class="lex-detail">Used for search (name includes keyword?) AND for statistics (course === "MERN"?). Same method, two different jobs — just a different test inside.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="j-str">"keyup"</span></div>
+        <div class="lex-info">
+          <div class="lex-name">keyup event — fires on every key release</div>
+          <div class="lex-desc">Triggers the search function instantly as the admin types, without needing a Submit button</div>
+          <div class="lex-detail">this.value inside the listener refers to the search input itself — "this" is the element the event happened on.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="j-fn">confirm()</span></div>
+        <div class="lex-info">
+          <div class="lex-name">confirm() — ask before destroying data</div>
+          <div class="lex-desc">Shows a native browser popup with OK/Cancel and returns true or false</div>
+          <div class="lex-detail">Used before splice() (delete one) and before clearing the entire array (Clear All) — exactly what an if() statement needs to guard a destructive action.</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-10"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Bonus Features <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 11  BONUS FEATURES ═══ -->
+  <div class="slide" id="slide-11">
+    <div class="slide-header">
+      <span class="badge b-orange">Bonus</span>
+      <div>
+        <div class="slide-title">Clear All, Confirmations &amp; Status Badges</div>
+        <div class="slide-subtitle">Small touches that make the dashboard feel production-ready</div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div style="font-size:13px;font-weight:700;margin-bottom:8px"><i class="ti ti-shield-check" style="color:#d97706;margin-right:4px"></i>Delete confirmation</div>
+        <div class="editor" style="border-radius:8px">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div></div>
+          <div class="editor-body" style="font-size:11px">
+            <div class="e-row"><span class="j-kw">function</span> <span class="j-fn">deleteStudent</span><span class="c-punc">(</span><span class="j-var">i</span><span class="c-punc">) {</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="j-kw">if</span><span class="c-punc">(</span><span class="j-fn">confirm</span><span class="c-punc">(</span><span class="j-str">"Delete this student?"</span><span class="c-punc">)) {</span></div>
+            <div class="e-row"><span class="e-ind2"></span><span class="j-var">students</span><span class="c-punc">.</span><span class="j-fn">splice</span><span class="c-punc">(</span><span class="j-var">i</span><span class="c-punc">,</span><span class="j-num">1</span><span class="c-punc">);</span></div>
+            <div class="e-row"><span class="e-ind2"></span><span class="j-fn">saveData</span><span class="c-punc">();</span> <span class="j-fn">displayStudents</span><span class="c-punc">();</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="c-punc">}</span></div>
+            <div class="e-row"><span class="c-punc">}</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div style="font-size:13px;font-weight:700;margin-bottom:8px"><i class="ti ti-trash-x" style="color:#d97706;margin-right:4px"></i>Clear All button</div>
+        <div class="editor" style="border-radius:8px">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div></div>
+          <div class="editor-body" style="font-size:11px">
+            <div class="e-row"><span class="j-kw">function</span> <span class="j-fn">clearAll</span><span class="c-punc">() {</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="j-kw">if</span><span class="c-punc">(</span><span class="j-fn">confirm</span><span class="c-punc">(</span><span class="j-str">"Delete ALL students?"</span><span class="c-punc">)) {</span></div>
+            <div class="e-row"><span class="e-ind2"></span><span class="j-var">students</span> <span class="j-op">=</span> <span class="c-punc">[];</span></div>
+            <div class="e-row"><span class="e-ind2"></span><span class="j-fn">saveData</span><span class="c-punc">();</span> <span class="j-fn">displayStudents</span><span class="c-punc">();</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="c-punc">}</span></div>
+            <div class="e-row"><span class="c-punc">}</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div style="font-size:13px;font-weight:700;margin-bottom:8px"><i class="ti ti-tag" style="color:#d97706;margin-right:4px"></i>Bootstrap status badges — Active / Inactive</div>
+      <div class="grid-2">
+        <div class="editor" style="border-radius:8px">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div></div>
+          <div class="editor-body" style="font-size:11px">
+            <div class="e-row"><span class="c-punc">&lt;td&gt;</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="c-punc">&lt;span class="badge</span></div>
+            <div class="e-row"><span class="e-ind2"></span><span class="j-op">${</span><span class="j-var">s</span><span class="c-punc">.</span><span class="j-key">status</span><span class="j-op">===</span><span class="j-str">'Active'</span><span class="j-op">?</span><span class="j-str">'bg-success'</span><span class="j-op">:</span><span class="j-str">'bg-secondary'</span><span class="j-op">}</span><span class="c-punc">"&gt;</span></div>
+            <div class="e-row"><span class="e-ind2"></span><span class="j-op">${</span><span class="j-var">s</span><span class="c-punc">.</span><span class="j-key">status</span><span class="j-op">}</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="c-punc">&lt;/span&gt;</span></div>
+            <div class="e-row"><span class="c-punc">&lt;/td&gt;</span></div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;justify-content:center;gap:10px;padding:0 8px">
+          <div style="display:flex;align-items:center;gap:10px"><span class="bs-badge bs-badge-active">Active</span><span style="font-size:12px;color:#555">currently enrolled</span></div>
+          <div style="display:flex;align-items:center;gap:10px"><span class="bs-badge bs-badge-inactive">Inactive</span><span style="font-size:12px;color:#555">paused or dropped</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="warn-box">
+      <i class="ti ti-alert-triangle" style="color:#d97706;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+      <div style="font-size:13px;color:#92400e;line-height:1.6"><strong>confirm()</strong> pauses JavaScript and shows a native browser popup with OK/Cancel. It returns <code>true</code> or <code>false</code> — exactly what an <code>if()</code> needs to guard a destructive action.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-11"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Reference <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 12  REFERENCE ═══ -->
+  <div class="slide" id="slide-12">
+    <div class="slide-header">
+      <span class="badge b-slate">Reference</span>
+      <div>
+        <div class="slide-title">Update &amp; Search Quick Reference</div>
+        <div class="slide-subtitle">Everything covered in this 90 minutes — keep this open while coding</div>
+      </div>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <table class="tag-table">
+        <thead><tr><th>Concept</th><th>Syntax</th><th>Example</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>editIndex</strong></td>
+            <td><code>let editIndex = -1;</code></td>
+            <td><code>editIndex = 2;</code></td>
+            <td>-1 = adding, otherwise = editing that index</td>
+          </tr>
+          <tr>
+            <td><strong>Load into form</strong></td>
+            <td><code>field.value = obj.key;</code></td>
+            <td><code>name.value = students[i].name;</code></td>
+            <td>Reads existing data, doesn't change it</td>
+          </tr>
+          <tr>
+            <td><strong>Replace in array</strong></td>
+            <td><code>arr[i] = newValue;</code></td>
+            <td><code>students[editIndex] = student;</code></td>
+            <td>Overwrites — length stays the same</td>
+          </tr>
+          <tr>
+            <td><strong>filter()</strong></td>
+            <td><code>arr.filter(cb)</code></td>
+            <td><code>students.filter(s =&gt; ...)</code></td>
+            <td>Returns a NEW array of matches</td>
+          </tr>
+          <tr>
+            <td><strong>keyup</strong></td>
+            <td><code>el.addEventListener("keyup", fn)</code></td>
+            <td><code>searchBox.addEventListener(...)</code></td>
+            <td>Fires on every key release — live search</td>
+          </tr>
+          <tr>
+            <td><strong>confirm()</strong></td>
+            <td><code>confirm("message")</code></td>
+            <td><code>if(confirm("Delete?")) {…}</code></td>
+            <td>Returns true / false</td>
+          </tr>
+          <tr>
+            <td><strong>filter().length</strong></td>
+            <td><code>arr.filter(cb).length</code></td>
+            <td><code>students.filter(s =&gt; s.course==="MERN").length</code></td>
+            <td>Count of matching items</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="grid-2" style="margin-top:.25rem">
+      <div class="tip-box">
+        <i class="ti ti-bulb tip-icon"></i>
+        <div class="tip-text"><strong>The big pattern:</strong> push() = Create, displayStudents() = Read, arr[i] = value is Update, and splice() = Delete. Together they form full CRUD — the foundation of every admin tool you'll build, including with MongoDB later in this course.</div>
+      </div>
+      <div class="info-box">
+        <i class="ti ti-info-circle info-icon"></i>
+        <div class="info-text"><strong>Coming up:</strong> Day 11 brings ES6 — destructuring, spread/rest, and shorter array methods — folded directly into this same SkillHub LMS dashboard.</div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-12"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Assignment <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 13  ASSIGNMENT + TIMELINE ═══ -->
+  <div class="slide" id="slide-13">
+    <div class="slide-header">
+      <span class="badge b-indigo">Assignment</span>
+      <div>
+        <div class="slide-title">Build Your Admin Dashboard</div>
+        <div class="slide-subtitle">Apply everything from Day 9 to your own SkillHub LMS project</div>
+      </div>
+    </div>
+    <div class="challenge-box">
+      <div class="challenge-title"><i class="ti ti-target-arrow"></i> Students build — Admin Dashboard (click each item once it's done)</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle"></div>Search box that filters students live as you type</div>
+        <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle"></div>Edit button that loads a student back into the form</div>
+        <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle"></div>Delete button with a confirm() prompt</div>
+        <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle"></div>Total Students counter</div>
+        <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle"></div>Per-course statistics — MERN, Java, Python</div>
+        <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle"></div>Everything saved to and loaded from Local Storage</div>
+        <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle"></div>Clear All button with its own confirmation</div>
+      </div>
+    </div>
+    <div class="section-label">new project timeline</div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <table class="tag-table">
+        <thead><tr><th style="width:50px">Day</th><th>Deliverable</th><th style="width:90px">Status</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Project Setup + HTML Intro</td><td><span class="badge b-green">Done</span></td></tr>
+          <tr><td>2</td><td>Semantic HTML + Landing Page</td><td><span class="badge b-green">Done</span></td></tr>
+          <tr><td>3</td><td>CSS Styling</td><td><span class="badge b-green">Done</span></td></tr>
+          <tr><td>4</td><td>Flexbox + Professional UI</td><td><span class="badge b-green">Done</span></td></tr>
+          <tr><td>5</td><td>Responsive Design</td><td><span class="badge b-green">Done</span></td></tr>
+          <tr><td>6</td><td>Bootstrap 5</td><td><span class="badge b-green">Done</span></td></tr>
+          <tr><td>7</td><td>JavaScript Basics + DOM</td><td><span class="badge b-green">Done</span></td></tr>
+          <tr><td>8</td><td>Registration Form + Validation</td><td><span class="badge b-green">Done</span></td></tr>
+          <tr style="background:#fefce8"><td><strong>9</strong></td><td><strong>Student Dashboard + CRUD (Create, Read, Delete)</strong></td><td><span class="badge b-js">In Progress</span></td></tr>
+          <tr><td>10</td><td>Local Storage + Update + Search + Dashboard Statistics</td><td><span class="badge b-slate">Next</span></td></tr>
+          <tr><td>11</td><td>Advanced JavaScript (ES6, Destructuring, Spread, Rest, Array Methods)</td><td><span class="badge b-slate">Upcoming</span></td></tr>
+          <tr><td>12</td><td>Mini LMS Frontend Complete + GitHub Deployment</td><td><span class="badge b-slate">Upcoming</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-13"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Quiz <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 14  QUIZ ═══ -->
+  <div class="slide" id="slide-14">
+    <div class="slide-header">
+      <span class="badge b-green">Quiz</span>
+      <div>
+        <div class="slide-title">Quick Check — Update, Search &amp; Statistics</div>
+        <div class="slide-subtitle">5 questions covering this 90 minutes</div>
+      </div>
+    </div>
+    <div id="quiz-container"></div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-14"></div>
+      <button class="nav-btn" onclick="goSlide(0)"><i class="ti ti-home"></i> Home</button>
+    </div>
+  </div>
+
+</div><!-- /.wrapper -->
+<script>
+  var current = 0, total = 15, quizInit = false;
+
+  /* ── Edit-button demo ── */
+  var editDemoData = [
+    {name:"Rahul Sharma", email:"rahul@gmail.com", course:"MERN"},
+    {name:"Priya Singh",  email:"priya@gmail.com",  course:"Java"},
+    {name:"Aman Verma",   email:"aman@gmail.com",   course:"Python"}
+  ];
+  function editDemoClick(i) {
+    var s = editDemoData[i];
+    document.getElementById('ed-name').value = s.name;
+    document.getElementById('ed-course').value = s.course;
+    document.getElementById('ed-index-display').textContent = i;
+    var btn = document.getElementById('ed-btn');
+    btn.textContent = 'Update Student';
+    btn.disabled = false;
+  }
+  function editDemoDelete(i) {
+    if (confirm('Remove this student from the demo table?')) {
+      editDemoData.splice(i, 1);
+      document.getElementById('ed-name').value = '';
+      document.getElementById('ed-course').value = '';
+      document.getElementById('ed-index-display').textContent = '-1';
+      var btn = document.getElementById('ed-btn');
+      btn.textContent = 'Register Student';
+      btn.disabled = true;
+      renderEditDemo();
+    }
+  }
+  function renderEditDemo() {
+    var tbody = document.getElementById('ed-tbody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    editDemoData.forEach(function(s, i) {
+      var tr = document.createElement('tr');
+      tr.innerHTML = '<td>' + s.name + '</td><td>' + s.course + '</td><td>' +
+        '<button class="act-btn act-edit" onclick="editDemoClick(' + i + ')">Edit</button>' +
+        '<button class="act-btn act-delete" onclick="editDemoDelete(' + i + ')">Delete</button></td>';
+      tbody.appendChild(tr);
+    });
+  }
+
+  /* ── Live search demo ── */
+  var searchDemoData = [
+    {name:"Rahul Sharma", course:"MERN"},
+    {name:"Priya Singh",  course:"Java"},
+    {name:"Aman Verma",   course:"Python"},
+    {name:"Riya Kapoor",  course:"MERN"},
+    {name:"Karan Mehta",  course:"Java"},
+    {name:"Sneha Joshi",  course:"Python"},
+    {name:"Vikram Rao",   course:"MERN"},
+    {name:"Anjali Gupta", course:"Java"}
+  ];
+  function renderSearchChips() {
+    var wrap = document.getElementById('search-chip-wrap');
+    if (!wrap) return;
+    wrap.innerHTML = '';
+    searchDemoData.forEach(function(s) {
+      var chip = document.createElement('span');
+      chip.className = 'search-chip';
+      chip.setAttribute('data-name', s.name);
+      chip.innerHTML = s.name + ' <span class="crs">' + s.course + '</span>';
+      wrap.appendChild(chip);
+    });
+  }
+  function liveSearch() {
+    var keyword = document.getElementById('search-demo-input').value.toLowerCase();
+    var chips = document.querySelectorAll('.search-chip');
+    var visible = 0;
+    chips.forEach(function(chip) {
+      var name = chip.getAttribute('data-name').toLowerCase();
+      if (name.indexOf(keyword) !== -1) { chip.classList.remove('hidden'); visible++; }
+      else { chip.classList.add('hidden'); }
+    });
+    document.getElementById('search-demo-count').textContent = visible;
+  }
+
+  /* ── Stats demo ── */
+  var statsDemoData = [];
+  var statsNames = ["Aarav","Diya","Kabir","Meera","Ishaan","Tara","Yash","Naina"];
+  function statsAdd(course) {
+    var name = statsNames[statsDemoData.length % statsNames.length];
+    statsDemoData.push({name: name, course: course});
+    renderStatsDemo();
+  }
+  function statsReset() {
+    statsDemoData = [];
+    renderStatsDemo();
+  }
+  function renderStatsDemo() {
+    var totalEl = document.getElementById('sd-total');
+    if (!totalEl) return;
+    totalEl.textContent = statsDemoData.length;
+    document.getElementById('sd-mern').textContent = statsDemoData.filter(function(s){ return s.course === 'MERN'; }).length;
+    document.getElementById('sd-java').textContent = statsDemoData.filter(function(s){ return s.course === 'Java'; }).length;
+    document.getElementById('sd-python').textContent = statsDemoData.filter(function(s){ return s.course === 'Python'; }).length;
+  }
+
+  /* ── Checklist toggle ── */
+  function toggleCheck(el) {
+    el.classList.toggle('done');
+    var circle = el.querySelector('.check-circle');
+    circle.innerHTML = el.classList.contains('done') ? '<i class="ti ti-check"></i>' : '';
+  }
+
+  /* ── Quiz data ── */
+  var quizData = [
+    {
+      q: "What does <code>let editIndex = -1;</code> represent right after the page loads?",
+      opts: [
+        "An error has occurred and the form is broken",
+        "We are currently editing the student at position -1",
+        "We're in 'add mode' — the form will create a NEW student, not edit one",
+        "It deletes the entire students array"
+      ],
+      ans: 2,
+      exp: "editIndex acts as a flag. -1 means 'nothing is being edited' — the next Submit click will push() a brand-new student. Any other number means that index in students[] is currently loaded into the form."
+    },
+    {
+      q: "Inside the submit handler, what's the difference between <code>students.push(student)</code> and <code>students[editIndex] = student</code>?",
+      opts: [
+        "They do exactly the same thing",
+        "push() adds a NEW item at the end; students[editIndex] = student REPLACES the object already sitting at that position",
+        "push() deletes a student; the other one adds one",
+        "students[editIndex] = student only works on empty arrays"
+      ],
+      ans: 1,
+      exp: "push() grows the array by one — used for Create. students[editIndex] = student overwrites an existing slot without changing the array's length — used for Update."
+    },
+    {
+      q: "What does <code>students.filter(s => s.name.toLowerCase().includes(keyword))</code> return?",
+      opts: [
+        "The first matching student only, as an object",
+        "true or false, depending on whether any student matches",
+        "A brand-new array containing only the students whose name includes the keyword",
+        "The original students array, sorted alphabetically"
+      ],
+      ans: 2,
+      exp: "filter() runs the test against every item and returns a NEW array of just the ones that passed — the original students array is never modified."
+    },
+    {
+      q: "Why attach the search function to a <code>keyup</code> event instead of waiting for a Submit button?",
+      opts: [
+        "keyup only works with number inputs",
+        "keyup fires every time a key is released, so results update instantly as the admin types — a 'live' search",
+        "keyup is required by every Bootstrap form",
+        "There's no real difference between the two"
+      ],
+      ans: 1,
+      exp: "keyup fires on every single key release. Wiring the search to it means the filtered list updates on every keystroke, with no separate button needed."
+    },
+    {
+      q: "Which line correctly calculates 'Total MERN Students' for the dashboard card?",
+      opts: [
+        "students.push('MERN').length",
+        "students.splice('MERN', 1).length",
+        "students.filter(s => s.course === 'MERN').length",
+        "JSON.stringify(students).length"
+      ],
+      ans: 2,
+      exp: "filter() narrows the array down to MERN students only, and .length counts how many remain — the exact same pattern used for search, just with a different test condition."
+    }
+  ];
+  var quizAnswered = [];
+
+  function renderQuiz() {
+    var c = document.getElementById('quiz-container'); c.innerHTML = '';
+    quizData.forEach(function(q, i) {
+      var d = document.createElement('div'); d.style.cssText = 'margin-bottom:18px';
+      d.innerHTML = '<div style="font-size:13px;font-weight:600;margin-bottom:6px">'+(i+1)+'. '+q.q+'</div>';
+      q.opts.forEach(function(opt, j) {
+        var btn = document.createElement('button'); btn.className = 'quiz-option';
+        btn.innerHTML = String.fromCharCode(65+j)+'. '+opt;
+        btn.onclick = function() {
+          if (quizAnswered[i]) return; quizAnswered[i] = true;
+          var btns = d.querySelectorAll('.quiz-option');
+          btns.forEach(function(b,k){ b.disabled=true; if(k===q.ans) b.classList.add('correct'); else if(k===j) b.classList.add('wrong'); });
+          var fb = d.querySelector('.quiz-feedback');
+          fb.innerHTML = (j===q.ans?'✅ Correct! ':'❌ Not quite. ')+q.exp;
+          fb.className = 'quiz-feedback '+(j===q.ans?'correct':'wrong');
+        };
+        d.appendChild(btn);
+      });
+      var fb = document.createElement('div'); fb.className = 'quiz-feedback'; d.appendChild(fb);
+      c.appendChild(d);
+    });
+  }
+
+  function toggleLex(row) {
+    var was = row.classList.contains('active');
+    document.querySelectorAll('.lex-row.active').forEach(function(r){ r.classList.remove('active'); });
+    if (!was) row.classList.add('active');
+  }
+
+  function toggle(id) {
+    var el = document.getElementById(id); el.classList.toggle('open');
+    var btn = el.previousElementSibling;
+    if (btn && btn.tagName === 'BUTTON') {
+      btn.textContent = el.classList.contains('open') ? 'Hide the answer' : btn.getAttribute('data-label') || 'Reveal the answer';
+    }
+  }
+
+  function goSlide(n) {
+    document.getElementById('slide-'+current).classList.remove('active');
+    current = n;
+    document.getElementById('slide-'+current).classList.add('active');
+    updateDots();
+    document.getElementById('slide-counter').textContent = (current+1)+' / '+total;
+    if (n===14 && !quizInit) { renderQuiz(); quizInit=true; }
+    window.scrollTo(0,0);
+  }
+  function nextSlide() { if (current < total-1) goSlide(current+1); }
+  function prevSlide() { if (current > 0) goSlide(current-1); }
+
+  function updateDots() {
+    for (var s=0; s<total; s++) {
+      var el = document.getElementById('dots-'+s); if (!el) continue;
+      el.innerHTML = '';
+      for (var d=0; d<total; d++) {
+        var dot = document.createElement('div');
+        dot.className = 'dot'+(d===current?' active':'');
+        el.appendChild(dot);
+      }
+    }
+  }
+  updateDots();
+  renderEditDemo();
+  renderSearchChips();
+  renderStatsDemo();
+</script>
+</body>
+</html>

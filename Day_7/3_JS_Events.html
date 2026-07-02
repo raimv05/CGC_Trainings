@@ -1,0 +1,1500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Day 7 · Hour 3 – JavaScript Events</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f4f5f7; color: #1a1a1a;
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; padding: 2rem 1rem;
+  }
+  .wrapper {
+    width: 100%; max-width: 920px; background: #fff;
+    border-radius: 16px; box-shadow: 0 2px 20px rgba(0,0,0,0.09); overflow: hidden;
+  }
+  .top-bar {
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    color: #fff; padding: 14px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .top-bar-title { font-size: 15px; font-weight: 600; }
+  .top-bar-sub   { font-size: 12px; opacity: .55; margin-top: 2px; }
+  .slide-counter { font-size: 13px; opacity: .6; font-variant-numeric: tabular-nums; }
+  .slide { display: none; padding: 1.75rem 2rem; min-height: 500px; flex-direction: column; gap: 1.2rem; }
+  .slide.active { display: flex; }
+  .slide-header { display: flex; align-items: center; gap: 10px; padding-bottom: 1rem; border-bottom: 1px solid #e8e8e8; }
+  .slide-title    { font-size: 20px; font-weight: 700; color: #111; }
+  .slide-subtitle { font-size: 13px; color: #666; margin-top: 2px; }
+
+  /* ── Badges ── */
+  .badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+  .b-blue   { background:#dbeafe; color:#1d4ed8; }
+  .b-teal   { background:#d1fae5; color:#065f46; }
+  .b-purple { background:#ede9fe; color:#5b21b6; }
+  .b-amber  { background:#fef3c7; color:#92400e; }
+  .b-green  { background:#dcfce7; color:#166534; }
+  .b-slate  { background:#e2e8f0; color:#334155; }
+  .b-rose   { background:#ffe4e6; color:#9f1239; }
+  .b-orange { background:#ffedd5; color:#9a3412; }
+  .b-indigo { background:#e0e7ff; color:#3730a3; }
+  .b-cyan   { background:#cffafe; color:#164e63; }
+  .b-pink   { background:#fce7f3; color:#9d174d; }
+  .b-yellow { background:#fef9c3; color:#854d0e; }
+  .b-js     { background:#fef9c3; color:#854d0e; }
+
+  /* ── Layout ── */
+  .section-label { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 8px; }
+  .card { background: #fff; border: 1px solid #e8e8e8; border-radius: 12px; padding: 1rem 1.25rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+  /* ── Code Editor (Dracula) ── */
+  .editor { background: #1e1e2e; border-radius: 12px; overflow: hidden; font-family: 'SFMono-Regular', Consolas, 'Courier New', monospace; }
+  .editor-bar { background: #13131f; padding: 9px 14px; display: flex; align-items: center; gap: 6px; }
+  .e-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .e-red { background:#ff5f57; } .e-yellow { background:#febc2e; } .e-green { background:#28c840; }
+  .e-label { font-size: 12px; color: #6272a4; margin-left: 4px; font-family: -apple-system, sans-serif; }
+  .editor-body { padding: 14px 18px; font-size: 12.5px; line-height: 1.8; }
+  .e-ln   { color: #44475a; font-size: 11px; display: inline-block; width: 22px; user-select: none; }
+  .e-tag  { color: #ff79c6; }
+  .e-att  { color: #50fa7b; }
+  .e-val  { color: #f1fa8c; }
+  .e-txt  { color: #f8f8f2; }
+  .e-cmt  { color: #6272a4; font-style: italic; }
+  .e-new  { color: #80ffea; }
+  .j-kw   { color: #ff79c6; font-weight: 700; }
+  .j-fn   { color: #50fa7b; }
+  .j-str  { color: #f1fa8c; }
+  .j-num  { color: #bd93f9; }
+  .j-var  { color: #80ffea; }
+  .j-op   { color: #ff79c6; }
+  .j-dom  { color: #8be9fd; }
+  .j-prop { color: #50fa7b; }
+  .j-com  { color: #6272a4; font-style: italic; }
+  .e-ind1 { display: inline-block; width: 20px; }
+  .e-ind2 { display: inline-block; width: 40px; }
+  .e-ind3 { display: inline-block; width: 60px; }
+
+  /* ── Browser frame ── */
+  .browser { border-radius: 12px; overflow: hidden; border: 1px solid #e0e0e0; }
+  .browser-bar { background: #f1f3f4; padding: 9px 14px; display: flex; align-items: center; gap: 7px; border-bottom: 1px solid #e0e0e0; }
+  .b-dot2 { width: 10px; height: 10px; border-radius: 50%; }
+  .b-r { background:#ff5f57; } .b-y { background:#febc2e; } .b-g { background:#28c840; }
+  .b-url { flex:1; background:#fff; border:1px solid #dadce0; border-radius:20px; padding:4px 14px; font-size:12px; color:#555; }
+
+  /* ── Tables ── */
+  .tag-table { border-collapse: collapse; width: 100%; }
+  .tag-table th { background: #f1f5f9; font-size: 12px; font-weight: 700; text-align: left; padding: 10px 14px; color: #475569; border-bottom: 2px solid #e2e8f0; }
+  .tag-table td { font-size: 13px; padding: 10px 14px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+  .tag-table tr:last-child td { border-bottom: none; }
+  .tag-table tr:hover td { background: #f8f9fa; }
+
+  /* ── Quiz ── */
+  .quiz-option { border: 1px solid #dee2e6; border-radius: 8px; padding: 10px 14px; font-size: 13px; cursor: pointer; margin-bottom: 6px; transition: all .15s; background: transparent; width: 100%; text-align: left; color: #1a1a1a; }
+  .quiz-option:hover:not(:disabled) { background: #f8f9fa; }
+  .quiz-option.correct { background: #d1fae5; border-color: #059669; color: #065f46; }
+  .quiz-option.wrong   { background: #fee2e2; border-color: #dc2626; color: #991b1b; }
+  .quiz-feedback { display: none; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-top: 4px; }
+  .quiz-feedback.correct { background: #d1fae5; color: #065f46; display: block; }
+  .quiz-feedback.wrong   { background: #fee2e2; color: #991b1b; display: block; }
+
+  /* ── Tip / info / warn / success ── */
+  .tip-box   { display:flex; gap:10px; align-items:flex-start; background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:10px 14px; }
+  .tip-icon  { color:#d97706; font-size:18px; flex-shrink:0; margin-top:1px; }
+  .tip-text  { font-size:13px; color:#92400e; line-height:1.6; }
+  .info-box  { display:flex; gap:10px; align-items:flex-start; background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:10px 14px; }
+  .info-icon { color:#2563eb; font-size:18px; flex-shrink:0; margin-top:1px; }
+  .info-text { font-size:13px; color:#1e40af; line-height:1.6; }
+  .warn-box  { display:flex; gap:10px; align-items:flex-start; background:#fef9ee; border:1px solid #fcd34d; border-radius:10px; padding:10px 14px; }
+  .success-box { display:flex; gap:10px; align-items:flex-start; background:#f0fdf4; border:1px solid #86efac; border-radius:10px; padding:10px 14px; }
+
+  /* ── Line explainer (JS amber accent) ── */
+  .lex-row { display:flex; align-items:stretch; cursor:pointer; transition:background .12s; border-bottom:1px solid #f0f0f0; }
+  .lex-row:last-child { border-bottom:none; }
+  .lex-row:hover { background:#f8f9fa; }
+  .lex-row.active { background:#fefce8; border-left:3px solid #d97706; }
+  .lex-code { background:#1e1e2e; padding:10px 14px; font-family:'SFMono-Regular',Consolas,monospace; font-size:12px; min-width:210px; flex-shrink:0; display:flex; align-items:center; }
+  .lex-info { padding:10px 14px; flex:1; }
+  .lex-name   { font-size:13px; font-weight:700; color:#d97706; margin-bottom:2px; }
+  .lex-desc   { font-size:12px; color:#555; line-height:1.55; }
+  .lex-detail { display:none; font-size:12px; color:#92400e; margin-top:4px; padding-top:4px; border-top:1px dashed #fde68a; }
+  .lex-row.active .lex-detail { display:block; }
+  .line-explain { border:1px solid #e8e8e8; border-radius:10px; overflow:hidden; }
+
+  /* ── Nav (JS amber) ── */
+  .nav-row { display:flex; align-items:center; justify-content:space-between; margin-top:auto; padding-top:1rem; border-top:1px solid #f0f0f0; }
+  .nav-btn { display:inline-flex; align-items:center; gap:6px; padding:9px 18px; border:1px solid #dee2e6; border-radius:8px; background:transparent; font-size:13px; cursor:pointer; color:#333; transition:background .15s; }
+  .nav-btn:hover:not(:disabled) { background:#f1f3f5; }
+  .nav-btn:disabled { opacity:.35; cursor:default; }
+  .nav-btn.primary { background:#d97706; border-color:transparent; color:#fff; }
+  .nav-btn.primary:hover { background:#b45309; }
+  .progress-dots { display:flex; gap:6px; align-items:center; }
+  .dot { width:7px; height:7px; border-radius:50%; background:#dee2e6; transition:all .2s; }
+  .dot.active { width:20px; border-radius:4px; background:#d97706; }
+
+  /* ── Home grid ── */
+  .home-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .home-card { background:#fff; border:1px solid #e8e8e8; border-radius:12px; padding:1rem 1.25rem; cursor:pointer; transition:all .15s; }
+  .home-card:hover { border-color:#d97706; box-shadow:0 2px 8px rgba(217,119,6,.12); }
+  .home-card-title { font-size:15px; font-weight:700; margin:6px 0 2px; }
+  .home-card-sub   { font-size:12px; color:#666; }
+
+  code { font-family:'SFMono-Regular',Consolas,monospace; font-size:12px; background:#f1f3f5; padding:1px 6px; border-radius:4px; border:1px solid #dee2e6; }
+
+  /* ── Checklist ── */
+  .check-item { display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:10px; border:1px solid #e8e8e8; font-size:13px; cursor:pointer; transition:all .15s; user-select:none; }
+  .check-item:hover { background:#f8f9fa; }
+  .check-item.done { background:#f0fdf4; border-color:#86efac; }
+  .check-circle { width:22px; height:22px; border-radius:50%; border:2px solid #dee2e6; display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0; transition:all .2s; color:transparent; }
+  .check-item.done .check-circle { background:#22c55e; border-color:#22c55e; color:#fff; }
+
+  /* ── Console panel ── */
+  .console-panel { background: #0d1117; border-radius: 12px; overflow: hidden; font-family: 'SFMono-Regular', Consolas, monospace; }
+  .console-bar   { background: #161b22; padding: 9px 14px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #30363d; }
+  .console-tab   { font-size: 12px; color: #8b949e; padding-bottom: 3px; }
+  .console-tab.active { color: #f0f6fc; border-bottom: 2px solid #d97706; }
+  .console-body  { padding: 12px 16px; font-size: 12.5px; line-height: 2; }
+  .con-log  { color: #f0f6fc; }
+  .con-str  { color: #a5d6ff; }
+  .con-num  { color: #79c0ff; }
+  .con-arrow { color: #3fb950; font-size: 11px; }
+  .con-prompt-sym { color: #3fb950; }
+  .js-logo { width: 44px; height: 44px; background: #f0db4f; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-family: 'SFMono-Regular', Consolas, monospace; font-size: 18px; font-weight: 900; color: #323330; flex-shrink: 0; }
+
+  /* ── Popup mock ── */
+  .popup-mock { border-radius: 12px; overflow: hidden; border: 2px solid #475569; box-shadow: 0 8px 24px rgba(0,0,0,.25); background: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
+  .popup-bar  { background: #e2e8f0; padding: 8px 14px; display: flex; align-items: center; gap: 8px; font-size: 12px; color: #475569; font-weight: 600; }
+  .popup-body { padding: 16px; }
+  .popup-msg  { font-size: 13px; color: #1a1a1a; margin-bottom: 12px; }
+  .popup-btns { display: flex; justify-content: flex-end; gap: 8px; }
+  .popup-btn  { padding: 6px 16px; border-radius: 5px; font-size: 12px; font-weight: 700; border: none; cursor: pointer; }
+  .popup-btn-ok { background: #2563eb; color: white; }
+
+  /* ══ HOUR 3 SPECIFIC ══ */
+
+  /* Event flow diagram */
+  .event-flow { display: flex; align-items: center; gap: 0; flex-wrap: nowrap; overflow-x: auto; }
+  .event-step { background: white; border: 2px solid #e2e8f0; border-radius: 10px; padding: 12px 16px; text-align: center; flex-shrink: 0; min-width: 110px; }
+  .event-step.highlight { border-color: #d97706; background: #fffbeb; }
+  .event-arrow { color: #d97706; font-size: 20px; font-weight: 700; flex-shrink: 0; padding: 0 6px; }
+
+  /* Live feature demos */
+  .feature-demo { background: #0f172a; border-radius: 12px; overflow: hidden; }
+  .feature-demo-bar { background: #1e293b; padding: 8px 14px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #334155; }
+  .feature-demo-title { font-size: 12px; font-weight: 700; color: #94a3b8; }
+  .feature-demo-dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; }
+  .feature-demo-body { padding: 14px 16px; }
+
+  /* SkillHub mini preview */
+  .sh-preview { font-family: Arial, sans-serif; font-size: 11px; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; }
+  .sh-nav2 { background: #212529; color: #fff; padding: 7px 12px; font-weight: 700; font-size: 12px; }
+  .sh-dash { background: #f8f9fa; padding: 14px; }
+
+  /* Project progress tracker */
+  .progress-feature { display: flex; align-items: center; gap: 10px; padding: 9px 14px; border-radius: 10px; border: 1px solid transparent; font-size: 12px; font-weight: 700; }
+  .progress-feature.done   { background: #dcfce7; border-color: #86efac; color: #166534; }
+  .progress-feature.today  { background: #fef9c3; border-color: #fde047; color: #854d0e; }
+  .progress-feature.pending { background: #f8f9fa; border-color: #e2e8f0; color: #94a3b8; }
+
+  /* Live interactive sandbox */
+  .sandbox { background: #1e1e2e; border-radius: 12px; overflow: hidden; }
+  .sandbox-bar { background: #13131f; padding: 8px 14px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #30363d; }
+  .sandbox-label { font-size: 12px; color: #6272a4; font-family: -apple-system, sans-serif; }
+  .sandbox-run { background: #d97706; border: none; border-radius: 5px; padding: 4px 14px; font-size: 11px; font-weight: 700; color: #fff; cursor: pointer; }
+  .sandbox-run:hover { background: #b45309; }
+  .sandbox-output { background: #010409; border-top: 1px solid #30363d; padding: 10px 16px; font-family: 'SFMono-Regular', Consolas, monospace; font-size: 12px; color: #3fb950; min-height: 40px; }
+
+  /* Theme demo swatches */
+  .theme-swatch { width: 36px; height: 36px; border-radius: 8px; cursor: pointer; border: 3px solid transparent; transition: all .2s; flex-shrink: 0; }
+  .theme-swatch:hover { transform: scale(1.1); }
+  .theme-swatch.selected { border-color: #d97706; box-shadow: 0 0 0 2px #fde68a; }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <div>
+      <div class="top-bar-title">MERN Stack Training · Day 7 · Hour 3</div>
+      <div class="top-bar-sub">JavaScript Events — SkillHub LMS</div>
+    </div>
+    <div class="slide-counter" id="slide-counter">1 / 14</div>
+  </div>
+
+  <!-- ═══════════ SLIDE 0  HOME ═══════════ -->
+  <div class="slide active" id="slide-0">
+    <div class="slide-header">
+      <div class="js-logo">JS</div>
+      <div>
+        <div class="slide-title">JavaScript Events</div>
+        <div class="slide-subtitle">Now the website reacts to users — 4 live features, a mini challenge, and a Student Dashboard assignment.</div>
+      </div>
+    </div>
+
+    <div style="background:#fef9c3;border:1px solid #fde047;border-radius:12px;padding:12px 16px;display:flex;gap:12px;align-items:flex-start">
+      <i class="ti ti-mouse" style="color:#d97706;font-size:22px;flex-shrink:0;margin-top:1px"></i>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#854d0e;margin-bottom:4px">Hour 3 Goal — Make SkillHub Respond to User Actions</div>
+        <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:#92400e">
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>addEventListener — how events work</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Feature 1: Join Now alert</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Feature 2: Theme changer</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Feature 3: Course counter</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Feature 4: Today's date</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Mini challenge + Dashboard assignment</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="home-grid">
+      <div class="home-card" onclick="goSlide(1)">
+        <span class="badge b-green">Recap</span>
+        <div class="home-card-title">Where We Are Now</div>
+        <div class="home-card-sub">DOM manipulation done — adding interactivity next</div>
+      </div>
+      <div class="home-card" onclick="goSlide(2)">
+        <span class="badge b-amber">Concept</span>
+        <div class="home-card-title">What is an Event?</div>
+        <div class="home-card-sub">User action → browser fires an event → JS responds</div>
+      </div>
+      <div class="home-card" onclick="goSlide(3)">
+        <span class="badge b-js">Syntax</span>
+        <div class="home-card-title">addEventListener — The Pattern</div>
+        <div class="home-card-sub">element.addEventListener("click", function)</div>
+      </div>
+      <div class="home-card" onclick="goSlide(4)">
+        <span class="badge b-js">Feature 1</span>
+        <div class="home-card-title">Join Now → Alert</div>
+        <div class="home-card-sub">First live event — "Registration Starts Soon!"</div>
+      </div>
+      <div class="home-card" onclick="goSlide(5)">
+        <span class="badge b-js">Feature 2</span>
+        <div class="home-card-title">Theme Changer</div>
+        <div class="home-card-sub">One click changes the entire page background</div>
+      </div>
+      <div class="home-card" onclick="goSlide(6)">
+        <span class="badge b-js">Feature 3</span>
+        <div class="home-card-title">Course Counter</div>
+        <div class="home-card-sub">Variable + innerHTML — click to increment live</div>
+      </div>
+      <div class="home-card" onclick="goSlide(7)">
+        <span class="badge b-js">Feature 4</span>
+        <div class="home-card-title">Today's Date</div>
+        <div class="home-card-sub">new Date() → toDateString() → innerHTML</div>
+      </div>
+      <div class="home-card" onclick="goSlide(8)">
+        <span class="badge b-purple">Deep Dive</span>
+        <div class="home-card-title">Events Reference Table</div>
+        <div class="home-card-sub">click, mouseover, keypress, submit, load…</div>
+      </div>
+      <div class="home-card" onclick="goSlide(9)">
+        <span class="badge b-rose">Challenge</span>
+        <div class="home-card-title">15-Min Mini Challenge</div>
+        <div class="home-card-sub">prompt() → "Hello Rahul!" welcome banner</div>
+      </div>
+      <div class="home-card" onclick="goSlide(10)">
+        <span class="badge b-rose">Assignment</span>
+        <div class="home-card-title">Student Dashboard Section</div>
+        <div class="home-card-sub">Name, date, courses, theme, Start Learning button</div>
+      </div>
+      <div class="home-card" onclick="goSlide(11)">
+        <span class="badge b-orange">Preview</span>
+        <div class="home-card-title">Project Progress — Day 7 Complete</div>
+        <div class="home-card-sub">Everything SkillHub can now do</div>
+      </div>
+      <div class="home-card" onclick="goSlide(12)">
+        <span class="badge b-slate">Quiz</span>
+        <div class="home-card-title">Quick-Fire Quiz</div>
+        <div class="home-card-sub">4 questions on JS Events</div>
+      </div>
+      <div class="home-card" onclick="goSlide(13)">
+        <span class="badge b-teal">Wrap-Up</span>
+        <div class="home-card-title">Day 7 Complete!</div>
+        <div class="home-card-sub">Skills earned + Day 8 preview</div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" disabled><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-0"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Start <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 1  RECAP ═══════════ -->
+  <div class="slide" id="slide-1">
+    <div class="slide-header">
+      <span class="badge b-green">Recap</span>
+      <div>
+        <div class="slide-title">Where We Are After Hours 1 & 2</div>
+        <div class="slide-subtitle">DOM manipulation is mastered — now the page must respond to what users do</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div class="section-label">day 7 progress</div>
+        <div class="check-item done"><div class="check-circle" style="background:#22c55e;border-color:#22c55e;color:#fff">✓</div><span>JavaScript variables &amp; data types (Hour 1)</span></div>
+        <div class="check-item done"><div class="check-circle" style="background:#22c55e;border-color:#22c55e;color:#fff">✓</div><span>getElementById + querySelector (Hour 2)</span></div>
+        <div class="check-item done"><div class="check-circle" style="background:#22c55e;border-color:#22c55e;color:#fff">✓</div><span>innerHTML — changing page content (Hour 2)</span></div>
+        <div class="check-item done"><div class="check-circle" style="background:#22c55e;border-color:#22c55e;color:#fff">✓</div><span>.style.property — changing CSS with JS (Hour 2)</span></div>
+        <div class="check-item done"><div class="check-circle" style="background:#22c55e;border-color:#22c55e;color:#fff">✓</div><span>prompt() / alert() / dynamic heading (Hour 2)</span></div>
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;border:2px dashed #fde047;background:#fefce8;font-size:13px;margin-top:4px">
+          <i class="ti ti-clock-play" style="color:#d97706;font-size:18px;flex-shrink:0"></i>
+          <span style="color:#92400e;font-weight:600">Now: <strong>addEventListener</strong> — make buttons, counters, themes all react to clicks</span>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">what still needs js</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#fee2e2;border-radius:8px;border:1px solid #fca5a5;font-size:12px;font-weight:700;color:#991b1b">
+            <i class="ti ti-x" style="flex-shrink:0"></i>"Join Now" button does nothing when clicked
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#fee2e2;border-radius:8px;border:1px solid #fca5a5;font-size:12px;font-weight:700;color:#991b1b">
+            <i class="ti ti-x" style="flex-shrink:0"></i>Page has no way to change its look at runtime
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#fee2e2;border-radius:8px;border:1px solid #fca5a5;font-size:12px;font-weight:700;color:#991b1b">
+            <i class="ti ti-x" style="flex-shrink:0"></i>Course count is static — stuck at 6 forever
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#fee2e2;border-radius:8px;border:1px solid #fca5a5;font-size:12px;font-weight:700;color:#991b1b">
+            <i class="ti ti-x" style="flex-shrink:0"></i>No live date — it's hardcoded or missing
+          </div>
+        </div>
+        <div class="info-box" style="margin-top:8px">
+          <i class="ti ti-info-circle info-icon"></i>
+          <div class="info-text"><strong>addEventListener</strong> is the bridge between user actions and your JavaScript code. After this hour, every button on SkillHub will actually do something.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-1"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">What is an Event? <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 2  WHAT IS AN EVENT ═══════════ -->
+  <div class="slide" id="slide-2">
+    <div class="slide-header">
+      <span class="badge b-amber">Concept</span>
+      <div>
+        <div class="slide-title">What is an Event?</div>
+        <div class="slide-subtitle">An event is anything the user does — JS listens and reacts</div>
+      </div>
+    </div>
+
+    <div style="background:linear-gradient(135deg,#1e1b4b,#312e81);border-radius:14px;padding:24px;text-align:center">
+      <div style="font-size:13px;font-weight:700;color:#a5b4fc;letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px">The Core Idea</div>
+      <div style="font-size:22px;font-weight:800;color:#fff;line-height:1.4">User does something → Browser fires an event → Your JS function runs</div>
+    </div>
+
+    <div>
+      <div class="section-label">event flow — user → browser → your code</div>
+      <div class="event-flow">
+        <div class="event-step highlight">
+          <div style="font-size:22px;margin-bottom:4px">👆</div>
+          <div style="font-size:11px;font-weight:700;color:#d97706">User Action</div>
+          <div style="font-size:10px;color:#666;margin-top:2px">clicks a button</div>
+        </div>
+        <div class="event-arrow">→</div>
+        <div class="event-step">
+          <div style="font-size:22px;margin-bottom:4px">🌐</div>
+          <div style="font-size:11px;font-weight:700;color:#333">Browser</div>
+          <div style="font-size:10px;color:#666;margin-top:2px">fires "click" event</div>
+        </div>
+        <div class="event-arrow">→</div>
+        <div class="event-step highlight">
+          <div style="font-size:22px;margin-bottom:4px">👂</div>
+          <div style="font-size:11px;font-weight:700;color:#d97706">Event Listener</div>
+          <div style="font-size:10px;color:#666;margin-top:2px">catches the event</div>
+        </div>
+        <div class="event-arrow">→</div>
+        <div class="event-step">
+          <div style="font-size:22px;margin-bottom:4px">⚙️</div>
+          <div style="font-size:11px;font-weight:700;color:#333">Your Function</div>
+          <div style="font-size:10px;color:#666;margin-top:2px">runs your code</div>
+        </div>
+        <div class="event-arrow">→</div>
+        <div class="event-step highlight">
+          <div style="font-size:22px;margin-bottom:4px">✨</div>
+          <div style="font-size:11px;font-weight:700;color:#d97706">Page Changes</div>
+          <div style="font-size:10px;color:#666;margin-top:2px">user sees result</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-3">
+      <div class="card" style="text-align:center">
+        <div style="font-size:24px;margin-bottom:6px">🖱️</div>
+        <div style="font-size:13px;font-weight:700;margin-bottom:3px">Mouse Events</div>
+        <div style="font-size:11px;color:#666">click, dblclick, mouseover, mouseout</div>
+      </div>
+      <div class="card" style="text-align:center">
+        <div style="font-size:24px;margin-bottom:6px">⌨️</div>
+        <div style="font-size:13px;font-weight:700;margin-bottom:3px">Keyboard Events</div>
+        <div style="font-size:11px;color:#666">keydown, keyup, keypress</div>
+      </div>
+      <div class="card" style="text-align:center">
+        <div style="font-size:24px;margin-bottom:6px">📋</div>
+        <div style="font-size:13px;font-weight:700;margin-bottom:3px">Form Events</div>
+        <div style="font-size:11px;color:#666">submit, change, focus, blur</div>
+      </div>
+    </div>
+
+    <div class="tip-box">
+      <i class="ti ti-bulb tip-icon"></i>
+      <div class="tip-text">Every interactive website feature — like buttons, toggles, counters, and live search — is built on this same pattern. Learn <strong>addEventListener</strong> once and you can build almost any interactive feature.</div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-2"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">The addEventListener Pattern <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 3  SYNTAX ═══════════ -->
+  <div class="slide" id="slide-3">
+    <div class="slide-header">
+      <span class="badge b-js">Syntax</span>
+      <div>
+        <div class="slide-title">addEventListener — The Universal Pattern</div>
+        <div class="slide-subtitle">Learn this once — it's the same pattern for every event in JavaScript</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">the 3-part pattern</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><div class="e-label">script.js — addEventListener pattern</div></div>
+          <div class="editor-body">
+            <div><span class="e-ln">1</span> <span class="j-com">// Step 1: get the element</span></div>
+            <div><span class="e-ln">2</span> <span class="j-kw">let</span> <span class="j-var">btn</span> <span class="j-op">=</span> <span class="j-dom">document</span><span class="j-prop">.getElementById</span><span class="e-txt">(</span><span class="j-str">"joinBtn"</span><span class="e-txt">);</span></div>
+            <div><span class="e-ln">3</span></div>
+            <div><span class="e-ln">4</span> <span class="j-com">// Step 2: add the event listener</span></div>
+            <div><span class="e-ln">5</span> <span class="j-var">btn</span><span class="j-prop">.addEventListener</span><span class="e-txt">(</span></div>
+            <div><span class="e-ln">6</span>   <span class="e-ind1"></span><span class="j-str">"click"</span><span class="e-txt">,</span>         <span class="j-com">// ← Part 1: event type</span></div>
+            <div><span class="e-ln">7</span>   <span class="e-ind1"></span><span class="j-kw">function</span><span class="e-txt">() {</span>     <span class="j-com">// ← Part 2: callback</span></div>
+            <div><span class="e-ln">8</span>     <span class="e-ind2"></span><span class="j-fn">alert</span><span class="e-txt">(</span><span class="j-str">"Hello!"</span><span class="e-txt">);</span>  <span class="j-com">// ← Part 3: your code</span></div>
+            <div><span class="e-ln">9</span>   <span class="e-txt">}</span></div>
+            <div><span class="e-ln">10</span><span class="e-txt">);</span></div>
+          </div>
+        </div>
+
+        <div class="section-label" style="margin-top:10px">anatomy label</div>
+        <div class="line-explain">
+          <div class="lex-row" onclick="toggleLex(this)">
+            <div class="lex-code"><span class="j-prop">.addEventListener</span></div>
+            <div class="lex-info">
+              <div class="lex-name">The Listener Method</div>
+              <div class="lex-desc">Built-in JS method on every DOM element. "Listen for this event, then call this function."</div>
+              <div class="lex-detail">Every HTML element in the DOM has addEventListener. You can listen on a button, a div, a paragraph — even document or window.</div>
+            </div>
+          </div>
+          <div class="lex-row" onclick="toggleLex(this)">
+            <div class="lex-code"><span class="j-str">"click"</span></div>
+            <div class="lex-info">
+              <div class="lex-name">Event Type (string)</div>
+              <div class="lex-desc">The name of the event to listen for. Must be a string in quotes. "click", "mouseover", "keydown", "submit" are common types.</div>
+              <div class="lex-detail">Event names are case-sensitive and always lowercase. "Click" or "CLICK" won't work — it must be "click".</div>
+            </div>
+          </div>
+          <div class="lex-row" onclick="toggleLex(this)">
+            <div class="lex-code"><span class="j-kw">function</span><span class="e-txt">() {…}</span></div>
+            <div class="lex-info">
+              <div class="lex-name">The Callback Function</div>
+              <div class="lex-desc">The function that runs when the event fires. It only runs when the event happens — not immediately when addEventListener is called.</div>
+              <div class="lex-detail">This is called a "callback" because you're telling addEventListener: "call this function back when the event happens." The browser holds on to it until it's needed.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="section-label">comparison — old way vs modern way</div>
+        <div class="card" style="border-top:3px solid #dc2626">
+          <div style="font-size:12px;font-weight:700;color:#dc2626;margin-bottom:6px">❌ Old HTML way (avoid this)</div>
+          <div class="editor" style="border-radius:6px">
+            <div class="editor-body" style="padding:8px 12px;font-size:11.5px">
+              <div><span class="e-tag">&lt;button</span> <span class="e-att">onclick=</span><span class="e-val">"alert('hi')"</span><span class="e-tag">&gt;</span></div>
+            </div>
+          </div>
+          <div style="font-size:11px;color:#dc2626;margin-top:6px">Mixes HTML and JS — hard to maintain. Only supports one handler.</div>
+        </div>
+        <div class="card" style="border-top:3px solid #059669">
+          <div style="font-size:12px;font-weight:700;color:#059669;margin-bottom:6px">✅ Modern JS way (use this)</div>
+          <div class="editor" style="border-radius:6px">
+            <div class="editor-body" style="padding:8px 12px;font-size:11.5px">
+              <div><span class="j-var">btn</span><span class="j-prop">.addEventListener</span><span class="e-txt">(</span><span class="j-str">"click"</span><span class="e-txt">, fn);</span></div>
+            </div>
+          </div>
+          <div style="font-size:11px;color:#059669;margin-top:6px">Keeps JS separate. Can add multiple listeners to one element.</div>
+        </div>
+        <div class="tip-box">
+          <i class="ti ti-bulb tip-icon"></i>
+          <div class="tip-text"><strong>Always use addEventListener</strong> in real projects. The inline onclick= approach is outdated and makes code harder to manage as your project grows.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-3"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Feature 1 — Alert <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 4  FEATURE 1 — ALERT ═══════════ -->
+  <div class="slide" id="slide-4">
+    <div class="slide-header">
+      <span class="badge b-js">Feature 1</span>
+      <div>
+        <div class="slide-title">Join Now → Alert</div>
+        <div class="slide-subtitle">First live event — the button already exists, now make it react</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">html — button already in your page</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><div class="e-label">index.html — existing button</div></div>
+          <div class="editor-body">
+            <div><span class="e-ln">1</span> <span class="j-com">&lt;!-- Give the button an id if it doesn't have one --&gt;</span></div>
+            <div><span class="e-ln">2</span> <span class="e-tag">&lt;button</span> <span class="e-att">id=</span><span class="e-val">"joinBtn"</span> <span class="e-att">class=</span><span class="e-val">"btn btn-primary"</span><span class="e-tag">&gt;</span></div>
+            <div><span class="e-ln">3</span>   <span class="e-new">Join Now</span></div>
+            <div><span class="e-ln">4</span> <span class="e-tag">&lt;/button&gt;</span></div>
+          </div>
+        </div>
+
+        <div class="section-label" style="margin-top:10px">javascript — add to script.js</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><div class="e-label">script.js</div></div>
+          <div class="editor-body">
+            <div><span class="e-ln">1</span> <span class="j-kw">let</span> <span class="j-var">btn</span> <span class="j-op">=</span> <span class="j-dom">document</span><span class="j-prop">.getElementById</span><span class="e-txt">(</span><span class="j-str">"joinBtn"</span><span class="e-txt">);</span></div>
+            <div><span class="e-ln">2</span></div>
+            <div><span class="e-ln">3</span> <span class="j-var">btn</span><span class="j-prop">.addEventListener</span><span class="e-txt">(</span><span class="j-str">"click"</span><span class="e-txt">, </span><span class="j-kw">function</span><span class="e-txt">() {</span></div>
+            <div><span class="e-ln">4</span>   <span class="e-ind1"></span><span class="j-fn">alert</span><span class="e-txt">(</span><span class="j-str">"Registration Starts Soon!"</span><span class="e-txt">);</span></div>
+            <div><span class="e-ln">5</span> <span class="e-txt">});</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="section-label">what happens when clicked</div>
+        <div class="popup-mock">
+          <div class="popup-bar"><i class="ti ti-info-circle" style="color:#2563eb"></i> skillhub.html says:</div>
+          <div class="popup-body">
+            <div class="popup-msg">Registration Starts Soon!</div>
+            <div class="popup-btns"><button class="popup-btn popup-btn-ok">OK</button></div>
+          </div>
+        </div>
+
+        <div class="section-label">try it live — click the button</div>
+        <div class="feature-demo">
+          <div class="feature-demo-bar"><div class="feature-demo-dot"></div><div class="feature-demo-title">Feature 1 — Live Demo</div></div>
+          <div class="feature-demo-body" style="display:flex;align-items:center;gap:12px">
+            <button id="joinDemoBtn" onclick="demoAlert()" style="background:#0d6efd;color:white;border:none;padding:9px 20px;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer">Join Now</button>
+            <div id="alertResult" style="font-size:12px;color:#94a3b8;font-family:monospace"></div>
+          </div>
+        </div>
+
+        <div class="line-explain">
+          <div class="lex-row" onclick="toggleLex(this)">
+            <div class="lex-code"><span class="j-fn">alert</span><span class="e-txt">(…)</span></div>
+            <div class="lex-info">
+              <div class="lex-name">alert() — Browser Dialog</div>
+              <div class="lex-desc">Shows a browser popup with a message and an OK button. Pauses all JavaScript until the user clicks OK.</div>
+              <div class="lex-detail">alert() is great for learning and debugging but not used in production apps — it blocks the page and can't be styled. In real apps, use custom modals instead.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-4"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Feature 2 — Theme Changer <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 5  FEATURE 2 — THEME ═══════════ -->
+  <div class="slide" id="slide-5">
+    <div class="slide-header">
+      <span class="badge b-js">Feature 2</span>
+      <div>
+        <div class="slide-title">Theme Changer</div>
+        <div class="slide-subtitle">One click changes the entire page background — students see JS controlling CSS</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">html</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><div class="e-label">index.html</div></div>
+          <div class="editor-body">
+            <div><span class="e-ln">1</span> <span class="e-tag">&lt;button</span> <span class="e-att">id=</span><span class="e-val">"themeBtn"</span> <span class="e-att">class=</span><span class="e-val">"btn btn-warning"</span><span class="e-tag">&gt;</span></div>
+            <div><span class="e-ln">2</span>   <span class="e-new">Change Theme</span></div>
+            <div><span class="e-ln">3</span> <span class="e-tag">&lt;/button&gt;</span></div>
+          </div>
+        </div>
+
+        <div class="section-label" style="margin-top:10px">javascript</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><div class="e-label">script.js</div></div>
+          <div class="editor-body">
+            <div><span class="e-ln">1</span> <span class="j-kw">let</span> <span class="j-var">theme</span> <span class="j-op">=</span> <span class="j-dom">document</span><span class="j-prop">.getElementById</span><span class="e-txt">(</span><span class="j-str">"themeBtn"</span><span class="e-txt">);</span></div>
+            <div><span class="e-ln">2</span></div>
+            <div><span class="e-ln">3</span> <span class="j-var">theme</span><span class="j-prop">.addEventListener</span><span class="e-txt">(</span><span class="j-str">"click"</span><span class="e-txt">, </span><span class="j-kw">function</span><span class="e-txt">() {</span></div>
+            <div><span class="e-ln">4</span>   <span class="j-dom">document</span><span class="j-prop">.body.style.background</span> <span class="j-op">=</span> <span class="j-str">"#dbeafe"</span><span class="e-txt">;</span></div>
+            <div><span class="e-ln">5</span> <span class="e-txt">});</span></div>
+          </div>
+        </div>
+
+        <div class="section-label" style="margin-top:10px">bonus — cycling theme</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><div class="e-label">script.js — upgraded version</div></div>
+          <div class="editor-body">
+            <div><span class="e-ln">1</span> <span class="j-kw">let</span> <span class="j-var">themes</span> <span class="j-op">=</span> <span class="e-txt">[</span><span class="j-str">"#dbeafe"</span><span class="e-txt">, </span><span class="j-str">"#dcfce7"</span><span class="e-txt">, </span><span class="j-str">"#fce7f3"</span><span class="e-txt">, </span><span class="j-str">"#fff"</span><span class="e-txt">];</span></div>
+            <div><span class="e-ln">2</span> <span class="j-kw">let</span> <span class="j-var">t</span> <span class="j-op">=</span> <span class="j-num">0</span><span class="e-txt">;</span></div>
+            <div><span class="e-ln">3</span></div>
+            <div><span class="e-ln">4</span> <span class="j-dom">document</span><span class="j-prop">.getElementById</span><span class="e-txt">(</span><span class="j-str">"themeBtn"</span><span class="e-txt">)</span></div>
+            <div><span class="e-ln">5</span>   <span class="j-prop">.addEventListener</span><span class="e-txt">(</span><span class="j-str">"click"</span><span class="e-txt">, </span><span class="j-kw">function</span><span class="e-txt">() {</span></div>
+            <div><span class="e-ln">6</span>     <span class="e-ind1"></span><span class="j-var">t</span> <span class="j-op">=</span> <span class="e-txt">(</span><span class="j-var">t</span> <span class="j-op">+</span> <span class="j-num">1</span><span class="e-txt">) </span><span class="j-op">%</span> <span class="j-var">themes</span><span class="e-txt">.length;</span></div>
+            <div><span class="e-ln">7</span>     <span class="j-dom">document</span><span class="j-prop">.body.style.background</span> <span class="j-op">=</span> <span class="j-var">themes</span><span class="e-txt">[</span><span class="j-var">t</span><span class="e-txt">];</span></div>
+            <div><span class="e-ln">8</span> <span class="e-txt">});</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="section-label">live theme demo — pick a colour</div>
+        <div id="theme-preview" style="background:#fff;border:2px solid #e2e8f0;border-radius:12px;padding:16px;transition:background .4s;font-family:Arial,sans-serif">
+          <div style="font-size:12px;font-weight:700;margin-bottom:8px;color:#334155">SkillHub LMS — preview</div>
+          <div style="background:#212529;color:#fff;padding:6px 10px;border-radius:5px;font-size:10px;margin-bottom:8px;font-weight:700">Navbar</div>
+          <div style="font-size:11px;margin-bottom:8px;color:#555">This whole area represents <code>document.body</code>. Click a colour to change it.</div>
+          <div style="display:flex;gap:8px">
+            <div class="theme-swatch selected" style="background:#fff;border-color:#d97706" onclick="setTheme('#fff',this)" title="White"></div>
+            <div class="theme-swatch" style="background:#dbeafe" onclick="setTheme('#dbeafe',this)" title="Blue"></div>
+            <div class="theme-swatch" style="background:#dcfce7" onclick="setTheme('#dcfce7',this)" title="Green"></div>
+            <div class="theme-swatch" style="background:#fce7f3" onclick="setTheme('#fce7f3',this)" title="Pink"></div>
+            <div class="theme-swatch" style="background:#fef9c3" onclick="setTheme('#fef9c3',this)" title="Yellow"></div>
+            <div class="theme-swatch" style="background:#1e293b" onclick="setTheme('#1e293b',this)" title="Dark"></div>
+          </div>
+        </div>
+
+        <div class="line-explain">
+          <div class="lex-row" onclick="toggleLex(this)">
+            <div class="lex-code"><span class="j-dom">document</span><span class="j-prop">.body</span></div>
+            <div class="lex-info">
+              <div class="lex-name">document.body — The Whole Page</div>
+              <div class="lex-desc">document.body gives you the &lt;body&gt; element directly — no getElementById needed. Everything visible is inside body.</div>
+              <div class="lex-detail">document.body is a shortcut. You can also do getElementById on the body if it has an id, but document.body is simpler and universally available.</div>
+            </div>
+          </div>
+          <div class="lex-row" onclick="toggleLex(this)">
+            <div class="lex-code"><span class="j-prop">.style.background</span></div>
+            <div class="lex-info">
+              <div class="lex-name">Inline Style via JS</div>
+              <div class="lex-desc">Sets the CSS background property directly on the element as an inline style. This overrides any existing stylesheet rules.</div>
+              <div class="lex-detail">CSS property names with hyphens become camelCase in JS: background-color → backgroundColor. Both background and backgroundColor work for setting a solid colour.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-5"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Feature 3 — Course Counter <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 6  FEATURE 3 — COUNTER ═══════════ -->
+  <div class="slide" id="slide-6">
+    <div class="slide-header">
+      <span class="badge b-js">Feature 3</span>
+      <div>
+        <div class="slide-title">Course Counter</div>
+        <div class="slide-subtitle">A variable holds the count — each click increments it and updates the DOM</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">html</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><div class="e-label">index.html</div></div>
+          <div class="editor-body">
+            <div><span class="e-ln">1</span> <span class="e-tag">&lt;p&gt;</span></div>
+            <div><span class="e-ln">2</span>   <span class="e-new">Available Courses:</span></div>
+            <div><span class="e-ln">3</span>   <span class="e-tag">&lt;span</span> <span class="e-att">id=</span><span class="e-val">"count"</span><span class="e-tag">&gt;</span><span class="e-new">6</span><span class="e-tag">&lt;/span&gt;</span></div>
+            <div><span class="e-ln">4</span> <span class="e-tag">&lt;/p&gt;</span></div>
+            <div><span class="e-ln">5</span></div>
+            <div><span class="e-ln">6</span> <span class="e-tag">&lt;button</span> <span class="e-att">id=</span><span class="e-val">"addCourse"</span> <span class="e-att">class=</span><span class="e-val">"btn btn-success"</span><span class="e-tag">&gt;</span></div>
+            <div><span class="e-ln">7</span>   <span class="e-new">Add Course</span></div>
+            <div><span class="e-ln">8</span> <span class="e-tag">&lt;/button&gt;</span></div>
+          </div>
+        </div>
+
+        <div class="section-label" style="margin-top:10px">javascript</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><div class="e-label">script.js</div></div>
+          <div class="editor-body">
+            <div><span class="e-ln">1</span> <span class="j-kw">let</span> <span class="j-var">total</span> <span class="j-op">=</span> <span class="j-num">6</span><span class="e-txt">;</span>  <span class="j-com">// starts at 6</span></div>
+            <div><span class="e-ln">2</span></div>
+            <div><span class="e-ln">3</span> <span class="j-dom">document</span><span class="j-prop">.getElementById</span><span class="e-txt">(</span><span class="j-str">"addCourse"</span><span class="e-txt">)</span></div>
+            <div><span class="e-ln">4</span>   <span class="j-prop">.addEventListener</span><span class="e-txt">(</span><span class="j-str">"click"</span><span class="e-txt">, </span><span class="j-kw">function</span><span class="e-txt">() {</span></div>
+            <div><span class="e-ln">5</span>     <span class="j-var">total</span><span class="j-op">++</span><span class="e-txt">;</span>   <span class="j-com">// increment</span></div>
+            <div><span class="e-ln">6</span>     <span class="j-dom">document</span><span class="j-prop">.getElementById</span><span class="e-txt">(</span><span class="j-str">"count"</span><span class="e-txt">)</span></div>
+            <div><span class="e-ln">7</span>       <span class="j-prop">.innerHTML</span> <span class="j-op">=</span> <span class="j-var">total</span><span class="e-txt">;</span>  <span class="j-com">// update DOM</span></div>
+            <div><span class="e-ln">8</span> <span class="e-txt">});</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="section-label">live counter demo</div>
+        <div class="feature-demo">
+          <div class="feature-demo-bar"><div class="feature-demo-dot"></div><div class="feature-demo-title">Feature 3 — Click to Increment</div></div>
+          <div class="feature-demo-body">
+            <div style="font-size:14px;color:#94a3b8;font-family:'SFMono-Regular',Consolas,monospace;margin-bottom:10px">
+              Available Courses: <span id="course-count" style="color:#a4e400;font-size:20px;font-weight:800">6</span>
+            </div>
+            <button onclick="incrementCount()" style="background:#198754;color:white;border:none;padding:8px 18px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;margin-right:6px">Add Course</button>
+            <button onclick="resetCount()" style="background:#334155;color:#94a3b8;border:none;padding:8px 14px;border-radius:6px;font-size:12px;cursor:pointer">Reset</button>
+          </div>
+        </div>
+
+        <div class="line-explain">
+          <div class="lex-row" onclick="toggleLex(this)">
+            <div class="lex-code"><span class="j-var">total</span><span class="j-op">++</span></div>
+            <div class="lex-info">
+              <div class="lex-name">Increment Operator</div>
+              <div class="lex-desc">total++ is shorthand for total = total + 1. Adds 1 to the variable every time it runs.</div>
+              <div class="lex-detail">Other shortcuts: total-- (subtract 1), total += 5 (add 5), total *= 2 (multiply by 2). The ++ is called the "post-increment" operator.</div>
+            </div>
+          </div>
+          <div class="lex-row" onclick="toggleLex(this)">
+            <div class="lex-code"><span class="j-prop">.innerHTML</span> <span class="j-op">=</span> <span class="j-var">total</span></div>
+            <div class="lex-info">
+              <div class="lex-name">Update the DOM</div>
+              <div class="lex-desc">Sets the content of the #count span to the current value of total. JS automatically converts the number to a string for display.</div>
+              <div class="lex-detail">This is the complete pattern for live-updating numbers: keep the value in a variable, update the variable, then push the new value to the DOM with innerHTML.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tip-box">
+          <i class="ti ti-bulb tip-icon"></i>
+          <div class="tip-text"><strong>Key insight:</strong> The variable <code>total</code> lives in JS memory. The <code>#count</code> span lives in the DOM. They're separate — you must manually sync them with <code>.innerHTML = total</code> every time the variable changes.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-6"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Feature 4 — Today's Date <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 7  FEATURE 4 — DATE ═══════════ -->
+  <div class="slide" id="slide-7">
+    <div class="slide-header">
+      <span class="badge b-js">Feature 4</span>
+      <div>
+        <div class="slide-title">Today's Date — new Date()</div>
+        <div class="slide-subtitle">JavaScript has a built-in Date object — display the real date automatically</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">html</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><div class="e-label">index.html</div></div>
+          <div class="editor-body">
+            <div><span class="e-ln">1</span> <span class="j-com">&lt;!-- Empty paragraph — JS will fill this --&gt;</span></div>
+            <div><span class="e-ln">2</span> <span class="e-tag">&lt;p</span> <span class="e-att">id=</span><span class="e-val">"date"</span><span class="e-tag">&gt;&lt;/p&gt;</span></div>
+          </div>
+        </div>
+
+        <div class="section-label" style="margin-top:10px">javascript — no click needed, runs on page load</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><div class="e-label">script.js</div></div>
+          <div class="editor-body">
+            <div><span class="e-ln">1</span> <span class="j-kw">let</span> <span class="j-var">today</span> <span class="j-op">=</span> <span class="j-kw">new</span> <span class="j-fn">Date</span><span class="e-txt">();</span></div>
+            <div><span class="e-ln">2</span></div>
+            <div><span class="e-ln">3</span> <span class="j-dom">document</span><span class="j-prop">.getElementById</span><span class="e-txt">(</span><span class="j-str">"date"</span><span class="e-txt">)</span></div>
+            <div><span class="e-ln">4</span>   <span class="j-prop">.innerHTML</span> <span class="j-op">=</span> <span class="j-var">today</span><span class="j-prop">.toDateString</span><span class="e-txt">();</span></div>
+          </div>
+        </div>
+
+        <div class="section-label" style="margin-top:10px">useful date methods</div>
+        <table class="tag-table">
+          <thead><tr><th>Method</th><th>Example Output</th></tr></thead>
+          <tbody>
+            <tr><td><code>.toDateString()</code></td><td id="ex-datestring" style="font-family:monospace;font-size:12px"></td></tr>
+            <tr><td><code>.toLocaleDateString()</code></td><td id="ex-local" style="font-family:monospace;font-size:12px"></td></tr>
+            <tr><td><code>.getFullYear()</code></td><td id="ex-year" style="font-family:monospace;font-size:12px"></td></tr>
+            <tr><td><code>.getMonth()+1</code></td><td id="ex-month" style="font-family:monospace;font-size:12px"></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="section-label">live result on skillhub page</div>
+        <div class="sh-preview">
+          <div class="sh-nav2">SkillHub LMS</div>
+          <div class="sh-dash">
+            <div style="font-size:12px;font-weight:700;margin-bottom:6px;color:#1d4ed8">📅 Live Date on Page</div>
+            <div id="date-display" style="font-size:15px;font-weight:800;color:#1a1a1a;padding:10px;background:white;border-radius:6px;border:1px solid #e2e8f0;text-align:center"></div>
+            <div style="font-size:10px;color:#888;margin-top:5px;text-align:center">This updates automatically every time the page loads — no hardcoding</div>
+          </div>
+        </div>
+
+        <div class="line-explain">
+          <div class="lex-row" onclick="toggleLex(this)">
+            <div class="lex-code"><span class="j-kw">new</span> <span class="j-fn">Date</span><span class="e-txt">()</span></div>
+            <div class="lex-info">
+              <div class="lex-name">Creating a Date Object</div>
+              <div class="lex-desc">new Date() creates a Date object set to the current date and time. The "new" keyword creates an instance of the built-in Date class.</div>
+              <div class="lex-detail">new Date() with no arguments = right now. new Date("2024-01-15") = a specific date. new Date(year, month, day) = also a specific date (month is 0-indexed).</div>
+            </div>
+          </div>
+          <div class="lex-row" onclick="toggleLex(this)">
+            <div class="lex-code"><span class="j-prop">.toDateString</span><span class="e-txt">()</span></div>
+            <div class="lex-info">
+              <div class="lex-name">Human-Readable Format</div>
+              <div class="lex-desc">Converts the Date object to a readable string like "Mon Jan 15 2024". Always English, always the same format across browsers.</div>
+              <div class="lex-detail">For locale-aware formatting, use toLocaleDateString() — it shows the date in the user's regional format (e.g. DD/MM/YYYY in India vs MM/DD/YYYY in the US).</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="info-box">
+          <i class="ti ti-info-circle info-icon"></i>
+          <div class="info-text">Notice this code has <strong>no addEventListener</strong> — it runs immediately when the &lt;script&gt; tag executes. The date is always current because <code>new Date()</code> captures the moment it runs.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-7"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Events Reference <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 8  EVENTS REFERENCE ═══════════ -->
+  <div class="slide" id="slide-8">
+    <div class="slide-header">
+      <span class="badge b-purple">Reference</span>
+      <div>
+        <div class="slide-title">Common Events Reference Table</div>
+        <div class="slide-subtitle">The same addEventListener pattern works for all of these — just change the event name string</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <table class="tag-table">
+          <thead><tr><th>Event Type</th><th>Triggered When…</th><th>Common Use</th></tr></thead>
+          <tbody>
+            <tr><td><code>click</code></td><td>User clicks the element</td><td>Buttons, links</td></tr>
+            <tr><td><code>dblclick</code></td><td>User double-clicks</td><td>Image zoom, edit toggle</td></tr>
+            <tr><td><code>mouseover</code></td><td>Mouse moves onto element</td><td>Tooltips, hover effects</td></tr>
+            <tr><td><code>mouseout</code></td><td>Mouse moves off element</td><td>Hide tooltip</td></tr>
+            <tr><td><code>keydown</code></td><td>Any key is pressed</td><td>Keyboard shortcuts</td></tr>
+            <tr><td><code>keyup</code></td><td>Key is released</td><td>Live search / autocomplete</td></tr>
+            <tr><td><code>submit</code></td><td>Form is submitted</td><td>Form validation</td></tr>
+            <tr><td><code>change</code></td><td>Input value changes</td><td>Dropdowns, checkboxes</td></tr>
+            <tr><td><code>focus</code></td><td>Element receives focus</td><td>Input field highlight</td></tr>
+            <tr><td><code>load</code></td><td>Page/resource loads</td><td>Run code on page ready</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="section-label">same pattern — different event name</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><div class="e-label">any event — same structure</div></div>
+          <div class="editor-body" style="font-size:12px">
+            <div><span class="j-com">// CLICK</span></div>
+            <div><span class="j-var">el</span><span class="j-prop">.addEventListener</span><span class="e-txt">(</span><span class="j-str">"click"</span><span class="e-txt">, fn);</span></div>
+            <div></div>
+            <div><span class="j-com">// KEYBOARD</span></div>
+            <div><span class="j-var">el</span><span class="j-prop">.addEventListener</span><span class="e-txt">(</span><span class="j-str">"keyup"</span><span class="e-txt">, fn);</span></div>
+            <div></div>
+            <div><span class="j-com">// HOVER</span></div>
+            <div><span class="j-var">el</span><span class="j-prop">.addEventListener</span><span class="e-txt">(</span><span class="j-str">"mouseover"</span><span class="e-txt">, fn);</span></div>
+            <div></div>
+            <div><span class="j-com">// PAGE LOAD</span></div>
+            <div><span class="j-var">window</span><span class="j-prop">.addEventListener</span><span class="e-txt">(</span><span class="j-str">"load"</span><span class="e-txt">, fn);</span></div>
+          </div>
+        </div>
+
+        <div class="section-label">live mouseover demo</div>
+        <div class="feature-demo">
+          <div class="feature-demo-bar"><div class="feature-demo-dot"></div><div class="feature-demo-title">Hover event demo</div></div>
+          <div class="feature-demo-body">
+            <div id="hover-box" onmouseover="hoverEnter()" onmouseout="hoverLeave()" style="padding:14px;border-radius:8px;border:2px solid #334155;text-align:center;cursor:pointer;transition:all .2s;color:#94a3b8;font-size:12px;font-family:monospace">
+              👆 Hover over me (mouseover event)
+            </div>
+          </div>
+        </div>
+
+        <div class="success-box">
+          <i class="ti ti-check" style="color:#16a34a;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+          <div style="font-size:13px;color:#166534;line-height:1.6">Learn the addEventListener pattern once — it works for every event in this table and dozens more. This is one of the most reused patterns in all of JavaScript.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-8"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Mini Challenge <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 9  MINI CHALLENGE ═══════════ -->
+  <div class="slide" id="slide-9">
+    <div class="slide-header">
+      <span class="badge b-rose">⏱ 15-Min Challenge</span>
+      <div>
+        <div class="slide-title">Mini Challenge — Welcome Banner</div>
+        <div class="slide-subtitle">Students build a personalised greeting using prompt() and innerHTML</div>
+      </div>
+    </div>
+
+    <div style="background:linear-gradient(135deg,#7f1d1d,#991b1b);border-radius:14px;padding:20px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px">
+      <div style="font-size:13px;font-weight:700;color:#fca5a5;letter-spacing:.08em;text-transform:uppercase">⏱ 15 Minutes</div>
+      <div style="font-size:22px;font-weight:800;color:#fff;line-height:1.35">Build a Welcome Banner that greets<br>the user by name</div>
+      <div style="font-size:13px;color:#fca5a5">Hint: prompt() → save to a variable → innerHTML</div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">what the result should look like</div>
+        <div style="background:#dbeafe;border:2px solid #2563eb;border-radius:12px;padding:20px;text-align:center;font-family:Arial,sans-serif">
+          <div style="font-size:22px;font-weight:800;color:#1d4ed8" id="challenge-banner">Hello, Rahul! 👋</div>
+          <div style="font-size:12px;color:#2563eb;margin-top:4px">Welcome to SkillHub LMS</div>
+        </div>
+
+        <div class="section-label" style="margin-top:10px">html needed</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><div class="e-label">index.html</div></div>
+          <div class="editor-body">
+            <div><span class="e-ln">1</span> <span class="e-tag">&lt;div</span> <span class="e-att">id=</span><span class="e-val">"banner"</span><span class="e-tag">&gt;&lt;/div&gt;</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="section-label">solution — reveal after students try</div>
+        <button class="reveal-btn" id="revealChallenge" onclick="revealSolution()">👀 Reveal Solution</button>
+        <div id="challenge-solution" style="display:none">
+          <div class="editor">
+            <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><div class="e-label">script.js — solution</div></div>
+            <div class="editor-body">
+              <div><span class="e-ln">1</span> <span class="j-kw">let</span> <span class="j-var">name</span> <span class="j-op">=</span> <span class="j-fn">prompt</span><span class="e-txt">(</span><span class="j-str">"What is your name?"</span><span class="e-txt">);</span></div>
+              <div><span class="e-ln">2</span></div>
+              <div><span class="e-ln">3</span> <span class="j-dom">document</span><span class="j-prop">.getElementById</span><span class="e-txt">(</span><span class="j-str">"banner"</span><span class="e-txt">)</span></div>
+              <div><span class="e-ln">4</span>   <span class="j-prop">.innerHTML</span> <span class="j-op">=</span> <span class="j-str">"Hello, "</span> <span class="j-op">+</span> <span class="j-var">name</span> <span class="j-op">+</span> <span class="j-str">"! 👋"</span><span class="e-txt">;</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-label">try it live below</div>
+        <div class="feature-demo">
+          <div class="feature-demo-bar"><div class="feature-demo-dot"></div><div class="feature-demo-title">Welcome Banner — Interactive</div></div>
+          <div class="feature-demo-body" style="display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;gap:6px">
+              <input id="name-input" type="text" placeholder="Type your name…" style="flex:1;background:#1e293b;border:1px solid #334155;border-radius:6px;padding:7px 12px;color:#f8f8f2;font-family:monospace;font-size:13px;outline:none">
+              <button onclick="setBanner()" style="background:#d97706;color:white;border:none;padding:7px 14px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap">Say Hello</button>
+            </div>
+            <div id="live-banner" style="background:#0f172a;border-radius:6px;padding:12px;text-align:center;font-size:13px;color:#94a3b8;font-family:monospace;min-height:40px"></div>
+          </div>
+        </div>
+
+        <div class="tip-box">
+          <i class="ti ti-bulb tip-icon"></i>
+          <div class="tip-text">This tiny 4-line program uses <strong>three</strong> of the most important JS concepts together: a variable, string concatenation with +, and DOM manipulation with innerHTML. That's real JavaScript thinking!</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-9"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Assignment <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 10  ASSIGNMENT ═══════════ -->
+  <div class="slide" id="slide-10">
+    <div class="slide-header">
+      <span class="badge b-rose">Assignment</span>
+      <div>
+        <div class="slide-title">Student Dashboard Section</div>
+        <div class="slide-subtitle">Add a new section to the SkillHub homepage — using everything from Day 7</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">dashboard preview (target output)</div>
+        <div style="background:#f1f5f9;border:1px solid #e2e8f0;border-radius:12px;padding:14px;font-family:Arial,sans-serif">
+          <div style="font-size:13px;font-weight:800;color:#1e293b;margin-bottom:10px;border-bottom:2px solid #e2e8f0;padding-bottom:8px">🎓 Student Dashboard</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+            <div style="background:white;border-radius:8px;padding:10px;border:1px solid #e2e8f0">
+              <div style="font-size:9px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:3px">Student</div>
+              <div style="font-size:12px;font-weight:700" id="dash-name">Rahul Sharma</div>
+            </div>
+            <div style="background:white;border-radius:8px;padding:10px;border:1px solid #e2e8f0">
+              <div style="font-size:9px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:3px">Today</div>
+              <div style="font-size:12px;font-weight:700" id="dash-date"></div>
+            </div>
+            <div style="background:white;border-radius:8px;padding:10px;border:1px solid #e2e8f0">
+              <div style="font-size:9px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:3px">Courses</div>
+              <div style="font-size:18px;font-weight:800;color:#2563eb" id="dash-count">6</div>
+            </div>
+            <div style="background:white;border-radius:8px;padding:10px;border:1px solid #e2e8f0">
+              <div style="font-size:9px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:3px">Theme</div>
+              <button onclick="dashTheme()" style="background:#f59e0b;color:white;border:none;padding:4px 10px;border-radius:5px;font-size:10px;font-weight:700;cursor:pointer;width:100%">Change</button>
+            </div>
+          </div>
+          <button onclick="startLearning()" style="background:#0d6efd;color:white;border:none;padding:8px 0;border-radius:7px;font-size:12px;font-weight:700;width:100%;cursor:pointer">🚀 Start Learning</button>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="section-label">the complete js code</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><div class="e-label">script.js — dashboard section</div></div>
+          <div class="editor-body" style="font-size:11.5px">
+            <div><span class="e-ln"> 1</span> <span class="j-com">// 1. Ask student name</span></div>
+            <div><span class="e-ln"> 2</span> <span class="j-kw">let</span> <span class="j-var">studentName</span> <span class="j-op">=</span> <span class="j-fn">prompt</span><span class="e-txt">(</span><span class="j-str">"Enter your name:"</span><span class="e-txt">);</span></div>
+            <div><span class="e-ln"> 3</span> <span class="j-dom">document</span><span class="j-prop">.getElementById</span><span class="e-txt">(</span><span class="j-str">"dashName"</span><span class="e-txt">)</span></div>
+            <div><span class="e-ln"> 4</span>   <span class="j-prop">.innerHTML</span> <span class="j-op">=</span> <span class="j-var">studentName</span><span class="e-txt">;</span></div>
+            <div><span class="e-ln"> 5</span></div>
+            <div><span class="e-ln"> 6</span> <span class="j-com">// 2. Current date</span></div>
+            <div><span class="e-ln"> 7</span> <span class="j-dom">document</span><span class="j-prop">.getElementById</span><span class="e-txt">(</span><span class="j-str">"dashDate"</span><span class="e-txt">)</span></div>
+            <div><span class="e-ln"> 8</span>   <span class="j-prop">.innerHTML</span> <span class="j-op">=</span> <span class="j-kw">new</span> <span class="j-fn">Date</span><span class="e-txt">()</span><span class="j-prop">.toDateString</span><span class="e-txt">();</span></div>
+            <div><span class="e-ln"> 9</span></div>
+            <div><span class="e-ln">10</span> <span class="j-com">// 3. Course counter</span></div>
+            <div><span class="e-ln">11</span> <span class="j-kw">let</span> <span class="j-var">courses</span> <span class="j-op">=</span> <span class="j-num">6</span><span class="e-txt">;</span></div>
+            <div><span class="e-ln">12</span> <span class="j-dom">document</span><span class="j-prop">.getElementById</span><span class="e-txt">(</span><span class="j-str">"addBtn"</span><span class="e-txt">)</span></div>
+            <div><span class="e-ln">13</span>   <span class="j-prop">.addEventListener</span><span class="e-txt">(</span><span class="j-str">"click"</span><span class="e-txt">, </span><span class="j-kw">function</span><span class="e-txt">() {</span></div>
+            <div><span class="e-ln">14</span>     <span class="j-var">courses</span><span class="j-op">++</span><span class="e-txt">;</span></div>
+            <div><span class="e-ln">15</span>     <span class="j-dom">document</span><span class="j-prop">.getElementById</span><span class="e-txt">(</span><span class="j-str">"dashCount"</span><span class="e-txt">)</span></div>
+            <div><span class="e-ln">16</span>       <span class="j-prop">.innerHTML</span> <span class="j-op">=</span> <span class="j-var">courses</span><span class="e-txt">;</span></div>
+            <div><span class="e-ln">17</span>   <span class="e-txt">});</span></div>
+            <div><span class="e-ln">18</span></div>
+            <div><span class="e-ln">19</span> <span class="j-com">// 4. Theme changer</span></div>
+            <div><span class="e-ln">20</span> <span class="j-dom">document</span><span class="j-prop">.getElementById</span><span class="e-txt">(</span><span class="j-str">"themeBtn"</span><span class="e-txt">)</span></div>
+            <div><span class="e-ln">21</span>   <span class="j-prop">.addEventListener</span><span class="e-txt">(</span><span class="j-str">"click"</span><span class="e-txt">, </span><span class="j-kw">function</span><span class="e-txt">() {</span></div>
+            <div><span class="e-ln">22</span>     <span class="j-dom">document</span><span class="j-prop">.body.style.background</span> <span class="j-op">=</span> <span class="j-str">"#dbeafe"</span><span class="e-txt">;</span></div>
+            <div><span class="e-ln">23</span>   <span class="e-txt">});</span></div>
+            <div><span class="e-ln">24</span></div>
+            <div><span class="e-ln">25</span> <span class="j-com">// 5. Start Learning button</span></div>
+            <div><span class="e-ln">26</span> <span class="j-dom">document</span><span class="j-prop">.getElementById</span><span class="e-txt">(</span><span class="j-str">"startBtn"</span><span class="e-txt">)</span></div>
+            <div><span class="e-ln">27</span>   <span class="j-prop">.addEventListener</span><span class="e-txt">(</span><span class="j-str">"click"</span><span class="e-txt">, </span><span class="j-kw">function</span><span class="e-txt">() {</span></div>
+            <div><span class="e-ln">28</span>     <span class="j-fn">alert</span><span class="e-txt">(</span><span class="j-str">"Welcome to your learning journey!"</span><span class="e-txt">);</span></div>
+            <div><span class="e-ln">29</span>   <span class="e-txt">});</span></div>
+          </div>
+        </div>
+
+        <div class="section-label">requirements checklist</div>
+        <div style="display:flex;flex-direction:column;gap:5px">
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><div>Student name via <code>prompt()</code> → display in page</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><div>Current date using <code>new Date().toDateString()</code></div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><div>Total Available Courses counter</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><div>Theme Changer button changes background</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><div>"Start Learning" → alert("Welcome to your learning journey!")</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-10"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Project Progress <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 11  PROJECT PROGRESS ═══════════ -->
+  <div class="slide" id="slide-11">
+    <div class="slide-header">
+      <span class="badge b-orange">Project Progress</span>
+      <div>
+        <div class="slide-title">SkillHub LMS — Day 7 Feature Checklist</div>
+        <div class="slide-subtitle">Everything SkillHub can now do after 7 days of training</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div class="section-label">all features built so far</div>
+        <div class="progress-feature done"><i class="ti ti-check" style="flex-shrink:0"></i>Responsive Landing Page (Day 5)</div>
+        <div class="progress-feature done"><i class="ti ti-check" style="flex-shrink:0"></i>Bootstrap UI — Navbar, Grid, Cards (Day 6)</div>
+        <div class="progress-feature done"><i class="ti ti-check" style="flex-shrink:0"></i>Welcome Popup via prompt() (Day 7 H1)</div>
+        <div class="progress-feature done"><i class="ti ti-check" style="flex-shrink:0"></i>Dynamic Hero Heading via innerHTML (Day 7 H2)</div>
+        <div class="progress-feature done"><i class="ti ti-check" style="flex-shrink:0"></i>Dynamic Button — style.property (Day 7 H2)</div>
+        <div class="progress-feature today"><i class="ti ti-star" style="flex-shrink:0"></i>Theme Changer ← added today</div>
+        <div class="progress-feature today"><i class="ti ti-star" style="flex-shrink:0"></i>Course Counter ← added today</div>
+        <div class="progress-feature today"><i class="ti ti-star" style="flex-shrink:0"></i>Current Date ← added today</div>
+        <div class="progress-feature today"><i class="ti ti-star" style="flex-shrink:0"></i>Student Dashboard Section ← assignment</div>
+      </div>
+
+      <div>
+        <div class="section-label">what the site can do now</div>
+        <div class="sh-preview">
+          <div class="sh-nav2">SkillHub LMS — Day 7 Version</div>
+          <div class="sh-dash">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px">
+              <div style="background:#dbeafe;border-radius:6px;padding:8px;font-size:10px">
+                <div style="font-weight:700;color:#1d4ed8">🎯 Interactive</div>
+                <div style="color:#555;margin-top:2px">Buttons react to clicks</div>
+              </div>
+              <div style="background:#dcfce7;border-radius:6px;padding:8px;font-size:10px">
+                <div style="font-weight:700;color:#065f46">🎨 Dynamic</div>
+                <div style="color:#555;margin-top:2px">Theme changes live</div>
+              </div>
+              <div style="background:#fef9c3;border-radius:6px;padding:8px;font-size:10px">
+                <div style="font-weight:700;color:#854d0e">🔢 Live Count</div>
+                <div style="color:#555;margin-top:2px">Counter updates DOM</div>
+              </div>
+              <div style="background:#fce7f3;border-radius:6px;padding:8px;font-size:10px">
+                <div style="font-weight:700;color:#9d174d">📅 Auto Date</div>
+                <div style="color:#555;margin-top:2px">Always current date</div>
+              </div>
+            </div>
+            <div style="background:#1e293b;color:#a4e400;border-radius:6px;padding:8px;font-size:10px;font-family:monospace">
+              SkillHub: Responsive ✓ Styled ✓ Interactive ✓
+            </div>
+          </div>
+        </div>
+
+        <div class="success-box" style="margin-top:8px">
+          <i class="ti ti-sparkles" style="color:#16a34a;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+          <div style="font-size:13px;color:#166534;line-height:1.6"><strong>In 7 days</strong> you went from a blank HTML file to a fully responsive, Bootstrap-styled, JavaScript-powered web application. This is a genuine portfolio project.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-11"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Quiz <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 12  QUIZ ═══════════ -->
+  <div class="slide" id="slide-12">
+    <div class="slide-header">
+      <span class="badge b-slate">Quiz</span>
+      <div>
+        <div class="slide-title">Quick-Fire Quiz</div>
+        <div class="slide-subtitle">4 questions covering JS Events from Hour 3</div>
+      </div>
+    </div>
+    <div id="quiz-container"></div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-12"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Wrap Up <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 13  WRAP UP ═══════════ -->
+  <div class="slide" id="slide-13">
+    <div class="slide-header">
+      <span class="badge b-teal">Wrap-Up</span>
+      <div>
+        <div class="slide-title">Day 7 Complete! 🎉</div>
+        <div class="slide-subtitle">SkillHub is now a fully interactive web application</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">skills earned in day 7</div>
+        <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px">
+          <span style="background:#fef9c3;color:#854d0e;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700">addEventListener</span>
+          <span style="background:#fef9c3;color:#854d0e;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700">"click" event</span>
+          <span style="background:#fef9c3;color:#854d0e;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700">callback function</span>
+          <span style="background:#fef9c3;color:#854d0e;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700">alert()</span>
+          <span style="background:#fef9c3;color:#854d0e;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700">document.body.style</span>
+          <span style="background:#fef9c3;color:#854d0e;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700">total++</span>
+          <span style="background:#fef9c3;color:#854d0e;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700">new Date()</span>
+          <span style="background:#fef9c3;color:#854d0e;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700">toDateString()</span>
+          <span style="background:#fef9c3;color:#854d0e;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700">prompt() + innerHTML</span>
+          <span style="background:#fef9c3;color:#854d0e;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700">mouseover event</span>
+        </div>
+
+        <div class="section-label">complete skillhub feature log</div>
+        <div style="background:#0d1117;border-radius:10px;padding:14px 16px;font-family:'SFMono-Regular',Consolas,monospace;font-size:11px;line-height:2;color:#3fb950">
+          <div>✔ Responsive Landing Page</div>
+          <div>✔ Bootstrap UI</div>
+          <div>✔ Welcome Popup</div>
+          <div>✔ Dynamic Hero Heading</div>
+          <div>✔ Dynamic Button</div>
+          <div>✔ Theme Changer</div>
+          <div>✔ Course Counter</div>
+          <div>✔ Current Date</div>
+          <div style="color:#f1fa8c">✔ Student Dashboard (assignment)</div>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">day 8 preview</div>
+        <div style="background:linear-gradient(135deg,#0f172a,#1e3a5f);border-radius:12px;padding:16px;color:white;margin-bottom:10px">
+          <div style="font-size:13px;font-weight:700;margin-bottom:8px">🗓️ Day 8 — JavaScript Functions & Arrays</div>
+          <div style="font-size:12px;opacity:.8;line-height:1.8">
+            ✦ function declaration vs expression<br>
+            ✦ Parameters and return values<br>
+            ✦ Arrays — create, access, push, pop<br>
+            ✦ Looping over arrays with forEach<br>
+            ✦ Dynamic course list from an array
+          </div>
+        </div>
+
+        <div style="background:linear-gradient(135deg,#d97706,#92400e);border-radius:12px;padding:16px;color:white;text-align:center">
+          <div style="font-size:16px;font-weight:800;margin-bottom:4px">🏆 Day 7 Complete!</div>
+          <div style="font-size:13px;opacity:.85">Your website now listens, reacts, and changes — exactly what separates a static page from a real web application. You built that in a single day.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-13"></div>
+      <button class="nav-btn" disabled>Done <i class="ti ti-flag"></i></button>
+    </div>
+  </div>
+
+</div><!-- /.wrapper -->
+
+<script>
+  var current  = 0;
+  var total    = 14;
+  var quizInit = false;
+
+  /* ── Set date examples on slide 7 ── */
+  (function() {
+    var d = new Date();
+    var el = document.getElementById('date-display');
+    if (el) el.textContent = d.toDateString();
+    var ds = document.getElementById('ex-datestring');
+    if (ds) ds.textContent = d.toDateString();
+    var lo = document.getElementById('ex-local');
+    if (lo) lo.textContent = d.toLocaleDateString();
+    var yr = document.getElementById('ex-year');
+    if (yr) yr.textContent = d.getFullYear();
+    var mo = document.getElementById('ex-month');
+    if (mo) mo.textContent = d.getMonth() + 1;
+    var dd = document.getElementById('dash-date');
+    if (dd) dd.textContent = d.toDateString();
+  })();
+
+  /* ── Feature 1 — Alert demo ── */
+  function demoAlert() {
+    var r = document.getElementById('alertResult');
+    r.innerHTML = '<span style="color:#a4e400">✓ alert("Registration Starts Soon!") fired</span>';
+    setTimeout(function() { r.innerHTML = ''; }, 2500);
+  }
+
+  /* ── Feature 2 — Theme demo ── */
+  function setTheme(color, swatch) {
+    document.getElementById('theme-preview').style.background = color;
+    document.querySelectorAll('.theme-swatch').forEach(function(s){ s.classList.remove('selected'); });
+    swatch.classList.add('selected');
+  }
+
+  /* ── Feature 3 — Counter demo ── */
+  var demoCount = 6;
+  function incrementCount() {
+    demoCount++;
+    document.getElementById('course-count').textContent = demoCount;
+  }
+  function resetCount() {
+    demoCount = 6;
+    document.getElementById('course-count').textContent = 6;
+  }
+
+  /* ── Slide 8 — Hover demo ── */
+  function hoverEnter() {
+    var b = document.getElementById('hover-box');
+    b.style.background = '#fef9c3';
+    b.style.borderColor = '#d97706';
+    b.style.color = '#92400e';
+    b.textContent = '✨ mouseover event fired!';
+  }
+  function hoverLeave() {
+    var b = document.getElementById('hover-box');
+    b.style.background = '';
+    b.style.borderColor = '#334155';
+    b.style.color = '#94a3b8';
+    b.textContent = '👆 Hover over me (mouseover event)';
+  }
+
+  /* ── Slide 9 — Live banner ── */
+  function setBanner() {
+    var name = document.getElementById('name-input').value.trim();
+    var banner = document.getElementById('live-banner');
+    if (name) {
+      banner.innerHTML = '<span style="color:#a4e400;font-size:16px;font-weight:700">Hello, ' + name + '! 👋</span>';
+    } else {
+      banner.innerHTML = '<span style="color:#ff79c6">Please type a name first!</span>';
+    }
+  }
+  function revealSolution() {
+    document.getElementById('challenge-solution').style.display = 'block';
+    document.getElementById('revealChallenge').style.display = 'none';
+  }
+
+  /* ── Slide 10 — Dashboard demo ── */
+  function dashTheme() {
+    var colours = ['#dbeafe','#dcfce7','#fce7f3','#fef9c3','#fff'];
+    document.body.style.background = colours[Math.floor(Math.random()*colours.length)];
+  }
+  function startLearning() {
+    var el = document.createElement('div');
+    el.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#0d6efd;color:white;padding:20px 32px;border-radius:12px;font-size:16px;font-weight:700;z-index:9999;box-shadow:0 8px 32px rgba(0,0,0,.3);text-align:center';
+    el.innerHTML = '🎉 Welcome to your learning journey!<br><span style="font-size:12px;opacity:.8;font-weight:400;display:block;margin-top:6px">Click anywhere to close</span>';
+    document.body.appendChild(el);
+    el.onclick = function() { document.body.removeChild(el); };
+  }
+
+  /* ── Line explainer ── */
+  function toggleLex(row) {
+    var was = row.classList.contains('active');
+    document.querySelectorAll('.lex-row.active').forEach(function(r){ r.classList.remove('active'); });
+    if (!was) row.classList.add('active');
+  }
+
+  /* ── Checklist ── */
+  function toggleCheck(item) {
+    item.classList.toggle('done');
+    var c = item.querySelector('.check-circle');
+    if (item.classList.contains('done')) {
+      c.style.background = '#22c55e'; c.style.borderColor = '#22c55e'; c.style.color = '#fff';
+    } else {
+      c.style.background = ''; c.style.borderColor = ''; c.style.color = '';
+    }
+  }
+
+  /* ── Quiz ── */
+  var quizData = [
+    {
+      q: "What are the two required arguments to addEventListener?",
+      opts: [
+        "element id and function name",
+        "event type (string) and callback function",
+        "CSS selector and innerHTML value",
+        "event name and element id"
+      ],
+      ans: 1,
+      exp: "addEventListener takes (1) the event type as a string — e.g. \"click\", \"mouseover\" — and (2) a callback function that runs when the event fires. The element itself is what you call addEventListener on, not an argument."
+    },
+    {
+      q: "A student writes: document.body.style.background = \"#dbeafe\". What does this change?",
+      opts: [
+        "The background of every div on the page",
+        "The background colour of the CSS file",
+        "The background colour of the entire page (body element)",
+        "The background of the element with id=\"body\""
+      ],
+      ans: 2,
+      exp: "document.body is a direct reference to the &lt;body&gt; element — the container for all visible page content. Setting .style.background on it changes the page's background colour, visible everywhere. It applies as an inline style which overrides any stylesheet rules."
+    },
+    {
+      q: "In the course counter, why is the variable total defined OUTSIDE the addEventListener callback?",
+      opts: [
+        "Variables must always be outside event listeners — it's a syntax rule",
+        "So that total persists between clicks — if it were inside, it would reset to 6 every click",
+        "Because let variables can't be used inside functions",
+        "addEventListener only reads variables from the global scope"
+      ],
+      ans: 1,
+      exp: "If total were declared inside the callback function with let total = 6, it would be recreated fresh as 6 on EVERY click — so the counter would never go above 7. By declaring it outside, the variable lives in memory between clicks and its value accumulates."
+    },
+    {
+      q: "new Date().toDateString() — what does the new keyword do here?",
+      opts: [
+        "Creates a new HTML element in the DOM",
+        "Declares a new variable automatically",
+        "Creates a new instance (object) of the built-in Date class",
+        "It's optional — Date() works the same without new"
+      ],
+      ans: 2,
+      exp: "new creates a new instance of a class. Date is a built-in JavaScript class. new Date() means 'create a new Date object set to the current date and time.' Without new, calling Date() just returns a string, not a Date object — so methods like .toDateString() won't work."
+    }
+  ];
+  var quizAnswered = [];
+
+  function renderQuiz() {
+    var c = document.getElementById('quiz-container'); c.innerHTML = '';
+    quizData.forEach(function(q, i) {
+      var d = document.createElement('div'); d.style.cssText = 'margin-bottom:18px';
+      d.innerHTML = '<div style="font-size:13px;font-weight:600;margin-bottom:6px">'+(i+1)+'. '+q.q+'</div>';
+      q.opts.forEach(function(opt, j) {
+        var btn = document.createElement('button'); btn.className = 'quiz-option';
+        btn.innerHTML = String.fromCharCode(65+j)+'. '+opt;
+        btn.onclick = function() {
+          if (quizAnswered[i]) return; quizAnswered[i] = true;
+          var btns = d.querySelectorAll('.quiz-option');
+          btns.forEach(function(b,k){ b.disabled=true; if(k===q.ans) b.classList.add('correct'); else if(k===j) b.classList.add('wrong'); });
+          var fb = d.querySelector('.quiz-feedback');
+          fb.innerHTML = (j===q.ans?'✅ Correct! ':'❌ Not quite. ')+q.exp;
+          fb.className = 'quiz-feedback '+(j===q.ans?'correct':'wrong');
+        };
+        d.appendChild(btn);
+      });
+      var fb = document.createElement('div'); fb.className = 'quiz-feedback'; d.appendChild(fb);
+      c.appendChild(d);
+    });
+  }
+
+  /* ── Navigation ── */
+  function goSlide(n) {
+    document.getElementById('slide-'+current).classList.remove('active');
+    current = n;
+    document.getElementById('slide-'+current).classList.add('active');
+    updateDots();
+    document.getElementById('slide-counter').textContent = (current+1)+' / '+total;
+    if (n===12 && !quizInit) { renderQuiz(); quizInit=true; }
+    window.scrollTo(0,0);
+  }
+  function nextSlide() { if (current < total-1) goSlide(current+1); }
+  function prevSlide() { if (current > 0) goSlide(current-1); }
+
+  function updateDots() {
+    for (var s=0; s<total; s++) {
+      var el = document.getElementById('dots-'+s); if (!el) continue;
+      el.innerHTML = '';
+      for (var d=0; d<total; d++) {
+        var dot = document.createElement('div');
+        dot.className = 'dot'+(d===current?' active':'');
+        el.appendChild(dot);
+      }
+    }
+  }
+  updateDots();
+</script>
+</body>
+</html>

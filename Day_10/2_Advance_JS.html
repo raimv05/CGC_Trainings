@@ -1,0 +1,1437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Day 11 · Second 90 Minutes – Complete LMS Frontend</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f4f5f7; color: #1a1a1a;
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; padding: 2rem 1rem;
+  }
+  .wrapper {
+    width: 100%; max-width: 920px; background: #fff;
+    border-radius: 16px; box-shadow: 0 2px 20px rgba(0,0,0,0.09); overflow: hidden;
+  }
+  .top-bar {
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    color: #fff; padding: 14px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .top-bar-title { font-size: 15px; font-weight: 600; }
+  .top-bar-sub   { font-size: 12px; opacity: .55; margin-top: 2px; }
+  .slide-counter { font-size: 13px; opacity: .6; font-variant-numeric: tabular-nums; }
+  .slide { display: none; padding: 1.75rem 2rem; min-height: 500px; flex-direction: column; gap: 1.2rem; }
+  .slide.active { display: flex; }
+  .slide-header { display: flex; align-items: center; gap: 10px; padding-bottom: 1rem; border-bottom: 1px solid #e8e8e8; }
+  .slide-title    { font-size: 20px; font-weight: 700; color: #111; }
+  .slide-subtitle { font-size: 13px; color: #666; margin-top: 2px; }
+
+  /* ── Badges ── */
+  .badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+  .b-blue   { background:#dbeafe; color:#1d4ed8; }
+  .b-teal   { background:#d1fae5; color:#065f46; }
+  .b-purple { background:#ede9fe; color:#5b21b6; }
+  .b-amber  { background:#fef3c7; color:#92400e; }
+  .b-green  { background:#dcfce7; color:#166534; }
+  .b-slate  { background:#e2e8f0; color:#334155; }
+  .b-rose   { background:#ffe4e6; color:#9f1239; }
+  .b-orange { background:#ffedd5; color:#9a3412; }
+  .b-indigo { background:#e0e7ff; color:#3730a3; }
+  .b-cyan   { background:#cffafe; color:#164e63; }
+  .b-pink   { background:#fce7f3; color:#9d174d; }
+  .b-yellow { background:#fef9c3; color:#854d0e; }
+  .b-js     { background:#fef9c3; color:#854d0e; }
+  .b-dark   { background:#1e293b; color:#94a3b8; }
+
+  /* ── Layout ── */
+  .section-label { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 8px; }
+  .card { background: #fff; border: 1px solid #e8e8e8; border-radius: 12px; padding: 1rem 1.25rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+  /* ── Code Editor (Dracula) ── */
+  .editor { background: #1e1e2e; border-radius: 12px; overflow: hidden; font-family: 'SFMono-Regular', Consolas, 'Courier New', monospace; }
+  .editor-bar { background: #13131f; padding: 9px 14px; display: flex; align-items: center; gap: 6px; }
+  .e-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .e-red { background:#ff5f57; } .e-yellow { background:#febc2e; } .e-green { background:#28c840; }
+  .e-label { font-size: 12px; color: #6272a4; margin-left: 4px; font-family: -apple-system, sans-serif; }
+  .editor-body { padding: 14px 18px; font-size: 12.5px; line-height: 1.8; }
+  .e-ln   { color: #44475a; font-size: 11px; display: inline-block; width: 22px; user-select: none; }
+  .e-txt  { color: #f8f8f2; }
+  .e-cmt  { color: #6272a4; font-style: italic; }
+  .j-kw   { color: #ff79c6; font-weight: 700; }
+  .j-fn   { color: #50fa7b; }
+  .j-str  { color: #f1fa8c; }
+  .j-num  { color: #bd93f9; }
+  .j-var  { color: #80ffea; }
+  .j-op   { color: #ff79c6; }
+  .j-dom  { color: #8be9fd; }
+  .j-prop { color: #50fa7b; }
+  .j-com  { color: #6272a4; font-style: italic; }
+  .j-ret  { color: #ff79c6; font-weight: 700; }
+  .j-tpl  { color: #ff92df; }
+  .c-punc { color: #f8f8f2; }
+  .e-ind1 { display: inline-block; width: 20px; }
+  .e-ind2 { display: inline-block; width: 40px; }
+  .e-ind3 { display: inline-block; width: 60px; }
+  .e-ind4 { display: inline-block; width: 80px; }
+  .c-tag  { color: #ff79c6; }
+  .c-att  { color: #50fa7b; }
+  .c-val  { color: #f1fa8c; }
+  .c-sel  { color: #ff79c6; font-weight: 700; }
+  .c-prop { color: #50fa7b; }
+  .c-hex  { color: #bd93f9; }
+
+  /* ── Tables ── */
+  .tag-table { border-collapse: collapse; width: 100%; }
+  .tag-table th { background: #f1f5f9; font-size: 12px; font-weight: 700; text-align: left; padding: 10px 14px; color: #475569; border-bottom: 2px solid #e2e8f0; }
+  .tag-table td { font-size: 13px; padding: 10px 14px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+  .tag-table tr:last-child td { border-bottom: none; }
+  .tag-table tr:hover td { background: #f8f9fa; }
+
+  /* ── Quiz ── */
+  .quiz-option { border: 1px solid #dee2e6; border-radius: 8px; padding: 10px 14px; font-size: 13px; cursor: pointer; margin-bottom: 6px; transition: all .15s; background: transparent; width: 100%; text-align: left; color: #1a1a1a; }
+  .quiz-option:hover:not(:disabled) { background: #f8f9fa; }
+  .quiz-option.correct { background: #d1fae5; border-color: #059669; color: #065f46; }
+  .quiz-option.wrong   { background: #fee2e2; border-color: #dc2626; color: #991b1b; }
+  .quiz-feedback { display: none; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-top: 4px; }
+  .quiz-feedback.correct { background: #d1fae5; color: #065f46; display: block; }
+  .quiz-feedback.wrong   { background: #fee2e2; color: #991b1b; display: block; }
+
+  /* ── Tip / info / warn / success ── */
+  .tip-box   { display:flex; gap:10px; align-items:flex-start; background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:10px 14px; }
+  .tip-icon  { color:#d97706; font-size:18px; flex-shrink:0; margin-top:1px; }
+  .tip-text  { font-size:13px; color:#92400e; line-height:1.6; }
+  .info-box  { display:flex; gap:10px; align-items:flex-start; background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:10px 14px; }
+  .info-icon { color:#2563eb; font-size:18px; flex-shrink:0; margin-top:1px; }
+  .info-text { font-size:13px; color:#1e40af; line-height:1.6; }
+  .warn-box  { display:flex; gap:10px; align-items:flex-start; background:#fef9ee; border:1px solid #fcd34d; border-radius:10px; padding:10px 14px; }
+  .success-box { display:flex; gap:10px; align-items:flex-start; background:#f0fdf4; border:1px solid #86efac; border-radius:10px; padding:10px 14px; }
+
+  /* ── Line explainer ── */
+  .lex-row { display:flex; align-items:stretch; cursor:pointer; transition:background .12s; border-bottom:1px solid #f0f0f0; }
+  .lex-row:last-child { border-bottom:none; }
+  .lex-row:hover { background:#f8f9fa; }
+  .lex-row.active { background:#fefce8; border-left:3px solid #d97706; }
+  .lex-code { background:#1e1e2e; padding:10px 14px; font-family:'SFMono-Regular',Consolas,monospace; font-size:12px; min-width:210px; flex-shrink:0; display:flex; align-items:center; }
+  .lex-info { padding:10px 14px; flex:1; }
+  .lex-name   { font-size:13px; font-weight:700; color:#d97706; margin-bottom:2px; }
+  .lex-desc   { font-size:12px; color:#555; line-height:1.55; }
+  .lex-detail { display:none; font-size:12px; color:#92400e; margin-top:4px; padding-top:4px; border-top:1px dashed #fde68a; }
+  .lex-row.active .lex-detail { display:block; }
+  .line-explain { border:1px solid #e8e8e8; border-radius:10px; overflow:hidden; }
+
+  /* ── Nav ── */
+  .nav-row { display:flex; align-items:center; justify-content:space-between; margin-top:auto; padding-top:1rem; border-top:1px solid #f0f0f0; }
+  .nav-btn { display:inline-flex; align-items:center; gap:6px; padding:9px 18px; border:1px solid #dee2e6; border-radius:8px; background:transparent; font-size:13px; cursor:pointer; color:#333; transition:background .15s; }
+  .nav-btn:hover:not(:disabled) { background:#f1f3f5; }
+  .nav-btn:disabled { opacity:.35; cursor:default; }
+  .nav-btn.primary { background:#d97706; border-color:transparent; color:#fff; }
+  .nav-btn.primary:hover { background:#b45309; }
+  .progress-dots { display:flex; gap:6px; align-items:center; }
+  .dot { width:7px; height:7px; border-radius:50%; background:#dee2e6; transition:all .2s; }
+  .dot.active { width:20px; border-radius:4px; background:#d97706; }
+
+  /* ── Home grid ── */
+  .home-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .home-card { background:#fff; border:1px solid #e8e8e8; border-radius:12px; padding:1rem 1.25rem; cursor:pointer; transition:all .15s; }
+  .home-card:hover { border-color:#d97706; box-shadow:0 2px 8px rgba(217,119,6,.12); }
+  .home-card-title { font-size:15px; font-weight:700; margin:6px 0 2px; }
+  .home-card-sub   { font-size:12px; color:#666; }
+
+  code { font-family:'SFMono-Regular',Consolas,monospace; font-size:12px; background:#f1f3f5; padding:1px 6px; border-radius:4px; border:1px solid #dee2e6; }
+
+  /* ── Checklist ── */
+  .check-item { display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:10px; border:1px solid #e8e8e8; font-size:13px; cursor:pointer; transition:all .15s; user-select:none; }
+  .check-item:hover { background:#f8f9fa; }
+  .check-item.done { background:#f0fdf4; border-color:#86efac; }
+  .check-circle { width:22px; height:22px; border-radius:50%; border:2px solid #dee2e6; display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0; transition:all .2s; color:transparent; }
+  .check-item.done .check-circle { background:#22c55e; border-color:#22c55e; color:#fff; }
+
+  .js-logo { width: 44px; height: 44px; background: #0f172a; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 11px; color:#94a3b8; flex-shrink: 0; font-weight:800; font-family:monospace; letter-spacing:-.5px; }
+
+  .flow-step { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; border-bottom: 1px dashed #e2e8f0; }
+  .flow-step:last-child { border-bottom: none; }
+  .flow-num { width: 28px; height: 28px; border-radius: 50%; background: #d97706; color: white; font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+  .flow-content { flex: 1; font-size: 13px; color: #333; line-height: 1.6; }
+  .flow-label { font-weight: 700; color: #d97706; margin-bottom: 2px; }
+
+  /* ══ DAY 11 SECOND 90 MIN — SPECIFIC ══ */
+
+  /* Dark mode toggle live demo */
+  .dark-demo-wrap { border-radius: 12px; overflow: hidden; border: 2px solid #e2e8f0; transition: all .4s; }
+  .dark-demo-wrap.dark-on { background: #222 !important; border-color: #444; }
+  .dark-demo-nav { background: #1e293b; padding: 8px 14px; display: flex; justify-content: space-between; align-items: center; font-family:Arial,sans-serif; }
+  .dark-demo-body { background: #fff; padding: 14px; transition: background .4s, color .4s; font-family:Arial,sans-serif; }
+  .dark-demo-wrap.dark-on .dark-demo-body { background: #222; color: #fff; }
+  .dark-toggle-btn { background: #1e293b; color: #fde047; border: none; border-radius: 6px; padding: 5px 12px; font-size: 11px; font-weight: 700; cursor: pointer; }
+  .dark-toggle-btn.lit { background: #f1f5f9; color: #1a1a1a; }
+
+  /* Toast demo */
+  .toast-demo-container { position: relative; min-height: 80px; background: #f1f5f9; border-radius: 10px; overflow: hidden; padding: 12px; }
+  .toast-mock { position: absolute; bottom: 12px; right: 12px; background: #212529; color: #fff; padding: 10px 16px; border-radius: 8px; font-size: 12px; font-weight: 600; display: none; align-items: center; gap: 8px; box-shadow: 0 4px 16px rgba(0,0,0,.25); }
+  .toast-mock.show { display: flex; }
+  .toast-mock.success { border-left: 4px solid #22c55e; }
+  .toast-mock.error { border-left: 4px solid #ef4444; }
+  .toast-mock.info { border-left: 4px solid #3b82f6; }
+  .toast-btn-row { display: flex; gap: 6px; flex-wrap: wrap; }
+  .toast-fire-btn { padding: 6px 14px; border: none; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer; }
+
+  /* File tree */
+  .file-tree { background: #0d1117; border-radius: 12px; padding: 16px 18px; font-family: 'SFMono-Regular', Consolas, monospace; font-size: 12.5px; line-height: 2; }
+  .ft-folder { color: #79c0ff; }
+  .ft-file-js { color: #f0db4f; }
+  .ft-file-css { color: #60a5fa; }
+  .ft-file-html { color: #fb923c; }
+  .ft-file-md { color: #86efac; }
+  .ft-file-json { color: #d2a8ff; }
+  .ft-ind { display: inline-block; width: 18px; }
+  .ft-ind2 { display: inline-block; width: 36px; }
+
+  /* JSON export visual */
+  .json-preview { background: #0d1117; border-radius: 10px; padding: 12px 16px; font-family: monospace; font-size: 11.5px; line-height: 1.8; }
+  .j-bracket { color: #f8f8f2; }
+  .j-key2    { color: #7ee787; }
+  .j-str2    { color: #a5d6ff; }
+  .j-num2    { color: #d2a8ff; }
+
+  /* Progress feature items */
+  .progress-feature { display: flex; align-items: center; gap: 10px; padding: 9px 14px; border-radius: 10px; border: 1px solid transparent; font-size: 12px; font-weight: 700; }
+  .progress-feature.done   { background: #dcfce7; border-color: #86efac; color: #166534; }
+  .progress-feature.today  { background: #fef9c3; border-color: #fde047; color: #854d0e; }
+  .progress-feature.pending { background: #f8f9fa; border-color: #e2e8f0; color: #94a3b8; }
+
+  /* DRY principle before/after */
+  .repeat-box { background: #fee2e2; border: 2px solid #fca5a5; border-radius: 10px; padding: 12px 14px; }
+  .dry-box    { background: #dcfce7; border: 2px solid #86efac; border-radius: 10px; padding: 12px 14px; }
+
+  /* Stat card preview */
+  .stat-preview-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; }
+  .stat-mini { border-radius: 10px; padding: 12px 10px; text-align: center; border: 1px solid; }
+  .stat-mini-num { font-size: 22px; font-weight: 800; }
+  .stat-mini-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; margin-top: 2px; }
+
+  /* Final timeline */
+  .timeline-item { display: flex; gap: 12px; align-items: flex-start; padding: 8px 0; }
+  .timeline-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+  .timeline-line { width: 2px; background: #e2e8f0; margin: 2px auto; flex-shrink: 0; }
+
+  /* README preview */
+  .readme-wrap { background: #0d1117; border-radius: 12px; overflow: hidden; }
+  .readme-bar { background: #161b22; padding: 9px 14px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #30363d; }
+  .readme-body { padding: 14px 18px; font-family: -apple-system, sans-serif; font-size: 12px; line-height: 1.8; color: #e6edf3; }
+  .readme-h1 { color: #79c0ff; font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+  .readme-h2 { color: #7ee787; font-size: 13px; font-weight: 700; margin: 10px 0 3px; }
+  .readme-li { color: #cdd9e5; padding-left: 4px; }
+  .readme-li::before { content: '• '; color: #d97706; }
+  .readme-badge-wrap { display: flex; gap: 4px; flex-wrap: wrap; margin: 6px 0; }
+  .readme-badge { padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <div>
+      <div class="top-bar-title">MERN Stack Training · Day 11 · Second 90 Minutes</div>
+      <div class="top-bar-sub">Complete LMS Frontend — Dark Mode, Toast, Export, Cleanup &amp; Deployment Prep</div>
+    </div>
+    <div class="slide-counter" id="slide-counter">1 / 16</div>
+  </div>
+
+  <!-- ═══ SLIDE 0  HOME ═══ -->
+  <div class="slide active" id="slide-0">
+    <div class="slide-header">
+      <div class="js-logo">LMS</div>
+      <div>
+        <div class="slide-title">Building the Professional LMS Dashboard</div>
+        <div class="slide-subtitle">The final frontend session — polish, pro features, export/import, cleanup, and deployment prep</div>
+      </div>
+    </div>
+
+    <div style="background:#fef9c3;border:1px solid #fde68a;border-radius:12px;padding:12px 16px;display:flex;gap:12px;align-items:flex-start">
+      <i class="ti ti-trophy" style="color:#d97706;font-size:22px;flex-shrink:0;margin-top:1px"></i>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#854d0e;margin-bottom:4px">Second 90 Minutes Goal — Complete the Frontend LMS</div>
+        <div style="display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:#92400e">
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Dark Mode toggle</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Toast notifications (no more alert!)</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Export / Import JSON</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Project cleanup + DRY refactor</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>README + deployment prep</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="home-grid">
+      <div class="home-card" onclick="goSlide(1)">
+        <span class="badge b-green">Recap</span>
+        <div class="home-card-title">First 90 Min Recap</div>
+        <div class="home-card-sub">Folder structure, DRY, dashboard analytics</div>
+      </div>
+      <div class="home-card" onclick="goSlide(2)">
+        <span class="badge b-dark">Feature 1</span>
+        <div class="home-card-title">🌙 Dark Mode</div>
+        <div class="home-card-sub">classList.toggle — one line, full effect</div>
+      </div>
+      <div class="home-card" onclick="goSlide(3)">
+        <span class="badge b-dark">Feature 1 · CSS</span>
+        <div class="home-card-title">Dark Mode — CSS Side</div>
+        <div class="home-card-sub">.dark class overrides all colours</div>
+      </div>
+      <div class="home-card" onclick="goSlide(4)">
+        <span class="badge b-orange">Feature 2</span>
+        <div class="home-card-title">🔔 Toast Notifications</div>
+        <div class="home-card-sub">Replace every alert() with a Bootstrap Toast</div>
+      </div>
+      <div class="home-card" onclick="goSlide(5)">
+        <span class="badge b-orange">Feature 2 · code</span>
+        <div class="home-card-title">showToast() Utility Function</div>
+        <div class="home-card-sub">A reusable function the whole app shares</div>
+      </div>
+      <div class="home-card" onclick="goSlide(6)">
+        <span class="badge b-blue">Feature 3</span>
+        <div class="home-card-title">📤 Export Data — Download JSON</div>
+        <div class="home-card-sub">JSON.stringify + Blob + anchor trick</div>
+      </div>
+      <div class="home-card" onclick="goSlide(7)">
+        <span class="badge b-teal">Feature 4</span>
+        <div class="home-card-title">📥 Import Data — Load JSON</div>
+        <div class="home-card-sub">FileReader API — concept + basic implementation</div>
+      </div>
+      <div class="home-card" onclick="goSlide(8)">
+        <span class="badge b-purple">Refactor</span>
+        <div class="home-card-title">Project Cleanup — DRY Principle</div>
+        <div class="home-card-sub">Remove duplication · comment code · organise files</div>
+      </div>
+      <div class="home-card" onclick="goSlide(9)">
+        <span class="badge b-indigo">Deploy Prep</span>
+        <div class="home-card-title">README — Write Like a Pro</div>
+        <div class="home-card-sub">Description · Features · Tech · Folder structure</div>
+      </div>
+      <div class="home-card" onclick="goSlide(10)">
+        <span class="badge b-rose">Challenge</span>
+        <div class="home-card-title">Mini Challenge</div>
+        <div class="home-card-sub">Admin Profile · Logout · Settings · Contact</div>
+      </div>
+      <div class="home-card" onclick="goSlide(11)">
+        <span class="badge b-rose">Assignment</span>
+        <div class="home-card-title">Complete LMS Checklist</div>
+        <div class="home-card-sub">All 9 features students must finish</div>
+      </div>
+      <div class="home-card" onclick="goSlide(12)">
+        <span class="badge b-orange">Final Map</span>
+        <div class="home-card-title">SkillHub LMS — Full Journey</div>
+        <div class="home-card-sub">Everything built across 11 days</div>
+      </div>
+      <div class="home-card" onclick="goSlide(13)">
+        <span class="badge b-slate">Quiz</span>
+        <div class="home-card-title">Quick-Fire Quiz</div>
+        <div class="home-card-sub">4 questions on today's pro features</div>
+      </div>
+      <div class="home-card" onclick="goSlide(14)">
+        <span class="badge b-teal">Wrap-Up</span>
+        <div class="home-card-title">Day 11 Complete — Frontend LMS Done!</div>
+        <div class="home-card-sub">Ready for Backend (Day 12+)</div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" disabled><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-0"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Start <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 1  RECAP ═══ -->
+  <div class="slide" id="slide-1">
+    <div class="slide-header">
+      <span class="badge b-green">Recap</span>
+      <div>
+        <div class="slide-title">First 90 Minutes Recap</div>
+        <div class="slide-subtitle">Professional folder structure, DRY utilities, and Dashboard analytics — done</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div class="section-label">what was built in part 1</div>
+        <div class="check-item done"><div class="check-circle" style="background:#22c55e;border-color:#22c55e;color:#fff">✓</div><span>Folder structure: <code>css/</code> <code>js/</code> <code>images/</code></span></div>
+        <div class="check-item done"><div class="check-circle" style="background:#22c55e;border-color:#22c55e;color:#fff">✓</div><span>Split <code>script.js</code> → student.js · course.js · utils.js · dashboard.js</span></div>
+        <div class="check-item done"><div class="check-circle" style="background:#22c55e;border-color:#22c55e;color:#fff">✓</div><span>saveToStorage() / loadFromStorage() utility functions</span></div>
+        <div class="check-item done"><div class="check-circle" style="background:#22c55e;border-color:#22c55e;color:#fff">✓</div><span>Dashboard analytics cards — Students, Courses, Trainers, Revenue</span></div>
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;border:2px dashed #fde047;background:#fefce8;font-size:13px;margin-top:4px">
+          <i class="ti ti-clock-play" style="color:#d97706;font-size:18px;flex-shrink:0"></i>
+          <span style="color:#92400e;font-weight:600">Now: Dark Mode · Toast · Export · Import · README — finish the frontend</span>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">the folder structure we have now</div>
+        <div class="file-tree">
+          <div><span class="ft-folder">📁 frontend/</span></div>
+          <div><span class="ft-ind"></span><span class="ft-folder">📁 css/</span></div>
+          <div><span class="ft-ind2"></span><span class="ft-file-css">style.css</span></div>
+          <div><span class="ft-ind"></span><span class="ft-folder">📁 js/</span></div>
+          <div><span class="ft-ind2"></span><span class="ft-file-js">student.js</span></div>
+          <div><span class="ft-ind2"></span><span class="ft-file-js">course.js</span></div>
+          <div><span class="ft-ind2"></span><span class="ft-file-js">dashboard.js</span></div>
+          <div><span class="ft-ind2"></span><span class="ft-file-js">utils.js  ← shared helpers</span></div>
+          <div><span class="ft-ind"></span><span class="ft-folder">📁 images/</span></div>
+          <div><span class="ft-file-html">  index.html</span></div>
+          <div style="margin-top:8px"><span class="ft-file-md">  README.md  ← writing this today</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-1"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Dark Mode <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 2  DARK MODE JS ═══ -->
+  <div class="slide" id="slide-2">
+    <div class="slide-header">
+      <span class="badge b-dark">Feature 1</span>
+      <div>
+        <div class="slide-title">🌙 Dark Mode — JavaScript</div>
+        <div class="slide-subtitle">One line of JavaScript and one CSS class — that's all it takes</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">the button — index.html</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><div class="e-label">index.html — navbar area</div></div>
+          <div class="editor-body">
+            <div><span class="e-ln">1</span> <span class="c-tag">&lt;button</span> <span class="c-att">id=</span><span class="c-val">"darkBtn"</span></div>
+            <div><span class="e-ln">2</span>         <span class="c-att">class=</span><span class="c-val">"btn btn-outline-secondary"</span><span class="c-tag">&gt;</span></div>
+            <div><span class="e-ln">3</span>   <span class="e-txt">🌙 Dark Mode</span></div>
+            <div><span class="e-ln">4</span> <span class="c-tag">&lt;/button&gt;</span></div>
+          </div>
+        </div>
+
+        <div class="section-label" style="margin-top:10px">the javascript — dashboard.js</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><div class="e-label">dashboard.js</div></div>
+          <div class="editor-body">
+            <div><span class="e-ln">1</span> <span class="j-dom">document</span><span class="j-prop">.getElementById</span><span class="e-txt">(</span><span class="j-str">"darkBtn"</span><span class="e-txt">)</span></div>
+            <div><span class="e-ln">2</span>   <span class="j-prop">.addEventListener</span><span class="e-txt">(</span><span class="j-str">"click"</span><span class="e-txt">, () </span><span class="j-op">=&gt;</span> <span class="e-txt">{</span></div>
+            <div><span class="e-ln">3</span>     <span class="j-dom">document</span><span class="j-prop">.body</span></div>
+            <div><span class="e-ln">4</span>       <span class="j-prop">.classList.toggle</span><span class="e-txt">(</span><span class="j-str">"dark"</span><span class="e-txt">);</span></div>
+            <div><span class="e-ln">5</span> <span class="e-txt">});</span></div>
+          </div>
+        </div>
+
+        <div class="line-explain">
+          <div class="lex-row" onclick="toggleLex(this)">
+            <div class="lex-code"><span class="j-prop">.classList.toggle</span></div>
+            <div class="lex-info">
+              <div class="lex-name">Toggle — add if absent, remove if present</div>
+              <div class="lex-desc">If the "dark" class is NOT on body → adds it. If it IS on body → removes it. One method, two jobs — perfect for on/off features.</div>
+              <div class="lex-detail">You already know classList.add() from form validation. .toggle() combines add + remove into one call, checking which action is needed automatically.</div>
+            </div>
+          </div>
+          <div class="lex-row" onclick="toggleLex(this)">
+            <div class="lex-code"><span class="j-str">"dark"</span></div>
+            <div class="lex-info">
+              <div class="lex-name">The CSS Class We Toggle</div>
+              <div class="lex-desc">When this class is added to &lt;body&gt;, all .dark rules in CSS activate. This makes the whole page switch themes instantly.</div>
+              <div class="lex-detail">Using a class on body means every element on the page can respond to it — just write .dark .navbar, .dark .card, etc. in CSS.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="section-label">live dark mode demo — click the button</div>
+        <div class="dark-demo-wrap" id="darkDemoWrap">
+          <div class="dark-demo-nav">
+            <span style="color:#fff;font-weight:700;font-size:12px">SkillHub LMS</span>
+            <button class="dark-toggle-btn" id="darkDemoBtn" onclick="toggleDarkDemo()">🌙 Dark Mode</button>
+          </div>
+          <div class="dark-demo-body" id="darkDemoBody">
+            <div style="font-size:12px;font-weight:700;margin-bottom:6px">Welcome back, Admin 👋</div>
+            <div style="font-size:11px;color:inherit;opacity:.7;margin-bottom:8px">SkillHub LMS · Dashboard</div>
+            <div style="display:flex;gap:6px">
+              <div style="background:#dbeafe;color:#1d4ed8;padding:6px 10px;border-radius:6px;font-size:10px;font-weight:700">42 Students</div>
+              <div style="background:#dcfce7;color:#166534;padding:6px 10px;border-radius:6px;font-size:10px;font-weight:700">8 Courses</div>
+              <div style="background:#fce7f3;color:#9d174d;padding:6px 10px;border-radius:6px;font-size:10px;font-weight:700">5 Trainers</div>
+            </div>
+          </div>
+        </div>
+        <div id="dark-status" style="font-size:11px;font-family:monospace;color:#94a3b8;text-align:center">document.body.classList → [] (dark class absent)</div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-2"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Dark Mode CSS <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 3  DARK MODE CSS ═══ -->
+  <div class="slide" id="slide-3">
+    <div class="slide-header">
+      <span class="badge b-dark">Feature 1 · CSS</span>
+      <div>
+        <div class="slide-title">Dark Mode — The CSS Side</div>
+        <div class="slide-subtitle">When JS adds .dark to body, these rules override every element's colours</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">style.css — add at the bottom</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><div class="e-label">css/style.css</div></div>
+          <div class="editor-body">
+            <div><span class="e-ln"> 1</span> <span class="j-com">/* ═══ DARK MODE ═══ */</span></div>
+            <div><span class="e-ln"> 2</span> <span class="c-sel">.dark</span> <span class="c-punc">{</span></div>
+            <div><span class="e-ln"> 3</span>   <span class="c-prop">background</span><span class="c-punc">:</span> <span class="c-hex">#222</span><span class="c-punc">;</span></div>
+            <div><span class="e-ln"> 4</span>   <span class="c-prop">color</span><span class="c-punc">:</span> <span class="c-hex">white</span><span class="c-punc">;</span></div>
+            <div><span class="e-ln"> 5</span> <span class="c-punc">}</span></div>
+            <div><span class="e-ln"> 6</span></div>
+            <div><span class="e-ln"> 7</span> <span class="j-com">/* Cards inside dark mode */</span></div>
+            <div><span class="e-ln"> 8</span> <span class="c-sel">.dark .card</span> <span class="c-punc">{</span></div>
+            <div><span class="e-ln"> 9</span>   <span class="c-prop">background</span><span class="c-punc">:</span> <span class="c-hex">#333</span><span class="c-punc">;</span></div>
+            <div><span class="e-ln">10</span>   <span class="c-prop">border-color</span><span class="c-punc">:</span> <span class="c-hex">#444</span><span class="c-punc">;</span></div>
+            <div><span class="e-ln">11</span>   <span class="c-prop">color</span><span class="c-punc">:</span> <span class="c-hex">#f8f8f8</span><span class="c-punc">;</span></div>
+            <div><span class="e-ln">12</span> <span class="c-punc">}</span></div>
+            <div><span class="e-ln">13</span></div>
+            <div><span class="e-ln">14</span> <span class="j-com">/* Table inside dark mode */</span></div>
+            <div><span class="e-ln">15</span> <span class="c-sel">.dark table</span><span class="c-punc">,</span> <span class="c-sel">.dark th</span><span class="c-punc">,</span> <span class="c-sel">.dark td</span> <span class="c-punc">{</span></div>
+            <div><span class="e-ln">16</span>   <span class="c-prop">background</span><span class="c-punc">:</span> <span class="c-hex">#2a2a2a</span><span class="c-punc">;</span></div>
+            <div><span class="e-ln">17</span>   <span class="c-prop">color</span><span class="c-punc">:</span> <span class="c-hex">#e5e7eb</span><span class="c-punc">;</span></div>
+            <div><span class="e-ln">18</span>   <span class="c-prop">border-color</span><span class="c-punc">:</span> <span class="c-hex">#444</span><span class="c-punc">;</span></div>
+            <div><span class="e-ln">19</span> <span class="c-punc">}</span></div>
+            <div><span class="e-ln">20</span></div>
+            <div><span class="e-ln">21</span> <span class="j-com">/* Inputs inside dark mode */</span></div>
+            <div><span class="e-ln">22</span> <span class="c-sel">.dark input</span><span class="c-punc">,</span> <span class="c-sel">.dark select</span> <span class="c-punc">{</span></div>
+            <div><span class="e-ln">23</span>   <span class="c-prop">background</span><span class="c-punc">:</span> <span class="c-hex">#333</span><span class="c-punc">;</span></div>
+            <div><span class="e-ln">24</span>   <span class="c-prop">color</span><span class="c-punc">:</span> <span class="c-hex">#f8f8f8</span><span class="c-punc">;</span></div>
+            <div><span class="e-ln">25</span>   <span class="c-prop">border-color</span><span class="c-punc">:</span> <span class="c-hex">#555</span><span class="c-punc">;</span></div>
+            <div><span class="e-ln">26</span> <span class="c-punc">}</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="section-label">how cascading dark mode works</div>
+        <div class="card">
+          <div class="flow-step" style="padding-top:0">
+            <div class="flow-num">1</div>
+            <div class="flow-content"><span class="flow-label">JS adds "dark" to &lt;body&gt;</span>The &lt;body&gt; element now has class="dark" in the DOM</div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-num">2</div>
+            <div class="flow-content"><span class="flow-label">CSS .dark rule activates</span>background:#222 and color:white apply to the whole body</div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-num">3</div>
+            <div class="flow-content"><span class="flow-label">Descendant selectors kick in</span>.dark .card, .dark table, .dark input — all target elements INSIDE .dark body</div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-num">4</div>
+            <div class="flow-content"><span class="flow-label">JS toggle removes it</span>Click again → "dark" class is removed → all light styles return instantly</div>
+          </div>
+        </div>
+
+        <div class="tip-box">
+          <i class="ti ti-bulb tip-icon"></i>
+          <div class="tip-text"><strong>Pro tip — save dark mode preference:</strong> After toggling, call <code>localStorage.setItem("darkMode", "on")</code> — then on page load, check and re-apply it. Users hate having to toggle dark mode every visit.</div>
+        </div>
+
+        <div class="success-box">
+          <i class="ti ti-check" style="color:#16a34a;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+          <div style="font-size:13px;color:#166534;line-height:1.6">This pattern — <code>classList.toggle</code> + a CSS class on body — is how sites like GitHub, VS Code, and Twitter implement dark mode.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-3"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Toast Notifications <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 4  TOAST ═══ -->
+  <div class="slide" id="slide-4">
+    <div class="slide-header">
+      <span class="badge b-orange">Feature 2</span>
+      <div>
+        <div class="slide-title">🔔 Toast Notifications — Replace alert()</div>
+        <div class="slide-subtitle">Every alert() in the LMS gets replaced by a professional Bootstrap-style toast</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">html — add a toast container to index.html</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><div class="e-label">index.html — before &lt;/body&gt;</div></div>
+          <div class="editor-body" style="font-size:11.5px">
+            <div><span class="e-ln">1</span> <span class="j-com">&lt;!-- Toast Container --&gt;</span></div>
+            <div><span class="e-ln">2</span> <span class="c-tag">&lt;div</span> <span class="c-att">id=</span><span class="c-val">"toastContainer"</span></div>
+            <div><span class="e-ln">3</span>      <span class="c-att">style=</span><span class="c-val">"position:fixed;bottom:20px;</span></div>
+            <div><span class="e-ln">4</span>             <span class="c-val">right:20px;z-index:9999"</span><span class="c-tag">&gt;</span></div>
+            <div><span class="e-ln">5</span> <span class="c-tag">&lt;/div&gt;</span></div>
+          </div>
+        </div>
+
+        <div class="info-box" style="margin-top:10px">
+          <i class="ti ti-info-circle info-icon"></i>
+          <div class="info-text">A fixed-position div sits in the corner of the screen. The JS function <code>showToast()</code> creates toasts inside it dynamically and auto-removes them after 3 seconds.</div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="section-label">live toast demo — click to fire</div>
+        <div class="toast-demo-container" id="toastDemoArea">
+          <div style="font-size:11px;color:#666;font-family:monospace">SkillHub LMS — page area</div>
+          <div id="demoToast" class="toast-mock success"></div>
+        </div>
+        <div class="toast-btn-row">
+          <button class="toast-fire-btn" style="background:#22c55e;color:#fff" onclick="fireToast('✅ Student Added Successfully!','success')">Student Added</button>
+          <button class="toast-fire-btn" style="background:#ef4444;color:#fff" onclick="fireToast('❌ Student Deleted!','error')">Student Deleted</button>
+          <button class="toast-fire-btn" style="background:#3b82f6;color:#fff" onclick="fireToast('ℹ️ Course Updated!','info')">Course Updated</button>
+          <button class="toast-fire-btn" style="background:#f59e0b;color:#fff" onclick="fireToast('📤 Data Exported!','success')">Export Done</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-4"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">showToast() Code <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 5  SHOWTOAST CODE ═══ -->
+  <div class="slide" id="slide-5">
+    <div class="slide-header">
+      <span class="badge b-orange">Feature 2 · code</span>
+      <div>
+        <div class="slide-title">showToast() — The Reusable Utility Function</div>
+        <div class="slide-subtitle">Write once in utils.js — use everywhere. This is what DRY looks like in practice.</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">utils.js — the function</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><div class="e-label">js/utils.js</div></div>
+          <div class="editor-body" style="font-size:11.5px">
+            <div><span class="e-ln"> 1</span> <span class="j-kw">function</span> <span class="j-fn">showToast</span><span class="e-txt">(</span><span class="j-var">message</span><span class="e-txt">, </span><span class="j-var">type</span><span class="e-txt"> = </span><span class="j-str">"success"</span><span class="e-txt">) {</span></div>
+            <div><span class="e-ln"> 2</span></div>
+            <div><span class="e-ln"> 3</span>   <span class="j-com">// 1. Create the toast element</span></div>
+            <div><span class="e-ln"> 4</span>   <span class="j-kw">const</span> <span class="j-var">toast</span> <span class="j-op">=</span> <span class="j-dom">document</span><span class="j-prop">.createElement</span><span class="e-txt">(</span><span class="j-str">"div"</span><span class="e-txt">);</span></div>
+            <div><span class="e-ln"> 5</span></div>
+            <div><span class="e-ln"> 6</span>   <span class="j-com">// 2. Style it with Bootstrap alert classes</span></div>
+            <div><span class="e-ln"> 7</span>   <span class="j-var">toast</span><span class="j-prop">.className</span> <span class="j-op">=</span></div>
+            <div><span class="e-ln"> 8</span>     <span class="j-tpl">`alert alert-${</span><span class="j-var">type</span><span class="j-tpl">} alert-dismissible`</span><span class="e-txt">;</span></div>
+            <div><span class="e-ln"> 9</span></div>
+            <div><span class="e-ln">10</span>   <span class="j-com">// 3. Set the message</span></div>
+            <div><span class="e-ln">11</span>   <span class="j-var">toast</span><span class="j-prop">.innerHTML</span> <span class="j-op">=</span> <span class="j-var">message</span><span class="e-txt">;</span></div>
+            <div><span class="e-ln">12</span></div>
+            <div><span class="e-ln">13</span>   <span class="j-com">// 4. Insert into the container</span></div>
+            <div><span class="e-ln">14</span>   <span class="j-dom">document</span><span class="j-prop">.getElementById</span><span class="e-txt">(</span><span class="j-str">"toastContainer"</span><span class="e-txt">)</span></div>
+            <div><span class="e-ln">15</span>     <span class="j-prop">.appendChild</span><span class="e-txt">(</span><span class="j-var">toast</span><span class="e-txt">);</span></div>
+            <div><span class="e-ln">16</span></div>
+            <div><span class="e-ln">17</span>   <span class="j-com">// 5. Auto-remove after 3 seconds</span></div>
+            <div><span class="e-ln">18</span>   <span class="j-fn">setTimeout</span><span class="e-txt">(() </span><span class="j-op">=&gt;</span> <span class="e-txt">{</span></div>
+            <div><span class="e-ln">19</span>     <span class="j-var">toast</span><span class="j-prop">.remove</span><span class="e-txt">();</span></div>
+            <div><span class="e-ln">20</span>   <span class="e-txt">}, </span><span class="j-num">3000</span><span class="e-txt">);</span></div>
+            <div><span class="e-ln">21</span> <span class="e-txt">}</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="section-label">replace all alert() calls in the project</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="background:#fee2e2;border:1px solid #fca5a5;border-radius:8px;padding:10px 12px;font-size:12px;font-family:monospace;color:#991b1b">
+            <div style="font-weight:700;margin-bottom:4px">❌ OLD — student.js</div>
+            <div><span style="color:#ff79c6">alert</span>(<span style="color:#f1fa8c">"Student Added!"</span>);</div>
+            <div><span style="color:#ff79c6">alert</span>(<span style="color:#f1fa8c">"Student Deleted!"</span>);</div>
+          </div>
+          <div style="background:#dcfce7;border:1px solid #86efac;border-radius:8px;padding:10px 12px;font-size:12px;font-family:monospace;color:#166534">
+            <div style="font-weight:700;margin-bottom:4px">✅ NEW — student.js</div>
+            <div><span style="color:#50fa7b">showToast</span>(<span style="color:#f1fa8c">"✅ Student Added!"</span>, <span style="color:#f1fa8c">"success"</span>);</div>
+            <div><span style="color:#50fa7b">showToast</span>(<span style="color:#f1fa8c">"🗑 Student Deleted!"</span>, <span style="color:#f1fa8c">"danger"</span>);</div>
+          </div>
+        </div>
+
+        <div class="line-explain">
+          <div class="lex-row" onclick="toggleLex(this)">
+            <div class="lex-code"><span class="j-fn">setTimeout</span></div>
+            <div class="lex-info">
+              <div class="lex-name">Auto-dismiss after 3 seconds</div>
+              <div class="lex-desc">setTimeout(fn, 3000) runs the function once after 3000ms (3 seconds). Here it calls toast.remove() to delete the element from the DOM.</div>
+              <div class="lex-detail">Unlike setInterval (repeats forever), setTimeout runs exactly once. The 3000ms delay gives users enough time to read the message before it disappears.</div>
+            </div>
+          </div>
+          <div class="lex-row" onclick="toggleLex(this)">
+            <div class="lex-code"><span class="j-var">type</span> <span class="j-op">=</span> <span class="j-str">"success"</span></div>
+            <div class="lex-info">
+              <div class="lex-name">Default Parameter (ES6)</div>
+              <div class="lex-desc">If showToast("message") is called without a second argument, type defaults to "success". Another ES6 feature — right in the function signature.</div>
+              <div class="lex-detail">Default parameters mean: showToast("Done!") → green toast. showToast("Failed!", "danger") → red toast. The caller decides.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-5"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Export JSON <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 6  EXPORT ═══ -->
+  <div class="slide" id="slide-6">
+    <div class="slide-header">
+      <span class="badge b-blue">Feature 3</span>
+      <div>
+        <div class="slide-title">📤 Export Data — Download JSON</div>
+        <div class="slide-subtitle">Let admins download a backup of all student and course data as a JSON file</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">the export function — utils.js</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><div class="e-label">js/utils.js</div></div>
+          <div class="editor-body">
+            <div><span class="e-ln"> 1</span> <span class="j-kw">function</span> <span class="j-fn">exportData</span><span class="e-txt">() {</span></div>
+            <div><span class="e-ln"> 2</span></div>
+            <div><span class="e-ln"> 3</span>   <span class="j-com">// 1. Grab the data from localStorage</span></div>
+            <div><span class="e-ln"> 4</span>   <span class="j-kw">const</span> <span class="j-var">data</span> <span class="j-op">=</span> <span class="e-txt">{</span></div>
+            <div><span class="e-ln"> 5</span>     <span class="j-key">students</span><span class="e-txt">: </span><span class="j-fn">loadFromStorage</span><span class="e-txt">(</span><span class="j-str">"students"</span><span class="e-txt">),</span></div>
+            <div><span class="e-ln"> 6</span>     <span class="j-key">courses</span><span class="e-txt">:  </span><span class="j-fn">loadFromStorage</span><span class="e-txt">(</span><span class="j-str">"courses"</span><span class="e-txt">),</span></div>
+            <div><span class="e-ln"> 7</span>   <span class="e-txt">};</span></div>
+            <div><span class="e-ln"> 8</span></div>
+            <div><span class="e-ln"> 9</span>   <span class="j-com">// 2. Convert to a JSON string</span></div>
+            <div><span class="e-ln">10</span>   <span class="j-kw">const</span> <span class="j-var">json</span> <span class="j-op">=</span> <span class="j-dom">JSON</span><span class="j-prop">.stringify</span><span class="e-txt">(</span><span class="j-var">data</span><span class="e-txt">, </span><span class="j-kw">null</span><span class="e-txt">, </span><span class="j-num">2</span><span class="e-txt">);</span></div>
+            <div><span class="e-ln">11</span></div>
+            <div><span class="e-ln">12</span>   <span class="j-com">// 3. Create a downloadable Blob</span></div>
+            <div><span class="e-ln">13</span>   <span class="j-kw">const</span> <span class="j-var">blob</span> <span class="j-op">=</span> <span class="j-kw">new</span> <span class="j-fn">Blob</span><span class="e-txt">([</span><span class="j-var">json</span><span class="e-txt">], {</span><span class="j-key">type</span><span class="e-txt">:</span><span class="j-str">"application/json"</span><span class="e-txt">});</span></div>
+            <div><span class="e-ln">14</span></div>
+            <div><span class="e-ln">15</span>   <span class="j-com">// 4. Create a temporary download link</span></div>
+            <div><span class="e-ln">16</span>   <span class="j-kw">const</span> <span class="j-var">a</span> <span class="j-op">=</span> <span class="j-dom">document</span><span class="j-prop">.createElement</span><span class="e-txt">(</span><span class="j-str">"a"</span><span class="e-txt">);</span></div>
+            <div><span class="e-ln">17</span>   <span class="j-var">a</span><span class="j-prop">.href</span>     <span class="j-op">=</span> <span class="j-dom">URL</span><span class="j-prop">.createObjectURL</span><span class="e-txt">(</span><span class="j-var">blob</span><span class="e-txt">);</span></div>
+            <div><span class="e-ln">18</span>   <span class="j-var">a</span><span class="j-prop">.download</span> <span class="j-op">=</span> <span class="j-str">"skillhub-data.json"</span><span class="e-txt">;</span></div>
+            <div><span class="e-ln">19</span>   <span class="j-var">a</span><span class="j-prop">.click</span><span class="e-txt">();</span></div>
+            <div><span class="e-ln">20</span></div>
+            <div><span class="e-ln">21</span>   <span class="j-fn">showToast</span><span class="e-txt">(</span><span class="j-str">"📤 Data exported!"</span><span class="e-txt">, </span><span class="j-str">"success"</span><span class="e-txt">);</span></div>
+            <div><span class="e-ln">22</span> <span class="e-txt">}</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="section-label">what the downloaded file looks like</div>
+        <div class="json-preview">
+          <div><span class="j-bracket">{</span></div>
+          <div><span class="e-ind1"></span><span class="j-key2">"students"</span><span class="j-bracket">: [</span></div>
+          <div><span class="e-ind2"></span><span class="j-bracket">{</span></div>
+          <div><span class="e-ind3"></span><span class="j-key2">"name"</span><span class="j-bracket">:</span> <span class="j-str2">"Rahul Sharma"</span><span class="j-bracket">,</span></div>
+          <div><span class="e-ind3"></span><span class="j-key2">"email"</span><span class="j-bracket">:</span> <span class="j-str2">"rahul@skillhub.com"</span><span class="j-bracket">,</span></div>
+          <div><span class="e-ind3"></span><span class="j-key2">"course"</span><span class="j-bracket">:</span> <span class="j-str2">"MERN Stack"</span></div>
+          <div><span class="e-ind2"></span><span class="j-bracket">}</span></div>
+          <div><span class="e-ind1"></span><span class="j-bracket">],</span></div>
+          <div><span class="e-ind1"></span><span class="j-key2">"courses"</span><span class="j-bracket">: [</span></div>
+          <div><span class="e-ind2"></span><span class="j-bracket">{</span></div>
+          <div><span class="e-ind3"></span><span class="j-key2">"name"</span><span class="j-bracket">:</span> <span class="j-str2">"MERN Stack"</span><span class="j-bracket">,</span></div>
+          <div><span class="e-ind3"></span><span class="j-key2">"duration"</span><span class="j-bracket">:</span> <span class="j-str2">"6 months"</span><span class="j-bracket">,</span></div>
+          <div><span class="e-ind3"></span><span class="j-key2">"fees"</span><span class="j-bracket">:</span> <span class="j-num2">25000</span></div>
+          <div><span class="e-ind2"></span><span class="j-bracket">}</span></div>
+          <div><span class="e-ind1"></span><span class="j-bracket">]</span></div>
+          <div><span class="j-bracket">}</span></div>
+        </div>
+
+        <div class="line-explain">
+          <div class="lex-row" onclick="toggleLex(this)">
+            <div class="lex-code"><span class="j-dom">JSON</span><span class="j-prop">.stringify</span></div>
+            <div class="lex-info">
+              <div class="lex-name">Object → JSON String</div>
+              <div class="lex-desc">Converts a JavaScript object/array into a JSON-formatted string. The null, 2 arguments add indentation — making it human-readable.</div>
+              <div class="lex-detail">null = no replacer function. 2 = 2-space indent per level. Without these: {"students":[{"name":"Rahul"}]} — one dense line. With them: the formatted version shown here.</div>
+            </div>
+          </div>
+          <div class="lex-row" onclick="toggleLex(this)">
+            <div class="lex-code"><span class="j-kw">new</span> <span class="j-fn">Blob</span></div>
+            <div class="lex-info">
+              <div class="lex-name">Binary Large Object</div>
+              <div class="lex-desc">A Blob wraps the JSON string into a file-like object the browser can treat as a downloadable file with a specific MIME type.</div>
+              <div class="lex-detail">URL.createObjectURL(blob) generates a temporary URL like blob:http://... that points to that file in memory — the &lt;a&gt; tag then navigates to it, triggering a download.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-6"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Import JSON <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 7  IMPORT ═══ -->
+  <div class="slide" id="slide-7">
+    <div class="slide-header">
+      <span class="badge b-teal">Feature 4</span>
+      <div>
+        <div class="slide-title">📥 Import Data — Load JSON File</div>
+        <div class="slide-subtitle">Students choose a JSON file → the dashboard reads and updates itself</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">html — file input button</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><div class="e-label">index.html</div></div>
+          <div class="editor-body">
+            <div><span class="e-ln">1</span> <span class="c-tag">&lt;input</span> <span class="c-att">type=</span><span class="c-val">"file"</span></div>
+            <div><span class="e-ln">2</span>        <span class="c-att">id=</span><span class="c-val">"importFile"</span></div>
+            <div><span class="e-ln">3</span>        <span class="c-att">accept=</span><span class="c-val">".json"</span></div>
+            <div><span class="e-ln">4</span>        <span class="c-att">class=</span><span class="c-val">"form-control"</span><span class="c-tag">&gt;</span></div>
+          </div>
+        </div>
+
+        <div class="section-label" style="margin-top:10px">javascript — utils.js</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><div class="e-label">js/utils.js</div></div>
+          <div class="editor-body" style="font-size:11.5px">
+            <div><span class="e-ln"> 1</span> <span class="j-dom">document</span><span class="j-prop">.getElementById</span><span class="e-txt">(</span><span class="j-str">"importFile"</span><span class="e-txt">)</span></div>
+            <div><span class="e-ln"> 2</span>   <span class="j-prop">.addEventListener</span><span class="e-txt">(</span><span class="j-str">"change"</span><span class="e-txt">, </span><span class="j-kw">function</span><span class="e-txt">(</span><span class="j-var">e</span><span class="e-txt">) {</span></div>
+            <div><span class="e-ln"> 3</span></div>
+            <div><span class="e-ln"> 4</span>   <span class="j-com">// Get the selected file</span></div>
+            <div><span class="e-ln"> 5</span>   <span class="j-kw">const</span> <span class="j-var">file</span> <span class="j-op">=</span> <span class="j-var">e</span><span class="j-prop">.target.files</span><span class="e-txt">[</span><span class="j-num">0</span><span class="e-txt">];</span></div>
+            <div><span class="e-ln"> 6</span>   <span class="j-kw">const</span> <span class="j-var">reader</span> <span class="j-op">=</span> <span class="j-kw">new</span> <span class="j-fn">FileReader</span><span class="e-txt">();</span></div>
+            <div><span class="e-ln"> 7</span></div>
+            <div><span class="e-ln"> 8</span>   <span class="j-com">// When file is read, parse the JSON</span></div>
+            <div><span class="e-ln"> 9</span>   <span class="j-var">reader</span><span class="j-prop">.onload</span> <span class="j-op">=</span> <span class="j-kw">function</span><span class="e-txt">(</span><span class="j-var">ev</span><span class="e-txt">) {</span></div>
+            <div><span class="e-ln">10</span>     <span class="j-kw">const</span> <span class="j-var">data</span> <span class="j-op">=</span> <span class="j-dom">JSON</span><span class="j-prop">.parse</span><span class="e-txt">(</span><span class="j-var">ev</span><span class="j-prop">.target.result</span><span class="e-txt">);</span></div>
+            <div><span class="e-ln">11</span>     <span class="j-fn">saveToStorage</span><span class="e-txt">(</span><span class="j-str">"students"</span><span class="e-txt">, </span><span class="j-var">data</span><span class="j-prop">.students</span><span class="e-txt">);</span></div>
+            <div><span class="e-ln">12</span>     <span class="j-fn">saveToStorage</span><span class="e-txt">(</span><span class="j-str">"courses"</span><span class="e-txt">,  </span><span class="j-var">data</span><span class="j-prop">.courses</span><span class="e-txt">);</span></div>
+            <div><span class="e-ln">13</span>     <span class="j-fn">showToast</span><span class="e-txt">(</span><span class="j-str">"📥 Data imported!"</span><span class="e-txt">, </span><span class="j-str">"success"</span><span class="e-txt">);</span></div>
+            <div><span class="e-ln">14</span>     <span class="j-fn">renderAll</span><span class="e-txt">(); </span><span class="j-com">// re-draw dashboards</span></div>
+            <div><span class="e-ln">15</span>   <span class="e-txt">};</span></div>
+            <div><span class="e-ln">16</span>   <span class="j-var">reader</span><span class="j-prop">.readAsText</span><span class="e-txt">(</span><span class="j-var">file</span><span class="e-txt">);</span></div>
+            <div><span class="e-ln">17</span> <span class="e-txt">});</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="section-label">how the import flow works</div>
+        <div class="card">
+          <div class="flow-step" style="padding-top:0">
+            <div class="flow-num">1</div>
+            <div class="flow-content"><span class="flow-label">User picks a .json file</span>The &lt;input type="file"&gt; fires a "change" event with the selected file object.</div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-num">2</div>
+            <div class="flow-content"><span class="flow-label">FileReader reads it</span>FileReader is a browser API — like Date, it uses the <code>new</code> keyword. .readAsText() reads the file contents as a string.</div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-num">3</div>
+            <div class="flow-content"><span class="flow-label">onload fires when ready</span>Reading is async — .onload runs when the file is fully read. ev.target.result contains the raw JSON string.</div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-num">4</div>
+            <div class="flow-content"><span class="flow-label">JSON.parse converts it</span>Turns the raw string back into a JavaScript object. Then save to localStorage and re-render both dashboards.</div>
+          </div>
+        </div>
+
+        <div class="info-box">
+          <i class="ti ti-info-circle info-icon"></i>
+          <div class="info-text">Export + Import together give SkillHub a simple backup system — admins can back up data to a file and restore it later. This is a genuine, production-grade feature.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-7"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Project Cleanup <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 8  CLEANUP ═══ -->
+  <div class="slide" id="slide-8">
+    <div class="slide-header">
+      <span class="badge b-purple">Refactor</span>
+      <div>
+        <div class="slide-title">Project Cleanup — DRY Principle + Code Organisation</div>
+        <div class="slide-subtitle">Professional developers spend as much time cleaning code as writing it</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">the dry principle — don't repeat yourself</div>
+        <div class="repeat-box">
+          <div style="font-size:11px;font-weight:800;color:#991b1b;margin-bottom:6px">❌ Code that repeats (WET)</div>
+          <div class="editor" style="border-radius:8px">
+            <div class="editor-body" style="padding:8px 12px;font-size:11px">
+              <div><span class="j-com">// in student.js</span></div>
+              <div><span class="j-dom">localStorage</span><span class="j-prop">.setItem</span><span class="e-txt">(</span><span class="j-str">"students"</span><span class="e-txt">, </span><span class="j-dom">JSON</span><span class="j-prop">.stringify</span><span class="e-txt">(</span><span class="j-var">list</span><span class="e-txt">));</span></div>
+              <div><span class="j-com">// in course.js — SAME code!</span></div>
+              <div><span class="j-dom">localStorage</span><span class="j-prop">.setItem</span><span class="e-txt">(</span><span class="j-str">"courses"</span><span class="e-txt">, </span><span class="j-dom">JSON</span><span class="j-prop">.stringify</span><span class="e-txt">(</span><span class="j-var">list</span><span class="e-txt">));</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="dry-box" style="margin-top:8px">
+          <div style="font-size:11px;font-weight:800;color:#166534;margin-bottom:6px">✅ DRY — extracted to utils.js</div>
+          <div class="editor" style="border-radius:8px">
+            <div class="editor-body" style="padding:8px 12px;font-size:11px">
+              <div><span class="j-com">// utils.js — write once</span></div>
+              <div><span class="j-kw">function</span> <span class="j-fn">saveToStorage</span><span class="e-txt">(</span><span class="j-var">key</span><span class="e-txt">, </span><span class="j-var">data</span><span class="e-txt">) {</span></div>
+              <div><span class="e-ind1"></span><span class="j-dom">localStorage</span><span class="j-prop">.setItem</span><span class="e-txt">(</span><span class="j-var">key</span><span class="e-txt">, </span><span class="j-dom">JSON</span><span class="j-prop">.stringify</span><span class="e-txt">(</span><span class="j-var">data</span><span class="e-txt">));</span></div>
+              <div><span class="e-txt">}</span></div>
+              <div></div>
+              <div><span class="j-com">// student.js — use it</span></div>
+              <div><span class="j-fn">saveToStorage</span><span class="e-txt">(</span><span class="j-str">"students"</span><span class="e-txt">, </span><span class="j-var">list</span><span class="e-txt">);</span></div>
+              <div><span class="j-com">// course.js — use it</span></div>
+              <div><span class="j-fn">saveToStorage</span><span class="e-txt">(</span><span class="j-str">"courses"</span><span class="e-txt">, </span><span class="j-var">list</span><span class="e-txt">);</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="section-label">cleanup checklist — go through every file</div>
+        <div style="display:flex;flex-direction:column;gap:5px">
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><div>Remove all unused variables and functions</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><div>Add a <code>// Section comment</code> above every major block</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><div>Move all shared helpers to <code>utils.js</code></div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><div>Replace all <code>alert()</code> calls with <code>showToast()</code></div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><div>Ensure every <code>&lt;script&gt;</code> is loaded in the right order</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><div>Confirm localStorage keys are consistent across all files</div></div>
+        </div>
+
+        <div class="tip-box">
+          <i class="ti ti-bulb tip-icon"></i>
+          <div class="tip-text"><strong>Why this matters:</strong> Every professional codebase has a code review step before merging. Clean, readable code is what senior developers judge juniors on in their first job.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-8"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">README <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 9  README ═══ -->
+  <div class="slide" id="slide-9">
+    <div class="slide-header">
+      <span class="badge b-indigo">Deploy Prep</span>
+      <div>
+        <div class="slide-title">Write the README — Present Your Project Professionally</div>
+        <div class="slide-subtitle">A README is the first thing a hiring manager or recruiter sees on GitHub</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">readme sections to write</div>
+        <table class="tag-table">
+          <thead><tr><th>Section</th><th>What to write</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Project Title</strong></td><td>SkillHub LMS — a clear, bold name</td></tr>
+            <tr><td><strong>Description</strong></td><td>What the app does in 2 sentences</td></tr>
+            <tr><td><strong>Features</strong></td><td>Bullet list of all major features</td></tr>
+            <tr><td><strong>Technologies</strong></td><td>HTML, CSS, Bootstrap, JavaScript, localStorage</td></tr>
+            <tr><td><strong>Folder Structure</strong></td><td>Copy the tree from Slide 1</td></tr>
+            <tr><td><strong>How to Run</strong></td><td>"Open index.html in a browser"</td></tr>
+            <tr><td><strong>Author</strong></td><td>Your name + GitHub link</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div>
+        <div class="section-label">example readme — how it looks on github</div>
+        <div class="readme-wrap">
+          <div class="readme-bar">
+            <i class="ti ti-markdown" style="color:#7ee787;font-size:16px"></i>
+            <span style="font-size:12px;color:#8b949e">README.md</span>
+          </div>
+          <div class="readme-body">
+            <div class="readme-h1">🎓 SkillHub LMS</div>
+            <div class="readme-badge-wrap">
+              <span class="readme-badge" style="background:#fb923c22;color:#fb923c">HTML5</span>
+              <span class="readme-badge" style="background:#60a5fa22;color:#60a5fa">CSS3</span>
+              <span class="readme-badge" style="background:#7952b322;color:#a78bfa">Bootstrap 5</span>
+              <span class="readme-badge" style="background:#f0db4f22;color:#f0db4f">JavaScript ES6</span>
+            </div>
+            <div style="font-size:12px;color:#cdd9e5;margin:6px 0">A frontend LMS dashboard built with vanilla JavaScript. Manage students, courses, and training programmes with full CRUD, live search, and local data persistence.</div>
+            <div class="readme-h2">✨ Features</div>
+            <div class="readme-li">Student Dashboard — Add, Edit, Delete, Search</div>
+            <div class="readme-li">Course Dashboard — CRUD + Statistics</div>
+            <div class="readme-li">Dark Mode toggle</div>
+            <div class="readme-li">Toast Notifications</div>
+            <div class="readme-li">Export / Import JSON data</div>
+            <div class="readme-li">localStorage persistence</div>
+            <div class="readme-h2">🚀 How to Run</div>
+            <div style="background:#161b22;border-radius:6px;padding:6px 10px;font-family:monospace;font-size:11px;color:#3fb950;margin-top:4px">Open index.html in any browser</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-9"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Mini Challenge <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 10  MINI CHALLENGE ═══ -->
+  <div class="slide" id="slide-10">
+    <div class="slide-header">
+      <span class="badge b-rose">Mini Challenge</span>
+      <div>
+        <div class="slide-title">Mini Challenge — Admin Profile & Navigation</div>
+        <div class="slide-subtitle">Add the final UI touches that make SkillHub feel like a real product</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">features to add</div>
+        <div class="grid-2">
+          <div class="card" style="text-align:center">
+            <div style="font-size:22px;margin-bottom:6px">👤</div>
+            <div style="font-size:13px;font-weight:700">Admin Profile</div>
+            <div style="font-size:11px;color:#666;margin-top:2px">Name, avatar, role in the navbar</div>
+          </div>
+          <div class="card" style="text-align:center">
+            <div style="font-size:22px;margin-bottom:6px">🚪</div>
+            <div style="font-size:13px;font-weight:700">Logout Button</div>
+            <div style="font-size:11px;color:#666;margin-top:2px">confirm() → clear localStorage → redirect</div>
+          </div>
+          <div class="card" style="text-align:center">
+            <div style="font-size:22px;margin-bottom:6px">⚙️</div>
+            <div style="font-size:13px;font-weight:700">Settings Page</div>
+            <div style="font-size:11px;color:#666;margin-top:2px">Change LMS name / theme colour</div>
+          </div>
+          <div class="card" style="text-align:center">
+            <div style="font-size:22px;margin-bottom:6px">📩</div>
+            <div style="font-size:13px;font-weight:700">Contact Section</div>
+            <div style="font-size:11px;color:#666;margin-top:2px">Email, phone, address in footer</div>
+          </div>
+        </div>
+
+        <div class="section-label" style="margin-top:10px">logout logic hint</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><div class="e-label">dashboard.js</div></div>
+          <div class="editor-body" style="font-size:12px">
+            <div><span class="j-dom">document</span><span class="j-prop">.getElementById</span><span class="e-txt">(</span><span class="j-str">"logoutBtn"</span><span class="e-txt">)</span></div>
+            <div>  <span class="j-prop">.addEventListener</span><span class="e-txt">(</span><span class="j-str">"click"</span><span class="e-txt">, () </span><span class="j-op">=&gt;</span> <span class="e-txt">{</span></div>
+            <div>    <span class="j-kw">if</span><span class="e-txt">(</span><span class="j-fn">confirm</span><span class="e-txt">(</span><span class="j-str">"Are you sure?"</span><span class="e-txt">)) {</span></div>
+            <div>      <span class="j-dom">localStorage</span><span class="j-prop">.clear</span><span class="e-txt">();</span></div>
+            <div>      <span class="j-dom">location</span><span class="j-prop">.reload</span><span class="e-txt">();</span></div>
+            <div>    <span class="e-txt">}</span></div>
+            <div><span class="e-txt">});</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="section-label">what the navbar should look like</div>
+        <div style="background:#1e293b;border-radius:10px;overflow:hidden">
+          <div style="padding:10px 16px;display:flex;align-items:center;justify-content:space-between">
+            <div style="color:#fff;font-weight:700;font-size:13px">🎓 SkillHub LMS</div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <button style="background:transparent;border:1px solid #475569;color:#cbd5e1;padding:4px 10px;border-radius:6px;font-size:10px;cursor:pointer">⚙️ Settings</button>
+              <div style="display:flex;align-items:center;gap:6px">
+                <div style="width:28px;height:28px;background:#7c3aed;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700">A</div>
+                <span style="color:#e2e8f0;font-size:11px;font-weight:600">Admin</span>
+              </div>
+              <button onclick="demoLogout()" style="background:#dc2626;border:none;color:#fff;padding:4px 10px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer">🚪 Logout</button>
+            </div>
+          </div>
+        </div>
+        <div id="logout-status" style="font-size:11px;color:#94a3b8;font-family:monospace;text-align:center"></div>
+
+        <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><div>Admin avatar with first letter in navbar</div></div>
+        <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><div>Logout confirms then clears localStorage</div></div>
+        <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><div>Contact section added to footer</div></div>
+        <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><div>Settings page (even a basic one) exists</div></div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-10"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Assignment <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 11  ASSIGNMENT ═══ -->
+  <div class="slide" id="slide-11">
+    <div class="slide-header">
+      <span class="badge b-rose">Assignment</span>
+      <div>
+        <div class="slide-title">Complete LMS — Final Checklist</div>
+        <div class="slide-subtitle">Every feature that must be working before we move to backend</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div class="section-label">core features</div>
+        <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><div><strong>Student Dashboard</strong> — Add, Edit, Delete, Table view</div></div>
+        <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><div><strong>Course Dashboard</strong> — Add, Delete, Card view</div></div>
+        <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><div><strong>Search</strong> — Live filter on both dashboards</div></div>
+        <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><div><strong>CRUD</strong> — Complete on Students + Courses</div></div>
+        <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><div><strong>Local Storage</strong> — Data persists on refresh</div></div>
+        <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><div><strong>Statistics</strong> — Total counts + average fees</div></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div class="section-label">professional features</div>
+        <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><div><strong>Dark Mode</strong> — classList.toggle("dark") + CSS</div></div>
+        <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><div><strong>Bootstrap UI</strong> — Cards, Buttons, Grid throughout</div></div>
+        <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><div><strong>Toast Notifications</strong> — showToast() replaces all alert()</div></div>
+        <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><div><strong>Export JSON</strong> — Download backup file</div></div>
+        <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><div><strong>Folder Structure</strong> — css/ js/ images/ separated</div></div>
+        <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><div><strong>README.md</strong> — Description, features, tech, structure</div></div>
+      </div>
+    </div>
+
+    <div style="background:linear-gradient(135deg,#0f172a,#1e3a5f);border-radius:12px;padding:14px 16px;color:white;text-align:center;margin-top:4px">
+      <div style="font-size:14px;font-weight:800;margin-bottom:4px">🏆 Submit your complete SkillHub LMS</div>
+      <div style="font-size:12px;opacity:.8">Push to GitHub. Share the repo link. This is your portfolio project.</div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-11"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Full Journey <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 12  FINAL MAP ═══ -->
+  <div class="slide" id="slide-12">
+    <div class="slide-header">
+      <span class="badge b-orange">Final Map</span>
+      <div>
+        <div class="slide-title">SkillHub LMS — 11-Day Journey</div>
+        <div class="slide-subtitle">From a blank HTML file to a complete professional web application</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">complete feature log</div>
+        <div style="display:flex;flex-direction:column;gap:5px">
+          <div class="progress-feature done"><i class="ti ti-check" style="flex-shrink:0"></i>Landing Page → Responsive + Bootstrap</div>
+          <div class="progress-feature done"><i class="ti ti-check" style="flex-shrink:0"></i>Student Registration → Form Validation</div>
+          <div class="progress-feature done"><i class="ti ti-check" style="flex-shrink:0"></i>Student Dashboard → CRUD + Search</div>
+          <div class="progress-feature done"><i class="ti ti-check" style="flex-shrink:0"></i>Course Dashboard → CRUD + Statistics</div>
+          <div class="progress-feature done"><i class="ti ti-check" style="flex-shrink:0"></i>Local Storage → Data Persistence</div>
+          <div class="progress-feature done"><i class="ti ti-check" style="flex-shrink:0"></i>Dark Mode → classList.toggle</div>
+          <div class="progress-feature done"><i class="ti ti-check" style="flex-shrink:0"></i>Professional Dashboard → Folder Structure</div>
+          <div class="progress-feature today"><i class="ti ti-star" style="flex-shrink:0"></i>Toast Notifications → completed today</div>
+          <div class="progress-feature today"><i class="ti ti-star" style="flex-shrink:0"></i>Export / Import JSON → completed today</div>
+          <div class="progress-feature today"><i class="ti ti-star" style="flex-shrink:0"></i>README → completed today</div>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">what comes next — backend</div>
+        <div style="background:linear-gradient(135deg,#0f172a,#1e3a5f);border-radius:12px;padding:16px;color:white">
+          <div style="font-size:13px;font-weight:700;margin-bottom:8px">🗓️ Day 12+ — Backend Development</div>
+          <div style="font-size:12px;opacity:.8;line-height:1.8">
+            ✦ Node.js + Express server<br>
+            ✦ REST API — GET, POST, PUT, DELETE<br>
+            ✦ MongoDB + Mongoose<br>
+            ✦ Replace localStorage → real database<br>
+            ✦ Connect SkillHub frontend to the API
+          </div>
+        </div>
+        <div class="success-box" style="margin-top:10px">
+          <i class="ti ti-sparkles" style="color:#16a34a;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+          <div style="font-size:13px;color:#166534;line-height:1.6">SkillHub is now a complete, professional frontend application — ready to be backed by a real server and database. This is portfolio-ready code.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-12"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Quiz <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 13  QUIZ ═══ -->
+  <div class="slide" id="slide-13">
+    <div class="slide-header">
+      <span class="badge b-slate">Quiz</span>
+      <div>
+        <div class="slide-title">Quick-Fire Quiz</div>
+        <div class="slide-subtitle">4 questions on today's professional features</div>
+      </div>
+    </div>
+    <div id="quiz-container"></div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-13"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Wrap Up <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 14  WRAP UP ═══ -->
+  <div class="slide" id="slide-14">
+    <div class="slide-header">
+      <span class="badge b-teal">Wrap-Up</span>
+      <div>
+        <div class="slide-title">Day 11 Complete — Frontend LMS Done! 🎉</div>
+        <div class="slide-subtitle">SkillHub is a complete, professional, portfolio-ready frontend application</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">skills earned today</div>
+        <div style="display:flex;flex-wrap:wrap;gap:5px">
+          <span style="background:#fef9c3;color:#854d0e;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700">classList.toggle()</span>
+          <span style="background:#fef9c3;color:#854d0e;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700">Dark Mode</span>
+          <span style="background:#fef9c3;color:#854d0e;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700">showToast()</span>
+          <span style="background:#fef9c3;color:#854d0e;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700">setTimeout()</span>
+          <span style="background:#fef9c3;color:#854d0e;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700">JSON.stringify()</span>
+          <span style="background:#fef9c3;color:#854d0e;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700">Blob + Download</span>
+          <span style="background:#fef9c3;color:#854d0e;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700">FileReader API</span>
+          <span style="background:#fef9c3;color:#854d0e;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700">JSON.parse()</span>
+          <span style="background:#fef9c3;color:#854d0e;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700">DRY Principle</span>
+          <span style="background:#fef9c3;color:#854d0e;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700">README.md</span>
+          <span style="background:#fef9c3;color:#854d0e;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700">Default Parameters</span>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">what you've built in 11 days</div>
+        <div class="stat-preview-grid">
+          <div class="stat-mini" style="background:#dbeafe;border-color:#bfdbfe">
+            <div class="stat-mini-num" style="color:#1d4ed8">11</div>
+            <div class="stat-mini-label" style="color:#1d4ed8">Days</div>
+          </div>
+          <div class="stat-mini" style="background:#dcfce7;border-color:#86efac">
+            <div class="stat-mini-num" style="color:#166534">2</div>
+            <div class="stat-mini-label" style="color:#166534">Modules</div>
+          </div>
+          <div class="stat-mini" style="background:#fce7f3;border-color:#f9a8d4">
+            <div class="stat-mini-num" style="color:#9d174d">5</div>
+            <div class="stat-mini-label" style="color:#9d174d">JS Files</div>
+          </div>
+          <div class="stat-mini" style="background:#fef9c3;border-color:#fde047">
+            <div class="stat-mini-num" style="color:#854d0e">15+</div>
+            <div class="stat-mini-label" style="color:#854d0e">Features</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="background:linear-gradient(135deg,#059669,#047857);border-radius:12px;padding:18px;color:white;text-align:center;margin-top:4px">
+      <div style="font-size:18px;font-weight:800;margin-bottom:6px">🚀 Frontend Complete — Ready for Node.js!</div>
+      <div style="font-size:13px;opacity:.9;line-height:1.7">SkillHub LMS is a real, deployable web application. Two dashboards. Full CRUD. Search. Dark Mode. Toast notifications. Export/Import. localStorage. Professional folder structure. README. In 11 days. Push it to GitHub.</div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-14"></div>
+      <button class="nav-btn" disabled>Done <i class="ti ti-flag"></i></button>
+    </div>
+  </div>
+
+</div><!-- /.wrapper -->
+
+<script>
+  var current  = 0;
+  var total    = 15;
+  var quizInit = false;
+
+  /* ── Line explainer ── */
+  function toggleLex(row) {
+    var was = row.classList.contains('active');
+    document.querySelectorAll('.lex-row.active').forEach(function(r){ r.classList.remove('active'); });
+    if (!was) row.classList.add('active');
+  }
+
+  /* ── Checklist ── */
+  function toggleCheck(item) {
+    item.classList.toggle('done');
+    var c = item.querySelector('.check-circle');
+    if (item.classList.contains('done')) {
+      c.style.background = '#22c55e'; c.style.borderColor = '#22c55e'; c.style.color = '#fff';
+    } else {
+      c.style.background = ''; c.style.borderColor = ''; c.style.color = '';
+    }
+  }
+
+  /* ── Dark mode demo ── */
+  var darkOn = false;
+  function toggleDarkDemo() {
+    darkOn = !darkOn;
+    var wrap  = document.getElementById('darkDemoWrap');
+    var body  = document.getElementById('darkDemoBody');
+    var btn   = document.getElementById('darkDemoBtn');
+    var stat  = document.getElementById('dark-status');
+    if (darkOn) {
+      wrap.classList.add('dark-on');
+      body.style.background = '#222';
+      body.style.color = '#fff';
+      btn.classList.add('lit');
+      btn.style.background = '#f1f5f9'; btn.style.color = '#1a1a1a';
+      btn.textContent = '☀️ Light Mode';
+      stat.textContent = 'document.body.classList → ["dark"] (dark class present)';
+    } else {
+      wrap.classList.remove('dark-on');
+      body.style.background = '#fff';
+      body.style.color = '#1a1a1a';
+      btn.classList.remove('lit');
+      btn.style.background = '#1e293b'; btn.style.color = '#fde047';
+      btn.textContent = '🌙 Dark Mode';
+      stat.textContent = 'document.body.classList → [] (dark class absent)';
+    }
+  }
+
+  /* ── Toast demo ── */
+  var toastTimer = null;
+  function fireToast(msg, type) {
+    var t = document.getElementById('demoToast');
+    t.className = 'toast-mock ' + type + ' show';
+    t.innerHTML = '<i class="ti ti-' + (type==='success'?'check':'x') + '" style="font-size:16px"></i>' + msg;
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(function() { t.classList.remove('show'); }, 2500);
+  }
+
+  /* ── Logout demo ── */
+  function demoLogout() {
+    var s = document.getElementById('logout-status');
+    s.textContent = '→ confirm() shown → if OK: localStorage.clear() + location.reload()';
+    s.style.color = '#ef4444';
+    setTimeout(function() { s.textContent = ''; }, 3000);
+  }
+
+  /* ── Quiz ── */
+  var quizData = [
+    {
+      q: "classList.toggle('dark') — what makes it better than classList.add() for the dark mode button?",
+      opts: [
+        "toggle() works faster than add()",
+        "toggle() adds the class if absent, removes it if present — perfect for an on/off button with one click handler",
+        "toggle() changes the background colour automatically",
+        "add() doesn't work for dark mode themes"
+      ],
+      ans: 1,
+      exp: "classList.add('dark') only ever adds the class — clicking again would do nothing. classList.toggle('dark') checks: if dark is already there, remove it (go light); if it's not there, add it (go dark). This means one event listener handles both directions of the toggle."
+    },
+    {
+      q: "Why is showToast() written in utils.js rather than student.js or course.js?",
+      opts: [
+        "JavaScript only allows one function per file",
+        "It's a shared utility — both modules need it, so placing it in utils.js avoids duplicating the function in every file (DRY principle)",
+        "Toast functions must always go in a file called utils",
+        "student.js can't use setTimeout"
+      ],
+      ans: 1,
+      exp: "If you wrote showToast() inside student.js, course.js would need its own copy too — that's code duplication (WET code). Extracting shared functions into utils.js means every other file that loads utils.js can call showToast() — one definition, used everywhere. This is the DRY principle in practice."
+    },
+    {
+      q: "In the export function, what does JSON.stringify(data, null, 2) do compared to JSON.stringify(data)?",
+      opts: [
+        "The extra arguments make it export faster",
+        "null and 2 are required arguments — JSON.stringify doesn't work without them",
+        "The null, 2 adds pretty-printing with 2-space indentation, making the JSON human-readable instead of one long compressed line",
+        "It converts the data to a CSV format instead of JSON"
+      ],
+      ans: 2,
+      exp: "JSON.stringify(data) alone produces: {\"students\":[{\"name\":\"Rahul\"}]} — all on one line, hard to read. The null is a replacer function (none needed here) and 2 sets the indentation to 2 spaces per level, producing formatted, readable JSON with line breaks and indentation."
+    },
+    {
+      q: "What is the role of FileReader in the import function?",
+      opts: [
+        "It validates that the uploaded file is valid JSON",
+        "It reads the contents of the selected file from the user's computer as a text string, since browsers can't directly access files without it",
+        "It converts the JSON data into localStorage format automatically",
+        "It creates a download link for the imported file"
+      ],
+      ans: 1,
+      exp: "Browsers can't directly read files from a user's computer for security reasons. FileReader is the browser API that allows controlled, user-initiated file reading. The user picks a file via &lt;input type='file'&gt;, FileReader.readAsText() reads it asynchronously, and .onload fires when the content is ready as a string."
+    }
+  ];
+  var quizAnswered = [];
+
+  function renderQuiz() {
+    var c = document.getElementById('quiz-container'); c.innerHTML = '';
+    quizData.forEach(function(q, i) {
+      var d = document.createElement('div'); d.style.cssText = 'margin-bottom:18px';
+      d.innerHTML = '<div style="font-size:13px;font-weight:600;margin-bottom:6px">'+(i+1)+'. '+q.q+'</div>';
+      q.opts.forEach(function(opt, j) {
+        var btn = document.createElement('button'); btn.className = 'quiz-option';
+        btn.innerHTML = String.fromCharCode(65+j)+'. '+opt;
+        btn.onclick = function() {
+          if (quizAnswered[i]) return; quizAnswered[i] = true;
+          var btns = d.querySelectorAll('.quiz-option');
+          btns.forEach(function(b,k){ b.disabled=true; if(k===q.ans) b.classList.add('correct'); else if(k===j) b.classList.add('wrong'); });
+          var fb = d.querySelector('.quiz-feedback');
+          fb.innerHTML = (j===q.ans?'✅ Correct! ':'❌ Not quite. ')+q.exp;
+          fb.className = 'quiz-feedback '+(j===q.ans?'correct':'wrong');
+        };
+        d.appendChild(btn);
+      });
+      var fb = document.createElement('div'); fb.className = 'quiz-feedback'; d.appendChild(fb);
+      c.appendChild(d);
+    });
+  }
+
+  /* ── Navigation ── */
+  function goSlide(n) {
+    document.getElementById('slide-'+current).classList.remove('active');
+    current = n;
+    document.getElementById('slide-'+current).classList.add('active');
+    updateDots();
+    document.getElementById('slide-counter').textContent = (current+1)+' / '+total;
+    if (n===13 && !quizInit) { renderQuiz(); quizInit=true; }
+    window.scrollTo(0,0);
+  }
+  function nextSlide() { if (current < total-1) goSlide(current+1); }
+  function prevSlide() { if (current > 0) goSlide(current-1); }
+
+  function updateDots() {
+    for (var s=0; s<total; s++) {
+      var el = document.getElementById('dots-'+s); if (!el) continue;
+      el.innerHTML = '';
+      for (var d=0; d<total; d++) {
+        var dot = document.createElement('div');
+        dot.className = 'dot'+(d===current?' active':'');
+        el.appendChild(dot);
+      }
+    }
+  }
+  updateDots();
+</script>
+</body>
+</html>

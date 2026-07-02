@@ -1,0 +1,1287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Day 7 · Hour 1 – Introduction to JavaScript</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f4f5f7; color: #1a1a1a;
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; padding: 2rem 1rem;
+  }
+  .wrapper {
+    width: 100%; max-width: 920px; background: #fff;
+    border-radius: 16px; box-shadow: 0 2px 20px rgba(0,0,0,0.09); overflow: hidden;
+  }
+  .top-bar {
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    color: #fff; padding: 14px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .top-bar-title { font-size: 15px; font-weight: 600; }
+  .top-bar-sub   { font-size: 12px; opacity: .55; margin-top: 2px; }
+  .slide-counter { font-size: 13px; opacity: .6; font-variant-numeric: tabular-nums; }
+  .slide { display: none; padding: 1.75rem 2rem; min-height: 500px; flex-direction: column; gap: 1.2rem; }
+  .slide.active { display: flex; }
+  .slide-header { display: flex; align-items: center; gap: 10px; padding-bottom: 1rem; border-bottom: 1px solid #e8e8e8; }
+  .slide-title    { font-size: 20px; font-weight: 700; color: #111; }
+  .slide-subtitle { font-size: 13px; color: #666; margin-top: 2px; }
+
+  /* ── Badges ── */
+  .badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+  .b-blue   { background:#dbeafe; color:#1d4ed8; }
+  .b-teal   { background:#d1fae5; color:#065f46; }
+  .b-purple { background:#ede9fe; color:#5b21b6; }
+  .b-amber  { background:#fef3c7; color:#92400e; }
+  .b-green  { background:#dcfce7; color:#166534; }
+  .b-slate  { background:#e2e8f0; color:#334155; }
+  .b-rose   { background:#ffe4e6; color:#9f1239; }
+  .b-orange { background:#ffedd5; color:#9a3412; }
+  .b-indigo { background:#e0e7ff; color:#3730a3; }
+  .b-cyan   { background:#cffafe; color:#164e63; }
+  .b-pink   { background:#fce7f3; color:#9d174d; }
+  .b-yellow { background:#fef9c3; color:#854d0e; }
+  .b-js     { background:#fef9c3; color:#854d0e; } /* JS yellow */
+
+  /* ── Layout ── */
+  .section-label { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 8px; }
+  .card { background: #fff; border: 1px solid #e8e8e8; border-radius: 12px; padding: 1rem 1.25rem; }
+  .card-gray { background: #f8f9fa; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+  /* ── Code Editor (Dracula — identical to ref) ── */
+  .editor { background: #1e1e2e; border-radius: 12px; overflow: hidden; font-family: 'SFMono-Regular', Consolas, 'Courier New', monospace; }
+  .editor-bar { background: #13131f; padding: 9px 14px; display: flex; align-items: center; gap: 6px; }
+  .e-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .e-red { background:#ff5f57; } .e-yellow { background:#febc2e; } .e-green { background:#28c840; }
+  .e-label { font-size: 12px; color: #6272a4; margin-left: 4px; font-family: -apple-system, sans-serif; }
+  .editor-body { padding: 14px 18px; font-size: 12.5px; line-height: 1.8; }
+  .e-ln   { color: #44475a; font-size: 11px; display: inline-block; width: 22px; user-select: none; }
+  .e-tag  { color: #ff79c6; }
+  .e-att  { color: #50fa7b; }
+  .e-val  { color: #f1fa8c; }
+  .e-txt  { color: #f8f8f2; }
+  .e-cmt  { color: #6272a4; font-style: italic; }
+  .e-new  { color: #80ffea; }
+  .c-sel  { color: #ff79c6; font-weight: 700; }
+  .c-prop { color: #50fa7b; }
+  .c-val  { color: #f1fa8c; }
+  .c-punc { color: #f8f8f2; }
+  .c-hex  { color: #bd93f9; }
+  .c-cmt  { color: #6272a4; font-style: italic; }
+  .c-num  { color: #ff79c6; }
+  .c-cls  { color: #80ffea; }
+  /* JS-specific tokens */
+  .j-kw   { color: #ff79c6; font-weight: 700; }   /* let const function if */
+  .j-fn   { color: #50fa7b; }                      /* console.log, alert */
+  .j-str  { color: #f1fa8c; }                      /* "string values" */
+  .j-num  { color: #bd93f9; }                      /* numbers */
+  .j-bool { color: #ffb86c; }                      /* true false */
+  .j-var  { color: #80ffea; }                      /* variable names */
+  .j-op   { color: #ff79c6; }                      /* = + - operators */
+  .j-out  { color: #a4e400; }                      /* console output */
+  .j-com  { color: #6272a4; font-style: italic; }  /* // comment */
+  .e-row  { display: flex; gap: 8px; }
+  .e-ind1 { display: inline-block; width: 20px; }
+  .e-ind2 { display: inline-block; width: 40px; }
+  .e-ind3 { display: inline-block; width: 60px; }
+
+  /* ── Browser frame ── */
+  .browser { border-radius: 12px; overflow: hidden; border: 1px solid #e0e0e0; }
+  .browser-bar { background: #f1f3f4; padding: 9px 14px; display: flex; align-items: center; gap: 7px; border-bottom: 1px solid #e0e0e0; }
+  .b-dot2 { width: 10px; height: 10px; border-radius: 50%; }
+  .b-r { background:#ff5f57; } .b-y { background:#febc2e; } .b-g { background:#28c840; }
+  .b-url { flex:1; background:#fff; border:1px solid #dadce0; border-radius:20px; padding:4px 14px; font-size:12px; color:#555; }
+
+  /* ── Tables ── */
+  .tag-table { border-collapse: collapse; width: 100%; }
+  .tag-table th { background: #f1f5f9; font-size: 12px; font-weight: 700; text-align: left; padding: 10px 14px; color: #475569; border-bottom: 2px solid #e2e8f0; }
+  .tag-table td { font-size: 13px; padding: 10px 14px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+  .tag-table tr:last-child td { border-bottom: none; }
+  .tag-table tr:hover td { background: #f8f9fa; }
+  .tag-mono { font-family: 'SFMono-Regular', Consolas, monospace; font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 5px; }
+
+  /* ── Quiz ── */
+  .quiz-option { border: 1px solid #dee2e6; border-radius: 8px; padding: 10px 14px; font-size: 13px; cursor: pointer; margin-bottom: 6px; transition: all .15s; background: transparent; width: 100%; text-align: left; color: #1a1a1a; }
+  .quiz-option:hover:not(:disabled) { background: #f8f9fa; }
+  .quiz-option.correct { background: #d1fae5; border-color: #059669; color: #065f46; }
+  .quiz-option.wrong   { background: #fee2e2; border-color: #dc2626; color: #991b1b; }
+  .quiz-feedback { display: none; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-top: 4px; }
+  .quiz-feedback.correct { background: #d1fae5; color: #065f46; display: block; }
+  .quiz-feedback.wrong   { background: #fee2e2; color: #991b1b; display: block; }
+
+  /* ── Activity / challenge ── */
+  .activity-box { border: 2px dashed #a5b4fc; background: #eef2ff; border-radius: 12px; padding: 14px 18px; }
+  .activity-title { font-size: 13px; font-weight: 700; color: #3730a3; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .challenge-box { border: 2px dashed #f9a8d4; background: #fdf2f8; border-radius: 12px; padding: 14px 18px; }
+  .challenge-title { font-size: 13px; font-weight: 700; color: #9f1239; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+
+  /* ── Tip / info / warn / success ── */
+  .tip-box   { display:flex; gap:10px; align-items:flex-start; background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:10px 14px; }
+  .tip-icon  { color:#d97706; font-size:18px; flex-shrink:0; margin-top:1px; }
+  .tip-text  { font-size:13px; color:#92400e; line-height:1.6; }
+  .info-box  { display:flex; gap:10px; align-items:flex-start; background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:10px 14px; }
+  .info-icon { color:#2563eb; font-size:18px; flex-shrink:0; margin-top:1px; }
+  .info-text { font-size:13px; color:#1e40af; line-height:1.6; }
+  .warn-box  { display:flex; gap:10px; align-items:flex-start; background:#fef9ee; border:1px solid #fcd34d; border-radius:10px; padding:10px 14px; }
+  .success-box { display:flex; gap:10px; align-items:flex-start; background:#f0fdf4; border:1px solid #86efac; border-radius:10px; padding:10px 14px; }
+
+  /* ── Line explainer (purple accent from ref) ── */
+  .lex-row { display:flex; align-items:stretch; cursor:pointer; transition:background .12s; border-bottom:1px solid #f0f0f0; }
+  .lex-row:last-child { border-bottom:none; }
+  .lex-row:hover { background:#f8f9fa; }
+  .lex-row.active { background:#fefce8; border-left:3px solid #d97706; }
+  .lex-code { background:#1e1e2e; padding:10px 14px; font-family:'SFMono-Regular',Consolas,monospace; font-size:12px; min-width:210px; flex-shrink:0; display:flex; align-items:center; }
+  .lex-info { padding:10px 14px; flex:1; }
+  .lex-name   { font-size:13px; font-weight:700; color:#d97706; margin-bottom:2px; }
+  .lex-desc   { font-size:12px; color:#555; line-height:1.55; }
+  .lex-detail { display:none; font-size:12px; color:#92400e; margin-top:4px; padding-top:4px; border-top:1px dashed #fde68a; }
+  .lex-row.active .lex-detail { display:block; }
+  .line-explain { border:1px solid #e8e8e8; border-radius:10px; overflow:hidden; }
+
+  /* ── Reveal ── */
+  .reveal-btn { background:#f1f3f5; border:1px solid #dee2e6; border-radius:8px; padding:7px 14px; font-size:13px; cursor:pointer; color:#333; transition:background .15s; }
+  .reveal-btn:hover { background:#e9ecef; }
+  .reveal-content { display:none; margin-top:8px; }
+  .reveal-content.open { display:block; }
+
+  /* ── Nav (JS yellow accent) ── */
+  .nav-row { display:flex; align-items:center; justify-content:space-between; margin-top:auto; padding-top:1rem; border-top:1px solid #f0f0f0; }
+  .nav-btn { display:inline-flex; align-items:center; gap:6px; padding:9px 18px; border:1px solid #dee2e6; border-radius:8px; background:transparent; font-size:13px; cursor:pointer; color:#333; transition:background .15s; }
+  .nav-btn:hover:not(:disabled) { background:#f1f3f5; }
+  .nav-btn:disabled { opacity:.35; cursor:default; }
+  .nav-btn.primary { background:#d97706; border-color:transparent; color:#fff; }
+  .nav-btn.primary:hover { background:#b45309; }
+  .progress-dots { display:flex; gap:6px; align-items:center; }
+  .dot { width:7px; height:7px; border-radius:50%; background:#dee2e6; transition:all .2s; }
+  .dot.active { width:20px; border-radius:4px; background:#d97706; }
+
+  /* ── Home grid ── */
+  .home-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .home-card { background:#fff; border:1px solid #e8e8e8; border-radius:12px; padding:1rem 1.25rem; cursor:pointer; transition:all .15s; }
+  .home-card:hover { border-color:#d97706; box-shadow:0 2px 8px rgba(217,119,6,.12); }
+  .home-card-title { font-size:15px; font-weight:700; margin:6px 0 2px; }
+  .home-card-sub   { font-size:12px; color:#666; }
+
+  code { font-family:'SFMono-Regular',Consolas,monospace; font-size:12px; background:#f1f3f5; padding:1px 6px; border-radius:4px; border:1px solid #dee2e6; }
+
+  /* ── Checklist ── */
+  .check-item { display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:10px; border:1px solid #e8e8e8; font-size:13px; cursor:pointer; transition:all .15s; user-select:none; }
+  .check-item:hover { background:#f8f9fa; }
+  .check-item.done { background:#f0fdf4; border-color:#86efac; }
+  .check-circle { width:22px; height:22px; border-radius:50%; border:2px solid #dee2e6; display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0; transition:all .2s; color:transparent; }
+  .check-item.done .check-circle { background:#22c55e; border-color:#22c55e; color:#fff; }
+
+  /* ══ DAY 7 HOUR 1 — JAVASCRIPT SPECIFIC ══ */
+
+  /* Console panel */
+  .console-panel { background: #0d1117; border-radius: 12px; overflow: hidden; font-family: 'SFMono-Regular', Consolas, monospace; }
+  .console-bar   { background: #161b22; padding: 9px 14px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #30363d; }
+  .console-tab   { font-size: 12px; color: #8b949e; padding-bottom: 3px; cursor: pointer; }
+  .console-tab.active { color: #f0f6fc; border-bottom: 2px solid #d97706; }
+  .console-body  { padding: 12px 16px; font-size: 12.5px; line-height: 2; }
+  .con-log   { color: #f0f6fc; }
+  .con-str   { color: #a5d6ff; }
+  .con-num   { color: #79c0ff; }
+  .con-bool  { color: #ff7b72; }
+  .con-undef { color: #8b949e; }
+  .con-arrow { color: #3fb950; font-size: 11px; }
+  .con-err   { color: #ff7b72; }
+  .con-prompt-row { display: flex; align-items: center; gap: 8px; }
+  .con-prompt-sym { color: #3fb950; }
+
+  /* Car analogy visual */
+  .car-parts { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
+  .car-part  { text-align: center; padding: 14px 8px; border-radius: 10px; }
+  .car-part-icon { font-size: 28px; margin-bottom: 8px; }
+  .car-part-tech { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+  .car-part-name { font-size: 11px; }
+
+  /* Interactive variable builder */
+  .var-row { display: flex; align-items: center; gap: 6px; padding: 10px 14px; border: 1px solid #e8e8e8; border-radius: 8px; margin-bottom: 6px; font-family: monospace; font-size: 13px; }
+  .var-keyword  { color: #d97706; font-weight: 700; }
+  .var-name     { color: #2563eb; font-weight: 700; }
+  .var-equals   { color: #64748b; }
+  .var-string   { color: #16a34a; }
+  .var-number   { color: #7c3aed; }
+  .var-boolean  { color: #dc2626; }
+
+  /* Data type cards */
+  .dtype-card { border-radius: 10px; padding: 14px; border: 2px solid; }
+
+  /* Live playground */
+  .playground-wrap { background: #0d1117; border-radius: 12px; overflow: hidden; }
+  .playground-bar  { background: #161b22; padding: 8px 14px; display: flex; align-items: center; gap: 8px; font-size: 12px; color: #8b949e; border-bottom: 1px solid #30363d; }
+  .playground-input { width: 100%; background: #0d1117; border: none; outline: none; font-family: 'SFMono-Regular', Consolas, monospace; font-size: 13px; color: #f0f6fc; padding: 12px 16px; line-height: 1.8; resize: none; min-height: 90px; }
+  .playground-run { background: #d97706; border: none; border-radius: 6px; padding: 6px 16px; font-size: 12px; font-weight: 700; color: #fff; cursor: pointer; transition: background .15s; }
+  .playground-run:hover { background: #b45309; }
+  .playground-output { padding: 10px 16px; font-family: 'SFMono-Regular', Consolas, monospace; font-size: 12.5px; min-height: 60px; border-top: 1px solid #30363d; background: #010409; }
+
+  /* File tree */
+  .file-tree { background: #0f172a; border-radius: 10px; padding: 14px 18px; font-family: 'SFMono-Regular', Consolas, monospace; font-size: 12.5px; line-height: 1.9; }
+
+  /* JS logo */
+  .js-logo { width: 44px; height: 44px; background: #f0db4f; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-family: 'SFMono-Regular', Consolas, monospace; font-size: 18px; font-weight: 900; color: #323330; flex-shrink: 0; }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <div>
+      <div class="top-bar-title">MERN Stack Training · Day 7 · Hour 1</div>
+      <div class="top-bar-sub">Introduction to JavaScript — SkillHub LMS</div>
+    </div>
+    <div class="slide-counter" id="slide-counter">1 / 13</div>
+  </div>
+
+  <!-- ═══ SLIDE 0  HOME ═══ -->
+  <div class="slide active" id="slide-0">
+    <div class="slide-header">
+      <span class="badge b-js">Day 7 · Hour 1</span>
+      <div>
+        <div class="slide-title">Introduction to JavaScript</div>
+        <div class="slide-subtitle">HTML gives structure · CSS gives beauty · JavaScript gives <strong>life</strong></div>
+      </div>
+    </div>
+
+    <div style="background:#fef9c3;border:1px solid #fde68a;border-radius:12px;padding:12px 16px;display:flex;gap:12px;align-items:flex-start">
+      <div class="js-logo">JS</div>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#854d0e;margin-bottom:4px">Day 7 Goal — Make SkillHub LMS Interactive</div>
+        <div style="display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:#92400e">
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Welcome Student Popup</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Dynamic Hero Title</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Course Counter</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Theme Changer</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Current Date</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="home-grid">
+      <div class="home-card" onclick="goSlide(1)">
+        <span class="badge b-green">Recap</span>
+        <div class="home-card-title">Day 6 Deliverable</div>
+        <div class="home-card-sub">Bootstrap SkillHub — where we left off</div>
+      </div>
+      <div class="home-card" onclick="goSlide(2)">
+        <span class="badge b-amber">Question</span>
+        <div class="home-card-title">Can This Button Do Anything?</div>
+        <div class="home-card-sub">The opening question that reveals why JS is needed</div>
+      </div>
+      <div class="home-card" onclick="goSlide(3)">
+        <span class="badge b-js">Analogy</span>
+        <div class="home-card-title">HTML · CSS · JS — The Car Analogy</div>
+        <div class="home-card-sub">Body · Paint · Engine</div>
+      </div>
+      <div class="home-card" onclick="goSlide(4)">
+        <span class="badge b-teal">Setup</span>
+        <div class="home-card-title">Adding JavaScript to SkillHub</div>
+        <div class="home-card-sub">Create js/script.js + connect to index.html</div>
+      </div>
+      <div class="home-card" onclick="goSlide(5)">
+        <span class="badge b-blue">First JS</span>
+        <div class="home-card-title">First JavaScript Program</div>
+        <div class="home-card-sub">console.log() — the developer's notebook</div>
+      </div>
+      <div class="home-card" onclick="goSlide(6)">
+        <span class="badge b-purple">Variables</span>
+        <div class="home-card-title">Variables — Containers for Data</div>
+        <div class="home-card-sub">let trainer = "Manish Rai"</div>
+      </div>
+      <div class="home-card" onclick="goSlide(7)">
+        <span class="badge b-orange">More Vars</span>
+        <div class="home-card-title">More Variable Examples</div>
+        <div class="home-card-sub">course · duration · fees → console.log each</div>
+      </div>
+      <div class="home-card" onclick="goSlide(8)">
+        <span class="badge b-cyan">Data Types</span>
+        <div class="home-card-title">Data Types — String · Number · Boolean</div>
+        <div class="home-card-sub">What type of data each variable can hold</div>
+      </div>
+    </div>
+    <div class="grid-2" style="gap:10px">
+      <div class="home-card" onclick="goSlide(9)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge b-blue">Explain</span>
+          <span style="font-size:14px;font-weight:700">Line-by-Line Explainer</span>
+          <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+        </div>
+      </div>
+      <div class="home-card" onclick="goSlide(10)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge b-rose">Activity</span>
+          <span style="font-size:14px;font-weight:700">Student Variables Challenge</span>
+          <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+        </div>
+      </div>
+    </div>
+    <div class="grid-2" style="gap:10px">
+      <div class="home-card" onclick="goSlide(11)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge b-slate">Ref</span>
+          <span style="font-size:14px;font-weight:700">JS Fundamentals Reference</span>
+          <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+        </div>
+      </div>
+      <div class="home-card" onclick="goSlide(12)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge b-green">Quiz</span>
+          <span style="font-size:14px;font-weight:700">Quick Check — 5 Questions</span>
+          <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <div></div>
+      <div class="progress-dots" id="dots-0"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Start <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 1  RECAP ═══ -->
+  <div class="slide" id="slide-1">
+    <div class="slide-header">
+      <span class="badge b-green">Recap</span>
+      <div>
+        <div class="slide-title">Day 6 Deliverable</div>
+        <div class="slide-subtitle">SkillHub LMS rebuilt with Bootstrap — styled with class names, no hand-written CSS</div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="section-label">what we achieved in day 6</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#dbeafe;border-radius:8px;font-size:12px;font-weight:700;color:#1e40af">
+            <span>Bootstrap via CDN</span><span class="badge b-green" style="font-size:10px">✓</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#ede9fe;border-radius:8px;font-size:12px;font-weight:700;color:#5b21b6">
+            <span>Bootstrap Navbar + container</span><span class="badge b-green" style="font-size:10px">✓</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#d1fae5;border-radius:8px;font-size:12px;font-weight:700;color:#065f46">
+            <span>Bootstrap Grid — course cards</span><span class="badge b-green" style="font-size:10px">✓</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#fef9c3;border-radius:8px;font-size:12px;font-weight:700;color:#854d0e">
+            <span>Bootstrap utilities (p, m, text, bg)</span><span class="badge b-green" style="font-size:10px">✓</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#fef9c3;border-radius:8px;font-size:12px;font-weight:700;color:#854d0e;border:2px solid #fde68a">
+            <span>JavaScript (Day 7 — today)</span><span class="badge b-js" style="font-size:10px">← start</span>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">current project structure</div>
+        <div class="file-tree">
+          <div style="color:#fbbf24;font-weight:700"><i class="ti ti-folder-filled"></i> SkillHub-LMS/</div>
+          <div style="margin-left:16px;color:#60a5fa"><i class="ti ti-folder"></i> frontend/</div>
+          <div style="margin-left:36px;color:#a3e635"><i class="ti ti-file-code"></i> index.html</div>
+          <div style="margin-left:36px;color:#60a5fa"><i class="ti ti-folder"></i> css/</div>
+          <div style="margin-left:56px;color:#f472b6"><i class="ti ti-file-code"></i> style.css</div>
+          <div style="margin-left:36px;color:#60a5fa"><i class="ti ti-folder"></i> images/</div>
+          <div style="margin-left:36px;color:#60a5fa"><i class="ti ti-folder"></i> js/</div>
+          <div style="margin-left:56px;color:#f0db4f"><i class="ti ti-file-code"></i> script.js <span style="color:#22c55e;font-size:10px">← CREATE TODAY</span></div>
+          <div style="margin-left:16px;color:#60a5fa"><i class="ti ti-folder"></i> backend/</div>
+        </div>
+        <div class="info-box" style="margin-top:10px">
+          <i class="ti ti-info-circle info-icon"></i>
+          <div class="info-text"><strong>Today:</strong> We create <code>js/script.js</code>, connect it to <code>index.html</code>, and write our first JavaScript — making SkillHub interactive for the first time.</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-1"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 2  QUESTION — THE BUTTON ═══ -->
+  <div class="slide" id="slide-2">
+    <div class="slide-header">
+      <span class="badge b-amber">Question</span>
+      <div>
+        <div class="slide-title">Can This Button Do Anything?</div>
+        <div class="slide-subtitle">Open your website — look at the Join Now button — ask the class</div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="card card-gray">
+          <div style="font-size:14px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:8px">
+            <i class="ti ti-message-question" style="color:#d97706;font-size:20px"></i>
+            You have this button on your page. Can it do anything when clicked?
+          </div>
+          <div class="editor" style="border-radius:8px;margin-bottom:12px">
+            <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div></div>
+            <div class="editor-body">
+              <div class="e-row"><span class="e-tag">&lt;button&gt;</span></div>
+              <div class="e-row"><span class="e-ind1"></span><span class="e-txt">Join Now</span></div>
+              <div class="e-row"><span class="e-tag">&lt;/button&gt;</span></div>
+            </div>
+          </div>
+          <button class="reveal-btn" onclick="toggle('btn-ans')">Reveal the answer</button>
+          <div class="reveal-content" id="btn-ans">
+            <div style="margin-top:10px;padding:14px 16px;background:#fef9c3;border-radius:10px;border:1px solid #fde68a">
+              <div style="font-size:18px;font-weight:800;color:#854d0e;text-align:center;margin-bottom:6px">No. Not yet.</div>
+              <div style="font-size:13px;color:#92400e;text-align:center;line-height:1.7">HTML creates the button. CSS styles it. But clicking it does <strong>nothing</strong> — it has no behaviour. Only JavaScript can give it behaviour.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="card">
+          <div style="font-size:14px;font-weight:700;margin-bottom:10px;color:#1a1a1a">Try clicking this button:</div>
+          <div style="text-align:center;padding:10px">
+            <button id="demo-btn-plain" style="background:#2563eb;color:white;border:none;padding:12px 28px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer" onclick="showBtnResult()">Join Now</button>
+          </div>
+          <div id="btn-result" style="display:none;margin-top:8px;padding:10px 14px;background:#f0fdf4;border-radius:8px;border:1px solid #86efac;font-size:13px;color:#166534;text-align:center">
+            🎉 <strong>JavaScript made this work!</strong> This is what you'll build today.
+          </div>
+          <div style="margin-top:10px;font-size:12px;color:#888;text-align:center">This slide's button has JS. Your SkillHub button doesn't — yet.</div>
+        </div>
+        <div class="card card-gray">
+          <div class="section-label">without javascript vs with javascript</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px">
+            <div style="padding:10px 12px;background:#fee2e2;border-radius:8px;border:1px solid #fca5a5;text-align:center">
+              <div style="font-size:13px;font-weight:700;color:#dc2626;margin-bottom:4px">Static</div>
+              <div style="font-size:11px;color:#991b1b">Users can read and look. Nothing responds to clicks or input.</div>
+            </div>
+            <div style="padding:10px 12px;background:#d1fae5;border-radius:8px;border:1px solid #6ee7b7;text-align:center">
+              <div style="font-size:13px;font-weight:700;color:#065f46;margin-bottom:4px">Interactive</div>
+              <div style="font-size:11px;color:#065f46">Buttons work · Content changes · Forms validate · Data loads</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-2"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">The Car Analogy <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 3  CAR ANALOGY ═══ -->
+  <div class="slide" id="slide-3">
+    <div class="slide-header">
+      <span class="badge b-js">Analogy</span>
+      <div>
+        <div class="slide-title">HTML · CSS · JS — The Car Analogy</div>
+        <div class="slide-subtitle">Think of building a car — three separate jobs, three separate technologies</div>
+      </div>
+    </div>
+    <div class="car-parts">
+      <div class="car-part" style="background:#f1f5f9;border:2px solid #94a3b8">
+        <div class="car-part-icon">🚗</div>
+        <div style="font-size:22px;margin-bottom:8px">Body</div>
+        <div style="font-size:11px;color:#888;margin-bottom:10px">↓</div>
+        <div class="car-part-tech" style="color:#e25c8c;font-family:monospace">HTML</div>
+        <div class="car-part-name" style="color:#555">The structure — doors, windows, frame, seats. Without it, nothing exists.</div>
+      </div>
+      <div class="car-part" style="background:#fef3c7;border:2px solid #fbbf24">
+        <div class="car-part-icon">🎨</div>
+        <div style="font-size:22px;margin-bottom:8px">Paint</div>
+        <div style="font-size:11px;color:#888;margin-bottom:10px">↓</div>
+        <div class="car-part-tech" style="color:#7952b3;font-family:monospace">CSS</div>
+        <div class="car-part-name" style="color:#555">The appearance — colour, finish, decals. Makes it look great. Doesn't move it.</div>
+      </div>
+      <div class="car-part" style="background:#fef9c3;border:2px dashed #d97706">
+        <div class="car-part-icon">⚙️</div>
+        <div style="font-size:22px;margin-bottom:8px">Engine</div>
+        <div style="font-size:11px;color:#888;margin-bottom:10px">↓</div>
+        <div class="car-part-tech" style="color:#d97706;font-family:monospace;font-size:16px">JavaScript</div>
+        <div class="car-part-name" style="color:#555">The power — makes it actually <strong>move</strong>. Without it, the car is just a display model.</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-label">applied to skillhub lms</div>
+      <div style="display:flex;flex-direction:column;gap:6px;margin-top:4px">
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:#fee2e2;border-radius:8px;font-size:13px">
+          <span style="font-family:monospace;font-weight:700;color:#e25c8c;min-width:40px">HTML</span>
+          <span style="color:#555">Creates the heading, button, course list — the skeleton of the page</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:#ede9fe;border-radius:8px;font-size:13px">
+          <span style="font-family:monospace;font-weight:700;color:#7952b3;min-width:40px">CSS</span>
+          <span style="color:#555">Styles the navbar, hero gradient, card shadows, Bootstrap classes</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:#fef9c3;border-radius:8px;font-size:13px;border:2px solid #fde68a">
+          <span style="font-family:monospace;font-weight:700;color:#d97706;min-width:40px">JS</span>
+          <span style="color:#92400e"><strong>Reacts to clicks</strong> · Changes content · Shows popups · Counts courses · Switches themes</span>
+        </div>
+      </div>
+    </div>
+    <div class="tip-box">
+      <i class="ti ti-bulb tip-icon"></i>
+      <div class="tip-text"><strong>Remember this:</strong> A car without an engine is just furniture. A website without JavaScript is just a brochure. JavaScript is what makes it an application — something users can <em>interact</em> with.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-3"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Add JavaScript <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 4  SETUP ═══ -->
+  <div class="slide" id="slide-4">
+    <div class="slide-header">
+      <span class="badge b-teal">Setup</span>
+      <div>
+        <div class="slide-title">Adding JavaScript to SkillHub</div>
+        <div class="slide-subtitle">Two steps — create the file, then connect it</div>
+      </div>
+    </div>
+    <div class="activity-box">
+      <div class="activity-title"><i class="ti ti-keyboard"></i> Do this now in VS Code</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:center;gap:10px;padding:9px 14px;background:#fff;border-radius:8px;border:1px solid #c7d2fe;font-size:13px">
+          <span style="width:24px;height:24px;background:#4f46e5;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">1</span>
+          In VS Code Explorer, right-click <code>frontend/</code> → <strong>New Folder</strong> → name it <code>js</code>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:9px 14px;background:#fff;border-radius:8px;border:1px solid #c7d2fe;font-size:13px">
+          <span style="width:24px;height:24px;background:#4f46e5;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">2</span>
+          Right-click <code>js/</code> → <strong>New File</strong> → name it <code>script.js</code>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:9px 14px;background:#fff;border-radius:8px;border:1px solid #c7d2fe;font-size:13px">
+          <span style="width:24px;height:24px;background:#4f46e5;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">3</span>
+          Add the <code>&lt;script&gt;</code> tag to <code>index.html</code> — just before <code>&lt;/body&gt;</code>
+        </div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="section-label">connect in index.html</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">frontend/index.html — bottom of body</span></div>
+          <div class="editor-body">
+            <div class="e-row"><span class="e-ln">…</span><span class="e-cmt">&lt;!-- Bootstrap JS --&gt;</span></div>
+            <div class="e-row"><span class="e-ln"> </span><span class="e-tag">&lt;script</span> <span class="e-att">src</span><span class="e-val">="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/…"</span><span class="e-tag">&gt;&lt;/script&gt;</span></div>
+            <div class="e-row"><span class="e-ln"> </span></div>
+            <div class="e-row" style="background:#1a2a1a"><span class="e-ln"> </span><span class="e-cmt">&lt;!-- Our JavaScript --&gt;</span></div>
+            <div class="e-row" style="background:#1a2a1a"><span class="e-ln"> </span><span class="e-new">&lt;script</span> <span class="e-att">src</span><span class="e-val">="js/script.js"</span><span class="e-new">&gt;&lt;/script&gt;</span></div>
+            <div class="e-row"><span class="e-ln"> </span></div>
+            <div class="e-row"><span class="e-ln"> </span><span class="e-tag">&lt;/body&gt;</span></div>
+            <div class="e-row"><span class="e-ln"> </span><span class="e-tag">&lt;/html&gt;</span></div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="card card-gray">
+          <div class="section-label">why before &lt;/body&gt;?</div>
+          <div style="font-size:13px;color:#444;line-height:1.75">
+            The browser reads HTML top to bottom. JavaScript often needs to find HTML elements (buttons, headings, divs). If JS runs before the HTML loads, those elements don't exist yet and JS throws an error.<br><br>
+            Placing <code>&lt;script&gt;</code> at the bottom of <code>&lt;body&gt;</code> ensures HTML loads first — then JS runs safely.
+          </div>
+        </div>
+        <div style="background:#0f172a;border-radius:10px;padding:14px 18px;font-family:monospace;font-size:12px;line-height:1.9">
+          <div style="color:#fbbf24;font-weight:700"><i class="ti ti-folder-filled"></i> frontend/</div>
+          <div style="margin-left:16px;color:#a3e635"><i class="ti ti-file-code"></i> index.html</div>
+          <div style="margin-left:16px;color:#60a5fa"><i class="ti ti-folder"></i> css/</div>
+          <div style="margin-left:32px;color:#f472b6"><i class="ti ti-file-code"></i> style.css</div>
+          <div style="margin-left:16px;color:#60a5fa"><i class="ti ti-folder"></i> js/ <span style="color:#22c55e;font-size:10px">NEW</span></div>
+          <div style="margin-left:32px;color:#f0db4f"><i class="ti ti-file-code"></i> script.js <span style="color:#22c55e;font-size:10px">NEW</span></div>
+          <div style="margin-left:16px;color:#60a5fa"><i class="ti ti-folder"></i> images/</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-4"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">First JS Program <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 5  FIRST PROGRAM — console.log ═══ -->
+  <div class="slide" id="slide-5">
+    <div class="slide-header">
+      <span class="badge b-blue">First JS</span>
+      <div>
+        <div class="slide-title">First JavaScript Program</div>
+        <div class="slide-subtitle">console.log() — the developer's notebook — open F12 to see it</div>
+      </div>
+    </div>
+    <div class="activity-box">
+      <div class="activity-title"><i class="ti ti-keyboard"></i> Type this in script.js — then open F12 → Console</div>
+      <div class="editor" style="border-radius:8px">
+        <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">frontend/js/script.js</span></div>
+        <div class="editor-body">
+          <div class="e-row"><span class="e-ln">1</span><span class="j-fn">console</span><span class="c-punc">.</span><span class="j-fn">log</span><span class="c-punc">(</span><span class="j-str">"Welcome to SkillHub LMS"</span><span class="c-punc">);</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="section-label">what you see in the browser console (F12)</div>
+        <div class="console-panel">
+          <div class="console-bar">
+            <span class="console-tab">Elements</span>
+            <span class="console-tab active">Console</span>
+            <span class="console-tab">Sources</span>
+            <span class="console-tab">Network</span>
+          </div>
+          <div class="console-body">
+            <div class="con-prompt-row">
+              <span style="color:#3fb950;font-size:11px">▶</span>
+              <span class="con-str">Welcome to SkillHub LMS</span>
+            </div>
+            <div style="border-top:1px solid #30363d;margin-top:8px;padding-top:8px;display:flex;align-items:center;gap:8px">
+              <span class="con-prompt-sym">&gt;</span>
+              <span style="color:#8b949e;font-size:11px">|</span>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:8px;padding:8px 12px;background:#0d1117;border-radius:8px;font-size:11px;color:#3fb950;font-family:monospace;text-align:center">
+          🎉 This is your first JavaScript output!
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="card card-gray">
+          <div class="section-label">what is the console?</div>
+          <div style="font-size:13px;color:#444;line-height:1.75">
+            The Console is the <strong>developer's notebook</strong>. It shows messages that developers write — users never see it, only developers who press F12.<br><br>
+            It's the most important tool for testing and debugging JavaScript. Whenever something isn't working, <code>console.log()</code> is how you find out why.
+          </div>
+        </div>
+        <div class="card" style="border-color:#86efac;background:#f0fdf4">
+          <div class="section-label">how to open the console</div>
+          <div style="display:flex;flex-direction:column;gap:6px;font-size:13px;color:#166534">
+            <div style="display:flex;align-items:center;gap:8px"><i class="ti ti-keyboard" style="font-size:15px;flex-shrink:0"></i> Press <code>F12</code> (Windows) or <code>Cmd+Option+J</code> (Mac)</div>
+            <div style="display:flex;align-items:center;gap:8px"><i class="ti ti-click" style="font-size:15px;flex-shrink:0"></i> Right-click anywhere → Inspect → Console tab</div>
+            <div style="display:flex;align-items:center;gap:8px"><i class="ti ti-refresh" style="font-size:15px;flex-shrink:0"></i> Save script.js → refresh the browser → see your log</div>
+          </div>
+        </div>
+        <div class="tip-box">
+          <i class="ti ti-bulb tip-icon"></i>
+          <div class="tip-text"><strong>Pro tip:</strong> <code>console.log()</code> is the first thing every developer reaches for. Even senior engineers use it daily. Get comfortable with it — you'll use it throughout the entire MERN course.</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-5"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Variables <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 6  VARIABLES ═══ -->
+  <div class="slide" id="slide-6">
+    <div class="slide-header">
+      <span class="badge b-purple">Variables</span>
+      <div>
+        <div class="slide-title">Variables — Containers for Data</div>
+        <div class="slide-subtitle">A variable is a labelled box that stores a value you can use later</div>
+      </div>
+    </div>
+    <div class="activity-box">
+      <div class="activity-title"><i class="ti ti-keyboard"></i> Add this to script.js — below your first console.log</div>
+      <div class="editor" style="border-radius:8px">
+        <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">frontend/js/script.js</span></div>
+        <div class="editor-body">
+          <div class="e-row"><span class="e-ln">1</span><span class="j-fn">console</span><span class="c-punc">.</span><span class="j-fn">log</span><span class="c-punc">(</span><span class="j-str">"Welcome to SkillHub LMS"</span><span class="c-punc">);</span></div>
+          <div class="e-row"><span class="e-ln">2</span></div>
+          <div class="e-row"><span class="e-ln">3</span><span class="j-kw">let</span> <span class="j-var">trainer</span> <span class="j-op">=</span> <span class="j-str">"Manish Rai"</span><span class="c-punc">;</span></div>
+          <div class="e-row"><span class="e-ln">4</span><span class="j-fn">console</span><span class="c-punc">.</span><span class="j-fn">log</span><span class="c-punc">(</span><span class="j-var">trainer</span><span class="c-punc">);</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="section-label">anatomy of a variable declaration</div>
+        <div style="background:#1e1e2e;border-radius:10px;padding:16px 20px;font-family:monospace;font-size:16px;line-height:2.5">
+          <span id="anat-let" onclick="highlightAnat('let')" style="color:#ff79c6;font-weight:700;cursor:pointer;text-decoration:underline dotted">let</span>
+          <span style="color:#f8f8f2"> </span>
+          <span id="anat-name" onclick="highlightAnat('name')" style="color:#80ffea;cursor:pointer;text-decoration:underline dotted">trainer</span>
+          <span id="anat-eq" style="color:#f8f8f2"> = </span>
+          <span id="anat-val" onclick="highlightAnat('val')" style="color:#f1fa8c;cursor:pointer;text-decoration:underline dotted">"Manish Rai"</span>
+          <span style="color:#f8f8f2">;</span>
+        </div>
+        <div id="anat-explain" style="margin-top:8px;padding:12px 14px;border-radius:8px;border:1px solid #fde68a;background:#fffbeb;font-size:13px;color:#92400e;display:none;line-height:1.6"></div>
+        <div style="margin-top:8px;font-size:11px;color:#888;text-align:center">Click a highlighted word to learn about it</div>
+      </div>
+      <div>
+        <div class="section-label">console output</div>
+        <div class="console-panel">
+          <div class="console-bar">
+            <span class="console-tab active">Console</span>
+          </div>
+          <div class="console-body">
+            <div class="con-prompt-row"><span style="color:#3fb950;font-size:11px">▶</span><span class="con-str">Welcome to SkillHub LMS</span></div>
+            <div class="con-prompt-row" style="margin-top:4px"><span style="color:#3fb950;font-size:11px">▶</span><span class="con-str">Manish Rai</span></div>
+          </div>
+        </div>
+        <div class="card card-gray" style="margin-top:10px">
+          <div class="section-label">variable analogy</div>
+          <div style="font-size:13px;color:#444;line-height:1.7">
+            Think of a variable like a labelled <strong>box</strong>:<br>
+            📦 Label: <code>trainer</code><br>
+            📦 Contents: <code>"Manish Rai"</code><br><br>
+            You can open the box any time by writing the label name. The value inside can change later.
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-6"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">More Variables <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 7  MORE VARIABLES ═══ -->
+  <div class="slide" id="slide-7">
+    <div class="slide-header">
+      <span class="badge b-orange">More Vars</span>
+      <div>
+        <div class="slide-title">More Variable Examples</div>
+        <div class="slide-subtitle">course · duration · fees — three different variable types</div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="editor">
+        <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">frontend/js/script.js — add below</span></div>
+        <div class="editor-body">
+          <div class="e-row"><span class="e-ln">5</span><span class="j-kw">let</span> <span class="j-var">course</span>   <span class="j-op">=</span> <span class="j-str">"MERN"</span><span class="c-punc">;</span></div>
+          <div class="e-row"><span class="e-ln">6</span><span class="j-kw">let</span> <span class="j-var">duration</span> <span class="j-op">=</span> <span class="j-num">45</span><span class="c-punc">;</span></div>
+          <div class="e-row"><span class="e-ln">7</span><span class="j-kw">let</span> <span class="j-var">fees</span>     <span class="j-op">=</span> <span class="j-num">12000</span><span class="c-punc">;</span></div>
+          <div class="e-row"><span class="e-ln">8</span></div>
+          <div class="e-row"><span class="e-ln">9</span><span class="j-fn">console</span><span class="c-punc">.</span><span class="j-fn">log</span><span class="c-punc">(</span><span class="j-var">course</span><span class="c-punc">);</span></div>
+          <div class="e-row"><span class="e-ln">10</span><span class="j-fn">console</span><span class="c-punc">.</span><span class="j-fn">log</span><span class="c-punc">(</span><span class="j-var">duration</span><span class="c-punc">);</span></div>
+          <div class="e-row"><span class="e-ln">11</span><span class="j-fn">console</span><span class="c-punc">.</span><span class="j-fn">log</span><span class="c-punc">(</span><span class="j-var">fees</span><span class="c-punc">);</span></div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">console output</div>
+        <div class="console-panel">
+          <div class="console-bar"><span class="console-tab active">Console</span></div>
+          <div class="console-body">
+            <div class="con-prompt-row"><span style="color:#3fb950;font-size:11px">▶</span><span class="con-str">Welcome to SkillHub LMS</span></div>
+            <div class="con-prompt-row" style="margin-top:2px"><span style="color:#3fb950;font-size:11px">▶</span><span class="con-str">Manish Rai</span></div>
+            <div class="con-prompt-row" style="margin-top:2px"><span style="color:#3fb950;font-size:11px">▶</span><span class="con-str">MERN</span></div>
+            <div class="con-prompt-row" style="margin-top:2px"><span style="color:#3fb950;font-size:11px">▶</span><span class="con-num">45</span></div>
+            <div class="con-prompt-row" style="margin-top:2px"><span style="color:#3fb950;font-size:11px">▶</span><span class="con-num">12000</span></div>
+          </div>
+        </div>
+        <div class="card card-gray" style="margin-top:10px">
+          <div class="section-label">notice the difference</div>
+          <div style="display:flex;flex-direction:column;gap:6px;margin-top:4px">
+            <div class="var-row">
+              <span class="var-keyword">let</span>
+              <span class="var-name">course</span>
+              <span class="var-equals">=</span>
+              <span class="var-string">"MERN"</span>
+              <span style="font-size:11px;color:#888;margin-left:auto">Text → use quotes</span>
+            </div>
+            <div class="var-row">
+              <span class="var-keyword">let</span>
+              <span class="var-name">duration</span>
+              <span class="var-equals">=</span>
+              <span class="var-number">45</span>
+              <span style="font-size:11px;color:#888;margin-left:auto">Number → no quotes</span>
+            </div>
+            <div class="var-row">
+              <span class="var-keyword">let</span>
+              <span class="var-name">fees</span>
+              <span class="var-equals">=</span>
+              <span class="var-number">12000</span>
+              <span style="font-size:11px;color:#888;margin-left:auto">Number → no quotes</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="warn-box">
+      <i class="ti ti-alert-triangle" style="color:#d97706;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+      <div style="font-size:13px;color:#92400e;line-height:1.6"><strong>Common mistake:</strong> Writing <code>let fees = "12000"</code> (with quotes) makes fees a text string, not a number. You can't do maths with it. Numbers never use quotes — only text values do.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-7"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Data Types <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 8  DATA TYPES ═══ -->
+  <div class="slide" id="slide-8">
+    <div class="slide-header">
+      <span class="badge b-cyan">Data Types</span>
+      <div>
+        <div class="slide-title">Data Types — String · Number · Boolean</div>
+        <div class="slide-subtitle">Every value in JavaScript has a type — JavaScript uses the type to know what it can do</div>
+      </div>
+    </div>
+    <div class="grid-3">
+      <div class="dtype-card" style="background:#f0fdf4;border-color:#86efac">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <div style="width:36px;height:36px;background:#dcfce7;border-radius:10px;display:flex;align-items:center;justify-content:center"><i class="ti ti-quote" style="color:#16a34a;font-size:18px"></i></div>
+          <div style="font-size:15px;font-weight:700;color:#166534">String</div>
+        </div>
+        <div style="font-size:12px;color:#555;line-height:1.65;margin-bottom:10px">Text values — always in quotes. Can be words, sentences, names, emails.</div>
+        <div class="editor" style="border-radius:6px">
+          <div class="editor-body" style="font-size:12px;padding:8px 12px">
+            <div class="e-row"><span class="j-kw">let</span> <span class="j-var">student</span> <span class="j-op">=</span> <span class="j-str">"Rahul"</span><span class="c-punc">;</span></div>
+          </div>
+        </div>
+        <div style="margin-top:8px;font-size:11px;color:#888">Use for: names, courses, emails, messages</div>
+      </div>
+      <div class="dtype-card" style="background:#eff6ff;border-color:#93c5fd">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <div style="width:36px;height:36px;background:#dbeafe;border-radius:10px;display:flex;align-items:center;justify-content:center"><i class="ti ti-123" style="color:#1d4ed8;font-size:18px"></i></div>
+          <div style="font-size:15px;font-weight:700;color:#1e40af">Number</div>
+        </div>
+        <div style="font-size:12px;color:#555;line-height:1.65;margin-bottom:10px">Numeric values — no quotes. Can be whole numbers or decimals. Used for maths.</div>
+        <div class="editor" style="border-radius:6px">
+          <div class="editor-body" style="font-size:12px;padding:8px 12px">
+            <div class="e-row"><span class="j-kw">let</span> <span class="j-var">age</span> <span class="j-op">=</span> <span class="j-num">20</span><span class="c-punc">;</span></div>
+          </div>
+        </div>
+        <div style="margin-top:8px;font-size:11px;color:#888">Use for: age, price, count, duration</div>
+      </div>
+      <div class="dtype-card" style="background:#fef9ee;border-color:#fde68a">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <div style="width:36px;height:36px;background:#fef3c7;border-radius:10px;display:flex;align-items:center;justify-content:center"><i class="ti ti-toggle-right" style="color:#d97706;font-size:18px"></i></div>
+          <div style="font-size:15px;font-weight:700;color:#92400e">Boolean</div>
+        </div>
+        <div style="font-size:12px;color:#555;line-height:1.65;margin-bottom:10px">Only two values — <code>true</code> or <code>false</code>. Used for yes/no questions and conditions.</div>
+        <div class="editor" style="border-radius:6px">
+          <div class="editor-body" style="font-size:12px;padding:8px 12px">
+            <div class="e-row"><span class="j-kw">let</span> <span class="j-var">enrolled</span> <span class="j-op">=</span> <span class="j-bool">true</span><span class="c-punc">;</span></div>
+          </div>
+        </div>
+        <div style="margin-top:8px;font-size:11px;color:#888">Use for: login status, enrolled yes/no</div>
+      </div>
+    </div>
+    <div class="activity-box" style="margin-top:.25rem">
+      <div class="activity-title"><i class="ti ti-keyboard"></i> Add all three to script.js — then console.log each</div>
+      <div class="editor" style="border-radius:8px">
+        <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">script.js — add below previous code</span></div>
+        <div class="editor-body">
+          <div class="e-row"><span class="e-ln">13</span><span class="j-com">// Data Types example</span></div>
+          <div class="e-row"><span class="e-ln">14</span><span class="j-kw">let</span> <span class="j-var">student</span>  <span class="j-op">=</span> <span class="j-str">"Rahul"</span><span class="c-punc">;</span>    <span class="j-com">// String</span></div>
+          <div class="e-row"><span class="e-ln">15</span><span class="j-kw">let</span> <span class="j-var">age</span>      <span class="j-op">=</span> <span class="j-num">20</span><span class="c-punc">;</span>         <span class="j-com">// Number</span></div>
+          <div class="e-row"><span class="e-ln">16</span><span class="j-kw">let</span> <span class="j-var">enrolled</span> <span class="j-op">=</span> <span class="j-bool">true</span><span class="c-punc">;</span>       <span class="j-com">// Boolean</span></div>
+          <div class="e-row"><span class="e-ln">17</span></div>
+          <div class="e-row"><span class="e-ln">18</span><span class="j-fn">console</span><span class="c-punc">.</span><span class="j-fn">log</span><span class="c-punc">(</span><span class="j-var">student</span><span class="c-punc">);</span></div>
+          <div class="e-row"><span class="e-ln">19</span><span class="j-fn">console</span><span class="c-punc">.</span><span class="j-fn">log</span><span class="c-punc">(</span><span class="j-var">age</span><span class="c-punc">);</span></div>
+          <div class="e-row"><span class="e-ln">20</span><span class="j-fn">console</span><span class="c-punc">.</span><span class="j-fn">log</span><span class="c-punc">(</span><span class="j-var">enrolled</span><span class="c-punc">);</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-8"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Explain All <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 9  LINE-BY-LINE EXPLAINER ═══ -->
+  <div class="slide" id="slide-9">
+    <div class="slide-header">
+      <span class="badge b-blue">Explain</span>
+      <div>
+        <div class="slide-title">Line-by-Line Explainer</div>
+        <div class="slide-subtitle">Click any row to expand — every JavaScript concept from today</div>
+      </div>
+    </div>
+    <div class="line-explain">
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="j-fn">console</span><span class="c-punc">.</span><span class="j-fn">log</span><span class="c-punc">(</span><span class="j-str">"…"</span><span class="c-punc">);</span></div>
+        <div class="lex-info">
+          <div class="lex-name">console.log()</div>
+          <div class="lex-desc">Prints a message to the browser console (F12). Invisible to users.</div>
+          <div class="lex-detail">console = built-in JavaScript object · log = a method on it · ("…") = what to print. You can log strings, numbers, variables, objects. Used for testing and debugging. Senior developers use it every day. You'll use it in every JS file you ever write.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="j-kw">let</span></div>
+        <div class="lex-info">
+          <div class="lex-name">let — declare a variable</div>
+          <div class="lex-desc">Creates a new variable that can be changed later</div>
+          <div class="lex-detail">In modern JavaScript (ES6+), use <code>let</code> for variables that may change. Use <code>const</code> for values that never change (we'll use const a lot in React). Avoid the old keyword <code>var</code> — it has confusing scoping rules. Rule: use <code>const</code> by default, switch to <code>let</code> only if you need to reassign.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="j-var">trainer</span></div>
+        <div class="lex-info">
+          <div class="lex-name">Variable name</div>
+          <div class="lex-desc">The label for the container — choose meaningful names</div>
+          <div class="lex-detail">Good names: <code>studentName</code>, <code>courseFees</code>, <code>isEnrolled</code>. JS uses camelCase (first word lowercase, next words capitalised). Bad names: <code>x</code>, <code>data</code>, <code>stuff</code>. Variable names cannot start with a number, cannot contain spaces, and are case-sensitive (trainer ≠ Trainer).</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="j-op">=</span> <span class="j-str">"Manish Rai"</span></div>
+        <div class="lex-info">
+          <div class="lex-name">= (assignment operator)</div>
+          <div class="lex-desc">Puts the value on the right into the variable on the left</div>
+          <div class="lex-detail">The single <code>=</code> in JS means "assign this value." It is NOT the same as equals in maths. In maths, 5 = 5 checks if they're equal. In JS, <code>let x = 5</code> puts 5 into x. To check equality in JS, you use <code>===</code> (triple equals) which we'll learn in Hour 2.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="j-str">"Manish Rai"</span></div>
+        <div class="lex-info">
+          <div class="lex-name">String value — text in quotes</div>
+          <div class="lex-desc">Any text surrounded by " " or ' ' is a String</div>
+          <div class="lex-detail">Both "double quotes" and 'single quotes' create strings. A third option: template literals with backticks ` ` (we'll use these in Hour 2 for combining variables with text). Always close what you open — an unclosed quote is a very common syntax error.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="j-num">45</span> <span class="c-punc">·</span> <span class="j-bool">true</span></div>
+        <div class="lex-info">
+          <div class="lex-name">Number + Boolean values</div>
+          <div class="lex-desc">Numbers: no quotes. Booleans: exactly true or false (no quotes, lowercase)</div>
+          <div class="lex-detail">JS Number can be integer (45) or decimal (12.5). Boolean is always exactly <code>true</code> or <code>false</code> — lowercase, no quotes. Writing "true" (with quotes) is a String, not a Boolean. This matters when you use it in if-statements in Hour 2.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="c-punc">;</span></div>
+        <div class="lex-info">
+          <div class="lex-name">Semicolon — ends a statement</div>
+          <div class="lex-desc">Tells JavaScript "this instruction is complete"</div>
+          <div class="lex-detail">Technically optional in modern JS (ASI — Automatic Semicolon Insertion adds them for you), but always write them. Missing semicolons are a common source of confusing bugs. In React and Node.js code you'll see semicolons everywhere — good habit to build now.</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-9"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Activity <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 10  ACTIVITY ═══ -->
+  <div class="slide" id="slide-10">
+    <div class="slide-header">
+      <span class="badge b-rose">Activity</span>
+      <div>
+        <div class="slide-title">Student Variables Challenge</div>
+        <div class="slide-subtitle">Create your own student profile using variables — 10 minutes</div>
+      </div>
+    </div>
+    <div class="challenge-box">
+      <div class="challenge-title"><i class="ti ti-target"></i> Create these 4 variables in script.js — then console.log each one</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px">
+        <div style="padding:10px 14px;background:#fff;border-radius:8px;border:1px solid #f9a8d4;font-size:13px">
+          <strong style="color:#9f1239">Student Name</strong><br><span style="font-size:12px;color:#666">Your own name as a String</span>
+        </div>
+        <div style="padding:10px 14px;background:#fff;border-radius:8px;border:1px solid #f9a8d4;font-size:13px">
+          <strong style="color:#9f1239">Course Name</strong><br><span style="font-size:12px;color:#666">"MERN Stack" as a String</span>
+        </div>
+        <div style="padding:10px 14px;background:#fff;border-radius:8px;border:1px solid #f9a8d4;font-size:13px">
+          <strong style="color:#9f1239">Batch</strong><br><span style="font-size:12px;color:#666">"2026" as a String or Number</span>
+        </div>
+        <div style="padding:10px 14px;background:#fff;border-radius:8px;border:1px solid #f9a8d4;font-size:13px">
+          <strong style="color:#9f1239">Duration</strong><br><span style="font-size:12px;color:#666">45 as a Number (days)</span>
+        </div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="section-label">starter template — replace with your details</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">script.js — add at the bottom</span></div>
+          <div class="editor-body">
+            <div class="e-row"><span class="e-ln">22</span><span class="j-com">// My Student Profile</span></div>
+            <div class="e-row"><span class="e-ln">23</span><span class="j-kw">let</span> <span class="j-var">myName</span>     <span class="j-op">=</span> <span class="j-str">"Your Name"</span><span class="c-punc">;</span></div>
+            <div class="e-row"><span class="e-ln">24</span><span class="j-kw">let</span> <span class="j-var">myCourse</span>   <span class="j-op">=</span> <span class="j-str">"MERN Stack"</span><span class="c-punc">;</span></div>
+            <div class="e-row"><span class="e-ln">25</span><span class="j-kw">let</span> <span class="j-var">myBatch</span>    <span class="j-op">=</span> <span class="j-str">"2026"</span><span class="c-punc">;</span></div>
+            <div class="e-row"><span class="e-ln">26</span><span class="j-kw">let</span> <span class="j-var">myDuration</span> <span class="j-op">=</span> <span class="j-num">45</span><span class="c-punc">;</span></div>
+            <div class="e-row"><span class="e-ln">27</span></div>
+            <div class="e-row"><span class="e-ln">28</span><span class="j-fn">console</span><span class="c-punc">.</span><span class="j-fn">log</span><span class="c-punc">(</span><span class="j-var">myName</span><span class="c-punc">);</span></div>
+            <div class="e-row"><span class="e-ln">29</span><span class="j-fn">console</span><span class="c-punc">.</span><span class="j-fn">log</span><span class="c-punc">(</span><span class="j-var">myCourse</span><span class="c-punc">);</span></div>
+            <div class="e-row"><span class="e-ln">30</span><span class="j-fn">console</span><span class="c-punc">.</span><span class="j-fn">log</span><span class="c-punc">(</span><span class="j-var">myBatch</span><span class="c-punc">);</span></div>
+            <div class="e-row"><span class="e-ln">31</span><span class="j-fn">console</span><span class="c-punc">.</span><span class="j-fn">log</span><span class="c-punc">(</span><span class="j-var">myDuration</span><span class="c-punc">);</span></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">expected console output</div>
+        <div class="console-panel">
+          <div class="console-bar"><span class="console-tab active">Console</span></div>
+          <div class="console-body">
+            <div class="con-prompt-row"><span style="color:#3fb950;font-size:11px">▶</span><span class="con-str">Welcome to SkillHub LMS</span></div>
+            <div class="con-prompt-row" style="margin-top:2px"><span style="color:#3fb950;font-size:11px">▶</span><span class="con-str">Manish Rai</span></div>
+            <div class="con-prompt-row" style="margin-top:2px"><span style="color:#3fb950;font-size:11px">▶</span><span class="con-str">MERN</span></div>
+            <div class="con-prompt-row" style="margin-top:2px"><span style="color:#3fb950;font-size:11px">▶</span><span class="con-num">45</span></div>
+            <div class="con-prompt-row" style="margin-top:2px"><span style="color:#3fb950;font-size:11px">▶</span><span class="con-num">12000</span></div>
+            <div class="con-prompt-row" style="margin-top:2px"><span style="color:#3fb950;font-size:11px">▶</span><span class="con-str">Rahul</span></div>
+            <div class="con-prompt-row" style="margin-top:2px"><span style="color:#3fb950;font-size:11px">▶</span><span class="con-num">20</span></div>
+            <div class="con-prompt-row" style="margin-top:2px"><span style="color:#3fb950;font-size:11px">▶</span><span class="con-bool">true</span></div>
+            <div style="border-top:1px solid #30363d;margin-top:6px;padding-top:6px">
+              <div class="con-prompt-row"><span style="color:#3fb950;font-size:11px">▶</span><span class="con-str" style="color:#f0db4f">Your Name ← your output</span></div>
+              <div class="con-prompt-row" style="margin-top:2px"><span style="color:#3fb950;font-size:11px">▶</span><span class="con-str" style="color:#f0db4f">MERN Stack</span></div>
+              <div class="con-prompt-row" style="margin-top:2px"><span style="color:#3fb950;font-size:11px">▶</span><span class="con-str" style="color:#f0db4f">2026</span></div>
+              <div class="con-prompt-row" style="margin-top:2px"><span style="color:#3fb950;font-size:11px">▶</span><span class="con-num" style="color:#f0db4f">45</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="success-box" style="margin-top:8px">
+          <i class="ti ti-trophy" style="color:#16a34a;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+          <div style="font-size:13px;color:#166534;line-height:1.65">You've written your first real JavaScript! Every React component, every Node.js API, every MongoDB query you'll ever write starts with exactly these building blocks — variables and console.log.</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-10"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Reference <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 11  REFERENCE ═══ -->
+  <div class="slide" id="slide-11">
+    <div class="slide-header">
+      <span class="badge b-slate">Reference</span>
+      <div>
+        <div class="slide-title">JS Fundamentals Reference</div>
+        <div class="slide-subtitle">Everything covered in Hour 1 — keep this open while coding</div>
+      </div>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <table class="tag-table">
+        <thead><tr><th>Concept</th><th>Syntax</th><th>Example</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>console.log()</strong></td>
+            <td><code>console.log(value);</code></td>
+            <td><code>console.log("Hello");</code></td>
+            <td>Prints to F12 Console — not visible to users</td>
+          </tr>
+          <tr>
+            <td><strong>let variable</strong></td>
+            <td><code>let name = value;</code></td>
+            <td><code>let trainer = "Manish";</code></td>
+            <td>Use for values that may change later</td>
+          </tr>
+          <tr>
+            <td><strong>const variable</strong></td>
+            <td><code>const name = value;</code></td>
+            <td><code>const PI = 3.14;</code></td>
+            <td>Use for values that never change — preferred</td>
+          </tr>
+          <tr>
+            <td><strong>String</strong></td>
+            <td><code>"text"</code> or <code>'text'</code></td>
+            <td><code>let name = "Rahul";</code></td>
+            <td>Any text — always in quotes</td>
+          </tr>
+          <tr>
+            <td><strong>Number</strong></td>
+            <td><code>42</code> or <code>3.14</code></td>
+            <td><code>let age = 20;</code></td>
+            <td>Any number — never in quotes</td>
+          </tr>
+          <tr>
+            <td><strong>Boolean</strong></td>
+            <td><code>true</code> or <code>false</code></td>
+            <td><code>let enrolled = true;</code></td>
+            <td>Always lowercase — no quotes</td>
+          </tr>
+          <tr>
+            <td><strong>= (assignment)</strong></td>
+            <td><code>variable = value</code></td>
+            <td><code>let x = 5;</code></td>
+            <td>Puts value into variable. NOT "equals" check.</td>
+          </tr>
+          <tr>
+            <td><strong>&lt;script&gt; tag</strong></td>
+            <td><code>&lt;script src="js/script.js"&gt;&lt;/script&gt;</code></td>
+            <td>Before <code>&lt;/body&gt;</code></td>
+            <td>Always place at the bottom of body</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="grid-2" style="margin-top:.25rem">
+      <div class="tip-box">
+        <i class="ti ti-bulb tip-icon"></i>
+        <div class="tip-text"><strong>const vs let:</strong> Use <code>const</code> by default — it prevents accidental changes. Switch to <code>let</code> only when you need to reassign the value (like a counter). In React, you'll use <code>const</code> almost exclusively.</div>
+      </div>
+      <div class="info-box">
+        <i class="ti ti-info-circle info-icon"></i>
+        <div class="info-text"><strong>Hours 2 &amp; 3 preview:</strong> We'll use DOM manipulation (<code>document.getElementById</code>) to make buttons actually change SkillHub's heading text, show popups, count courses, and switch between light/dark themes.</div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-11"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Quiz <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 12  QUIZ ═══ -->
+  <div class="slide" id="slide-12">
+    <div class="slide-header">
+      <span class="badge b-green">Quiz</span>
+      <div>
+        <div class="slide-title">Quick Check — JavaScript Hour 1</div>
+        <div class="slide-subtitle">5 questions covering JS basics, variables, and data types</div>
+      </div>
+    </div>
+    <div id="quiz-container"></div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-12"></div>
+      <button class="nav-btn" onclick="goSlide(0)"><i class="ti ti-home"></i> Home</button>
+    </div>
+  </div>
+
+</div><!-- /.wrapper -->
+<script>
+  var current = 0, total = 13, quizInit = false;
+
+  /* ── Demo button on slide 2 ── */
+  function showBtnResult() {
+    document.getElementById('btn-result').style.display = 'block';
+  }
+
+  /* ── Variable anatomy highlight ── */
+  var anatData = {
+    let: {
+      text: '<strong>let</strong> is a keyword — a reserved word in JavaScript that means "create a new variable." Think of it as saying "I want a new labelled box." You can only declare each variable name once in the same scope.',
+      bg: '#fee2e2', border: '#fca5a5', color: '#991b1b'
+    },
+    name: {
+      text: '<strong>trainer</strong> is the variable name — the label on the box. You choose this name. Use camelCase for multi-word names (e.g. <code>studentName</code>, <code>coursePrice</code>). Names can contain letters, numbers, _, $ — but cannot start with a number.',
+      bg: '#d1fae5', border: '#6ee7b7', color: '#065f46'
+    },
+    val: {
+      text: '<strong>"Manish Rai"</strong> is a String value — text surrounded by double quotes. The value goes on the right side of =. The = sign puts the value INTO the variable (it is an assignment, not a maths equation).',
+      bg: '#fef3c7', border: '#fde68a', color: '#92400e'
+    }
+  };
+  function highlightAnat(part) {
+    var box = document.getElementById('anat-explain');
+    var d = anatData[part];
+    box.innerHTML = d.text;
+    box.style.background = d.bg;
+    box.style.borderColor = d.border;
+    box.style.color = d.color;
+    box.style.display = 'block';
+  }
+
+  /* ── Quiz data ── */
+  var quizData = [
+    {
+      q: "What is the role of JavaScript in web development?",
+      opts: [
+        "Provides the structure of the page — headings, paragraphs, lists",
+        "Styles the page — colours, fonts, spacing, and layout",
+        "Makes the page interactive — buttons that work, content that changes, forms that validate",
+        "Connects the page to a database — stores and retrieves data"
+      ],
+      ans: 2,
+      exp: "HTML = structure (skeleton) · CSS = appearance (skin) · JavaScript = behaviour (engine). Without JS, buttons do nothing when clicked, forms don't validate, and no content changes. JS gives websites life."
+    },
+    {
+      q: "Where should the <code>&lt;script src=\"js/script.js\"&gt;&lt;/script&gt;</code> tag be placed?",
+      opts: [
+        "Inside &lt;head&gt;, before the Bootstrap CSS link",
+        "Inside &lt;head&gt;, after the Bootstrap CSS link",
+        "At the very start of &lt;body&gt;",
+        "Just before the closing &lt;/body&gt; tag"
+      ],
+      ans: 3,
+      exp: "JavaScript is placed before &lt;/body&gt; because it often needs to find HTML elements (buttons, headings). If JS runs before HTML loads, those elements don't exist yet and JS throws an error. Placing JS last ensures HTML is fully parsed first."
+    },
+    {
+      q: "What is the output of <code>let age = 20; console.log(age);</code>?",
+      opts: [
+        "age",
+        "let age = 20",
+        "20",
+        "\"20\""
+      ],
+      ans: 2,
+      exp: "console.log(age) prints the VALUE stored in the variable, not the variable name. Since age = 20, it prints 20 (a Number, not a String). Writing console.log(\"age\") would print the text \"age\" — but without quotes, age refers to the variable."
+    },
+    {
+      q: "What is wrong with this code? <code>let fees = \"12000\";</code>",
+      opts: [
+        "Nothing — this is correct JavaScript",
+        "fees should be declared with const, not let",
+        "fees contains a String (\"12000\") not a Number — you cannot do maths with it",
+        "JavaScript does not support variable names like fees"
+      ],
+      ans: 2,
+      exp: "Putting 12000 in quotes makes it a String, not a Number. You cannot do fees * 2 correctly — JS treats \"12000\" * 2 in unexpected ways. If fees is a price you'll calculate with, write let fees = 12000 (no quotes)."
+    },
+    {
+      q: "What are the three data types introduced today?",
+      opts: [
+        "Integer, Float, Character",
+        "String, Number, Boolean",
+        "Text, Digit, Logic",
+        "Array, Object, Function"
+      ],
+      ans: 1,
+      exp: "String = text in quotes (\"Rahul\") · Number = numeric value, no quotes (20, 12000) · Boolean = true or false, no quotes. These are the three most fundamental data types and the foundation for all JavaScript logic."
+    }
+  ];
+  var quizAnswered = [];
+
+  function renderQuiz() {
+    var c = document.getElementById('quiz-container'); c.innerHTML = '';
+    quizData.forEach(function(q, i) {
+      var d = document.createElement('div'); d.style.cssText = 'margin-bottom:18px';
+      d.innerHTML = '<div style="font-size:13px;font-weight:600;margin-bottom:6px">'+(i+1)+'. '+q.q+'</div>';
+      q.opts.forEach(function(opt, j) {
+        var btn = document.createElement('button'); btn.className = 'quiz-option';
+        btn.innerHTML = String.fromCharCode(65+j)+'. '+opt;
+        btn.onclick = function() {
+          if (quizAnswered[i]) return; quizAnswered[i] = true;
+          var btns = d.querySelectorAll('.quiz-option');
+          btns.forEach(function(b,k){ b.disabled=true; if(k===q.ans) b.classList.add('correct'); else if(k===j) b.classList.add('wrong'); });
+          var fb = d.querySelector('.quiz-feedback');
+          fb.innerHTML = (j===q.ans?'✅ Correct! ':'❌ Not quite. ')+q.exp;
+          fb.className = 'quiz-feedback '+(j===q.ans?'correct':'wrong');
+        };
+        d.appendChild(btn);
+      });
+      var fb = document.createElement('div'); fb.className = 'quiz-feedback'; d.appendChild(fb);
+      c.appendChild(d);
+    });
+  }
+
+  function toggleLex(row) {
+    var was = row.classList.contains('active');
+    document.querySelectorAll('.lex-row.active').forEach(function(r){ r.classList.remove('active'); });
+    if (!was) row.classList.add('active');
+  }
+
+  function toggle(id) {
+    var el = document.getElementById(id); el.classList.toggle('open');
+    el.previousElementSibling.textContent = el.classList.contains('open') ? 'Hide the answer' : 'Reveal the answer';
+  }
+
+  function goSlide(n) {
+    document.getElementById('slide-'+current).classList.remove('active');
+    current = n;
+    document.getElementById('slide-'+current).classList.add('active');
+    updateDots();
+    document.getElementById('slide-counter').textContent = (current+1)+' / '+total;
+    if (n===12 && !quizInit) { renderQuiz(); quizInit=true; }
+    window.scrollTo(0,0);
+  }
+  function nextSlide() { if (current < total-1) goSlide(current+1); }
+  function prevSlide() { if (current > 0) goSlide(current-1); }
+
+  function updateDots() {
+    for (var s=0; s<total; s++) {
+      var el = document.getElementById('dots-'+s); if (!el) continue;
+      el.innerHTML = '';
+      for (var d=0; d<total; d++) {
+        var dot = document.createElement('div');
+        dot.className = 'dot'+(d===current?' active':'');
+        el.appendChild(dot);
+      }
+    }
+  }
+  updateDots();
+</script>
+</body>
+</html>

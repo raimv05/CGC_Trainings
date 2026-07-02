@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Day 8 · Hour 1 – JavaScript Functions</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f4f5f7; color: #1a1a1a;
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; padding: 2rem 1rem;
+  }
+  .wrapper {
+    width: 100%; max-width: 920px; background: #fff;
+    border-radius: 16px; box-shadow: 0 2px 20px rgba(0,0,0,0.09); overflow: hidden;
+  }
+  .top-bar {
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    color: #fff; padding: 14px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .top-bar-title { font-size: 15px; font-weight: 600; }
+  .top-bar-sub   { font-size: 12px; opacity: .55; margin-top: 2px; }
+  .slide-counter { font-size: 13px; opacity: .6; font-variant-numeric: tabular-nums; }
+  .slide { display: none; padding: 1.75rem 2rem; min-height: 500px; flex-direction: column; gap: 1.2rem; }
+  .slide.active { display: flex; }
+  .slide-header { display: flex; align-items: center; gap: 10px; padding-bottom: 1rem; border-bottom: 1px solid #e8e8e8; }
+  .slide-title    { font-size: 20px; font-weight: 700; color: #111; }
+  .slide-subtitle { font-size: 13px; color: #666; margin-top: 2px; }
+
+  /* ── Badges ── */
+  .badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+  .b-blue   { background:#dbeafe; color:#1d4ed8; }
+  .b-teal   { background:#d1fae5; color:#065f46; }
+  .b-purple { background:#ede9fe; color:#5b21b6; }
+  .b-amber  { background:#fef3c7; color:#92400e; }
+  .b-green  { background:#dcfce7; color:#166534; }
+  .b-slate  { background:#e2e8f0; color:#334155; }
+  .b-rose   { background:#ffe4e6; color:#9f1239; }
+  .b-orange { background:#ffedd5; color:#9a3412; }
+  .b-indigo { background:#e0e7ff; color:#3730a3; }
+  .b-cyan   { background:#cffafe; color:#164e63; }
+  .b-pink   { background:#fce7f3; color:#9d174d; }
+  .b-yellow { background:#fef9c3; color:#854d0e; }
+  .b-js     { background:#fef9c3; color:#854d0e; }
+
+  /* ── Layout ── */
+  .section-label { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 8px; }
+  .card { background: #fff; border: 1px solid #e8e8e8; border-radius: 12px; padding: 1rem 1.25rem; }
+  .card-gray { background: #f8f9fa; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+  /* ── Code Editor (Dracula — identical to ref) ── */
+  .editor { background: #1e1e2e; border-radius: 12px; overflow: hidden; font-family: 'SFMono-Regular', Consolas, 'Courier New', monospace; }
+  .editor-bar { background: #13131f; padding: 9px 14px; display: flex; align-items: center; gap: 6px; }
+  .e-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .e-red { background:#ff5f57; } .e-yellow { background:#febc2e; } .e-green { background:#28c840; }
+  .e-label { font-size: 12px; color: #6272a4; margin-left: 4px; font-family: -apple-system, sans-serif; }
+  .editor-body { padding: 14px 18px; font-size: 12.5px; line-height: 1.8; }
+  .e-ln   { color: #44475a; font-size: 11px; display: inline-block; width: 22px; user-select: none; }
+  .e-tag  { color: #ff79c6; }
+  .e-att  { color: #50fa7b; }
+  .e-val  { color: #f1fa8c; }
+  .e-txt  { color: #f8f8f2; }
+  .e-cmt  { color: #6272a4; font-style: italic; }
+  .e-new  { color: #80ffea; }
+  .j-kw   { color: #ff79c6; font-weight: 700; }   /* function let return if */
+  .j-fn   { color: #50fa7b; }                      /* console.log, function names */
+  .j-str  { color: #f1fa8c; }
+  .j-num  { color: #bd93f9; }
+  .j-var  { color: #80ffea; }                      /* parameter / variable names */
+  .j-op   { color: #ff79c6; }
+  .j-dom  { color: #8be9fd; }
+  .j-prop { color: #50fa7b; }
+  .j-com  { color: #6272a4; font-style: italic; }
+  .j-ret  { color: #ff79c6; font-weight: 700; }    /* return keyword */
+  .e-ind1 { display: inline-block; width: 20px; }
+  .e-ind2 { display: inline-block; width: 40px; }
+  .e-ind3 { display: inline-block; width: 60px; }
+
+  /* ── Browser frame ── */
+  .browser { border-radius: 12px; overflow: hidden; border: 1px solid #e0e0e0; }
+  .browser-bar { background: #f1f3f4; padding: 9px 14px; display: flex; align-items: center; gap: 7px; border-bottom: 1px solid #e0e0e0; }
+  .b-dot2 { width: 10px; height: 10px; border-radius: 50%; }
+  .b-r { background:#ff5f57; } .b-y { background:#febc2e; } .b-g { background:#28c840; }
+  .b-url { flex:1; background:#fff; border:1px solid #dadce0; border-radius:20px; padding:4px 14px; font-size:12px; color:#555; }
+
+  /* ── Tables ── */
+  .tag-table { border-collapse: collapse; width: 100%; }
+  .tag-table th { background: #f1f5f9; font-size: 12px; font-weight: 700; text-align: left; padding: 10px 14px; color: #475569; border-bottom: 2px solid #e2e8f0; }
+  .tag-table td { font-size: 13px; padding: 10px 14px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+  .tag-table tr:last-child td { border-bottom: none; }
+  .tag-table tr:hover td { background: #f8f9fa; }
+  .tag-mono { font-family: 'SFMono-Regular', Consolas, monospace; font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 5px; }
+
+  /* ── Quiz ── */
+  .quiz-option { border: 1px solid #dee2e6; border-radius: 8px; padding: 10px 14px; font-size: 13px; cursor: pointer; margin-bottom: 6px; transition: all .15s; background: transparent; width: 100%; text-align: left; color: #1a1a1a; }
+  .quiz-option:hover:not(:disabled) { background: #f8f9fa; }
+  .quiz-option.correct { background: #d1fae5; border-color: #059669; color: #065f46; }
+  .quiz-option.wrong   { background: #fee2e2; border-color: #dc2626; color: #991b1b; }
+  .quiz-feedback { display: none; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-top: 4px; }
+  .quiz-feedback.correct { background: #d1fae5; color: #065f46; display: block; }
+  .quiz-feedback.wrong   { background: #fee2e2; color: #991b1b; display: block; }
+
+  /* ── Activity / challenge ── */
+  .activity-box { border: 2px dashed #a5b4fc; background: #eef2ff; border-radius: 12px; padding: 14px 18px; }
+  .activity-title { font-size: 13px; font-weight: 700; color: #3730a3; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .challenge-box { border: 2px dashed #f9a8d4; background: #fdf2f8; border-radius: 12px; padding: 14px 18px; }
+  .challenge-title { font-size: 13px; font-weight: 700; color: #9f1239; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+
+  /* ── Tip / info / warn / success ── */
+  .tip-box   { display:flex; gap:10px; align-items:flex-start; background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:10px 14px; }
+  .tip-icon  { color:#d97706; font-size:18px; flex-shrink:0; margin-top:1px; }
+  .tip-text  { font-size:13px; color:#92400e; line-height:1.6; }
+  .info-box  { display:flex; gap:10px; align-items:flex-start; background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:10px 14px; }
+  .info-icon { color:#2563eb; font-size:18px; flex-shrink:0; margin-top:1px; }
+  .info-text { font-size:13px; color:#1e40af; line-height:1.6; }
+  .warn-box  { display:flex; gap:10px; align-items:flex-start; background:#fef9ee; border:1px solid #fcd34d; border-radius:10px; padding:10px 14px; }
+  .success-box { display:flex; gap:10px; align-items:flex-start; background:#f0fdf4; border:1px solid #86efac; border-radius:10px; padding:10px 14px; }
+
+  /* ── Line explainer (JS amber accent) ── */
+  .lex-row { display:flex; align-items:stretch; cursor:pointer; transition:background .12s; border-bottom:1px solid #f0f0f0; }
+  .lex-row:last-child { border-bottom:none; }
+  .lex-row:hover { background:#f8f9fa; }
+  .lex-row.active { background:#fefce8; border-left:3px solid #d97706; }
+  .lex-code { background:#1e1e2e; padding:10px 14px; font-family:'SFMono-Regular',Consolas,monospace; font-size:12px; min-width:210px; flex-shrink:0; display:flex; align-items:center; }
+  .lex-info { padding:10px 14px; flex:1; }
+  .lex-name   { font-size:13px; font-weight:700; color:#d97706; margin-bottom:2px; }
+  .lex-desc   { font-size:12px; color:#555; line-height:1.55; }
+  .lex-detail { display:none; font-size:12px; color:#92400e; margin-top:4px; padding-top:4px; border-top:1px dashed #fde68a; }
+  .lex-row.active .lex-detail { display:block; }
+  .line-explain { border:1px solid #e8e8e8; border-radius:10px; overflow:hidden; }
+
+  /* ── Reveal ── */
+  .reveal-btn { background:#f1f3f5; border:1px solid #dee2e6; border-radius:8px; padding:7px 14px; font-size:13px; cursor:pointer; color:#333; transition:background .15s; }
+  .reveal-btn:hover { background:#e9ecef; }
+  .reveal-content { display:none; margin-top:8px; }
+  .reveal-content.open { display:block; }
+
+  /* ── Nav (JS amber) ── */
+  .nav-row { display:flex; align-items:center; justify-content:space-between; margin-top:auto; padding-top:1rem; border-top:1px solid #f0f0f0; }
+  .nav-btn { display:inline-flex; align-items:center; gap:6px; padding:9px 18px; border:1px solid #dee2e6; border-radius:8px; background:transparent; font-size:13px; cursor:pointer; color:#333; transition:background .15s; }
+  .nav-btn:hover:not(:disabled) { background:#f1f3f5; }
+  .nav-btn:disabled { opacity:.35; cursor:default; }
+  .nav-btn.primary { background:#d97706; border-color:transparent; color:#fff; }
+  .nav-btn.primary:hover { background:#b45309; }
+  .progress-dots { display:flex; gap:6px; align-items:center; }
+  .dot { width:7px; height:7px; border-radius:50%; background:#dee2e6; transition:all .2s; }
+  .dot.active { width:20px; border-radius:4px; background:#d97706; }
+
+  /* ── Home grid ── */
+  .home-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .home-card { background:#fff; border:1px solid #e8e8e8; border-radius:12px; padding:1rem 1.25rem; cursor:pointer; transition:all .15s; }
+  .home-card:hover { border-color:#d97706; box-shadow:0 2px 8px rgba(217,119,6,.12); }
+  .home-card-title { font-size:15px; font-weight:700; margin:6px 0 2px; }
+  .home-card-sub   { font-size:12px; color:#666; }
+
+  code { font-family:'SFMono-Regular',Consolas,monospace; font-size:12px; background:#f1f3f5; padding:1px 6px; border-radius:4px; border:1px solid #dee2e6; }
+
+  /* ── Checklist ── */
+  .check-item { display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:10px; border:1px solid #e8e8e8; font-size:13px; cursor:pointer; transition:all .15s; user-select:none; }
+  .check-item:hover { background:#f8f9fa; }
+  .check-item.done { background:#f0fdf4; border-color:#86efac; }
+  .check-circle { width:22px; height:22px; border-radius:50%; border:2px solid #dee2e6; display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0; transition:all .2s; color:transparent; }
+  .check-item.done .check-circle { background:#22c55e; border-color:#22c55e; color:#fff; }
+
+  /* ── Console panel (identical to ref) ── */
+  .console-panel { background: #0d1117; border-radius: 12px; overflow: hidden; font-family: 'SFMono-Regular', Consolas, monospace; }
+  .console-bar   { background: #161b22; padding: 9px 14px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #30363d; }
+  .console-tab   { font-size: 12px; color: #8b949e; padding-bottom: 3px; }
+  .console-tab.active { color: #f0f6fc; border-bottom: 2px solid #d97706; }
+  .console-body  { padding: 12px 16px; font-size: 12.5px; line-height: 2; }
+  .con-log  { color: #f0f6fc; }
+  .con-str  { color: #a5d6ff; }
+  .con-num  { color: #79c0ff; }
+  .con-arrow { color: #3fb950; font-size: 11px; }
+  .con-prompt-sym { color: #3fb950; }
+  .con-prompt-row { display: flex; align-items: center; gap: 8px; }
+  .js-logo { width: 44px; height: 44px; background: #f0db4f; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-family: 'SFMono-Regular', Consolas, monospace; font-size: 18px; font-weight: 900; color: #323330; flex-shrink: 0; }
+
+  /* ── Popup mock (identical to ref) ── */
+  .popup-mock { border-radius: 12px; overflow: hidden; border: 2px solid #475569; box-shadow: 0 8px 24px rgba(0,0,0,.25); background: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
+  .popup-bar  { background: #e2e8f0; padding: 8px 14px; display: flex; align-items: center; gap: 8px; font-size: 12px; color: #475569; font-weight: 600; }
+  .popup-body { padding: 16px; }
+  .popup-msg  { font-size: 13px; color: #1a1a1a; margin-bottom: 12px; }
+  .popup-btns { display: flex; justify-content: flex-end; gap: 8px; }
+  .popup-btn  { padding: 6px 16px; border-radius: 5px; font-size: 12px; font-weight: 700; border: none; cursor: pointer; }
+  .popup-btn-ok { background: #2563eb; color: white; }
+
+  /* ══ DAY 8 HOUR 1 — FUNCTIONS SPECIFIC ══ */
+
+  /* Recipe / tea analogy */
+  .recipe-card { text-align: center; padding: 16px 12px; border-radius: 12px; }
+  .recipe-icon { font-size: 32px; margin-bottom: 8px; }
+
+  /* Function anatomy diagram */
+  .fn-anatomy { background: #1e1e2e; border-radius: 12px; padding: 18px 22px; font-family: 'SFMono-Regular', Consolas, monospace; font-size: 15px; line-height: 2.2; }
+  .fn-part { cursor: pointer; text-decoration: underline dotted; }
+
+  /* Function call flow */
+  .call-flow { display: flex; align-items: center; gap: 0; flex-wrap: wrap; justify-content: center; }
+  .call-step { background: white; border: 2px solid #e2e8f0; border-radius: 10px; padding: 10px 16px; text-align: center; flex-shrink: 0; }
+  .call-step.highlight { border-color: #d97706; background: #fffbeb; }
+  .call-arrow { color: #d97706; font-size: 18px; font-weight: 700; margin: 0 6px; }
+
+  /* Interactive function builder */
+  .fn-builder { background: #0f172a; border-radius: 12px; padding: 16px 18px; }
+  .fn-builder-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+  .fn-input { background: #1e293b; border: 1px solid #334155; border-radius: 6px; padding: 6px 10px; font-family: monospace; font-size: 13px; color: #f0db4f; min-width: 100px; }
+  .fn-input:focus { outline: none; border-color: #d97706; }
+
+  /* Parameter box visual */
+  .param-box { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; background: #ede9fe; border: 2px dashed #c4b5fd; border-radius: 8px; font-family: monospace; font-size: 13px; color: #5b21b6; font-weight: 700; }
+
+  /* Return value visual */
+  .return-flow { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .return-box { padding: 10px 16px; border-radius: 10px; font-size: 13px; font-weight: 700; text-align: center; }
+
+  /* Interactive sandbox */
+  .sandbox { background: #1e1e2e; border-radius: 12px; overflow: hidden; }
+  .sandbox-bar { background: #13131f; padding: 8px 14px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #30363d; }
+  .sandbox-label { font-size: 12px; color: #6272a4; font-family: -apple-system, sans-serif; }
+  .sandbox-run { background: #d97706; border: none; border-radius: 5px; padding: 4px 14px; font-size: 11px; font-weight: 700; color: #fff; cursor: pointer; }
+  .sandbox-run:hover { background: #b45309; }
+  .sandbox-output { background: #010409; border-top: 1px solid #30363d; padding: 10px 16px; font-family: 'SFMono-Regular', Consolas, monospace; font-size: 12px; color: #3fb950; min-height: 40px; }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <div>
+      <div class="top-bar-title">MERN Stack Training · Day 8 · Hour 1</div>
+      <div class="top-bar-sub">JavaScript Functions — SkillHub LMS</div>
+    </div>
+    <div class="slide-counter" id="slide-counter">1 / 13</div>
+  </div>
+
+  <!-- ═══ SLIDE 0  HOME ═══ -->
+  <div class="slide active" id="slide-0">
+    <div class="slide-header">
+      <span class="badge b-js">Day 8 · Hour 1</span>
+      <div>
+        <div class="slide-title">JavaScript Functions</div>
+        <div class="slide-subtitle">Write the recipe once. Call it whenever you need it.</div>
+      </div>
+    </div>
+
+    <div style="background:#fef9c3;border:1px solid #fde68a;border-radius:12px;padding:12px 16px;display:flex;gap:12px;align-items:flex-start">
+      <div class="js-logo">ƒ()</div>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#854d0e;margin-bottom:4px">Day 8 Goal — Reusable, Organised JavaScript</div>
+        <div style="display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:#92400e">
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Function syntax</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Parameters</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Multiple parameters</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Return statement</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Reusable SkillHub functions</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="home-grid">
+      <div class="home-card" onclick="goSlide(1)">
+        <span class="badge b-green">Recap</span>
+        <div class="home-card-title">Day 7 Deliverable</div>
+        <div class="home-card-sub">Variables &amp; events — where we left off</div>
+      </div>
+      <div class="home-card" onclick="goSlide(2)">
+        <span class="badge b-amber">Question</span>
+        <div class="home-card-title">The Tea Recipe Question</div>
+        <div class="home-card-sub">Do you explain the recipe every single day?</div>
+      </div>
+      <div class="home-card" onclick="goSlide(3)">
+        <span class="badge b-js">Syntax</span>
+        <div class="home-card-title">Function Syntax</div>
+        <div class="home-card-sub">function greet() { } — anatomy of a function</div>
+      </div>
+      <div class="home-card" onclick="goSlide(4)">
+        <span class="badge b-blue">Call It</span>
+        <div class="home-card-title">Calling a Function</div>
+        <div class="home-card-sub">greet(); — define once, call many times</div>
+      </div>
+      <div class="home-card" onclick="goSlide(5)">
+        <span class="badge b-purple">Parameters</span>
+        <div class="home-card-title">Function with Parameters</div>
+        <div class="home-card-sub">greetStudent(name) — passing data in</div>
+      </div>
+      <div class="home-card" onclick="goSlide(6)">
+        <span class="badge b-teal">Multiple</span>
+        <div class="home-card-title">Multiple Parameters</div>
+        <div class="home-card-sub">studentInfo(name, course)</div>
+      </div>
+      <div class="home-card" onclick="goSlide(7)">
+        <span class="badge b-cyan">Return</span>
+        <div class="home-card-title">The Return Statement</div>
+        <div class="home-card-sub">add(a, b) — functions that give data back</div>
+      </div>
+      <div class="home-card" onclick="goSlide(8)">
+        <span class="badge b-blue">Explain</span>
+        <div class="home-card-title">Line-by-Line Explainer</div>
+        <div class="home-card-sub">Click each part to expand</div>
+      </div>
+    </div>
+    <div class="grid-2" style="gap:10px">
+      <div class="home-card" onclick="goSlide(9)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge b-orange">Activity</span>
+          <span style="font-size:14px;font-weight:700">3 SkillHub Functions to Build</span>
+          <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+        </div>
+      </div>
+      <div class="home-card" onclick="goSlide(10)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge b-rose">Challenge</span>
+          <span style="font-size:14px;font-weight:700">Mini Challenge — showWelcome(name)</span>
+          <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+        </div>
+      </div>
+    </div>
+    <div class="grid-2" style="gap:10px">
+      <div class="home-card" onclick="goSlide(11)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge b-slate">Ref</span>
+          <span style="font-size:14px;font-weight:700">Functions Reference</span>
+          <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+        </div>
+      </div>
+      <div class="home-card" onclick="goSlide(12)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge b-green">Quiz</span>
+          <span style="font-size:14px;font-weight:700">Quick Check — 5 Questions</span>
+          <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <div></div>
+      <div class="progress-dots" id="dots-0"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Start <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 1  RECAP ═══ -->
+  <div class="slide" id="slide-1">
+    <div class="slide-header">
+      <span class="badge b-green">Recap</span>
+      <div>
+        <div class="slide-title">Day 7 Deliverable</div>
+        <div class="slide-subtitle">JavaScript fundamentals + Events — SkillHub became interactive</div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="section-label">what we built in day 7</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#dbeafe;border-radius:8px;font-size:12px;font-weight:700;color:#1e40af">
+            <span>js/script.js connected to index.html</span><span class="badge b-green" style="font-size:10px">✓</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#ede9fe;border-radius:8px;font-size:12px;font-weight:700;color:#5b21b6">
+            <span>Variables — let, String, Number, Boolean</span><span class="badge b-green" style="font-size:10px">✓</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#d1fae5;border-radius:8px;font-size:12px;font-weight:700;color:#065f46">
+            <span>Welcome Popup + Click Events</span><span class="badge b-green" style="font-size:10px">✓</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#fef9c3;border-radius:8px;font-size:12px;font-weight:700;color:#854d0e">
+            <span>DOM Manipulation basics</span><span class="badge b-green" style="font-size:10px">✓</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#fef9c3;border-radius:8px;font-size:12px;font-weight:700;color:#854d0e;border:2px solid #fde68a">
+            <span>Functions (Day 8 — today)</span><span class="badge b-js" style="font-size:10px">← start</span>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">the problem we solve today</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">js/script.js — repeated code (Day 7 style)</span></div>
+          <div class="editor-body" style="font-size:11.5px">
+            <div class="e-row"><span class="j-fn">console</span><span class="c-punc">.</span><span class="j-fn">log</span><span class="c-punc">(</span><span class="j-str">"Welcome to SkillHub LMS"</span><span class="c-punc">);</span></div>
+            <div class="e-row"><span class="j-fn">alert</span><span class="c-punc">(</span><span class="j-str">"Welcome to SkillHub LMS"</span><span class="c-punc">);</span></div>
+            <div class="e-row" style="opacity:.5"><span class="j-com">// ...later in the file...</span></div>
+            <div class="e-row"><span class="j-fn">console</span><span class="c-punc">.</span><span class="j-fn">log</span><span class="c-punc">(</span><span class="j-str">"Welcome to SkillHub LMS"</span><span class="c-punc">);</span></div>
+            <div class="e-row" style="opacity:.5"><span class="j-com">// ...and again...</span></div>
+            <div class="e-row"><span class="j-fn">alert</span><span class="c-punc">(</span><span class="j-str">"Welcome to SkillHub LMS"</span><span class="c-punc">);</span></div>
+          </div>
+        </div>
+        <div class="warn-box" style="margin-top:8px">
+          <i class="ti ti-alert-triangle" style="color:#d97706;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+          <div style="font-size:13px;color:#92400e;line-height:1.6"><strong>The issue:</strong> Repeating the same code over and over. If the message needs to change, you'd have to update it in 4+ places. Functions solve this.</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-1"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 2  TEA RECIPE QUESTION ═══ -->
+  <div class="slide" id="slide-2">
+    <div class="slide-header">
+      <span class="badge b-amber">Question</span>
+      <div>
+        <div class="slide-title">The Tea Recipe Question</div>
+        <div class="slide-subtitle">Every morning your mother makes tea. Does she explain the recipe every single day?</div>
+      </div>
+    </div>
+    <div class="card card-gray">
+      <div style="font-size:14px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px">
+        <i class="ti ti-message-question" style="color:#d97706;font-size:20px"></i>
+        Does your mother explain the entire tea recipe every single morning before making it?
+      </div>
+      <button class="reveal-btn" onclick="toggle('tea-ans')">Reveal the answer</button>
+      <div class="reveal-content" id="tea-ans">
+        <div style="margin-top:12px;padding:18px 20px;background:#fff;border-radius:12px;border:1px solid #fde68a">
+          <div style="font-size:20px;font-weight:800;color:#854d0e;text-align:center;margin-bottom:8px">No!</div>
+          <div style="font-size:13px;color:#444;text-align:center;line-height:1.8">The recipe is written <strong>once</strong>, in her memory.<br>Every morning, she just "calls" the recipe — without re-explaining it.<br><strong>This is exactly how a function works in JavaScript.</strong></div>
+        </div>
+      </div>
+    </div>
+    <div class="grid-3">
+      <div class="recipe-card" style="background:#fef9c3;border:2px solid #fde68a">
+        <div class="recipe-icon">📝</div>
+        <div style="font-size:13px;font-weight:700;color:#854d0e;margin-bottom:4px">Write the recipe once</div>
+        <div style="font-size:11px;color:#92400e">Boil water → Add tea leaves → Add milk → Add sugar → Strain</div>
+      </div>
+      <div class="recipe-card" style="background:#fef3c7;border:2px solid #fbbf24">
+        <div class="recipe-icon">🫖</div>
+        <div style="font-size:13px;font-weight:700;color:#92400e;margin-bottom:4px">Call it every day</div>
+        <div style="font-size:11px;color:#92400e">"Make tea" — no need to re-explain the steps each time</div>
+      </div>
+      <div class="recipe-card" style="background:#fffbeb;border:2px solid #fcd34d">
+        <div class="recipe-icon">☕</div>
+        <div style="font-size:13px;font-weight:700;color:#92400e;margin-bottom:4px">Same result, every time</div>
+        <div style="font-size:11px;color:#92400e">Consistent, repeatable, no wasted effort</div>
+      </div>
+    </div>
+    <div class="info-box">
+      <i class="ti ti-info-circle info-icon"></i>
+      <div class="info-text"><strong>This IS a function:</strong> A reusable block of code — write the instructions once, then "call" them by name whenever you need that exact behaviour again.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-2"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Function Syntax <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 3  FUNCTION SYNTAX ═══ -->
+  <div class="slide" id="slide-3">
+    <div class="slide-header">
+      <span class="badge b-js">Syntax</span>
+      <div>
+        <div class="slide-title">Function Syntax</div>
+        <div class="slide-subtitle">The anatomy of a JavaScript function — click each part to learn it</div>
+      </div>
+    </div>
+    <div class="activity-box">
+      <div class="activity-title"><i class="ti ti-keyboard"></i> Type this in script.js</div>
+      <div class="editor" style="border-radius:8px">
+        <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">frontend/js/script.js</span></div>
+        <div class="editor-body">
+          <div class="e-row"><span class="e-ln">1</span><span class="j-kw">function</span> <span class="j-fn">greet</span><span class="c-punc">()</span> <span class="c-punc">{</span></div>
+          <div class="e-row"><span class="e-ln">2</span><span class="e-ind1"></span><span class="j-fn">console</span><span class="c-punc">.</span><span class="j-fn">log</span><span class="c-punc">(</span><span class="j-str">"Welcome to SkillHub LMS"</span><span class="c-punc">);</span></div>
+          <div class="e-row"><span class="e-ln">3</span><span class="c-punc">}</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="section-label">function anatomy — click to learn</div>
+        <div class="fn-anatomy">
+          <span id="anat-kw" onclick="highlightFnAnat('kw')" class="fn-part" style="color:#ff79c6;font-weight:700">function</span>
+          <span style="color:#f8f8f2"> </span>
+          <span id="anat-name" onclick="highlightFnAnat('name')" class="fn-part" style="color:#50fa7b">greet</span>
+          <span id="anat-parens" onclick="highlightFnAnat('parens')" class="fn-part" style="color:#f8f8f2">()</span>
+          <span style="color:#f8f8f2"> {</span>
+          <br>
+          <span style="display:inline-block;width:24px"></span>
+          <span style="color:#50fa7b">console</span><span style="color:#f8f8f2">.</span><span style="color:#50fa7b">log</span><span style="color:#f8f8f2">(</span><span style="color:#f1fa8c">"Welcome…"</span><span style="color:#f8f8f2">);</span>
+          <br>
+          <span id="anat-brace" onclick="highlightFnAnat('brace')" class="fn-part" style="color:#f8f8f2">}</span>
+        </div>
+        <div id="fn-anat-explain" style="margin-top:8px;padding:12px 14px;border-radius:8px;border:1px solid #fde68a;background:#fffbeb;font-size:13px;color:#92400e;display:none;line-height:1.6"></div>
+        <div style="margin-top:6px;font-size:11px;color:#888;text-align:center">Click any highlighted part above</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="card card-gray">
+          <div class="section-label">key idea</div>
+          <div style="font-size:14px;font-weight:700;text-align:center;color:#854d0e;padding:10px 0">
+            Function<br>↓<br>Reusable Block of Code
+          </div>
+        </div>
+        <div class="card" style="border-color:#86efac;background:#f0fdf4">
+          <div style="font-size:13px;font-weight:700;color:#166534;margin-bottom:6px">✅ What just happened</div>
+          <div style="font-size:13px;color:#166534;line-height:1.7">
+            Writing <code>function greet() { … }</code> does NOT run the code yet. It just <strong>defines</strong> the recipe — saves it for later. Nothing prints to the console until you "call" it.
+          </div>
+        </div>
+        <div class="tip-box">
+          <i class="ti ti-bulb tip-icon"></i>
+          <div class="tip-text"><strong>Refresh the browser now</strong> and check F12 console — you'll see nothing printed. That's correct! The function is defined but not yet called.</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-3"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Call It <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 4  CALLING A FUNCTION ═══ -->
+  <div class="slide" id="slide-4">
+    <div class="slide-header">
+      <span class="badge b-blue">Call It</span>
+      <div>
+        <div class="slide-title">Calling a Function</div>
+        <div class="slide-subtitle">Define once. Call as many times as you want.</div>
+      </div>
+    </div>
+    <div class="activity-box">
+      <div class="activity-title"><i class="ti ti-keyboard"></i> Add this below your function</div>
+      <div class="editor" style="border-radius:8px">
+        <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">frontend/js/script.js</span></div>
+        <div class="editor-body">
+          <div class="e-row"><span class="e-ln">1</span><span class="j-kw">function</span> <span class="j-fn">greet</span><span class="c-punc">()</span> <span class="c-punc">{</span></div>
+          <div class="e-row"><span class="e-ln">2</span><span class="e-ind1"></span><span class="j-fn">console</span><span class="c-punc">.</span><span class="j-fn">log</span><span class="c-punc">(</span><span class="j-str">"Welcome to SkillHub LMS"</span><span class="c-punc">);</span></div>
+          <div class="e-row"><span class="e-ln">3</span><span class="c-punc">}</span></div>
+          <div class="e-row"><span class="e-ln">4</span></div>
+          <div class="e-row" style="background:#1a2a1a"><span class="e-ln">5</span><span class="j-fn" style="color:#80ffea">greet</span><span class="c-punc">();</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="section-label">call flow — visualised</div>
+        <div class="call-flow">
+          <div class="call-step highlight">
+            <div style="font-size:12px;font-weight:700;color:#92400e">greet();</div>
+            <div style="font-size:10px;color:#888;margin-top:2px">Function call</div>
+          </div>
+          <span class="call-arrow">→</span>
+          <div class="call-step">
+            <div style="font-size:12px;font-weight:700;color:#1e40af">JS finds<br>function greet()</div>
+          </div>
+          <span class="call-arrow">→</span>
+          <div class="call-step">
+            <div style="font-size:12px;font-weight:700;color:#065f46">Runs the<br>code inside</div>
+          </div>
+          <span class="call-arrow">→</span>
+          <div class="call-step">
+            <div style="font-size:12px;font-weight:700;color:#5b21b6">console.log<br>executes</div>
+          </div>
+        </div>
+        <div style="margin-top:12px">
+          <div class="section-label">console output</div>
+          <div class="console-panel">
+            <div class="console-bar"><span class="console-tab active">Console</span></div>
+            <div class="console-body">
+              <div class="con-prompt-row"><span style="color:#3fb950;font-size:11px">▶</span><span class="con-str">Welcome to SkillHub LMS</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="card card-gray">
+          <div class="section-label">call it multiple times</div>
+          <div class="editor" style="border-radius:6px">
+            <div class="editor-body" style="font-size:12px;padding:10px 14px">
+              <div class="e-row"><span class="j-fn" style="color:#80ffea">greet</span><span class="c-punc">();</span></div>
+              <div class="e-row"><span class="j-fn" style="color:#80ffea">greet</span><span class="c-punc">();</span></div>
+              <div class="e-row"><span class="j-fn" style="color:#80ffea">greet</span><span class="c-punc">();</span></div>
+              <div class="e-row"><span class="j-com">// Prints 3 times — same code, called 3 times</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="success-box">
+          <i class="ti ti-sparkles" style="color:#16a34a;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+          <div style="font-size:13px;color:#166534;line-height:1.65"><strong>The power of functions:</strong> 1 line of definition + 1 line per call = unlimited reuse. Change the message once inside the function, and every call automatically uses the new message.</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-4"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Parameters <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 5  PARAMETERS ═══ -->
+  <div class="slide" id="slide-5">
+    <div class="slide-header">
+      <span class="badge b-purple">Parameters</span>
+      <div>
+        <div class="slide-title">Function with Parameters</div>
+        <div class="slide-subtitle">Pass data INTO a function so it can use different values each time</div>
+      </div>
+    </div>
+    <div class="activity-box">
+      <div class="activity-title"><i class="ti ti-keyboard"></i> Add this below — a function with a parameter</div>
+      <div class="editor" style="border-radius:8px">
+        <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">frontend/js/script.js</span></div>
+        <div class="editor-body">
+          <div class="e-row"><span class="e-ln">7</span><span class="j-kw">function</span> <span class="j-fn">greetStudent</span><span class="c-punc">(</span><span class="j-var">name</span><span class="c-punc">)</span> <span class="c-punc">{</span></div>
+          <div class="e-row"><span class="e-ln">8</span><span class="e-ind1"></span><span class="j-fn">alert</span><span class="c-punc">(</span><span class="j-str">"Welcome "</span> <span class="j-op">+</span> <span class="j-var">name</span><span class="c-punc">);</span></div>
+          <div class="e-row"><span class="e-ln">9</span><span class="c-punc">}</span></div>
+          <div class="e-row"><span class="e-ln">10</span></div>
+          <div class="e-row" style="background:#1a2a1a"><span class="e-ln">11</span><span class="j-fn" style="color:#80ffea">greetStudent</span><span class="c-punc">(</span><span class="j-str">"Rahul"</span><span class="c-punc">);</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="section-label">what is a parameter?</div>
+        <div style="display:flex;align-items:center;gap:10px;justify-content:center;padding:16px;background:#f8f9fa;border-radius:10px;border:1px solid #e8e8e8">
+          <span class="param-box">name</span>
+          <i class="ti ti-arrow-right" style="color:#888;font-size:18px"></i>
+          <div style="font-size:12px;color:#555;text-align:left">A placeholder<br>that holds whatever<br>value you pass in</div>
+        </div>
+        <div style="margin-top:10px;font-size:13px;color:#444;line-height:1.7">
+          Think of <code>name</code> as a blank space in the function's recipe. Each time you call <code>greetStudent("Rahul")</code>, JavaScript fills that blank with <code>"Rahul"</code>.
+        </div>
+        <div class="card card-gray" style="margin-top:10px">
+          <div class="section-label">popup that appears</div>
+          <div class="popup-mock" style="max-width:260px;margin:0 auto">
+            <div class="popup-bar"><i class="ti ti-window" style="font-size:12px"></i> skillhub.com says</div>
+            <div class="popup-body">
+              <div class="popup-msg">Welcome Rahul</div>
+              <div class="popup-btns"><button class="popup-btn popup-btn-ok">OK</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="card card-gray">
+          <div class="section-label">try different names — same function</div>
+          <div class="editor" style="border-radius:6px">
+            <div class="editor-body" style="font-size:12px;padding:10px 14px">
+              <div class="e-row"><span class="j-fn" style="color:#80ffea">greetStudent</span><span class="c-punc">(</span><span class="j-str">"Rahul"</span><span class="c-punc">);</span> <span class="j-com">// "Welcome Rahul"</span></div>
+              <div class="e-row"><span class="j-fn" style="color:#80ffea">greetStudent</span><span class="c-punc">(</span><span class="j-str">"Priya"</span><span class="c-punc">);</span> <span class="j-com">// "Welcome Priya"</span></div>
+              <div class="e-row"><span class="j-fn" style="color:#80ffea">greetStudent</span><span class="c-punc">(</span><span class="j-str">"Aman"</span><span class="c-punc">);</span> <span class="j-com">// "Welcome Aman"</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="info-box">
+          <i class="ti ti-info-circle info-icon"></i>
+          <div class="info-text"><strong>Vocabulary:</strong> <code>name</code> inside the function definition is called a <strong>parameter</strong>. <code>"Rahul"</code> inside the function call is called an <strong>argument</strong>. They're related but technically different words — interviewers sometimes ask this!</div>
+        </div>
+        <div class="tip-box">
+          <i class="ti ti-bulb tip-icon"></i>
+          <div class="tip-text"><strong>The +</strong> joins two strings together — this is called <strong>concatenation</strong>. <code>"Welcome " + "Rahul"</code> becomes <code>"Welcome Rahul"</code>. Notice the space inside the first string!</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-5"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Multiple Parameters <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 6  MULTIPLE PARAMETERS ═══ -->
+  <div class="slide" id="slide-6">
+    <div class="slide-header">
+      <span class="badge b-teal">Multiple</span>
+      <div>
+        <div class="slide-title">Multiple Parameters</div>
+        <div class="slide-subtitle">A function can accept more than one piece of data at a time</div>
+      </div>
+    </div>
+    <div class="activity-box">
+      <div class="activity-title"><i class="ti ti-keyboard"></i> Add this — a function with two parameters</div>
+      <div class="editor" style="border-radius:8px">
+        <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">frontend/js/script.js</span></div>
+        <div class="editor-body">
+          <div class="e-row"><span class="e-ln">13</span><span class="j-kw">function</span> <span class="j-fn">studentInfo</span><span class="c-punc">(</span><span class="j-var">name</span><span class="c-punc">,</span> <span class="j-var">course</span><span class="c-punc">)</span> <span class="c-punc">{</span></div>
+          <div class="e-row"><span class="e-ln">14</span><span class="e-ind1"></span><span class="j-fn">console</span><span class="c-punc">.</span><span class="j-fn">log</span><span class="c-punc">(</span><span class="j-var">name</span><span class="c-punc">);</span></div>
+          <div class="e-row"><span class="e-ln">15</span><span class="e-ind1"></span><span class="j-fn">console</span><span class="c-punc">.</span><span class="j-fn">log</span><span class="c-punc">(</span><span class="j-var">course</span><span class="c-punc">);</span></div>
+          <div class="e-row"><span class="e-ln">16</span><span class="c-punc">}</span></div>
+          <div class="e-row"><span class="e-ln">17</span></div>
+          <div class="e-row" style="background:#1a2a1a"><span class="e-ln">18</span><span class="j-fn" style="color:#80ffea">studentInfo</span><span class="c-punc">(</span><span class="j-str">"Rahul"</span><span class="c-punc">,</span><span class="j-str">"MERN"</span><span class="c-punc">);</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="section-label">how arguments map to parameters</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:#dbeafe;border-radius:8px;font-size:13px">
+            <span style="font-family:monospace;font-weight:700;color:#1e40af">name</span>
+            <i class="ti ti-arrow-left" style="color:#888;font-size:14px"></i>
+            <span style="font-family:monospace;color:#1e40af">"Rahul"</span>
+            <span style="font-size:11px;color:#888;margin-left:auto">1st position</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:#d1fae5;border-radius:8px;font-size:13px">
+            <span style="font-family:monospace;font-weight:700;color:#065f46">course</span>
+            <i class="ti ti-arrow-left" style="color:#888;font-size:14px"></i>
+            <span style="font-family:monospace;color:#065f46">"MERN"</span>
+            <span style="font-size:11px;color:#888;margin-left:auto">2nd position</span>
+          </div>
+        </div>
+        <div class="warn-box" style="margin-top:10px">
+          <i class="ti ti-alert-triangle" style="color:#d97706;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+          <div style="font-size:13px;color:#92400e;line-height:1.6"><strong>Order matters!</strong> <code>studentInfo("MERN", "Rahul")</code> would print "MERN" as the name and "Rahul" as the course — backwards! Always match the order you defined.</div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">console output</div>
+        <div class="console-panel">
+          <div class="console-bar"><span class="console-tab active">Console</span></div>
+          <div class="console-body">
+            <div class="con-prompt-row"><span style="color:#3fb950;font-size:11px">▶</span><span class="con-str">Rahul</span></div>
+            <div class="con-prompt-row" style="margin-top:2px"><span style="color:#3fb950;font-size:11px">▶</span><span class="con-str">MERN</span></div>
+          </div>
+        </div>
+        <div class="card card-gray" style="margin-top:10px">
+          <div class="section-label">how many parameters can a function have?</div>
+          <div style="font-size:13px;color:#444;line-height:1.7">Technically unlimited — but for readability, most functions use 1–4 parameters. More than that, and developers typically pass an object instead (we'll learn that later in React).</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-6"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Return Statement <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 7  RETURN STATEMENT ═══ -->
+  <div class="slide" id="slide-7">
+    <div class="slide-header">
+      <span class="badge b-cyan">Return</span>
+      <div>
+        <div class="slide-title">The Return Statement</div>
+        <div class="slide-subtitle">A function can give data back to whoever called it</div>
+      </div>
+    </div>
+    <div class="activity-box">
+      <div class="activity-title"><i class="ti ti-keyboard"></i> Add this — a function that returns a value</div>
+      <div class="editor" style="border-radius:8px">
+        <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">frontend/js/script.js</span></div>
+        <div class="editor-body">
+          <div class="e-row"><span class="e-ln">20</span><span class="j-kw">function</span> <span class="j-fn">add</span><span class="c-punc">(</span><span class="j-var">a</span><span class="c-punc">,</span> <span class="j-var">b</span><span class="c-punc">)</span> <span class="c-punc">{</span></div>
+          <div class="e-row"><span class="e-ln">21</span><span class="e-ind1"></span><span class="j-ret">return</span> <span class="j-var">a</span> <span class="j-op">+</span> <span class="j-var">b</span><span class="c-punc">;</span></div>
+          <div class="e-row"><span class="e-ln">22</span><span class="c-punc">}</span></div>
+          <div class="e-row"><span class="e-ln">23</span></div>
+          <div class="e-row" style="background:#1a2a1a"><span class="e-ln">24</span><span class="j-kw">let</span> <span class="j-var">total</span> <span class="j-op">=</span> <span class="j-fn" style="color:#80ffea">add</span><span class="c-punc">(</span><span class="j-num">10</span><span class="c-punc">,</span><span class="j-num">20</span><span class="c-punc">);</span></div>
+          <div class="e-row"><span class="e-ln">25</span><span class="j-fn">console</span><span class="c-punc">.</span><span class="j-fn">log</span><span class="c-punc">(</span><span class="j-var">total</span><span class="c-punc">);</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="section-label">return value flow</div>
+        <div class="return-flow">
+          <div class="return-box" style="background:#dbeafe;color:#1e40af">add(10, 20)</div>
+          <i class="ti ti-arrow-right" style="color:#888"></i>
+          <div class="return-box" style="background:#fef9c3;color:#854d0e">return 10+20</div>
+          <i class="ti ti-arrow-right" style="color:#888"></i>
+          <div class="return-box" style="background:#d1fae5;color:#065f46">total = 30</div>
+        </div>
+        <div style="margin-top:12px">
+          <div class="section-label">console output</div>
+          <div class="console-panel">
+            <div class="console-bar"><span class="console-tab active">Console</span></div>
+            <div class="console-body">
+              <div class="con-prompt-row"><span style="color:#3fb950;font-size:11px">▶</span><span class="con-num">30</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="card card-gray">
+          <div class="section-label">console.log vs return — the key difference</div>
+          <div style="display:flex;flex-direction:column;gap:6px;margin-top:4px">
+            <div style="padding:8px 12px;background:#fff;border-radius:8px;border:1px solid #e8e8e8;font-size:12px">
+              <strong style="color:#1e40af">console.log()</strong> — just <em>displays</em> a value in the console. Cannot be reused elsewhere.
+            </div>
+            <div style="padding:8px 12px;background:#fff;border-radius:8px;border:1px solid #e8e8e8;font-size:12px">
+              <strong style="color:#065f46">return</strong> — <em>gives back</em> a value that can be stored in a variable and used anywhere else in your code.
+            </div>
+          </div>
+        </div>
+        <div class="success-box">
+          <i class="ti ti-sparkles" style="color:#16a34a;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+          <div style="font-size:13px;color:#166534;line-height:1.65">A function can return data. This is one of the most powerful ideas in programming — you'll use <code>return</code> constantly in React components and Node.js APIs later in this course.</div>
+        </div>
+        <div class="tip-box">
+          <i class="ti ti-bulb tip-icon"></i>
+          <div class="tip-text"><strong>return stops the function:</strong> any code written after <code>return</code> inside the same function never runs. Always the last line that matters in a function.</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-7"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Explain All <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 8  LINE-BY-LINE EXPLAINER ═══ -->
+  <div class="slide" id="slide-8">
+    <div class="slide-header">
+      <span class="badge b-blue">Explain</span>
+      <div>
+        <div class="slide-title">Line-by-Line Explainer</div>
+        <div class="slide-subtitle">Click any row to expand — every function concept from today</div>
+      </div>
+    </div>
+    <div class="line-explain">
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="j-kw">function</span></div>
+        <div class="lex-info">
+          <div class="lex-name">function — keyword</div>
+          <div class="lex-desc">Tells JavaScript "I'm about to define a reusable block of code"</div>
+          <div class="lex-detail">This is the classic way to define a function. Modern JS also has arrow functions (<code>const greet = () => {}</code>) which you'll see in React. For now, the <code>function</code> keyword is the clearest way to learn the concept.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="j-fn">greet</span></div>
+        <div class="lex-info">
+          <div class="lex-name">Function name</div>
+          <div class="lex-desc">The label you use to call this function later</div>
+          <div class="lex-detail">Use camelCase, descriptive names: <code>greetStudent</code>, <code>calculateFees</code>, <code>showCourse</code>. A good function name tells you what it does without reading the code inside. Avoid vague names like <code>doStuff</code> or <code>fn1</code>.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="c-punc">(</span><span class="j-var">name</span><span class="c-punc">)</span></div>
+        <div class="lex-info">
+          <div class="lex-name">Parameters — the parentheses</div>
+          <div class="lex-desc">Placeholders for data the function needs to do its job</div>
+          <div class="lex-detail">Empty <code>()</code> = no data needed. <code>(name)</code> = needs one piece of data. <code>(name, course)</code> = needs two, separated by commas. Parameters only exist INSIDE the function — you can't use <code>name</code> outside it.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="c-punc">{ … }</span></div>
+        <div class="lex-info">
+          <div class="lex-name">Function body — curly braces</div>
+          <div class="lex-desc">Everything between { and } is the actual code that runs when the function is called</div>
+          <div class="lex-detail">This is the "recipe" — the steps. Code here only executes when the function is called, not when it's defined. Indent the content inside for readability (we use 4 spaces or 1 tab, consistently).</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="j-fn" style="color:#80ffea">greet</span><span class="c-punc">();</span></div>
+        <div class="lex-info">
+          <div class="lex-name">Function call — the parentheses trigger it</div>
+          <div class="lex-desc">Writing the function name followed by () actually RUNS the code inside</div>
+          <div class="lex-detail">Without <code>()</code>, just writing <code>greet</code> refers to the function itself, but doesn't run it. The parentheses are what trigger execution. This is the single most common beginner mistake — forgetting the parentheses when calling a function.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="j-str">"Rahul"</span></div>
+        <div class="lex-info">
+          <div class="lex-name">Argument — the actual value passed in</div>
+          <div class="lex-desc">The real data you send when calling the function</div>
+          <div class="lex-detail">Parameter (in the definition) vs Argument (in the call) — related terms, technically different. <code>function greetStudent(name)</code> → <code>name</code> is the parameter. <code>greetStudent("Rahul")</code> → <code>"Rahul"</code> is the argument.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="j-ret">return</span> <span class="j-var">a</span> <span class="j-op">+</span> <span class="j-var">b</span><span class="c-punc">;</span></div>
+        <div class="lex-info">
+          <div class="lex-name">return statement</div>
+          <div class="lex-desc">Sends a value back out of the function, to be used elsewhere</div>
+          <div class="lex-detail">Without <code>return</code>, a function call evaluates to <code>undefined</code> — you can't store its result in a variable usefully. With <code>return</code>, you CAN write <code>let total = add(10, 20)</code> and total becomes the returned value (30).</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-8"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Activity <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 9  ACTIVITY — 3 FUNCTIONS ═══ -->
+  <div class="slide" id="slide-9">
+    <div class="slide-header">
+      <span class="badge b-orange">Activity</span>
+      <div>
+        <div class="slide-title">3 SkillHub Functions to Build</div>
+        <div class="slide-subtitle">Build all three in script.js — 15 minutes</div>
+      </div>
+    </div>
+    <div class="activity-box">
+      <div class="activity-title"><i class="ti ti-target"></i> Build these three functions — then call each one</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+
+        <div style="background:#fff;border-radius:10px;padding:12px 14px;border:1px solid #c7d2fe">
+          <div style="font-size:13px;font-weight:700;color:#3730a3;margin-bottom:8px;display:flex;align-items:center;gap:6px"><span style="width:22px;height:22px;background:#4f46e5;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700">1</span> showCourse(courseName) — display the course name</div>
+          <div class="editor" style="border-radius:6px">
+            <div class="editor-body" style="font-size:12px;padding:10px 14px">
+              <div class="e-row"><span class="j-kw">function</span> <span class="j-fn">showCourse</span><span class="c-punc">(</span><span class="j-var">courseName</span><span class="c-punc">)</span> <span class="c-punc">{</span></div>
+              <div class="e-row"><span class="e-ind1"></span><span class="j-fn">console</span><span class="c-punc">.</span><span class="j-fn">log</span><span class="c-punc">(</span><span class="j-str">"Course: "</span> <span class="j-op">+</span> <span class="j-var">courseName</span><span class="c-punc">);</span></div>
+              <div class="e-row"><span class="c-punc">}</span></div>
+              <div class="e-row"><span class="j-fn" style="color:#80ffea">showCourse</span><span class="c-punc">(</span><span class="j-str">"MERN Stack"</span><span class="c-punc">);</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div style="background:#fff;border-radius:10px;padding:12px 14px;border:1px solid #c7d2fe">
+          <div style="font-size:13px;font-weight:700;color:#3730a3;margin-bottom:8px;display:flex;align-items:center;gap:6px"><span style="width:22px;height:22px;background:#4f46e5;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700">2</span> showTrainer(name) — display the trainer name</div>
+          <div class="editor" style="border-radius:6px">
+            <div class="editor-body" style="font-size:12px;padding:10px 14px">
+              <div class="e-row"><span class="j-kw">function</span> <span class="j-fn">showTrainer</span><span class="c-punc">(</span><span class="j-var">name</span><span class="c-punc">)</span> <span class="c-punc">{</span></div>
+              <div class="e-row"><span class="e-ind1"></span><span class="j-fn">console</span><span class="c-punc">.</span><span class="j-fn">log</span><span class="c-punc">(</span><span class="j-str">"Trainer: "</span> <span class="j-op">+</span> <span class="j-var">name</span><span class="c-punc">);</span></div>
+              <div class="e-row"><span class="c-punc">}</span></div>
+              <div class="e-row"><span class="j-fn" style="color:#80ffea">showTrainer</span><span class="c-punc">(</span><span class="j-str">"Manish Rai"</span><span class="c-punc">);</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div style="background:#fff;border-radius:10px;padding:12px 14px;border:1px solid #c7d2fe">
+          <div style="font-size:13px;font-weight:700;color:#3730a3;margin-bottom:8px;display:flex;align-items:center;gap:6px"><span style="width:22px;height:22px;background:#4f46e5;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700">3</span> calculateFees(fees, gst) — return total with GST</div>
+          <div class="editor" style="border-radius:6px">
+            <div class="editor-body" style="font-size:12px;padding:10px 14px">
+              <div class="e-row"><span class="j-kw">function</span> <span class="j-fn">calculateFees</span><span class="c-punc">(</span><span class="j-var">fees</span><span class="c-punc">,</span> <span class="j-var">gst</span><span class="c-punc">)</span> <span class="c-punc">{</span></div>
+              <div class="e-row"><span class="e-ind1"></span><span class="j-ret">return</span> <span class="j-var">fees</span> <span class="j-op">+</span> <span class="j-var">gst</span><span class="c-punc">;</span></div>
+              <div class="e-row"><span class="c-punc">}</span></div>
+              <div class="e-row"><span class="j-kw">let</span> <span class="j-var">totalFees</span> <span class="j-op">=</span> <span class="j-fn" style="color:#80ffea">calculateFees</span><span class="c-punc">(</span><span class="j-num">12000</span><span class="c-punc">,</span><span class="j-num">2160</span><span class="c-punc">);</span></div>
+              <div class="e-row"><span class="j-fn">console</span><span class="c-punc">.</span><span class="j-fn">log</span><span class="c-punc">(</span><span class="j-var">totalFees</span><span class="c-punc">);</span> <span class="j-com">// 14160</span></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="card card-gray">
+      <div class="section-label">expected console output</div>
+      <div class="console-panel">
+        <div class="console-bar"><span class="console-tab active">Console</span></div>
+        <div class="console-body">
+          <div class="con-prompt-row"><span style="color:#3fb950;font-size:11px">▶</span><span class="con-str">Course: MERN Stack</span></div>
+          <div class="con-prompt-row" style="margin-top:2px"><span style="color:#3fb950;font-size:11px">▶</span><span class="con-str">Trainer: Manish Rai</span></div>
+          <div class="con-prompt-row" style="margin-top:2px"><span style="color:#3fb950;font-size:11px">▶</span><span class="con-num">14160</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-9"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Mini Challenge <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 10  MINI CHALLENGE ═══ -->
+  <div class="slide" id="slide-10">
+    <div class="slide-header">
+      <span class="badge b-rose">Challenge</span>
+      <div>
+        <div class="slide-title">Mini Challenge — showWelcome(name)</div>
+        <div class="slide-subtitle">Build a function that outputs "Welcome Rahul" — your turn, no starter code shown</div>
+      </div>
+    </div>
+    <div class="challenge-box">
+      <div class="challenge-title"><i class="ti ti-target"></i> Task: write showWelcome(name) so it produces this exact output</div>
+      <div style="font-size:13px;color:#9f1239;margin-bottom:10px">Call it with your own name as the argument. Use console.log() inside.</div>
+      <div class="console-panel" style="max-width:340px">
+        <div class="console-bar"><span class="console-tab active">Expected output</span></div>
+        <div class="console-body">
+          <div class="con-prompt-row"><span style="color:#3fb950;font-size:11px">▶</span><span class="con-str">Welcome Rahul</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="section-label">hints — only look if stuck</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <button class="reveal-btn" onclick="toggle('hint1')" style="width:100%;text-align:left">💡 Hint 1 — function structure</button>
+          <div class="reveal-content" id="hint1">
+            <div style="padding:8px 12px;background:#fffbeb;border-radius:8px;font-size:12px;color:#92400e">You need <code>function showWelcome(name) { … }</code> — one parameter called name.</div>
+          </div>
+          <button class="reveal-btn" onclick="toggle('hint2')" style="width:100%;text-align:left">💡 Hint 2 — joining the strings</button>
+          <div class="reveal-content" id="hint2">
+            <div style="padding:8px 12px;background:#fffbeb;border-radius:8px;font-size:12px;color:#92400e">Use <code>console.log("Welcome " + name);</code> — don't forget the space inside the quotes.</div>
+          </div>
+          <button class="reveal-btn" onclick="toggle('hint3')" style="width:100%;text-align:left">💡 Hint 3 — calling it</button>
+          <div class="reveal-content" id="hint3">
+            <div style="padding:8px 12px;background:#fffbeb;border-radius:8px;font-size:12px;color:#92400e">Don't forget to call it: <code>showWelcome("Rahul");</code> — the function alone does nothing without a call.</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">full solution — try first, then check</div>
+        <button class="reveal-btn" onclick="toggle('solution')">Reveal full solution</button>
+        <div class="reveal-content" id="solution">
+          <div class="editor" style="border-radius:8px;margin-top:8px">
+            <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">script.js — solution</span></div>
+            <div class="editor-body">
+              <div class="e-row"><span class="j-kw">function</span> <span class="j-fn">showWelcome</span><span class="c-punc">(</span><span class="j-var">name</span><span class="c-punc">)</span> <span class="c-punc">{</span></div>
+              <div class="e-row"><span class="e-ind1"></span><span class="j-fn">console</span><span class="c-punc">.</span><span class="j-fn">log</span><span class="c-punc">(</span><span class="j-str">"Welcome "</span> <span class="j-op">+</span> <span class="j-var">name</span><span class="c-punc">);</span></div>
+              <div class="e-row"><span class="c-punc">}</span></div>
+              <div class="e-row"><span class="j-fn" style="color:#80ffea">showWelcome</span><span class="c-punc">(</span><span class="j-str">"Rahul"</span><span class="c-punc">);</span></div>
+            </div>
+          </div>
+          <div class="success-box" style="margin-top:8px">
+            <i class="ti ti-trophy" style="color:#16a34a;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+            <div style="font-size:13px;color:#166534;line-height:1.6">If you got this right without peeking, you understand the four core pieces of a function: definition, parameter, body, and call.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-10"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Reference <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 11  REFERENCE ═══ -->
+  <div class="slide" id="slide-11">
+    <div class="slide-header">
+      <span class="badge b-slate">Reference</span>
+      <div>
+        <div class="slide-title">Functions Reference</div>
+        <div class="slide-subtitle">Everything covered in Hour 1 — keep this open while coding</div>
+      </div>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <table class="tag-table">
+        <thead><tr><th>Concept</th><th>Syntax</th><th>Example</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>Define a function</strong></td>
+            <td><code>function name() { }</code></td>
+            <td><code>function greet() {…}</code></td>
+            <td>No data needed — empty parentheses</td>
+          </tr>
+          <tr>
+            <td><strong>Call a function</strong></td>
+            <td><code>name();</code></td>
+            <td><code>greet();</code></td>
+            <td>Parentheses actually trigger execution</td>
+          </tr>
+          <tr>
+            <td><strong>One parameter</strong></td>
+            <td><code>function name(param) { }</code></td>
+            <td><code>greetStudent(name)</code></td>
+            <td>Placeholder for one piece of incoming data</td>
+          </tr>
+          <tr>
+            <td><strong>Multiple parameters</strong></td>
+            <td><code>function name(p1, p2) { }</code></td>
+            <td><code>studentInfo(name, course)</code></td>
+            <td>Separated by commas — order matters</td>
+          </tr>
+          <tr>
+            <td><strong>Argument</strong></td>
+            <td><code>name("value")</code></td>
+            <td><code>greetStudent("Rahul")</code></td>
+            <td>The real data sent in at call-time</td>
+          </tr>
+          <tr>
+            <td><strong>return statement</strong></td>
+            <td><code>return value;</code></td>
+            <td><code>return a + b;</code></td>
+            <td>Sends a value back — stoppable, usable elsewhere</td>
+          </tr>
+          <tr>
+            <td><strong>String concatenation</strong></td>
+            <td><code>"text" + variable</code></td>
+            <td><code>"Welcome " + name</code></td>
+            <td>+ joins strings together</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="grid-2" style="margin-top:.25rem">
+      <div class="tip-box">
+        <i class="ti ti-bulb tip-icon"></i>
+        <div class="tip-text"><strong>Definition vs Call:</strong> Writing <code>function greet() {}</code> defines the recipe — it does NOT run. Writing <code>greet();</code> actually runs it. Beginners often forget to call the function and wonder why nothing happens.</div>
+      </div>
+      <div class="info-box">
+        <i class="ti ti-info-circle info-icon"></i>
+        <div class="info-text"><strong>Hours 2 &amp; 3 preview:</strong> We'll connect these functions to real buttons using DOM manipulation and event listeners — turning <code>showCourse()</code> into something that updates SkillHub's page when a student clicks.</div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-11"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Quiz <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 12  QUIZ ═══ -->
+  <div class="slide" id="slide-12">
+    <div class="slide-header">
+      <span class="badge b-green">Quiz</span>
+      <div>
+        <div class="slide-title">Quick Check — JavaScript Functions</div>
+        <div class="slide-subtitle">5 questions covering syntax, parameters, and return</div>
+      </div>
+    </div>
+    <div id="quiz-container"></div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-12"></div>
+      <button class="nav-btn" onclick="goSlide(0)"><i class="ti ti-home"></i> Home</button>
+    </div>
+  </div>
+
+</div><!-- /.wrapper -->
+<script>
+  var current = 0, total = 13, quizInit = false;
+
+  /* ── Function anatomy highlight ── */
+  var fnAnatData = {
+    kw: { text: '<strong>function</strong> is a reserved keyword. Writing it tells JavaScript: "I am about to define a reusable block of code — don\'t run anything yet, just remember it."', color: '#854d0e' },
+    name: { text: '<strong>greet</strong> is the function\'s name — the label you\'ll use later to call it. Choose names that describe what the function DOES: showCourse, calculateFees, greetStudent.', color: '#854d0e' },
+    parens: { text: 'The <strong>()</strong> parentheses hold parameters — placeholders for data the function needs. Empty parentheses mean this function needs no outside data to do its job.', color: '#854d0e' },
+    brace: { text: 'The <strong>{ }</strong> curly braces wrap the function body — the actual instructions. Everything between the opening { and closing } only runs when the function is called.', color: '#854d0e' }
+  };
+  function highlightFnAnat(part) {
+    var box = document.getElementById('fn-anat-explain');
+    box.innerHTML = fnAnatData[part].text;
+    box.style.display = 'block';
+  }
+
+  /* ── Quiz data ── */
+  var quizData = [
+    {
+      q: "What is the main purpose of a JavaScript function?",
+      opts: [
+        "To create HTML elements directly on the page",
+        "To store a single value, like a variable",
+        "To write a reusable block of code that can be called multiple times without rewriting it",
+        "To connect JavaScript to a database"
+      ],
+      ans: 2,
+      exp: "A function lets you write a set of instructions ONCE and reuse them whenever needed by calling the function — like how your mother doesn't re-explain the tea recipe every morning. This avoids repeating code."
+    },
+    {
+      q: "You write <code>function greet() { console.log(\"Hi\"); }</code> and refresh the browser. Nothing appears in the console. Why?",
+      opts: [
+        "There's a syntax error in the code",
+        "console.log only works with variables, not strings",
+        "The function was only DEFINED, not CALLED — you need to add greet(); to actually run it",
+        "Functions automatically run when the page loads"
+      ],
+      ans: 2,
+      exp: "Defining a function (writing function greet() {...}) only saves the instructions for later. It does NOT execute the code inside. You must call it separately with greet(); for the code to actually run."
+    },
+    {
+      q: "In <code>function greetStudent(name) { alert(\"Welcome \" + name); }</code>, what is <code>name</code> called?",
+      opts: ["An argument", "A parameter", "A return value", "A console log"],
+      ans: 1,
+      exp: "name is a PARAMETER — a placeholder defined inside the function's parentheses. When you call greetStudent(\"Rahul\"), \"Rahul\" is the ARGUMENT — the real value passed in. Parameter = the placeholder in the definition. Argument = the actual value at call time."
+    },
+    {
+      q: "What does <code>return</code> do in a function that console.log() does NOT do?",
+      opts: [
+        "return prints to the console; console.log does not",
+        "return sends a value back out of the function so it can be stored in a variable and reused elsewhere; console.log just displays a value and cannot be reused",
+        "They do exactly the same thing",
+        "return only works with numbers; console.log only works with strings"
+      ],
+      ans: 1,
+      exp: "return gives a value back to whoever called the function — you can write let total = add(10,20) and use total elsewhere. console.log() just prints to the console for you to see — it cannot be stored or reused in your code."
+    },
+    {
+      q: "What is the output of: <code>function add(a,b) { return a+b; } let total = add(10,20); console.log(total);</code>",
+      opts: ["a+b", "10+20", "30", "undefined"],
+      ans: 2,
+      exp: "add(10,20) runs with a=10 and b=20. return a+b evaluates 10+20=30 and sends it back. total is assigned 30. console.log(total) prints 30."
+    }
+  ];
+  var quizAnswered = [];
+
+  function renderQuiz() {
+    var c = document.getElementById('quiz-container'); c.innerHTML = '';
+    quizData.forEach(function(q, i) {
+      var d = document.createElement('div'); d.style.cssText = 'margin-bottom:18px';
+      d.innerHTML = '<div style="font-size:13px;font-weight:600;margin-bottom:6px">'+(i+1)+'. '+q.q+'</div>';
+      q.opts.forEach(function(opt, j) {
+        var btn = document.createElement('button'); btn.className = 'quiz-option';
+        btn.innerHTML = String.fromCharCode(65+j)+'. '+opt;
+        btn.onclick = function() {
+          if (quizAnswered[i]) return; quizAnswered[i] = true;
+          var btns = d.querySelectorAll('.quiz-option');
+          btns.forEach(function(b,k){ b.disabled=true; if(k===q.ans) b.classList.add('correct'); else if(k===j) b.classList.add('wrong'); });
+          var fb = d.querySelector('.quiz-feedback');
+          fb.innerHTML = (j===q.ans?'✅ Correct! ':'❌ Not quite. ')+q.exp;
+          fb.className = 'quiz-feedback '+(j===q.ans?'correct':'wrong');
+        };
+        d.appendChild(btn);
+      });
+      var fb = document.createElement('div'); fb.className = 'quiz-feedback'; d.appendChild(fb);
+      c.appendChild(d);
+    });
+  }
+
+  function toggleLex(row) {
+    var was = row.classList.contains('active');
+    document.querySelectorAll('.lex-row.active').forEach(function(r){ r.classList.remove('active'); });
+    if (!was) row.classList.add('active');
+  }
+
+  function toggle(id) {
+    var el = document.getElementById(id); el.classList.toggle('open');
+    if (el.previousElementSibling && el.previousElementSibling.tagName === 'BUTTON') {
+      var btn = el.previousElementSibling;
+      if (btn.textContent.indexOf('Hint') === -1) {
+        btn.textContent = el.classList.contains('open') ? 'Hide the answer' : 'Reveal the answer';
+      }
+    }
+  }
+
+  function goSlide(n) {
+    document.getElementById('slide-'+current).classList.remove('active');
+    current = n;
+    document.getElementById('slide-'+current).classList.add('active');
+    updateDots();
+    document.getElementById('slide-counter').textContent = (current+1)+' / '+total;
+    if (n===12 && !quizInit) { renderQuiz(); quizInit=true; }
+    window.scrollTo(0,0);
+  }
+  function nextSlide() { if (current < total-1) goSlide(current+1); }
+  function prevSlide() { if (current > 0) goSlide(current-1); }
+
+  function updateDots() {
+    for (var s=0; s<total; s++) {
+      var el = document.getElementById('dots-'+s); if (!el) continue;
+      el.innerHTML = '';
+      for (var d=0; d<total; d++) {
+        var dot = document.createElement('div');
+        dot.className = 'dot'+(d===current?' active':'');
+        el.appendChild(dot);
+      }
+    }
+  }
+  updateDots();
+</script>
+</body>
+</html>

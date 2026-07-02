@@ -1,0 +1,1530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Day 8 · Hour 3 – Form Validation</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f4f5f7; color: #1a1a1a;
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; padding: 2rem 1rem;
+  }
+  .wrapper {
+    width: 100%; max-width: 920px; background: #fff;
+    border-radius: 16px; box-shadow: 0 2px 20px rgba(0,0,0,0.09); overflow: hidden;
+  }
+  .top-bar {
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    color: #fff; padding: 14px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .top-bar-title { font-size: 15px; font-weight: 600; }
+  .top-bar-sub   { font-size: 12px; opacity: .55; margin-top: 2px; }
+  .slide-counter { font-size: 13px; opacity: .6; font-variant-numeric: tabular-nums; }
+  .slide { display: none; padding: 1.75rem 2rem; min-height: 500px; flex-direction: column; gap: 1.2rem; }
+  .slide.active { display: flex; }
+  .slide-header { display: flex; align-items: center; gap: 10px; padding-bottom: 1rem; border-bottom: 1px solid #e8e8e8; }
+  .slide-title    { font-size: 20px; font-weight: 700; color: #111; }
+  .slide-subtitle { font-size: 13px; color: #666; margin-top: 2px; }
+
+  /* ── Badges ── */
+  .badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+  .b-blue   { background:#dbeafe; color:#1d4ed8; }
+  .b-teal   { background:#d1fae5; color:#065f46; }
+  .b-purple { background:#ede9fe; color:#5b21b6; }
+  .b-amber  { background:#fef3c7; color:#92400e; }
+  .b-green  { background:#dcfce7; color:#166534; }
+  .b-slate  { background:#e2e8f0; color:#334155; }
+  .b-rose   { background:#ffe4e6; color:#9f1239; }
+  .b-orange { background:#ffedd5; color:#9a3412; }
+  .b-indigo { background:#e0e7ff; color:#3730a3; }
+  .b-cyan   { background:#cffafe; color:#164e63; }
+  .b-pink   { background:#fce7f3; color:#9d174d; }
+  .b-yellow { background:#fef9c3; color:#854d0e; }
+  .b-js     { background:#fef9c3; color:#854d0e; }
+
+  /* ── Layout ── */
+  .section-label { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 8px; }
+  .card { background: #fff; border: 1px solid #e8e8e8; border-radius: 12px; padding: 1rem 1.25rem; }
+  .card-gray { background: #f8f9fa; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+  /* ── Code Editor (Dracula) ── */
+  .editor { background: #1e1e2e; border-radius: 12px; overflow: hidden; font-family: 'SFMono-Regular', Consolas, 'Courier New', monospace; }
+  .editor-bar { background: #13131f; padding: 9px 14px; display: flex; align-items: center; gap: 6px; }
+  .e-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .e-red { background:#ff5f57; } .e-yellow { background:#febc2e; } .e-green { background:#28c840; }
+  .e-label { font-size: 12px; color: #6272a4; margin-left: 4px; font-family: -apple-system, sans-serif; }
+  .editor-body { padding: 14px 18px; font-size: 12.5px; line-height: 1.8; }
+  .e-ln   { color: #44475a; font-size: 11px; display: inline-block; width: 22px; user-select: none; }
+  .e-tag  { color: #ff79c6; }
+  .e-att  { color: #50fa7b; }
+  .e-val  { color: #f1fa8c; }
+  .e-txt  { color: #f8f8f2; }
+  .e-cmt  { color: #6272a4; font-style: italic; }
+  .e-new  { color: #80ffea; }
+  .j-kw   { color: #ff79c6; font-weight: 700; }
+  .j-fn   { color: #50fa7b; }
+  .j-str  { color: #f1fa8c; }
+  .j-num  { color: #bd93f9; }
+  .j-var  { color: #80ffea; }
+  .j-op   { color: #ff79c6; }
+  .j-dom  { color: #8be9fd; }
+  .j-prop { color: #50fa7b; }
+  .j-com  { color: #6272a4; font-style: italic; }
+  .j-ret  { color: #ff79c6; font-weight: 700; }
+  .c-punc { color: #f8f8f2; }
+  .e-ind1 { display: inline-block; width: 20px; }
+  .e-ind2 { display: inline-block; width: 40px; }
+  .e-ind3 { display: inline-block; width: 60px; }
+  .e-ind4 { display: inline-block; width: 80px; }
+
+  /* ── Browser frame ── */
+  .browser { border-radius: 12px; overflow: hidden; border: 1px solid #e0e0e0; }
+  .browser-bar { background: #f1f3f4; padding: 9px 14px; display: flex; align-items: center; gap: 7px; border-bottom: 1px solid #e0e0e0; }
+  .b-dot2 { width: 10px; height: 10px; border-radius: 50%; }
+  .b-r { background:#ff5f57; } .b-y { background:#febc2e; } .b-g { background:#28c840; }
+  .b-url { flex:1; background:#fff; border:1px solid #dadce0; border-radius:20px; padding:4px 14px; font-size:12px; color:#555; }
+
+  /* ── Tables ── */
+  .tag-table { border-collapse: collapse; width: 100%; }
+  .tag-table th { background: #f1f5f9; font-size: 12px; font-weight: 700; text-align: left; padding: 10px 14px; color: #475569; border-bottom: 2px solid #e2e8f0; }
+  .tag-table td { font-size: 13px; padding: 10px 14px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+  .tag-table tr:last-child td { border-bottom: none; }
+  .tag-table tr:hover td { background: #f8f9fa; }
+
+  /* ── Quiz ── */
+  .quiz-option { border: 1px solid #dee2e6; border-radius: 8px; padding: 10px 14px; font-size: 13px; cursor: pointer; margin-bottom: 6px; transition: all .15s; background: transparent; width: 100%; text-align: left; color: #1a1a1a; }
+  .quiz-option:hover:not(:disabled) { background: #f8f9fa; }
+  .quiz-option.correct { background: #d1fae5; border-color: #059669; color: #065f46; }
+  .quiz-option.wrong   { background: #fee2e2; border-color: #dc2626; color: #991b1b; }
+  .quiz-feedback { display: none; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-top: 4px; }
+  .quiz-feedback.correct { background: #d1fae5; color: #065f46; display: block; }
+  .quiz-feedback.wrong   { background: #fee2e2; color: #991b1b; display: block; }
+
+  /* ── Tip / info / warn / success ── */
+  .tip-box   { display:flex; gap:10px; align-items:flex-start; background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:10px 14px; }
+  .tip-icon  { color:#d97706; font-size:18px; flex-shrink:0; margin-top:1px; }
+  .tip-text  { font-size:13px; color:#92400e; line-height:1.6; }
+  .info-box  { display:flex; gap:10px; align-items:flex-start; background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:10px 14px; }
+  .info-icon { color:#2563eb; font-size:18px; flex-shrink:0; margin-top:1px; }
+  .info-text { font-size:13px; color:#1e40af; line-height:1.6; }
+  .warn-box  { display:flex; gap:10px; align-items:flex-start; background:#fef9ee; border:1px solid #fcd34d; border-radius:10px; padding:10px 14px; }
+  .success-box { display:flex; gap:10px; align-items:flex-start; background:#f0fdf4; border:1px solid #86efac; border-radius:10px; padding:10px 14px; }
+
+  /* ── Line explainer (JS amber accent) ── */
+  .lex-row { display:flex; align-items:stretch; cursor:pointer; transition:background .12s; border-bottom:1px solid #f0f0f0; }
+  .lex-row:last-child { border-bottom:none; }
+  .lex-row:hover { background:#f8f9fa; }
+  .lex-row.active { background:#fefce8; border-left:3px solid #d97706; }
+  .lex-code { background:#1e1e2e; padding:10px 14px; font-family:'SFMono-Regular',Consolas,monospace; font-size:12px; min-width:200px; flex-shrink:0; display:flex; align-items:center; }
+  .lex-info { padding:10px 14px; flex:1; }
+  .lex-name   { font-size:13px; font-weight:700; color:#d97706; margin-bottom:2px; }
+  .lex-desc   { font-size:12px; color:#555; line-height:1.55; }
+  .lex-detail { display:none; font-size:12px; color:#92400e; margin-top:4px; padding-top:4px; border-top:1px dashed #fde68a; }
+  .lex-row.active .lex-detail { display:block; }
+  .line-explain { border:1px solid #e8e8e8; border-radius:10px; overflow:hidden; }
+
+  /* ── Reveal ── */
+  .reveal-btn { background:#f1f3f5; border:1px solid #dee2e6; border-radius:8px; padding:7px 14px; font-size:13px; cursor:pointer; color:#333; transition:background .15s; }
+  .reveal-btn:hover { background:#e9ecef; }
+  .reveal-content { display:none; margin-top:8px; }
+  .reveal-content.open { display:block; }
+
+  /* ── Nav (JS amber) ── */
+  .nav-row { display:flex; align-items:center; justify-content:space-between; margin-top:auto; padding-top:1rem; border-top:1px solid #f0f0f0; }
+  .nav-btn { display:inline-flex; align-items:center; gap:6px; padding:9px 18px; border:1px solid #dee2e6; border-radius:8px; background:transparent; font-size:13px; cursor:pointer; color:#333; transition:background .15s; }
+  .nav-btn:hover:not(:disabled) { background:#f1f3f5; }
+  .nav-btn:disabled { opacity:.35; cursor:default; }
+  .nav-btn.primary { background:#d97706; border-color:transparent; color:#fff; }
+  .nav-btn.primary:hover { background:#b45309; }
+  .progress-dots { display:flex; gap:6px; align-items:center; }
+  .dot { width:7px; height:7px; border-radius:50%; background:#dee2e6; transition:all .2s; }
+  .dot.active { width:20px; border-radius:4px; background:#d97706; }
+
+  /* ── Home grid ── */
+  .home-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .home-card { background:#fff; border:1px solid #e8e8e8; border-radius:12px; padding:1rem 1.25rem; cursor:pointer; transition:all .15s; }
+  .home-card:hover { border-color:#d97706; box-shadow:0 2px 8px rgba(217,119,6,.12); }
+  .home-card-title { font-size:15px; font-weight:700; margin:6px 0 2px; }
+  .home-card-sub   { font-size:12px; color:#666; }
+
+  code { font-family:'SFMono-Regular',Consolas,monospace; font-size:12px; background:#f1f3f5; padding:1px 6px; border-radius:4px; border:1px solid #dee2e6; }
+
+  /* ── Checklist ── */
+  .check-item { display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:10px; border:1px solid #e8e8e8; font-size:13px; cursor:pointer; transition:all .15s; user-select:none; }
+  .check-item:hover { background:#f8f9fa; }
+  .check-item.done { background:#f0fdf4; border-color:#86efac; }
+  .check-circle { width:22px; height:22px; border-radius:50%; border:2px solid #dee2e6; display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0; transition:all .2s; color:transparent; }
+  .check-item.done .check-circle { background:#22c55e; border-color:#22c55e; color:#fff; }
+
+  .js-logo { width: 44px; height: 44px; background: #f0db4f; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-family: 'SFMono-Regular', Consolas, monospace; font-size: 18px; font-weight: 900; color: #323330; flex-shrink: 0; }
+
+  /* ── Flow steps ── */
+  .flow-step { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; border-bottom: 1px dashed #e2e8f0; }
+  .flow-step:last-child { border-bottom: none; }
+  .flow-num { width: 28px; height: 28px; border-radius: 50%; background: #d97706; color: white; font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+  .flow-content { flex: 1; font-size: 13px; color: #333; line-height: 1.6; }
+  .flow-label { font-weight: 700; color: #d97706; margin-bottom: 2px; }
+
+  /* ── Bootstrap form mockup ── */
+  .bs-form-group { margin-bottom: 14px; }
+  .bs-label { display: block; font-size: 12px; font-weight: 600; color: #333; margin-bottom: 4px; }
+  .bs-input { width: 100%; padding: 7px 12px; border: 1px solid #ced4da; border-radius: 5px; font-size: 13px; font-family: -apple-system, sans-serif; color: #333; }
+  .bs-input:focus { outline: none; border-color: #86b7fe; }
+  .bs-input.is-invalid { border-color: #dc2626; background: #fff5f5; }
+  .bs-input.is-valid { border-color: #16a34a; }
+  .bs-feedback-invalid { font-size: 11px; color: #dc2626; margin-top: 3px; display: none; }
+  .bs-feedback-invalid.show { display: block; }
+  .bs-btn-submit { background: #0d6efd; color: white; border: none; border-radius: 5px; padding: 8px 22px; font-size: 13px; font-weight: 700; cursor: pointer; width: 100%; }
+  .bs-btn-submit:hover { background: #0b5ed7; }
+
+  /* ══ HOUR 3 — FORM VALIDATION SPECIFIC ══ */
+
+  /* Submit lifecycle diagram */
+  .lifecycle-flow { display: flex; align-items: center; gap: 0; flex-wrap: nowrap; overflow-x: auto; }
+  .lifecycle-step { background: white; border: 2px solid #e2e8f0; border-radius: 10px; padding: 10px 14px; text-align: center; flex-shrink: 0; min-width: 100px; }
+  .lifecycle-step.bad { border-color: #fca5a5; background: #fef2f2; }
+  .lifecycle-step.good { border-color: #86efac; background: #f0fdf4; }
+  .lifecycle-arrow { color: #d97706; font-size: 18px; font-weight: 700; flex-shrink: 0; padding: 0 4px; }
+
+  /* Live registration form sandbox */
+  .reg-form-wrap { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; }
+  .reg-message { padding: 10px 14px; border-radius: 8px; font-size: 13px; font-weight: 700; margin-top: 10px; min-height: 18px; text-align: center; transition: all .2s; }
+
+  /* Validation rule cards */
+  .rule-card { border-radius: 10px; padding: 12px 14px; border: 1px solid; }
+  .rule-card.r1 { background: #eff6ff; border-color: #bfdbfe; }
+  .rule-card.r2 { background: #f0fdf4; border-color: #86efac; }
+  .rule-card.r3 { background: #fdf4ff; border-color: #e9d5ff; }
+  .rule-icon { width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+
+  /* Welcome success card */
+  .welcome-card { background: linear-gradient(135deg, #059669, #047857); border-radius: 12px; padding: 20px; text-align: center; color: white; }
+
+  /* Mobile / password match visual */
+  .digit-box { display: inline-flex; width: 24px; height: 28px; border: 2px solid #cbd5e1; border-radius: 5px; align-items: center; justify-content: center; font-family: monospace; font-weight: 700; font-size: 13px; margin: 0 2px; }
+  .digit-box.filled { border-color: #2563eb; background: #eff6ff; color: #1d4ed8; }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <div>
+      <div class="top-bar-title">MERN Stack Training · Day 8 · Hour 3</div>
+      <div class="top-bar-sub">Form Validation — SkillHub LMS</div>
+    </div>
+    <div class="slide-counter" id="slide-counter">1 / 15</div>
+  </div>
+
+  <!-- ═══════════ SLIDE 0  HOME ═══════════ -->
+  <div class="slide active" id="slide-0">
+    <div class="slide-header">
+      <div class="js-logo">✓</div>
+      <div>
+        <div class="slide-title">Form Validation</div>
+        <div class="slide-subtitle">This is the highlight of today's session — make the registration form actually validate user input.</div>
+      </div>
+    </div>
+
+    <div style="background:#fef9c3;border:1px solid #fde68a;border-radius:12px;padding:12px 16px;display:flex;gap:12px;align-items:flex-start">
+      <i class="ti ti-shield-check" style="color:#d97706;font-size:22px;flex-shrink:0;margin-top:1px"></i>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#854d0e;margin-bottom:4px">Hour 3 Goal — Build a Real Registration Form Validator</div>
+        <div style="display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:#92400e">
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>preventDefault() — stop page reload</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Validate name, email, password</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Course dropdown + bonus welcome message</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Full registration module assignment</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="home-grid">
+      <div class="home-card" onclick="goSlide(1)">
+        <span class="badge b-green">Recap</span>
+        <div class="home-card-title">Where We Are Now</div>
+        <div class="home-card-sub">Conditionals done — applying them to a real form</div>
+      </div>
+      <div class="home-card" onclick="goSlide(2)">
+        <span class="badge b-amber">Concept</span>
+        <div class="home-card-title">Prevent Refresh — preventDefault()</div>
+        <div class="home-card-sub">Why forms reload by default and how to stop it</div>
+      </div>
+      <div class="home-card" onclick="goSlide(3)">
+        <span class="badge b-js">Step 1</span>
+        <div class="home-card-title">Validate Name</div>
+        <div class="home-card-sub">Check for an empty field</div>
+      </div>
+      <div class="home-card" onclick="goSlide(4)">
+        <span class="badge b-js">Step 2</span>
+        <div class="home-card-title">Validate Email</div>
+        <div class="home-card-sub">Same empty-check pattern, new field</div>
+      </div>
+      <div class="home-card" onclick="goSlide(5)">
+        <span class="badge b-js">Step 3</span>
+        <div class="home-card-title">Validate Password</div>
+        <div class="home-card-sub">.length check — minimum 6 characters</div>
+      </div>
+      <div class="home-card" onclick="goSlide(6)">
+        <span class="badge b-rose">⭐ Highlight</span>
+        <div class="home-card-title">Complete Validation — Live Demo</div>
+        <div class="home-card-sub">All 3 checks combined — try the real form</div>
+      </div>
+      <div class="home-card" onclick="goSlide(7)">
+        <span class="badge b-purple">Deep Dive</span>
+        <div class="home-card-title">Explain Line by Line</div>
+        <div class="home-card-sub">addEventListener, submit, trim, value, length, return</div>
+      </div>
+      <div class="home-card" onclick="goSlide(8)">
+        <span class="badge b-rose">Challenge</span>
+        <div class="home-card-title">20-Min Mini Challenge</div>
+        <div class="home-card-sub">Add a Course dropdown with its own validation</div>
+      </div>
+      <div class="home-card" onclick="goSlide(9)">
+        <span class="badge b-orange">Bonus</span>
+        <div class="home-card-title">Bonus — Personalised Welcome</div>
+        <div class="home-card-sub">"Welcome Rahul — enrolled in MERN Stack"</div>
+      </div>
+      <div class="home-card" onclick="goSlide(10)">
+        <span class="badge b-rose">Assignment</span>
+        <div class="home-card-title">Enhanced Registration Module</div>
+        <div class="home-card-sub">Mobile, Confirm Password, Gender, T&amp;C</div>
+      </div>
+      <div class="home-card" onclick="goSlide(11)">
+        <span class="badge b-rose">Assignment</span>
+        <div class="home-card-title">New Validation Rules</div>
+        <div class="home-card-sub">10-digit mobile, password match, T&amp;C required</div>
+      </div>
+      <div class="home-card" onclick="goSlide(12)">
+        <span class="badge b-purple">Reference</span>
+        <div class="home-card-title">Inline Error Display Pattern</div>
+        <div class="home-card-sub">On-page errors instead of alert() — Bootstrap style</div>
+      </div>
+      <div class="home-card" onclick="goSlide(13)">
+        <span class="badge b-slate">Quiz</span>
+        <div class="home-card-title">Quick-Fire Quiz</div>
+        <div class="home-card-sub">4 questions on Form Validation</div>
+      </div>
+      <div class="home-card" onclick="goSlide(14)">
+        <span class="badge b-teal">Wrap-Up</span>
+        <div class="home-card-title">Day 8 Complete!</div>
+        <div class="home-card-sub">Skills earned + Day 9 preview</div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" disabled><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-0"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Start <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 1  RECAP ═══════════ -->
+  <div class="slide" id="slide-1">
+    <div class="slide-header">
+      <span class="badge b-green">Recap</span>
+      <div>
+        <div class="slide-title">Where We Are After Hours 1 & 2</div>
+        <div class="slide-subtitle">Conditionals are mastered — now apply them to a real-world form</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div class="section-label">day 8 progress</div>
+        <div class="check-item done"><div class="check-circle" style="background:#22c55e;border-color:#22c55e;color:#fff">✓</div><span>if / else if / else syntax (Hour 1)</span></div>
+        <div class="check-item done"><div class="check-circle" style="background:#22c55e;border-color:#22c55e;color:#fff">✓</div><span>Comparison operators ==, ===, &lt;, &gt; (Hour 1)</span></div>
+        <div class="check-item done"><div class="check-circle" style="background:#22c55e;border-color:#22c55e;color:#fff">✓</div><span>Logical operators &amp;&amp;, ||, ! (Hour 2)</span></div>
+        <div class="check-item done"><div class="check-circle" style="background:#22c55e;border-color:#22c55e;color:#fff">✓</div><span>Eligibility checker + grade calculator (Hour 2)</span></div>
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;border:2px dashed #fde047;background:#fefce8;font-size:13px;margin-top:4px">
+          <i class="ti ti-clock-play" style="color:#d97706;font-size:18px;flex-shrink:0"></i>
+          <span style="color:#92400e;font-weight:600">Now: Apply <strong>if statements</strong> to validate a real registration form</span>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">the problem with the current form</div>
+        <div style="background:#f8f9fa;border:1px solid #e2e8f0;border-radius:12px;padding:14px;font-family:Arial,sans-serif">
+          <div style="font-size:12px;font-weight:700;margin-bottom:10px;color:#334155">Registration Form — no validation yet</div>
+          <div style="margin-bottom:8px"><label style="font-size:11px;color:#666;display:block;margin-bottom:2px">Name</label><div style="border:1px solid #ced4da;border-radius:5px;padding:6px 10px;font-size:12px;color:#999">(empty)</div></div>
+          <div style="margin-bottom:8px"><label style="font-size:11px;color:#666;display:block;margin-bottom:2px">Email</label><div style="border:1px solid #ced4da;border-radius:5px;padding:6px 10px;font-size:12px;color:#999">(empty)</div></div>
+          <div style="margin-bottom:10px"><label style="font-size:11px;color:#666;display:block;margin-bottom:2px">Password</label><div style="border:1px solid #ced4da;border-radius:5px;padding:6px 10px;font-size:12px;color:#999">12</div></div>
+          <button style="background:#0d6efd;color:white;border:none;padding:7px 18px;border-radius:5px;font-size:12px;font-weight:700;width:100%">Register</button>
+        </div>
+        <div class="warn-box" style="margin-top:8px">
+          <i class="ti ti-alert-triangle" style="color:#d97706;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+          <div style="font-size:13px;color:#78350f;line-height:1.6">Right now this form will <strong>submit with empty fields</strong> and reload the page. We're about to fix both problems.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-1"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Prevent Refresh <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 2  PREVENT REFRESH ═══════════ -->
+  <div class="slide" id="slide-2">
+    <div class="slide-header">
+      <span class="badge b-amber">Concept</span>
+      <div>
+        <div class="slide-title">Prevent Refresh — event.preventDefault()</div>
+        <div class="slide-subtitle">Normally forms reload the page. preventDefault() stops that behaviour.</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">the problem — default form behaviour</div>
+        <div class="lifecycle-flow">
+          <div class="lifecycle-step bad">
+            <div style="font-size:18px;margin-bottom:3px">🖱️</div>
+            <div style="font-size:10px;font-weight:700;color:#991b1b">User clicks<br>Submit</div>
+          </div>
+          <div class="lifecycle-arrow">→</div>
+          <div class="lifecycle-step bad">
+            <div style="font-size:18px;margin-bottom:3px">🔄</div>
+            <div style="font-size:10px;font-weight:700;color:#991b1b">Page<br>reloads</div>
+          </div>
+          <div class="lifecycle-arrow">→</div>
+          <div class="lifecycle-step bad">
+            <div style="font-size:18px;margin-bottom:3px">❌</div>
+            <div style="font-size:10px;font-weight:700;color:#991b1b">Your JS<br>never runs</div>
+          </div>
+        </div>
+        <div style="font-size:11px;color:#991b1b;text-align:center;margin-top:6px">This is the browser's built-in HTML behaviour — happens BEFORE your JS gets a chance</div>
+
+        <div class="section-label" style="margin-top:14px">the fix</div>
+        <div class="lifecycle-flow">
+          <div class="lifecycle-step good">
+            <div style="font-size:18px;margin-bottom:3px">🖱️</div>
+            <div style="font-size:10px;font-weight:700;color:#166534">User clicks<br>Submit</div>
+          </div>
+          <div class="lifecycle-arrow">→</div>
+          <div class="lifecycle-step good">
+            <div style="font-size:18px;margin-bottom:3px">🛑</div>
+            <div style="font-size:10px;font-weight:700;color:#166534">preventDefault()<br>stops reload</div>
+          </div>
+          <div class="lifecycle-arrow">→</div>
+          <div class="lifecycle-step good">
+            <div style="font-size:18px;margin-bottom:3px">✅</div>
+            <div style="font-size:10px;font-weight:700;color:#166534">Your JS<br>runs instead</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="section-label">the code</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><div class="e-label">script.js</div></div>
+          <div class="editor-body">
+            <div><span class="e-ln">1</span> <span class="j-kw">let</span> <span class="j-var">form</span> <span class="j-op">=</span> <span class="j-dom">document</span><span class="j-prop">.getElementById</span><span class="e-txt">(</span><span class="j-str">"registrationForm"</span><span class="e-txt">);</span></div>
+            <div><span class="e-ln">2</span></div>
+            <div><span class="e-ln">3</span> <span class="j-var">form</span><span class="j-prop">.addEventListener</span><span class="e-txt">(</span><span class="j-str">"submit"</span><span class="e-txt">, </span><span class="j-kw">function</span><span class="e-txt">(</span><span class="j-var">event</span><span class="e-txt">) {</span></div>
+            <div><span class="e-ln">4</span>   <span class="j-var">event</span><span class="j-prop">.preventDefault</span><span class="e-txt">();</span></div>
+            <div><span class="e-ln">5</span> <span class="e-txt">});</span></div>
+          </div>
+        </div>
+
+        <div class="line-explain">
+          <div class="lex-row" onclick="toggleLex(this)">
+            <div class="lex-code"><span class="j-str">"submit"</span></div>
+            <div class="lex-info">
+              <div class="lex-name">The submit Event</div>
+              <div class="lex-desc">Fires on the &lt;form&gt; element itself (not the button) when the form is submitted — by clicking the submit button OR pressing Enter in a field.</div>
+              <div class="lex-detail">Always attach the listener to the form, not the button. This way Enter-key submission is caught too, not just button clicks.</div>
+            </div>
+          </div>
+          <div class="lex-row" onclick="toggleLex(this)">
+            <div class="lex-code"><span class="j-var">event</span></div>
+            <div class="lex-info">
+              <div class="lex-name">The Event Object</div>
+              <div class="lex-desc">The browser automatically passes an "event" object into your callback function. It contains details about what just happened.</div>
+              <div class="lex-detail">You can name this parameter anything (e, evt, event) — it's just a regular function parameter. "event" is the clearest name for beginners.</div>
+            </div>
+          </div>
+          <div class="lex-row" onclick="toggleLex(this)">
+            <div class="lex-code"><span class="j-prop">.preventDefault</span><span class="e-txt">()</span></div>
+            <div class="lex-info">
+              <div class="lex-name">Cancel the Default Action</div>
+              <div class="lex-desc">Tells the browser "don't do what you'd normally do for this event." For forms, that means: don't reload the page.</div>
+              <div class="lex-detail">preventDefault() is used for many events: stop a link from navigating, stop right-click menus, stop form submission. It must be called inside the event handler, every time.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tip-box">
+          <i class="ti ti-bulb tip-icon"></i>
+          <div class="tip-text"><strong>This must be the FIRST line</strong> inside your submit handler. If you put validation checks before preventDefault(), the page might reload before your alert/error message even shows.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-2"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Validate Name <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 3  VALIDATE NAME ═══════════ -->
+  <div class="slide" id="slide-3">
+    <div class="slide-header">
+      <span class="badge b-js">Step 1</span>
+      <div>
+        <div class="slide-title">Validate Name</div>
+        <div class="slide-subtitle">The simplest possible check — is the field empty?</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">the code</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><div class="e-label">script.js — inside submit handler</div></div>
+          <div class="editor-body">
+            <div><span class="e-ln">1</span> <span class="j-kw">let</span> <span class="j-var">name</span> <span class="j-op">=</span> <span class="j-dom">document</span><span class="j-prop">.getElementById</span><span class="e-txt">(</span><span class="j-str">"name"</span><span class="e-txt">)</span><span class="j-prop">.value</span><span class="e-txt">;</span></div>
+            <div><span class="e-ln">2</span></div>
+            <div><span class="e-ln">3</span> <span class="j-kw">if</span><span class="e-txt">(</span><span class="j-var">name</span> <span class="j-op">==</span> <span class="j-str">""</span><span class="e-txt">) {</span></div>
+            <div><span class="e-ln">4</span>   <span class="j-fn">alert</span><span class="e-txt">(</span><span class="j-str">"Name Required"</span><span class="e-txt">);</span></div>
+            <div><span class="e-ln">5</span> <span class="e-txt">}</span></div>
+          </div>
+        </div>
+
+        <div class="line-explain">
+          <div class="lex-row" onclick="toggleLex(this)">
+            <div class="lex-code"><span class="j-prop">.value</span></div>
+            <div class="lex-info">
+              <div class="lex-name">Reading the Input's Content</div>
+              <div class="lex-desc">.value gets whatever text the user has typed into an &lt;input&gt; field. This is different from innerHTML which is for displaying content, not reading form inputs.</div>
+              <div class="lex-detail">innerHTML reads/writes content inside an element's tags. .value reads/writes the current text inside an &lt;input&gt;, &lt;textarea&gt;, or &lt;select&gt;. Mixing these up is the #1 beginner mistake.</div>
+            </div>
+          </div>
+          <div class="lex-row" onclick="toggleLex(this)">
+            <div class="lex-code"><span class="j-var">name</span> <span class="j-op">==</span> <span class="j-str">""</span></div>
+            <div class="lex-info">
+              <div class="lex-name">Empty String Check</div>
+              <div class="lex-desc">"" is an empty string — zero characters. If the user typed nothing, name will equal "" exactly.</div>
+              <div class="lex-detail">We'll upgrade this to === (strict equality) in the complete version — best practice in real projects to avoid type coercion bugs.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="section-label">try it — type a name (or leave empty) and submit</div>
+        <div class="reg-form-wrap">
+          <div class="bs-form-group">
+            <label class="bs-label">Full Name</label>
+            <input type="text" class="bs-input" id="step1-name" placeholder="Enter your name">
+          </div>
+          <button class="bs-btn-submit" onclick="checkNameOnly()">Submit</button>
+          <div id="step1-message" class="reg-message"></div>
+        </div>
+
+        <div class="info-box">
+          <i class="ti ti-info-circle info-icon"></i>
+          <div class="info-text">This single check works — but using <code>alert()</code> for every error is annoying for users. In the complete version, we'll display the error directly on the page instead.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-3"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Validate Email <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 4  VALIDATE EMAIL ═══════════ -->
+  <div class="slide" id="slide-4">
+    <div class="slide-header">
+      <span class="badge b-js">Step 2</span>
+      <div>
+        <div class="slide-title">Validate Email</div>
+        <div class="slide-subtitle">Exact same pattern as name — just a new field id</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">the code</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><div class="e-label">script.js — inside submit handler</div></div>
+          <div class="editor-body">
+            <div><span class="e-ln">1</span> <span class="j-kw">let</span> <span class="j-var">email</span> <span class="j-op">=</span> <span class="j-dom">document</span><span class="j-prop">.getElementById</span><span class="e-txt">(</span><span class="j-str">"email"</span><span class="e-txt">)</span><span class="j-prop">.value</span><span class="e-txt">;</span></div>
+            <div><span class="e-ln">2</span></div>
+            <div><span class="e-ln">3</span> <span class="j-kw">if</span><span class="e-txt">(</span><span class="j-var">email</span> <span class="j-op">==</span> <span class="j-str">""</span><span class="e-txt">) {</span></div>
+            <div><span class="e-ln">4</span>   <span class="j-fn">alert</span><span class="e-txt">(</span><span class="j-str">"Email Required"</span><span class="e-txt">);</span></div>
+            <div><span class="e-ln">5</span> <span class="e-txt">}</span></div>
+          </div>
+        </div>
+
+        <div class="success-box">
+          <i class="ti ti-check" style="color:#16a34a;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+          <div style="font-size:13px;color:#166534;line-height:1.6"><strong>Notice the pattern repeats exactly.</strong> get the value → check if empty → show an error. This is the core validation pattern you'll use for almost every field.</div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="section-label">try it — type an email and submit</div>
+        <div class="reg-form-wrap">
+          <div class="bs-form-group">
+            <label class="bs-label">Email Address</label>
+            <input type="email" class="bs-input" id="step2-email" placeholder="you@example.com">
+          </div>
+          <button class="bs-btn-submit" onclick="checkEmailOnly()">Submit</button>
+          <div id="step2-message" class="reg-message"></div>
+        </div>
+
+        <div class="tip-box">
+          <i class="ti ti-bulb tip-icon"></i>
+          <div class="tip-text">This basic check only confirms the field isn't empty — it doesn't verify the email looks like a real email (has @ and a domain). That's a more advanced check using regular expressions, which we'll touch on in later lessons.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-4"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Validate Password <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 5  VALIDATE PASSWORD ═══════════ -->
+  <div class="slide" id="slide-5">
+    <div class="slide-header">
+      <span class="badge b-js">Step 3</span>
+      <div>
+        <div class="slide-title">Validate Password</div>
+        <div class="slide-subtitle">A different kind of check — not just "empty", but "long enough"</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">the code</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><div class="e-label">script.js — inside submit handler</div></div>
+          <div class="editor-body">
+            <div><span class="e-ln">1</span> <span class="j-kw">let</span> <span class="j-var">password</span> <span class="j-op">=</span> <span class="j-dom">document</span><span class="j-prop">.getElementById</span><span class="e-txt">(</span><span class="j-str">"password"</span><span class="e-txt">)</span><span class="j-prop">.value</span><span class="e-txt">;</span></div>
+            <div><span class="e-ln">2</span></div>
+            <div><span class="e-ln">3</span> <span class="j-kw">if</span><span class="e-txt">(</span><span class="j-var">password</span><span class="j-prop">.length</span> <span class="j-op">&lt;</span> <span class="j-num">6</span><span class="e-txt">) {</span></div>
+            <div><span class="e-ln">4</span>   <span class="j-fn">alert</span><span class="e-txt">(</span><span class="j-str">"Password should contain</span></div>
+            <div><span class="e-ln">5</span>         <span class="j-str">at least 6 characters"</span><span class="e-txt">);</span></div>
+            <div><span class="e-ln">6</span> <span class="e-txt">}</span></div>
+          </div>
+        </div>
+
+        <div class="line-explain">
+          <div class="lex-row" onclick="toggleLex(this)">
+            <div class="lex-code"><span class="j-var">password</span><span class="j-prop">.length</span></div>
+            <div class="lex-info">
+              <div class="lex-name">String Length Property</div>
+              <div class="lex-desc">.length counts the number of characters in a string. "abc".length is 3. password.length tells us how many characters the user typed.</div>
+              <div class="lex-detail">.length is a property, not a method — no parentheses! Common mistake: writing .length() instead of .length.</div>
+            </div>
+          </div>
+          <div class="lex-row" onclick="toggleLex(this)">
+            <div class="lex-code"><span class="j-op">&lt; 6</span></div>
+            <div class="lex-info">
+              <div class="lex-name">Minimum Length Check</div>
+              <div class="lex-desc">If the password has FEWER than 6 characters, it's too short and fails validation. 6 characters or more passes this check.</div>
+              <div class="lex-detail">Real-world password rules often require even more: uppercase, numbers, symbols. We're keeping it simple with a length check for this lesson.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="section-label">try it — type a password and submit</div>
+        <div class="reg-form-wrap">
+          <div class="bs-form-group">
+            <label class="bs-label">Password</label>
+            <input type="password" class="bs-input" id="step3-password" placeholder="At least 6 characters">
+            <div style="font-size:11px;color:#888;margin-top:3px" id="step3-count">0 characters</div>
+          </div>
+          <button class="bs-btn-submit" onclick="checkPasswordOnly()">Submit</button>
+          <div id="step3-message" class="reg-message"></div>
+        </div>
+
+        <div class="warn-box">
+          <i class="ti ti-alert-triangle" style="color:#d97706;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+          <div style="font-size:13px;color:#78350f;line-height:1.6">Notice: <strong>3 separate if-blocks</strong> means 3 separate alert popups could appear back-to-back if multiple fields are wrong. That's a poor user experience — the complete version fixes this with <code>return</code>.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-5"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">⭐ Complete Validation <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 6  COMPLETE VALIDATION — LIVE DEMO ═══════════ -->
+  <div class="slide" id="slide-6">
+    <div class="slide-header">
+      <span class="badge b-rose">⭐ Highlight</span>
+      <div>
+        <div class="slide-title">Complete Validation — The Real Pattern</div>
+        <div class="slide-subtitle">All three checks combined, errors shown on-page, return stops execution early</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">the complete code</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><div class="e-label">script.js — complete validation</div></div>
+          <div class="editor-body" style="font-size:11px;line-height:1.7">
+            <div><span class="e-ln"> 1</span> <span class="j-var">form</span><span class="j-prop">.addEventListener</span><span class="e-txt">(</span><span class="j-str">"submit"</span><span class="e-txt">, </span><span class="j-kw">function</span><span class="e-txt">(</span><span class="j-var">event</span><span class="e-txt">) {</span></div>
+            <div><span class="e-ln"> 2</span>   <span class="e-ind1"></span><span class="j-var">event</span><span class="j-prop">.preventDefault</span><span class="e-txt">();</span></div>
+            <div><span class="e-ln"> 3</span></div>
+            <div><span class="e-ln"> 4</span>   <span class="e-ind1"></span><span class="j-kw">let</span> <span class="j-var">name</span> <span class="j-op">=</span> <span class="j-dom">document</span><span class="j-prop">.getElementById</span><span class="e-txt">(</span><span class="j-str">"name"</span><span class="e-txt">)</span><span class="j-prop">.value</span><span class="j-prop">.trim</span><span class="e-txt">();</span></div>
+            <div><span class="e-ln"> 5</span>   <span class="e-ind1"></span><span class="j-kw">let</span> <span class="j-var">email</span> <span class="j-op">=</span> <span class="j-dom">document</span><span class="j-prop">.getElementById</span><span class="e-txt">(</span><span class="j-str">"email"</span><span class="e-txt">)</span><span class="j-prop">.value</span><span class="j-prop">.trim</span><span class="e-txt">();</span></div>
+            <div><span class="e-ln"> 6</span>   <span class="e-ind1"></span><span class="j-kw">let</span> <span class="j-var">password</span> <span class="j-op">=</span> <span class="j-dom">document</span><span class="j-prop">.getElementById</span><span class="e-txt">(</span><span class="j-str">"password"</span><span class="e-txt">)</span><span class="j-prop">.value</span><span class="e-txt">;</span></div>
+            <div><span class="e-ln"> 7</span>   <span class="e-ind1"></span><span class="j-kw">let</span> <span class="j-var">message</span> <span class="j-op">=</span> <span class="j-dom">document</span><span class="j-prop">.getElementById</span><span class="e-txt">(</span><span class="j-str">"message"</span><span class="e-txt">);</span></div>
+            <div><span class="e-ln"> 8</span></div>
+            <div><span class="e-ln"> 9</span>   <span class="e-ind1"></span><span class="j-kw">if</span><span class="e-txt">(</span><span class="j-var">name</span> <span class="j-op">===</span> <span class="j-str">""</span><span class="e-txt">) {</span></div>
+            <div><span class="e-ln">10</span>     <span class="e-ind2"></span><span class="j-var">message</span><span class="j-prop">.innerHTML</span><span class="j-op">=</span><span class="j-str">"Name is required"</span><span class="e-txt">;</span></div>
+            <div><span class="e-ln">11</span>     <span class="e-ind2"></span><span class="j-var">message</span><span class="j-prop">.style.color</span><span class="j-op">=</span><span class="j-str">"red"</span><span class="e-txt">;</span></div>
+            <div><span class="e-ln">12</span>     <span class="e-ind2"></span><span class="j-ret">return</span><span class="e-txt">;</span></div>
+            <div><span class="e-ln">13</span>   <span class="e-txt">}</span></div>
+            <div><span class="e-ln">14</span></div>
+            <div><span class="e-ln">15</span>   <span class="e-ind1"></span><span class="j-kw">if</span><span class="e-txt">(</span><span class="j-var">email</span> <span class="j-op">===</span> <span class="j-str">""</span><span class="e-txt">) {</span></div>
+            <div><span class="e-ln">16</span>     <span class="e-ind2"></span><span class="j-var">message</span><span class="j-prop">.innerHTML</span><span class="j-op">=</span><span class="j-str">"Email is required"</span><span class="e-txt">;</span></div>
+            <div><span class="e-ln">17</span>     <span class="e-ind2"></span><span class="j-var">message</span><span class="j-prop">.style.color</span><span class="j-op">=</span><span class="j-str">"red"</span><span class="e-txt">;</span></div>
+            <div><span class="e-ln">18</span>     <span class="e-ind2"></span><span class="j-ret">return</span><span class="e-txt">;</span></div>
+            <div><span class="e-ln">19</span>   <span class="e-txt">}</span></div>
+            <div><span class="e-ln">20</span></div>
+            <div><span class="e-ln">21</span>   <span class="e-ind1"></span><span class="j-kw">if</span><span class="e-txt">(</span><span class="j-var">password</span><span class="j-prop">.length</span> <span class="j-op">&lt;</span> <span class="j-num">6</span><span class="e-txt">) {</span></div>
+            <div><span class="e-ln">22</span>     <span class="e-ind2"></span><span class="j-var">message</span><span class="j-prop">.innerHTML</span><span class="j-op">=</span><span class="j-str">"Password must be at least 6 characters"</span><span class="e-txt">;</span></div>
+            <div><span class="e-ln">23</span>     <span class="e-ind2"></span><span class="j-var">message</span><span class="j-prop">.style.color</span><span class="j-op">=</span><span class="j-str">"red"</span><span class="e-txt">;</span></div>
+            <div><span class="e-ln">24</span>     <span class="e-ind2"></span><span class="j-ret">return</span><span class="e-txt">;</span></div>
+            <div><span class="e-ln">25</span>   <span class="e-txt">}</span></div>
+            <div><span class="e-ln">26</span></div>
+            <div><span class="e-ln">27</span>   <span class="e-ind1"></span><span class="j-var">message</span><span class="j-prop">.innerHTML</span><span class="j-op">=</span><span class="j-str">"🎉 Registration Successful!"</span><span class="e-txt">;</span></div>
+            <div><span class="e-ln">28</span>   <span class="e-ind1"></span><span class="j-var">message</span><span class="j-prop">.style.color</span><span class="j-op">=</span><span class="j-str">"green"</span><span class="e-txt">;</span></div>
+            <div><span class="e-ln">29</span> <span class="e-txt">});</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="section-label">⭐ try the real form — fully working</div>
+        <div class="reg-form-wrap" id="full-form-wrap">
+          <div class="bs-form-group">
+            <label class="bs-label">Full Name</label>
+            <input type="text" class="bs-input" id="full-name" placeholder="Enter your name">
+          </div>
+          <div class="bs-form-group">
+            <label class="bs-label">Email</label>
+            <input type="email" class="bs-input" id="full-email" placeholder="you@example.com">
+          </div>
+          <div class="bs-form-group">
+            <label class="bs-label">Password</label>
+            <input type="password" class="bs-input" id="full-password" placeholder="At least 6 characters">
+          </div>
+          <button class="bs-btn-submit" onclick="runFullValidation()">Register</button>
+          <div id="full-message" class="reg-message"></div>
+        </div>
+
+        <div class="success-box">
+          <i class="ti ti-sparkles" style="color:#16a34a;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+          <div style="font-size:13px;color:#166534;line-height:1.6">This is what students should build in their own SkillHub project right now. Walk through it live — leave a field empty, submit, watch the on-page error appear instead of an alert popup.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-6"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Explain Line by Line <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 7  EXPLAIN LINE BY LINE ═══════════ -->
+  <div class="slide" id="slide-7">
+    <div class="slide-header">
+      <span class="badge b-purple">Deep Dive</span>
+      <div>
+        <div class="slide-title">Explain Line by Line — 7 Concepts to Master</div>
+        <div class="slide-subtitle">Click each concept — students must understand all of these to fully grasp the validation</div>
+      </div>
+    </div>
+
+    <div class="line-explain">
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="j-prop">addEventListener()</span></div>
+        <div class="lex-info">
+          <div class="lex-name">1. addEventListener()</div>
+          <div class="lex-desc">Attaches a function to run when a specific event happens on an element. Here it's attached to the &lt;form&gt;, listening for "submit".</div>
+          <div class="lex-detail">Pattern: element.addEventListener("eventType", callbackFunction). This is the same pattern from Hour 3 of Day 7 — now applied to forms specifically.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="j-str">"submit"</span></div>
+        <div class="lex-info">
+          <div class="lex-name">2. submit (the event type)</div>
+          <div class="lex-desc">The event that fires when a form is submitted — either by clicking a submit button or pressing Enter inside a text field.</div>
+          <div class="lex-detail">Always listen on the &lt;form&gt; element for "submit", not on the button for "click". This catches BOTH submission methods.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="j-prop">preventDefault()</span></div>
+        <div class="lex-info">
+          <div class="lex-name">3. preventDefault()</div>
+          <div class="lex-desc">Stops the browser's default action — for a form submit event, that default action is "reload the page".</div>
+          <div class="lex-detail">Without this line, even if validation passes, the page would reload and any JS-driven success message would instantly disappear.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="j-prop">trim()</span></div>
+        <div class="lex-info">
+          <div class="lex-name">4. trim()</div>
+          <div class="lex-desc">Removes whitespace from the start and end of a string. " John " becomes "John". Prevents users from "cheating" empty validation by typing just spaces.</div>
+          <div class="lex-detail">Without trim(), a user could type "   " (just spaces) into the name field and it would NOT equal "" — so the empty check would wrongly pass.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="j-prop">value</span></div>
+        <div class="lex-info">
+          <div class="lex-name">5. value</div>
+          <div class="lex-desc">Reads the current text inside an input field. Different from innerHTML, which reads content between HTML tags rather than form input data.</div>
+          <div class="lex-detail">.value works on &lt;input&gt;, &lt;textarea&gt;, and &lt;select&gt;. It's always a string, even for type="number" inputs — you may need Number() to convert it.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="j-prop">length</span></div>
+        <div class="lex-info">
+          <div class="lex-name">6. length</div>
+          <div class="lex-desc">A property (not a method!) that tells you how many characters are in a string. Used here to enforce a minimum password length.</div>
+          <div class="lex-detail">"hello".length is 5. No parentheses. This is one of the most common JS properties used across strings and arrays alike.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="j-ret">return</span></div>
+        <div class="lex-info">
+          <div class="lex-name">7. return</div>
+          <div class="lex-desc">Immediately exits the function. Used here to stop running the rest of the validation checks once one error is found — prevents multiple errors overwriting each other.</div>
+          <div class="lex-detail">Without return, if name is empty, the code would still continue to check email and password, and only the LAST error message would be visible — confusing for users. return makes validation stop at the first problem found.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tip-box">
+      <i class="ti ti-bulb tip-icon"></i>
+      <div class="tip-text"><strong>Teaching tip:</strong> Have students predict what happens if you remove the <code>return</code> statement from one if-block. Then test it live — watch how the message flickers through multiple errors before landing on the last one.</div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-7"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Mini Challenge <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 8  MINI CHALLENGE ═══════════ -->
+  <div class="slide" id="slide-8">
+    <div class="slide-header">
+      <span class="badge b-rose">⏱ 20-Min Challenge</span>
+      <div>
+        <div class="slide-title">Mini Challenge — Add a Course Dropdown</div>
+        <div class="slide-subtitle">Add a new field, validate it, and integrate it into the existing return-based pattern</div>
+      </div>
+    </div>
+
+    <div style="background:linear-gradient(135deg,#7f1d1d,#991b1b);border-radius:14px;padding:18px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px">
+      <div style="font-size:13px;font-weight:700;color:#fca5a5;letter-spacing:.08em;text-transform:uppercase">⏱ 20 Minutes</div>
+      <div style="font-size:20px;font-weight:800;color:#fff;line-height:1.35">Add a Course dropdown — validate that something was selected</div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">html — add the dropdown</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><div class="e-label">index.html</div></div>
+          <div class="editor-body">
+            <div><span class="e-ln">1</span> <span class="e-tag">&lt;label</span> <span class="e-att">class=</span><span class="e-val">"bs-label"</span><span class="e-tag">&gt;</span><span class="e-new">Course</span><span class="e-tag">&lt;/label&gt;</span></div>
+            <div><span class="e-ln">2</span> <span class="e-tag">&lt;select</span> <span class="e-att">id=</span><span class="e-val">"course"</span> <span class="e-att">class=</span><span class="e-val">"form-select"</span><span class="e-tag">&gt;</span></div>
+            <div><span class="e-ln">3</span>   <span class="e-tag">&lt;option&gt;</span><span class="e-new">Select Course</span><span class="e-tag">&lt;/option&gt;</span></div>
+            <div><span class="e-ln">4</span>   <span class="e-tag">&lt;option&gt;</span><span class="e-new">MERN Stack</span><span class="e-tag">&lt;/option&gt;</span></div>
+            <div><span class="e-ln">5</span>   <span class="e-tag">&lt;option&gt;</span><span class="e-new">Java</span><span class="e-tag">&lt;/option&gt;</span></div>
+            <div><span class="e-ln">6</span>   <span class="e-tag">&lt;option&gt;</span><span class="e-new">Python</span><span class="e-tag">&lt;/option&gt;</span></div>
+            <div><span class="e-ln">7</span> <span class="e-tag">&lt;/select&gt;</span></div>
+          </div>
+        </div>
+
+        <div class="section-label" style="margin-top:10px">javascript — add this 4th if-block</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><div class="e-label">script.js — insert before success message</div></div>
+          <div class="editor-body">
+            <div><span class="e-ln">1</span> <span class="j-kw">let</span> <span class="j-var">course</span> <span class="j-op">=</span> <span class="j-dom">document</span><span class="j-prop">.getElementById</span><span class="e-txt">(</span><span class="j-str">"course"</span><span class="e-txt">)</span><span class="j-prop">.value</span><span class="e-txt">;</span></div>
+            <div><span class="e-ln">2</span></div>
+            <div><span class="e-ln">3</span> <span class="j-kw">if</span><span class="e-txt">(</span><span class="j-var">course</span> <span class="j-op">===</span> <span class="j-str">"Select Course"</span><span class="e-txt">) {</span></div>
+            <div><span class="e-ln">4</span>   <span class="j-var">message</span><span class="j-prop">.innerHTML</span><span class="j-op">=</span><span class="j-str">"Please select a course."</span><span class="e-txt">;</span></div>
+            <div><span class="e-ln">5</span>   <span class="j-var">message</span><span class="j-prop">.style.color</span><span class="j-op">=</span><span class="j-str">"red"</span><span class="e-txt">;</span></div>
+            <div><span class="e-ln">6</span>   <span class="j-ret">return</span><span class="e-txt">;</span></div>
+            <div><span class="e-ln">7</span> <span class="e-txt">}</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="section-label">try it — select a course and submit</div>
+        <div class="reg-form-wrap">
+          <div class="bs-form-group">
+            <label class="bs-label">Course</label>
+            <select class="bs-input" id="challenge-course">
+              <option>Select Course</option>
+              <option>MERN Stack</option>
+              <option>Java</option>
+              <option>Python</option>
+            </select>
+          </div>
+          <button class="bs-btn-submit" onclick="checkCourseOnly()">Submit</button>
+          <div id="challenge-message" class="reg-message"></div>
+        </div>
+
+        <div class="section-label">requirements checklist</div>
+        <div style="display:flex;flex-direction:column;gap:5px">
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><div>Add the <code>&lt;select id="course"&gt;</code> with 4 options</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><div>Read its value with <code>.value</code></div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><div>Check if it still equals "Select Course"</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><div>Show "Please select a course." error</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><div>Insert this check BEFORE the success message line</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-8"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Bonus Feature <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 9  BONUS FEATURE ═══════════ -->
+  <div class="slide" id="slide-9">
+    <div class="slide-header">
+      <span class="badge b-orange">Bonus</span>
+      <div>
+        <div class="slide-title">Bonus Feature — Personalised Welcome Message</div>
+        <div class="slide-subtitle">After successful registration, greet the user by name and confirm their course</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">the upgraded success message</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><div class="e-label">script.js — replace the final success line</div></div>
+          <div class="editor-body">
+            <div><span class="e-ln">1</span> <span class="j-com">// instead of just "Registration Successful!"</span></div>
+            <div><span class="e-ln">2</span> <span class="j-var">message</span><span class="j-prop">.innerHTML</span> <span class="j-op">=</span></div>
+            <div><span class="e-ln">3</span>   <span class="j-str">"Welcome "</span> <span class="j-op">+</span> <span class="j-var">name</span> <span class="j-op">+</span> <span class="j-str">"&lt;br&gt;"</span> <span class="j-op">+</span></div>
+            <div><span class="e-ln">4</span>   <span class="j-str">"You have successfully enrolled in &lt;br&gt;"</span> <span class="j-op">+</span></div>
+            <div><span class="e-ln">5</span>   <span class="j-str">"&lt;strong&gt;"</span> <span class="j-op">+</span> <span class="j-var">course</span> <span class="j-op">+</span> <span class="j-str">"&lt;/strong&gt;"</span><span class="e-txt">;</span></div>
+            <div><span class="e-ln">6</span></div>
+            <div><span class="e-ln">7</span> <span class="j-var">message</span><span class="j-prop">.style.color</span> <span class="j-op">=</span> <span class="j-str">"green"</span><span class="e-txt">;</span></div>
+          </div>
+        </div>
+
+        <div class="line-explain">
+          <div class="lex-row" onclick="toggleLex(this)">
+            <div class="lex-code"><span class="j-op">+</span></div>
+            <div class="lex-info">
+              <div class="lex-name">String Concatenation</div>
+              <div class="lex-desc">The + operator joins strings together. "Welcome " + name combines the fixed text with the variable's value into one new string.</div>
+              <div class="lex-detail">You can mix HTML tags right inside the strings — like "&lt;br&gt;" for a line break — since innerHTML interprets HTML, not just plain text.</div>
+            </div>
+          </div>
+          <div class="lex-row" onclick="toggleLex(this)">
+            <div class="lex-code"><span class="j-str">"&lt;strong&gt;"</span></div>
+            <div class="lex-info">
+              <div class="lex-name">HTML Inside innerHTML</div>
+              <div class="lex-desc">Because we're setting .innerHTML (not .textContent), any HTML tags we include — like &lt;br&gt; or &lt;strong&gt; — actually render as real HTML elements.</div>
+              <div class="lex-detail">This is exactly why innerHTML is powerful — and also why you should never put raw, untrusted user input into innerHTML without sanitising it (a security concept called XSS, covered in later weeks).</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="section-label">what it looks like</div>
+        <div class="welcome-card">
+          <div style="font-size:28px;margin-bottom:8px">🎉</div>
+          <div style="font-size:18px;font-weight:800;margin-bottom:4px">Welcome Rahul</div>
+          <div style="font-size:13px;opacity:.9;margin-bottom:8px">You have successfully enrolled in</div>
+          <div style="font-size:16px;font-weight:800;background:rgba(255,255,255,.15);border-radius:8px;padding:8px 16px;display:inline-block">MERN Stack</div>
+        </div>
+
+        <div class="section-label">try it — fill out and register below</div>
+        <div class="reg-form-wrap">
+          <div class="bs-form-group">
+            <label class="bs-label">Name</label>
+            <input type="text" class="bs-input" id="bonus-name" placeholder="Your name">
+          </div>
+          <div class="bs-form-group">
+            <label class="bs-label">Course</label>
+            <select class="bs-input" id="bonus-course">
+              <option>Select Course</option>
+              <option>MERN Stack</option>
+              <option>Java</option>
+              <option>Python</option>
+            </select>
+          </div>
+          <button class="bs-btn-submit" onclick="runBonusWelcome()">Register</button>
+          <div id="bonus-message" class="reg-message" style="background:transparent"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-9"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Assignment Fields <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 10  ASSIGNMENT — FIELDS ═══════════ -->
+  <div class="slide" id="slide-10">
+    <div class="slide-header">
+      <span class="badge b-rose">Assignment</span>
+      <div>
+        <div class="slide-title">Enhanced Registration Module — New Fields</div>
+        <div class="slide-subtitle">Add 4 more fields to make this a complete, realistic registration form</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="rule-card r1">
+          <div style="display:flex;gap:10px;align-items:flex-start">
+            <div class="rule-icon" style="background:#2563eb;color:white">📱</div>
+            <div>
+              <div style="font-size:13px;font-weight:700;color:#1d4ed8">Mobile Number Field</div>
+              <div style="font-size:12px;color:#1e40af;margin-top:2px">A new text input for the student's phone number</div>
+            </div>
+          </div>
+        </div>
+        <div class="rule-card r2">
+          <div style="display:flex;gap:10px;align-items:flex-start">
+            <div class="rule-icon" style="background:#16a34a;color:white">🔒</div>
+            <div>
+              <div style="font-size:13px;font-weight:700;color:#166534">Confirm Password Field</div>
+              <div style="font-size:12px;color:#15803d;margin-top:2px">A second password field to catch typos</div>
+            </div>
+          </div>
+        </div>
+        <div class="rule-card r3">
+          <div style="display:flex;gap:10px;align-items:flex-start">
+            <div class="rule-icon" style="background:#9333ea;color:white">⚪</div>
+            <div>
+              <div style="font-size:13px;font-weight:700;color:#7e22ce">Gender (Radio Buttons)</div>
+              <div style="font-size:12px;color:#6b21a8;margin-top:2px">Male / Female / Other — pick one</div>
+            </div>
+          </div>
+        </div>
+        <div class="rule-card" style="background:#fff7ed;border-color:#fed7aa">
+          <div style="display:flex;gap:10px;align-items:flex-start">
+            <div class="rule-icon" style="background:#ea580c;color:white">☑️</div>
+            <div>
+              <div style="font-size:13px;font-weight:700;color:#9a3412">Terms &amp; Conditions Checkbox</div>
+              <div style="font-size:12px;color:#c2410c;margin-top:2px">Must be checked before registering</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">starter html for the new fields</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><div class="e-label">index.html — add inside &lt;form&gt;</div></div>
+          <div class="editor-body" style="font-size:10.5px;line-height:1.7">
+            <div><span class="e-tag">&lt;label&gt;</span><span class="e-new">Mobile Number</span><span class="e-tag">&lt;/label&gt;</span></div>
+            <div><span class="e-tag">&lt;input</span> <span class="e-att">type=</span><span class="e-val">"text"</span> <span class="e-att">id=</span><span class="e-val">"mobile"</span><span class="e-tag">&gt;</span></div>
+            <div></div>
+            <div><span class="e-tag">&lt;label&gt;</span><span class="e-new">Confirm Password</span><span class="e-tag">&lt;/label&gt;</span></div>
+            <div><span class="e-tag">&lt;input</span> <span class="e-att">type=</span><span class="e-val">"password"</span> <span class="e-att">id=</span><span class="e-val">"confirmPassword"</span><span class="e-tag">&gt;</span></div>
+            <div></div>
+            <div><span class="e-tag">&lt;label&gt;</span><span class="e-new">Gender</span><span class="e-tag">&lt;/label&gt;</span></div>
+            <div><span class="e-tag">&lt;input</span> <span class="e-att">type=</span><span class="e-val">"radio"</span> <span class="e-att">name=</span><span class="e-val">"gender"</span> <span class="e-att">value=</span><span class="e-val">"Male"</span><span class="e-tag">&gt;</span> <span class="e-new">Male</span></div>
+            <div><span class="e-tag">&lt;input</span> <span class="e-att">type=</span><span class="e-val">"radio"</span> <span class="e-att">name=</span><span class="e-val">"gender"</span> <span class="e-att">value=</span><span class="e-val">"Female"</span><span class="e-tag">&gt;</span> <span class="e-new">Female</span></div>
+            <div><span class="e-tag">&lt;input</span> <span class="e-att">type=</span><span class="e-val">"radio"</span> <span class="e-att">name=</span><span class="e-val">"gender"</span> <span class="e-att">value=</span><span class="e-val">"Other"</span><span class="e-tag">&gt;</span> <span class="e-new">Other</span></div>
+            <div></div>
+            <div><span class="e-tag">&lt;input</span> <span class="e-att">type=</span><span class="e-val">"checkbox"</span> <span class="e-att">id=</span><span class="e-val">"terms"</span><span class="e-tag">&gt;</span></div>
+            <div><span class="e-tag">&lt;label&gt;</span><span class="e-new">I agree to Terms &amp; Conditions</span><span class="e-tag">&lt;/label&gt;</span></div>
+          </div>
+        </div>
+
+        <div class="info-box" style="margin-top:10px">
+          <i class="ti ti-info-circle info-icon"></i>
+          <div class="info-text">For radio buttons, all three inputs share the same <code>name="gender"</code> — that's what groups them so only one can be selected at a time.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-10"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Validation Rules <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 11  ASSIGNMENT — VALIDATION RULES ═══════════ -->
+  <div class="slide" id="slide-11">
+    <div class="slide-header">
+      <span class="badge b-rose">Assignment</span>
+      <div>
+        <div class="slide-title">New Validation Rules</div>
+        <div class="slide-subtitle">The logic needed to validate every new field — code hints for each rule</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="section-label">rule 1 — mobile must be exactly 10 digits</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><div class="e-label">hint</div></div>
+          <div class="editor-body" style="font-size:11px">
+            <div><span class="j-kw">let</span> <span class="j-var">mobile</span> <span class="j-op">=</span> <span class="j-dom">document</span><span class="j-prop">.getElementById</span><span class="e-txt">(</span><span class="j-str">"mobile"</span><span class="e-txt">)</span><span class="j-prop">.value</span><span class="j-prop">.trim</span><span class="e-txt">();</span></div>
+            <div></div>
+            <div><span class="j-kw">if</span><span class="e-txt">(</span><span class="j-var">mobile</span><span class="j-prop">.length</span> <span class="j-op">!==</span> <span class="j-num">10</span><span class="e-txt">) {</span></div>
+            <div>  <span class="j-com">// show: "Mobile number must be 10 digits"</span></div>
+            <div><span class="e-txt">}</span></div>
+          </div>
+        </div>
+        <div class="success-box" style="padding:8px 12px">
+          <div style="display:flex;gap:3px;align-items:center;font-size:11px">
+            <span class="digit-box filled">9</span><span class="digit-box filled">8</span><span class="digit-box filled">7</span><span class="digit-box filled">6</span><span class="digit-box filled">5</span><span class="digit-box filled">4</span><span class="digit-box filled">3</span><span class="digit-box filled">2</span><span class="digit-box filled">1</span><span class="digit-box filled">0</span>
+            <span style="margin-left:8px;color:#166534;font-weight:700">✓ exactly 10</span>
+          </div>
+        </div>
+
+        <div class="section-label" style="margin-top:6px">rule 2 — passwords must match</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><div class="e-label">hint</div></div>
+          <div class="editor-body" style="font-size:11px">
+            <div><span class="j-kw">let</span> <span class="j-var">confirmPassword</span> <span class="j-op">=</span> <span class="j-dom">document</span><span class="j-prop">.getElementById</span><span class="e-txt">(</span><span class="j-str">"confirmPassword"</span><span class="e-txt">)</span><span class="j-prop">.value</span><span class="e-txt">;</span></div>
+            <div></div>
+            <div><span class="j-kw">if</span><span class="e-txt">(</span><span class="j-var">password</span> <span class="j-op">!==</span> <span class="j-var">confirmPassword</span><span class="e-txt">) {</span></div>
+            <div>  <span class="j-com">// show: "Passwords do not match"</span></div>
+            <div><span class="e-txt">}</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="section-label">rule 3 — terms checkbox must be checked</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><div class="e-label">hint</div></div>
+          <div class="editor-body" style="font-size:11px">
+            <div><span class="j-kw">let</span> <span class="j-var">terms</span> <span class="j-op">=</span> <span class="j-dom">document</span><span class="j-prop">.getElementById</span><span class="e-txt">(</span><span class="j-str">"terms"</span><span class="e-txt">)</span><span class="j-prop">.checked</span><span class="e-txt">;</span></div>
+            <div></div>
+            <div><span class="j-kw">if</span><span class="e-txt">(</span><span class="j-var">terms</span> <span class="j-op">===</span> <span class="j-kw">false</span><span class="e-txt">) {</span></div>
+            <div>  <span class="j-com">// show: "You must accept Terms &amp; Conditions"</span></div>
+            <div><span class="e-txt">}</span></div>
+          </div>
+        </div>
+        <div class="info-box">
+          <i class="ti ti-info-circle info-icon"></i>
+          <div class="info-text">Checkboxes use <code>.checked</code> (true/false), NOT <code>.value</code>. This trips up many beginners — value would just give you the string "on".</div>
+        </div>
+
+        <div class="section-label" style="margin-top:6px">key requirement — no more alert()</div>
+        <div class="warn-box">
+          <i class="ti ti-alert-triangle" style="color:#d97706;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+          <div style="font-size:13px;color:#78350f;line-height:1.6"><strong>Display ALL validation errors on the page</strong> — using the <code>#message</code> div pattern from this lesson, not <code>alert()</code>. This is a more professional UX that real production apps use.</div>
+        </div>
+
+        <div class="section-label">final requirements checklist</div>
+        <div style="display:flex;flex-direction:column;gap:5px">
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><div>Mobile field — exactly 10 digits</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><div>Confirm Password — must match Password</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><div>Gender radio buttons present</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><div>Terms checkbox — must be checked</div></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-circle">✓</div><div>All errors shown on-page, zero alert() calls</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-11"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Inline Error Pattern <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 12  INLINE ERROR PATTERN ═══════════ -->
+  <div class="slide" id="slide-12">
+    <div class="slide-header">
+      <span class="badge b-purple">Reference</span>
+      <div>
+        <div class="slide-title">Inline Error Display — Bootstrap Pattern</div>
+        <div class="slide-subtitle">Production apps show errors next to the field, not in a single message div — here's how</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">html — bootstrap invalid-feedback pattern</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><div class="e-label">index.html</div></div>
+          <div class="editor-body" style="font-size:11px">
+            <div><span class="e-tag">&lt;input</span> <span class="e-att">type=</span><span class="e-val">"text"</span> <span class="e-att">id=</span><span class="e-val">"mobile"</span></div>
+            <div>       <span class="e-att">class=</span><span class="e-val">"form-control"</span><span class="e-tag">&gt;</span></div>
+            <div><span class="e-tag">&lt;div</span> <span class="e-att">id=</span><span class="e-val">"mobileError"</span></div>
+            <div>     <span class="e-att">class=</span><span class="e-val">"invalid-feedback"</span><span class="e-tag">&gt;&lt;/div&gt;</span></div>
+          </div>
+        </div>
+
+        <div class="section-label" style="margin-top:10px">javascript — toggle classes + set message</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><div class="e-label">script.js</div></div>
+          <div class="editor-body" style="font-size:11px">
+            <div><span class="j-kw">if</span><span class="e-txt">(</span><span class="j-var">mobile</span><span class="j-prop">.length</span> <span class="j-op">!==</span> <span class="j-num">10</span><span class="e-txt">) {</span></div>
+            <div>  <span class="j-dom">document</span><span class="j-prop">.getElementById</span><span class="e-txt">(</span><span class="j-str">"mobile"</span><span class="e-txt">)</span></div>
+            <div>    <span class="j-prop">.classList.add</span><span class="e-txt">(</span><span class="j-str">"is-invalid"</span><span class="e-txt">);</span></div>
+            <div>  <span class="j-dom">document</span><span class="j-prop">.getElementById</span><span class="e-txt">(</span><span class="j-str">"mobileError"</span><span class="e-txt">)</span></div>
+            <div>    <span class="j-prop">.innerHTML</span> <span class="j-op">=</span> <span class="j-str">"Must be 10 digits"</span><span class="e-txt">;</span></div>
+            <div>  <span class="j-ret">return</span><span class="e-txt">;</span></div>
+            <div><span class="e-txt">}</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="section-label">live preview — try an invalid mobile number</div>
+        <div class="reg-form-wrap">
+          <div class="bs-form-group">
+            <label class="bs-label">Mobile Number</label>
+            <input type="text" class="bs-input" id="inline-mobile" placeholder="10-digit number">
+            <div id="inline-mobile-error" class="bs-feedback-invalid">Mobile number must be 10 digits</div>
+          </div>
+          <button class="bs-btn-submit" onclick="checkInlineMobile()">Check</button>
+        </div>
+
+        <div class="line-explain">
+          <div class="lex-row" onclick="toggleLex(this)">
+            <div class="lex-code"><span class="j-prop">classList.add()</span></div>
+            <div class="lex-info">
+              <div class="lex-name">Add a CSS Class via JS</div>
+              <div class="lex-desc">Adds a class name to an element without removing existing ones. Here, "is-invalid" triggers a red border style via CSS.</div>
+              <div class="lex-detail">classList also has .remove(), .toggle(), and .contains() — useful for clearing errors when the user fixes their input.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tip-box">
+          <i class="ti ti-bulb tip-icon"></i>
+          <div class="tip-text">This per-field pattern is more work to write, but gives users a much clearer experience than one shared <code>#message</code> div — they instantly know which field has the problem.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-12"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Quiz <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 13  QUIZ ═══════════ -->
+  <div class="slide" id="slide-13">
+    <div class="slide-header">
+      <span class="badge b-slate">Quiz</span>
+      <div>
+        <div class="slide-title">Quick-Fire Quiz</div>
+        <div class="slide-subtitle">4 questions covering Form Validation from Hour 3</div>
+      </div>
+    </div>
+    <div id="quiz-container"></div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-13"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Wrap Up <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══════════ SLIDE 14  WRAP UP ═══════════ -->
+  <div class="slide" id="slide-14">
+    <div class="slide-header">
+      <span class="badge b-teal">Wrap-Up</span>
+      <div>
+        <div class="slide-title">Day 8 Complete! 🎉</div>
+        <div class="slide-subtitle">SkillHub now has a real, validated registration form — a genuine production feature</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">everything built in day 8</div>
+        <div style="display:flex;flex-direction:column;gap:5px">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:#dcfce7;border-radius:8px;font-size:12px;font-weight:700;color:#166534"><span><i class="ti ti-check" style="margin-right:5px"></i>if / else / else if (Hour 1)</span><span class="badge b-green" style="font-size:10px">✓</span></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:#dcfce7;border-radius:8px;font-size:12px;font-weight:700;color:#166534"><span><i class="ti ti-check" style="margin-right:5px"></i>Logical operators &amp;&amp; || ! (Hour 2)</span><span class="badge b-green" style="font-size:10px">✓</span></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:#dcfce7;border-radius:8px;font-size:12px;font-weight:700;color:#166534"><span><i class="ti ti-check" style="margin-right:5px"></i>preventDefault() — stop page reload</span><span class="badge b-green" style="font-size:10px">✓</span></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:#dcfce7;border-radius:8px;font-size:12px;font-weight:700;color:#166534"><span><i class="ti ti-check" style="margin-right:5px"></i>Name / Email / Password validation</span><span class="badge b-green" style="font-size:10px">✓</span></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:#dcfce7;border-radius:8px;font-size:12px;font-weight:700;color:#166534"><span><i class="ti ti-check" style="margin-right:5px"></i>Course dropdown + welcome message</span><span class="badge b-green" style="font-size:10px">✓</span></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:#ede9fe;border-radius:8px;font-size:12px;font-weight:700;color:#5b21b6;border:2px dashed #a78bfa"><span><i class="ti ti-pencil" style="margin-right:5px"></i>Enhanced module — assignment</span><span class="badge b-purple" style="font-size:10px">← hw</span></div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">skills earned in hour 3</div>
+        <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px">
+          <span style="background:#fef9c3;color:#854d0e;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700">preventDefault()</span>
+          <span style="background:#fef9c3;color:#854d0e;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700">submit event</span>
+          <span style="background:#fef9c3;color:#854d0e;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700">.value</span>
+          <span style="background:#fef9c3;color:#854d0e;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700">.trim()</span>
+          <span style="background:#fef9c3;color:#854d0e;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700">.length</span>
+          <span style="background:#fef9c3;color:#854d0e;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700">return</span>
+          <span style="background:#fef9c3;color:#854d0e;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700">.checked</span>
+          <span style="background:#fef9c3;color:#854d0e;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700">classList.add()</span>
+          <span style="background:#fef9c3;color:#854d0e;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700">string concatenation</span>
+        </div>
+
+        <div class="section-label">day 9 preview</div>
+        <div style="background:linear-gradient(135deg,#0f172a,#1e3a5f);border-radius:12px;padding:16px;color:white">
+          <div style="font-size:13px;font-weight:700;margin-bottom:8px">🗓️ Day 9 — Functions & Arrays</div>
+          <div style="font-size:12px;opacity:.8;line-height:1.8">
+            ✦ function declarations and parameters<br>
+            ✦ Arrays — create, access, push, pop<br>
+            ✦ Looping with forEach<br>
+            ✦ Render a dynamic course list from an array
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="background:linear-gradient(135deg,#d97706,#92400e);border-radius:12px;padding:16px;color:white;text-align:center">
+      <div style="font-size:16px;font-weight:800;margin-bottom:4px">🏆 Day 8 Complete — SkillHub Validates Real Input!</div>
+      <div style="font-size:13px;opacity:.85">You just built the single most common feature in web development: form validation. Every signup page, every checkout, every contact form uses exactly this pattern.</div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-14"></div>
+      <button class="nav-btn" disabled>Done <i class="ti ti-flag"></i></button>
+    </div>
+  </div>
+
+</div><!-- /.wrapper -->
+
+<script>
+  var current  = 0;
+  var total    = 15;
+  var quizInit = false;
+
+  /* ── Line explainer ── */
+  function toggleLex(row) {
+    var was = row.classList.contains('active');
+    document.querySelectorAll('.lex-row.active').forEach(function(r){ r.classList.remove('active'); });
+    if (!was) row.classList.add('active');
+  }
+
+  /* ── Checklist ── */
+  function toggleCheck(item) {
+    item.classList.toggle('done');
+    var c = item.querySelector('.check-circle');
+    if (item.classList.contains('done')) {
+      c.style.background = '#22c55e'; c.style.borderColor = '#22c55e'; c.style.color = '#fff';
+    } else {
+      c.style.background = ''; c.style.borderColor = ''; c.style.color = '';
+    }
+  }
+
+  function setMsg(id, text, ok) {
+    var el = document.getElementById(id);
+    el.textContent = text;
+    el.style.background = ok ? '#dcfce7' : '#fee2e2';
+    el.style.color = ok ? '#166534' : '#991b1b';
+  }
+
+  /* ── Slide 3 — Name only ── */
+  function checkNameOnly() {
+    var name = document.getElementById('step1-name').value.trim();
+    if (name === '') setMsg('step1-message', 'Name is required', false);
+    else setMsg('step1-message', '✓ Name looks good: "' + name + '"', true);
+  }
+
+  /* ── Slide 4 — Email only ── */
+  function checkEmailOnly() {
+    var email = document.getElementById('step2-email').value.trim();
+    if (email === '') setMsg('step2-message', 'Email is required', false);
+    else setMsg('step2-message', '✓ Email captured: "' + email + '"', true);
+  }
+
+  /* ── Slide 5 — Password only ── */
+  document.addEventListener('DOMContentLoaded', function() {
+    var pw = document.getElementById('step3-password');
+    if (pw) pw.addEventListener('input', function() {
+      document.getElementById('step3-count').textContent = pw.value.length + ' characters';
+    });
+  });
+  function checkPasswordOnly() {
+    var pw = document.getElementById('step3-password').value;
+    if (pw.length < 6) setMsg('step3-message', 'Password should contain at least 6 characters', false);
+    else setMsg('step3-message', '✓ Password length OK (' + pw.length + ' chars)', true);
+  }
+
+  /* ── Slide 6 — Full validation ── */
+  function runFullValidation() {
+    var name = document.getElementById('full-name').value.trim();
+    var email = document.getElementById('full-email').value.trim();
+    var password = document.getElementById('full-password').value;
+    var msg = document.getElementById('full-message');
+
+    if (name === '') { setMsg('full-message', 'Name is required', false); return; }
+    if (email === '') { setMsg('full-message', 'Email is required', false); return; }
+    if (password.length < 6) { setMsg('full-message', 'Password must be at least 6 characters', false); return; }
+    setMsg('full-message', '🎉 Registration Successful!', true);
+  }
+
+  /* ── Slide 8 — Course only ── */
+  function checkCourseOnly() {
+    var course = document.getElementById('challenge-course').value;
+    if (course === 'Select Course') setMsg('challenge-message', 'Please select a course.', false);
+    else setMsg('challenge-message', '✓ Course selected: ' + course, true);
+  }
+
+  /* ── Slide 9 — Bonus welcome ── */
+  function runBonusWelcome() {
+    var name = document.getElementById('bonus-name').value.trim();
+    var course = document.getElementById('bonus-course').value;
+    var msg = document.getElementById('bonus-message');
+    if (name === '') { setMsg('bonus-message', 'Name is required', false); return; }
+    if (course === 'Select Course') { setMsg('bonus-message', 'Please select a course.', false); return; }
+    msg.style.background = 'linear-gradient(135deg,#059669,#047857)';
+    msg.style.color = '#fff';
+    msg.style.padding = '14px';
+    msg.innerHTML = '🎉 Welcome ' + name + '<br><span style="font-size:11px;opacity:.9">You have successfully enrolled in</span><br><strong>' + course + '</strong>';
+  }
+
+  /* ── Slide 12 — Inline mobile validation ── */
+  function checkInlineMobile() {
+    var input = document.getElementById('inline-mobile');
+    var err = document.getElementById('inline-mobile-error');
+    var val = input.value.trim();
+    if (val.length !== 10 || isNaN(val)) {
+      input.classList.add('is-invalid');
+      input.classList.remove('is-valid');
+      err.classList.add('show');
+      err.textContent = 'Mobile number must be exactly 10 digits';
+    } else {
+      input.classList.remove('is-invalid');
+      input.classList.add('is-valid');
+      err.classList.remove('show');
+    }
+  }
+
+  /* ── Quiz ── */
+  var quizData = [
+    {
+      q: "Why must event.preventDefault() be called for a registration form to work with JavaScript validation?",
+      opts: [
+        "It makes the form submit faster",
+        "It stops the browser's default behaviour of reloading the page on submit",
+        "It automatically validates all fields",
+        "It's only needed for forms with a password field"
+      ],
+      ans: 1,
+      exp: "By default, submitting an HTML form reloads the page (the browser's built-in behaviour). preventDefault() cancels that default action so your JavaScript validation code can run and control what happens next, instead of the page reloading immediately."
+    },
+    {
+      q: "A student writes: let name = document.getElementById(\"name\").innerHTML; — to read what the user typed into a text input. What's wrong?",
+      opts: [
+        "Nothing — innerHTML works fine for inputs",
+        "getElementById should be querySelector instead",
+        "innerHTML is for reading content INSIDE tags; form inputs need .value instead",
+        "The id \"name\" is a reserved word and can't be used"
+      ],
+      ans: 2,
+      exp: "innerHTML reads/writes HTML content between opening and closing tags (like a &lt;p&gt; or &lt;div&gt;). Input fields don't store their text that way — they use the .value property. Using innerHTML on an input will return an empty string or undefined, never what the user typed."
+    },
+    {
+      q: "In the complete validation function, why does each if-block end with `return;`?",
+      opts: [
+        "return is required syntax for every if statement in JavaScript",
+        "Without it, the function would throw an error",
+        "It immediately stops the function so later checks don't run and overwrite the current error message",
+        "return makes the alert() popup appear instead of innerHTML"
+      ],
+      ans: 2,
+      exp: "Without return, even after finding an error (e.g. empty name), the code would keep running and check email and password too — and whichever check runs LAST would overwrite the message, hiding the real first error. return exits the function immediately once a problem is found."
+    },
+    {
+      q: "Why is .trim() used on the name and email values before checking if they're empty?",
+      opts: [
+        "trim() converts the text to lowercase for comparison",
+        "trim() removes leading/trailing spaces, so a string of just spaces correctly counts as empty",
+        "trim() is required before using .value on any input",
+        "trim() prevents the page from reloading"
+      ],
+      ans: 1,
+      exp: "Without .trim(), a user typing just spaces (\"   \") would NOT equal \"\" — so the empty check (name === \"\") would wrongly pass, letting an effectively blank name through. .trim() strips whitespace from both ends first, so \"   \".trim() becomes \"\" and the check works correctly."
+    }
+  ];
+  var quizAnswered = [];
+
+  function renderQuiz() {
+    var c = document.getElementById('quiz-container'); c.innerHTML = '';
+    quizData.forEach(function(q, i) {
+      var d = document.createElement('div'); d.style.cssText = 'margin-bottom:18px';
+      d.innerHTML = '<div style="font-size:13px;font-weight:600;margin-bottom:6px">'+(i+1)+'. '+q.q+'</div>';
+      q.opts.forEach(function(opt, j) {
+        var btn = document.createElement('button'); btn.className = 'quiz-option';
+        btn.innerHTML = String.fromCharCode(65+j)+'. '+opt;
+        btn.onclick = function() {
+          if (quizAnswered[i]) return; quizAnswered[i] = true;
+          var btns = d.querySelectorAll('.quiz-option');
+          btns.forEach(function(b,k){ b.disabled=true; if(k===q.ans) b.classList.add('correct'); else if(k===j) b.classList.add('wrong'); });
+          var fb = d.querySelector('.quiz-feedback');
+          fb.innerHTML = (j===q.ans?'✅ Correct! ':'❌ Not quite. ')+q.exp;
+          fb.className = 'quiz-feedback '+(j===q.ans?'correct':'wrong');
+        };
+        d.appendChild(btn);
+      });
+      var fb = document.createElement('div'); fb.className = 'quiz-feedback'; d.appendChild(fb);
+      c.appendChild(d);
+    });
+  }
+
+  /* ── Navigation ── */
+  function goSlide(n) {
+    document.getElementById('slide-'+current).classList.remove('active');
+    current = n;
+    document.getElementById('slide-'+current).classList.add('active');
+    updateDots();
+    document.getElementById('slide-counter').textContent = (current+1)+' / '+total;
+    if (n===13 && !quizInit) { renderQuiz(); quizInit=true; }
+    window.scrollTo(0,0);
+  }
+  function nextSlide() { if (current < total-1) goSlide(current+1); }
+  function prevSlide() { if (current > 0) goSlide(current-1); }
+
+  function updateDots() {
+    for (var s=0; s<total; s++) {
+      var el = document.getElementById('dots-'+s); if (!el) continue;
+      el.innerHTML = '';
+      for (var d=0; d<total; d++) {
+        var dot = document.createElement('div');
+        dot.className = 'dot'+(d===current?' active':'');
+        el.appendChild(dot);
+      }
+    }
+  }
+  updateDots();
+</script>
+</body>
+</html>

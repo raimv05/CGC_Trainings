@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Day 9 · Part 1 (90 min) – Arrays, Objects &amp; Student Registration</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f4f5f7; color: #1a1a1a;
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; padding: 2rem 1rem;
+  }
+  .wrapper {
+    width: 100%; max-width: 920px; background: #fff;
+    border-radius: 16px; box-shadow: 0 2px 20px rgba(0,0,0,0.09); overflow: hidden;
+  }
+  .top-bar {
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    color: #fff; padding: 14px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .top-bar-title { font-size: 15px; font-weight: 600; }
+  .top-bar-sub   { font-size: 12px; opacity: .55; margin-top: 2px; }
+  .slide-counter { font-size: 13px; opacity: .6; font-variant-numeric: tabular-nums; }
+  .slide { display: none; padding: 1.75rem 2rem; min-height: 500px; flex-direction: column; gap: 1.2rem; }
+  .slide.active { display: flex; }
+  .slide-header { display: flex; align-items: center; gap: 10px; padding-bottom: 1rem; border-bottom: 1px solid #e8e8e8; }
+  .slide-title    { font-size: 20px; font-weight: 700; color: #111; }
+  .slide-subtitle { font-size: 13px; color: #666; margin-top: 2px; }
+
+  /* ── Badges ── */
+  .badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+  .b-blue   { background:#dbeafe; color:#1d4ed8; }
+  .b-teal   { background:#d1fae5; color:#065f46; }
+  .b-purple { background:#ede9fe; color:#5b21b6; }
+  .b-amber  { background:#fef3c7; color:#92400e; }
+  .b-green  { background:#dcfce7; color:#166534; }
+  .b-slate  { background:#e2e8f0; color:#334155; }
+  .b-rose   { background:#ffe4e6; color:#9f1239; }
+  .b-orange { background:#ffedd5; color:#9a3412; }
+  .b-indigo { background:#e0e7ff; color:#3730a3; }
+  .b-cyan   { background:#cffafe; color:#164e63; }
+  .b-pink   { background:#fce7f3; color:#9d174d; }
+  .b-yellow { background:#fef9c3; color:#854d0e; }
+  .b-js     { background:#fef9c3; color:#854d0e; }
+
+  /* ── Layout ── */
+  .section-label { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 8px; }
+  .card { background: #fff; border: 1px solid #e8e8e8; border-radius: 12px; padding: 1rem 1.25rem; }
+  .card-gray { background: #f8f9fa; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+  /* ── Code Editor (Dracula — identical to ref) ── */
+  .editor { background: #1e1e2e; border-radius: 12px; overflow: hidden; font-family: 'SFMono-Regular', Consolas, 'Courier New', monospace; }
+  .editor-bar { background: #13131f; padding: 9px 14px; display: flex; align-items: center; gap: 6px; }
+  .e-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .e-red { background:#ff5f57; } .e-yellow { background:#febc2e; } .e-green { background:#28c840; }
+  .e-label { font-size: 12px; color: #6272a4; margin-left: 4px; font-family: -apple-system, sans-serif; }
+  .editor-body { padding: 14px 18px; font-size: 12.5px; line-height: 1.8; }
+  .e-ln   { color: #44475a; font-size: 11px; display: inline-block; width: 22px; user-select: none; }
+  .e-tag  { color: #ff79c6; }
+  .e-att  { color: #50fa7b; }
+  .e-val  { color: #f1fa8c; }
+  .e-txt  { color: #f8f8f2; }
+  .e-cmt  { color: #6272a4; font-style: italic; }
+  .e-new  { color: #80ffea; }
+  .j-kw   { color: #ff79c6; font-weight: 700; }
+  .j-fn   { color: #50fa7b; }
+  .j-str  { color: #f1fa8c; }
+  .j-num  { color: #bd93f9; }
+  .j-var  { color: #80ffea; }
+  .j-op   { color: #ff79c6; }
+  .j-dom  { color: #8be9fd; }
+  .j-prop { color: #50fa7b; }
+  .j-com  { color: #6272a4; font-style: italic; }
+  .j-ret  { color: #ff79c6; font-weight: 700; }
+  .j-key  { color: #ff79c6; }
+  .c-punc { color: #f8f8f2; }
+  .e-ind1 { display: inline-block; width: 20px; }
+  .e-ind2 { display: inline-block; width: 40px; }
+  .e-ind3 { display: inline-block; width: 60px; }
+  .e-ind4 { display: inline-block; width: 80px; }
+  .e-row  { display: flex; gap: 8px; }
+
+  /* ── Browser frame ── */
+  .browser { border-radius: 12px; overflow: hidden; border: 1px solid #e0e0e0; }
+  .browser-bar { background: #f1f3f4; padding: 9px 14px; display: flex; align-items: center; gap: 7px; border-bottom: 1px solid #e0e0e0; }
+  .b-dot2 { width: 10px; height: 10px; border-radius: 50%; }
+  .b-r { background:#ff5f57; } .b-y { background:#febc2e; } .b-g { background:#28c840; }
+  .b-url { flex:1; background:#fff; border:1px solid #dadce0; border-radius:20px; padding:4px 14px; font-size:12px; color:#555; }
+
+  /* ── Tables ── */
+  .tag-table { border-collapse: collapse; width: 100%; }
+  .tag-table th { background: #f1f5f9; font-size: 12px; font-weight: 700; text-align: left; padding: 10px 14px; color: #475569; border-bottom: 2px solid #e2e8f0; }
+  .tag-table td { font-size: 13px; padding: 10px 14px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+  .tag-table tr:last-child td { border-bottom: none; }
+  .tag-table tr:hover td { background: #f8f9fa; }
+
+  /* ── Quiz ── */
+  .quiz-option { border: 1px solid #dee2e6; border-radius: 8px; padding: 10px 14px; font-size: 13px; cursor: pointer; margin-bottom: 6px; transition: all .15s; background: transparent; width: 100%; text-align: left; color: #1a1a1a; }
+  .quiz-option:hover:not(:disabled) { background: #f8f9fa; }
+  .quiz-option.correct { background: #d1fae5; border-color: #059669; color: #065f46; }
+  .quiz-option.wrong   { background: #fee2e2; border-color: #dc2626; color: #991b1b; }
+  .quiz-feedback { display: none; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-top: 4px; }
+  .quiz-feedback.correct { background: #d1fae5; color: #065f46; display: block; }
+  .quiz-feedback.wrong   { background: #fee2e2; color: #991b1b; display: block; }
+
+  /* ── Activity / challenge ── */
+  .activity-box { border: 2px dashed #a5b4fc; background: #eef2ff; border-radius: 12px; padding: 14px 18px; }
+  .activity-title { font-size: 13px; font-weight: 700; color: #3730a3; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .challenge-box { border: 2px dashed #f9a8d4; background: #fdf2f8; border-radius: 12px; padding: 14px 18px; }
+  .challenge-title { font-size: 13px; font-weight: 700; color: #9f1239; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+
+  /* ── Tip / info / warn / success ── */
+  .tip-box   { display:flex; gap:10px; align-items:flex-start; background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:10px 14px; }
+  .tip-icon  { color:#d97706; font-size:18px; flex-shrink:0; margin-top:1px; }
+  .tip-text  { font-size:13px; color:#92400e; line-height:1.6; }
+  .info-box  { display:flex; gap:10px; align-items:flex-start; background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:10px 14px; }
+  .info-icon { color:#2563eb; font-size:18px; flex-shrink:0; margin-top:1px; }
+  .info-text { font-size:13px; color:#1e40af; line-height:1.6; }
+  .warn-box  { display:flex; gap:10px; align-items:flex-start; background:#fef9ee; border:1px solid #fcd34d; border-radius:10px; padding:10px 14px; }
+  .success-box { display:flex; gap:10px; align-items:flex-start; background:#f0fdf4; border:1px solid #86efac; border-radius:10px; padding:10px 14px; }
+
+  /* ── Line explainer (JS amber accent) ── */
+  .lex-row { display:flex; align-items:stretch; cursor:pointer; transition:background .12s; border-bottom:1px solid #f0f0f0; }
+  .lex-row:last-child { border-bottom:none; }
+  .lex-row:hover { background:#f8f9fa; }
+  .lex-row.active { background:#fefce8; border-left:3px solid #d97706; }
+  .lex-code { background:#1e1e2e; padding:10px 14px; font-family:'SFMono-Regular',Consolas,monospace; font-size:12px; min-width:200px; flex-shrink:0; display:flex; align-items:center; }
+  .lex-info { padding:10px 14px; flex:1; }
+  .lex-name   { font-size:13px; font-weight:700; color:#d97706; margin-bottom:2px; }
+  .lex-desc   { font-size:12px; color:#555; line-height:1.55; }
+  .lex-detail { display:none; font-size:12px; color:#92400e; margin-top:4px; padding-top:4px; border-top:1px dashed #fde68a; }
+  .lex-row.active .lex-detail { display:block; }
+  .line-explain { border:1px solid #e8e8e8; border-radius:10px; overflow:hidden; }
+
+  /* ── Reveal ── */
+  .reveal-btn { background:#f1f3f5; border:1px solid #dee2e6; border-radius:8px; padding:7px 14px; font-size:13px; cursor:pointer; color:#333; transition:background .15s; }
+  .reveal-btn:hover { background:#e9ecef; }
+  .reveal-content { display:none; margin-top:8px; }
+  .reveal-content.open { display:block; }
+
+  /* ── Nav (JS amber) ── */
+  .nav-row { display:flex; align-items:center; justify-content:space-between; margin-top:auto; padding-top:1rem; border-top:1px solid #f0f0f0; }
+  .nav-btn { display:inline-flex; align-items:center; gap:6px; padding:9px 18px; border:1px solid #dee2e6; border-radius:8px; background:transparent; font-size:13px; cursor:pointer; color:#333; transition:background .15s; }
+  .nav-btn:hover:not(:disabled) { background:#f1f3f5; }
+  .nav-btn:disabled { opacity:.35; cursor:default; }
+  .nav-btn.primary { background:#d97706; border-color:transparent; color:#fff; }
+  .nav-btn.primary:hover { background:#b45309; }
+  .progress-dots { display:flex; gap:6px; align-items:center; }
+  .dot { width:7px; height:7px; border-radius:50%; background:#dee2e6; transition:all .2s; }
+  .dot.active { width:20px; border-radius:4px; background:#d97706; }
+
+  /* ── Home grid ── */
+  .home-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .home-card { background:#fff; border:1px solid #e8e8e8; border-radius:12px; padding:1rem 1.25rem; cursor:pointer; transition:all .15s; }
+  .home-card:hover { border-color:#d97706; box-shadow:0 2px 8px rgba(217,119,6,.12); }
+  .home-card-title { font-size:15px; font-weight:700; margin:6px 0 2px; }
+  .home-card-sub   { font-size:12px; color:#666; }
+
+  code { font-family:'SFMono-Regular',Consolas,monospace; font-size:12px; background:#f1f3f5; padding:1px 6px; border-radius:4px; border:1px solid #dee2e6; }
+
+  /* ── Checklist ── */
+  .check-item { display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:10px; border:1px solid #e8e8e8; font-size:13px; cursor:pointer; transition:all .15s; user-select:none; }
+  .check-item:hover { background:#f8f9fa; }
+  .check-item.done { background:#f0fdf4; border-color:#86efac; }
+  .check-circle { width:22px; height:22px; border-radius:50%; border:2px solid #dee2e6; display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0; transition:all .2s; color:transparent; }
+  .check-item.done .check-circle { background:#22c55e; border-color:#22c55e; color:#fff; }
+
+  /* ── Console panel (identical to ref) ── */
+  .console-panel { background: #0d1117; border-radius: 12px; overflow: hidden; font-family: 'SFMono-Regular', Consolas, monospace; }
+  .console-bar   { background: #161b22; padding: 9px 14px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #30363d; }
+  .console-tab   { font-size: 12px; color: #8b949e; padding-bottom: 3px; }
+  .console-tab.active { color: #f0f6fc; border-bottom: 2px solid #d97706; }
+  .console-body  { padding: 12px 16px; font-size: 12.5px; line-height: 2; }
+  .con-log  { color: #f0f6fc; }
+  .con-str  { color: #a5d6ff; }
+  .con-num  { color: #79c0ff; }
+  .con-arrow { color: #3fb950; font-size: 11px; }
+  .con-prompt-sym { color: #3fb950; }
+  .con-prompt-row { display: flex; align-items: center; gap: 8px; }
+  .con-arr  { color: #d2a8ff; }
+  .con-key  { color: #7ee787; }
+  .js-logo { width: 44px; height: 44px; background: #f0db4f; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-family: 'SFMono-Regular', Consolas, monospace; font-size: 16px; font-weight: 900; color: #323330; flex-shrink: 0; }
+
+  /* ── Flow steps (identical to ref) ── */
+  .flow-step { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; border-bottom: 1px dashed #e2e8f0; }
+  .flow-step:last-child { border-bottom: none; }
+  .flow-num { width: 28px; height: 28px; border-radius: 50%; background: #d97706; color: white; font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+  .flow-content { flex: 1; font-size: 13px; color: #333; line-height: 1.6; }
+  .flow-label { font-weight: 700; color: #d97706; margin-bottom: 2px; }
+
+  /* ── Bootstrap form mockup (identical to ref) ── */
+  .bs-form-group { margin-bottom: 14px; }
+  .bs-label { display: block; font-size: 12px; font-weight: 600; color: #333; margin-bottom: 4px; }
+  .bs-input { width: 100%; padding: 7px 12px; border: 1px solid #ced4da; border-radius: 5px; font-size: 13px; font-family: -apple-system, sans-serif; color: #333; }
+  .bs-input:focus { outline: none; border-color: #86b7fe; }
+  .bs-btn-submit { background: #0d6efd; color: white; border: none; border-radius: 5px; padding: 8px 22px; font-size: 13px; font-weight: 700; cursor: pointer; width: 100%; }
+  .bs-btn-submit:hover { background: #0b5ed7; }
+
+  /* ══ DAY 9 — ARRAYS / OBJECTS SPECIFIC ══ */
+
+  /* Array box visualisation */
+  .array-box { display: inline-flex; border: 2px solid #1e293b; border-radius: 8px; overflow: hidden; }
+  .array-cell { padding: 10px 16px; font-family: monospace; font-size: 13px; font-weight: 700; border-right: 1px solid #1e293b; position: relative; min-width: 60px; text-align: center; }
+  .array-cell:last-child { border-right: none; }
+  .array-cell .idx { position: absolute; top: -18px; left: 50%; transform: translateX(-50%); font-size: 10px; color: #888; font-weight: 400; }
+  .array-cell.empty { background: #f8f9fa; color: #cbd5e1; font-style: italic; }
+  .array-cell.filled { background: #dbeafe; color: #1e40af; }
+  .array-cell.removed { background: #fee2e2; color: #dc2626; text-decoration: line-through; opacity: .5; }
+
+  /* Object box visualisation */
+  .obj-box { background: #1e1e2e; border-radius: 10px; padding: 14px 18px; font-family: monospace; font-size: 13px; }
+  .obj-key-row { display: flex; gap: 8px; padding: 3px 0; }
+
+  /* Why array problem cards */
+  .bad-var-row { display: flex; gap: 8px; align-items: center; padding: 6px 0; font-family: monospace; font-size: 12px; opacity: .8; }
+
+  /* Interactive array builder */
+  .array-builder { background: #0f172a; border-radius: 12px; padding: 16px 18px; }
+  .ab-controls { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+  .ab-btn { background: #1e293b; border: 1px solid #334155; color: #f0db4f; font-family: monospace; font-size: 12px; font-weight: 700; padding: 6px 14px; border-radius: 6px; cursor: pointer; transition: all .15s; }
+  .ab-btn:hover { background: #334155; border-color: #d97706; }
+  .ab-btn.danger { color: #ff7b86; }
+  .ab-visual { display: flex; gap: 6px; flex-wrap: wrap; min-height: 50px; align-items: center; padding: 10px; background: #1e1e2e; border-radius: 8px; }
+  .ab-item { background: #2563eb; color: white; padding: 8px 14px; border-radius: 6px; font-family: monospace; font-size: 12px; font-weight: 700; position: relative; animation: popIn .25s ease; }
+  .ab-item .ab-idx { position: absolute; top: -16px; left: 0; font-size: 9px; color: #6272a4; }
+  @keyframes popIn { from { transform: scale(0.5); opacity:0; } to { transform: scale(1); opacity:1; } }
+  .ab-empty-msg { color: #6272a4; font-family: monospace; font-size: 12px; font-style: italic; }
+
+  /* Method explainer chips */
+  .method-chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 20px; font-family: monospace; font-size: 12px; font-weight: 700; }
+
+  /* Object property explorer */
+  .obj-prop-row { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 8px; border: 1px solid #e8e8e8; cursor: pointer; transition: all .15s; }
+  .obj-prop-row:hover { background: #f8f9fa; border-color: #d97706; }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <div>
+      <div class="top-bar-title">MERN Stack Training · Day 9 · First 90 Minutes</div>
+      <div class="top-bar-sub">Arrays, Objects &amp; Student Registration — SkillHub LMS</div>
+    </div>
+    <div class="slide-counter" id="slide-counter">1 / 14</div>
+  </div>
+
+  <!-- ═══ SLIDE 0  HOME ═══ -->
+  <div class="slide active" id="slide-0">
+    <div class="slide-header">
+      <div class="js-logo">[ ]</div>
+      <div>
+        <div class="slide-title">Arrays, Objects &amp; Student Registration</div>
+        <div class="slide-subtitle">Convert the registration form into a working Student Management System</div>
+      </div>
+    </div>
+
+    <div style="background:#fef9c3;border:1px solid #fde68a;border-radius:12px;padding:12px 16px;display:flex;gap:12px;align-items:flex-start">
+      <i class="ti ti-database" style="color:#d97706;font-size:22px;flex-shrink:0;margin-top:1px"></i>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#854d0e;margin-bottom:4px">First 90 Minutes — Build Toward a Real Data Store</div>
+        <div style="display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:#92400e">
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Arrays — store many values</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>push, pop, splice, length</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Objects — store structured data</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Connect the Registration Form</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="home-grid">
+      <div class="home-card" onclick="goSlide(1)">
+        <span class="badge b-green">Recap</span>
+        <div class="home-card-title">Day 8 Deliverable</div>
+        <div class="home-card-sub">Functions + Form Validation — where we left off</div>
+      </div>
+      <div class="home-card" onclick="goSlide(2)">
+        <span class="badge b-amber">Part 1</span>
+        <div class="home-card-title">Why Arrays?</div>
+        <div class="home-card-sub">500 students — can't make 500 variables</div>
+      </div>
+      <div class="home-card" onclick="goSlide(3)">
+        <span class="badge b-js">Concept</span>
+        <div class="home-card-title">What Is an Array?</div>
+        <div class="home-card-sub">let students = [] — a box that holds many values</div>
+      </div>
+      <div class="home-card" onclick="goSlide(4)">
+        <span class="badge b-blue">Part 2</span>
+        <div class="home-card-title">Array Methods — push, pop</div>
+        <div class="home-card-sub">Adding and removing items live</div>
+      </div>
+      <div class="home-card" onclick="goSlide(5)">
+        <span class="badge b-rose">Part 2</span>
+        <div class="home-card-title">splice() &amp; length</div>
+        <div class="home-card-sub">Delete from the middle + count items</div>
+      </div>
+      <div class="home-card" onclick="goSlide(6)">
+        <span class="badge b-purple">Part 3</span>
+        <div class="home-card-title">The Object Problem</div>
+        <div class="home-card-sub">Can an array store name + email + phone together?</div>
+      </div>
+      <div class="home-card" onclick="goSlide(7)">
+        <span class="badge b-teal">Concept</span>
+        <div class="home-card-title">What Is an Object?</div>
+        <div class="home-card-sub">{ key: value } pairs — structured data</div>
+      </div>
+      <div class="home-card" onclick="goSlide(8)">
+        <span class="badge b-cyan">Access</span>
+        <div class="home-card-title">Accessing Object Properties</div>
+        <div class="home-card-sub">student.name · student.course — dot notation</div>
+      </div>
+    </div>
+    <div class="grid-2" style="gap:10px">
+      <div class="home-card" onclick="goSlide(9)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge b-blue">Explain</span>
+          <span style="font-size:14px;font-weight:700">Line-by-Line — Arrays &amp; Objects</span>
+          <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+        </div>
+      </div>
+      <div class="home-card" onclick="goSlide(10)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge b-orange">Part 4</span>
+          <span style="font-size:14px;font-weight:700">Connect the Registration Form</span>
+          <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+        </div>
+      </div>
+    </div>
+    <div class="grid-2" style="gap:10px">
+      <div class="home-card" onclick="goSlide(11)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge b-indigo">Flow</span>
+          <span style="font-size:14px;font-weight:700">Form → Object → Array → Memory</span>
+          <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+        </div>
+      </div>
+      <div class="home-card" onclick="goSlide(12)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge b-slate">Ref</span>
+          <span style="font-size:14px;font-weight:700">Arrays &amp; Objects Reference</span>
+          <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+        </div>
+      </div>
+    </div>
+    <div class="home-card" onclick="goSlide(13)" style="cursor:pointer">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="badge b-green">Quiz</span>
+        <span style="font-size:14px;font-weight:700">Quick Check — 5 Questions</span>
+        <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+      </div>
+    </div>
+    <div class="nav-row">
+      <div></div>
+      <div class="progress-dots" id="dots-0"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Start <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 1  RECAP ═══ -->
+  <div class="slide" id="slide-1">
+    <div class="slide-header">
+      <span class="badge b-green">Recap</span>
+      <div>
+        <div class="slide-title">Day 8 Deliverable</div>
+        <div class="slide-subtitle">Functions, DOM events, and a validated registration form — ready to be wired up</div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="section-label">what we built in day 8</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#dbeafe;border-radius:8px;font-size:12px;font-weight:700;color:#1e40af">
+            <span>Functions — definition, params, return</span><span class="badge b-green" style="font-size:10px">✓</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#ede9fe;border-radius:8px;font-size:12px;font-weight:700;color:#5b21b6">
+            <span>DOM Events — click, addEventListener</span><span class="badge b-green" style="font-size:10px">✓</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#d1fae5;border-radius:8px;font-size:12px;font-weight:700;color:#065f46">
+            <span>Registration Form built (Bootstrap)</span><span class="badge b-green" style="font-size:10px">✓</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#fef9c3;border-radius:8px;font-size:12px;font-weight:700;color:#854d0e">
+            <span>Form Validation — name/email/password rules</span><span class="badge b-green" style="font-size:10px">✓</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#fef9c3;border-radius:8px;font-size:12px;font-weight:700;color:#854d0e;border:2px solid #fde68a">
+            <span>Arrays &amp; Objects (Day 9 — today)</span><span class="badge b-js" style="font-size:10px">← start</span>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">the gap we close today</div>
+        <div class="card card-gray">
+          <div style="font-size:13px;color:#444;line-height:1.7">
+            The form currently <strong>validates</strong> input — but once submitted, the data goes nowhere. There's no way to:
+          </div>
+          <div style="display:flex;flex-direction:column;gap:5px;margin-top:8px">
+            <div style="font-size:12px;color:#888"><i class="ti ti-x" style="color:#dc2626;font-size:12px;margin-right:4px"></i>Store multiple students</div>
+            <div style="font-size:12px;color:#888"><i class="ti ti-x" style="color:#dc2626;font-size:12px;margin-right:4px"></i>Show them in a table</div>
+            <div style="font-size:12px;color:#888"><i class="ti ti-x" style="color:#dc2626;font-size:12px;margin-right:4px"></i>Count or delete them</div>
+          </div>
+        </div>
+        <div class="info-box" style="margin-top:10px">
+          <i class="ti ti-info-circle info-icon"></i>
+          <div class="info-text"><strong>Today's fix:</strong> Arrays store many students. Objects structure each student's data. Together, they become the foundation of every dashboard you'll ever build — including in MongoDB later in this course.</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-1"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Why Arrays? <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 2  WHY ARRAYS ═══ -->
+  <div class="slide" id="slide-2">
+    <div class="slide-header">
+      <span class="badge b-amber">Part 1 · 15 min</span>
+      <div>
+        <div class="slide-title">Why Arrays?</div>
+        <div class="slide-subtitle">Suppose 500 students register. Can we do this?</div>
+      </div>
+    </div>
+    <div class="card card-gray">
+      <div style="font-size:14px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px">
+        <i class="ti ti-message-question" style="color:#d97706;font-size:20px"></i>
+        500 students register for SkillHub. Should we make 500 separate variables?
+      </div>
+      <div class="editor" style="border-radius:8px;margin-bottom:12px">
+        <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">the wrong way</span></div>
+        <div class="editor-body">
+          <div class="e-row"><span class="j-kw">let</span> <span class="j-var">student1</span> <span class="j-op">=</span> <span class="j-str">"Rahul"</span><span class="c-punc">;</span></div>
+          <div class="e-row"><span class="j-kw">let</span> <span class="j-var">student2</span> <span class="j-op">=</span> <span class="j-str">"Aman"</span><span class="c-punc">;</span></div>
+          <div class="e-row"><span class="j-kw">let</span> <span class="j-var">student3</span> <span class="j-op">=</span> <span class="j-str">"Riya"</span><span class="c-punc">;</span></div>
+          <div class="e-row"><span class="j-com">// ...497 more lines like this...</span></div>
+        </div>
+      </div>
+      <button class="reveal-btn" onclick="toggle('arr-ans')">Reveal the answer</button>
+      <div class="reveal-content" id="arr-ans">
+        <div style="margin-top:10px;padding:14px 16px;background:#fff;border-radius:10px;border:1px solid #fde68a">
+          <div style="font-size:18px;font-weight:800;color:#854d0e;text-align:center;margin-bottom:6px">Obviously not.</div>
+          <div style="font-size:13px;color:#444;text-align:center;line-height:1.7">500 variables is unmanageable — impossible to loop through, search, or count.<br>We need ONE container that holds <strong>many values</strong> at once. That's an Array.</div>
+        </div>
+      </div>
+    </div>
+    <div class="grid-3">
+      <div class="card" style="text-align:center;border-color:#fca5a5">
+        <i class="ti ti-x" style="font-size:24px;color:#dc2626;margin-bottom:6px;display:block"></i>
+        <div style="font-size:13px;font-weight:700;margin-bottom:4px">Unmanageable</div>
+        <div style="font-size:12px;color:#555">500 separate variable names to remember and type correctly</div>
+      </div>
+      <div class="card" style="text-align:center;border-color:#fca5a5">
+        <i class="ti ti-x" style="font-size:24px;color:#dc2626;margin-bottom:6px;display:block"></i>
+        <div style="font-size:13px;font-weight:700;margin-bottom:4px">Can't Loop</div>
+        <div style="font-size:12px;color:#555">No way to "go through all students" — they're not connected</div>
+      </div>
+      <div class="card" style="text-align:center;border-color:#fca5a5">
+        <i class="ti ti-x" style="font-size:24px;color:#dc2626;margin-bottom:6px;display:block"></i>
+        <div style="font-size:13px;font-weight:700;margin-bottom:4px">No Count</div>
+        <div style="font-size:12px;color:#555">No built-in way to know "how many students registered?"</div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-2"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">What Is an Array? <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 3  WHAT IS AN ARRAY ═══ -->
+  <div class="slide" id="slide-3">
+    <div class="slide-header">
+      <span class="badge b-js">Concept</span>
+      <div>
+        <div class="slide-title">What Is an Array?</div>
+        <div class="slide-subtitle">A single container that stores multiple values, in order</div>
+      </div>
+    </div>
+    <div class="activity-box">
+      <div class="activity-title"><i class="ti ti-keyboard"></i> Type this in script.js</div>
+      <div class="editor" style="border-radius:8px">
+        <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">frontend/js/script.js</span></div>
+        <div class="editor-body">
+          <div class="e-row"><span class="e-ln">1</span><span class="j-kw">let</span> <span class="j-var">students</span> <span class="j-op">=</span> <span class="c-punc">[];</span></div>
+          <div class="e-row"><span class="e-ln">2</span><span class="j-fn">console</span><span class="c-punc">.</span><span class="j-fn">log</span><span class="c-punc">(</span><span class="j-var">students</span><span class="c-punc">);</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="section-label">array = stores multiple values</div>
+        <div style="text-align:center;padding:14px 0">
+          <div style="font-size:15px;font-weight:700;color:#854d0e">Array<br>↓<br>Stores Multiple Values</div>
+        </div>
+        <div style="display:flex;justify-content:center;margin-top:10px">
+          <div class="array-box">
+            <div class="array-cell filled"><span class="idx">0</span>"Rahul"</div>
+            <div class="array-cell filled"><span class="idx">1</span>"Aman"</div>
+            <div class="array-cell filled"><span class="idx">2</span>"Riya"</div>
+            <div class="array-cell empty"><span class="idx">3</span>…</div>
+          </div>
+        </div>
+        <div style="text-align:center;font-size:11px;color:#888;margin-top:8px">One variable name (<code>students</code>) holds unlimited values</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="card card-gray">
+          <div class="section-label">array syntax basics</div>
+          <div style="font-size:13px;color:#444;line-height:1.75">
+            <code>[]</code> creates an empty array — square brackets.<br>
+            <code>["Rahul", "Aman"]</code> creates an array WITH values, separated by commas.<br>
+            Each value has a position called an <strong>index</strong>, starting at <strong>0</strong> (not 1!).
+          </div>
+        </div>
+        <div class="console-panel">
+          <div class="console-bar"><span class="console-tab active">Console</span></div>
+          <div class="console-body">
+            <div class="con-prompt-row"><span style="color:#3fb950;font-size:11px">▶</span><span class="con-arr">[]</span></div>
+          </div>
+        </div>
+        <div class="tip-box">
+          <i class="ti ti-bulb tip-icon"></i>
+          <div class="tip-text"><strong>Zero-indexed:</strong> The first item in any array is at position <code>0</code>, not <code>1</code>. This trips up every beginner at least once — get comfortable with it now.</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-3"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Array Methods <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 4  push / pop ═══ -->
+  <div class="slide" id="slide-4">
+    <div class="slide-header">
+      <span class="badge b-blue">Part 2 · 15 min</span>
+      <div>
+        <div class="slide-title">Array Methods — push() &amp; pop()</div>
+        <div class="slide-subtitle">Adding items to an array — and removing the last one</div>
+      </div>
+    </div>
+    <div class="activity-box">
+      <div class="activity-title"><i class="ti ti-keyboard"></i> Add this to script.js</div>
+      <div class="editor" style="border-radius:8px">
+        <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">frontend/js/script.js</span></div>
+        <div class="editor-body">
+          <div class="e-row"><span class="e-ln">4</span><span class="j-kw">let</span> <span class="j-var">courses</span> <span class="j-op">=</span> <span class="c-punc">[];</span></div>
+          <div class="e-row"><span class="e-ln">5</span></div>
+          <div class="e-row"><span class="e-ln">6</span><span class="j-var">courses</span><span class="c-punc">.</span><span class="j-fn">push</span><span class="c-punc">(</span><span class="j-str">"HTML"</span><span class="c-punc">);</span></div>
+          <div class="e-row"><span class="e-ln">7</span><span class="j-var">courses</span><span class="c-punc">.</span><span class="j-fn">push</span><span class="c-punc">(</span><span class="j-str">"CSS"</span><span class="c-punc">);</span></div>
+          <div class="e-row"><span class="e-ln">8</span><span class="j-var">courses</span><span class="c-punc">.</span><span class="j-fn">push</span><span class="c-punc">(</span><span class="j-str">"JavaScript"</span><span class="c-punc">);</span></div>
+          <div class="e-row"><span class="e-ln">9</span></div>
+          <div class="e-row"><span class="e-ln">10</span><span class="j-fn">console</span><span class="c-punc">.</span><span class="j-fn">log</span><span class="c-punc">(</span><span class="j-var">courses</span><span class="c-punc">);</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="section-label">try it — interactive array builder</div>
+        <div class="array-builder">
+          <div class="ab-controls">
+            <button class="ab-btn" onclick="abPush()">courses.push("React")</button>
+            <button class="ab-btn danger" onclick="abPop()">courses.pop()</button>
+            <button class="ab-btn" onclick="abReset()" style="color:#94a3b8">reset</button>
+          </div>
+          <div class="ab-visual" id="ab-visual">
+            <span class="ab-empty-msg">courses = []</span>
+          </div>
+        </div>
+        <div style="margin-top:8px;font-size:11px;color:#888;text-align:center">Click the buttons above — watch the array grow and shrink</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="card">
+          <span class="method-chip" style="background:#d1fae5;color:#065f46">.push(value)</span>
+          <div style="font-size:12px;color:#555;margin-top:8px;line-height:1.6">Adds a new value to the <strong>end</strong> of the array. The array grows by 1 each time.</div>
+        </div>
+        <div class="card">
+          <span class="method-chip" style="background:#fee2e2;color:#991b1b">.pop()</span>
+          <div style="font-size:12px;color:#555;margin-top:8px;line-height:1.6">Removes the <strong>last</strong> item from the array and returns it. No arguments needed.</div>
+        </div>
+        <div class="console-panel">
+          <div class="console-bar"><span class="console-tab active">Console</span></div>
+          <div class="console-body">
+            <div class="con-prompt-row"><span style="color:#3fb950;font-size:11px">▶</span><span class="con-arr">["HTML", "CSS", "JavaScript"]</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-4"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">splice &amp; length <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+  <!-- ═══ SLIDE 5  splice / length ═══ -->
+  <div class="slide" id="slide-5">
+    <div class="slide-header">
+      <span class="badge b-rose">Part 2 · continued</span>
+      <div>
+        <div class="slide-title">splice() &amp; length</div>
+        <div class="slide-subtitle">Delete from anywhere in the array — and count how many items exist</div>
+      </div>
+    </div>
+    <div class="activity-box">
+      <div class="activity-title"><i class="ti ti-keyboard"></i> Add this below your courses array</div>
+      <div class="editor" style="border-radius:8px">
+        <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">frontend/js/script.js</span></div>
+        <div class="editor-body">
+          <div class="e-row"><span class="e-ln">12</span><span class="j-com">// courses = ["HTML", "CSS", "JavaScript"]</span></div>
+          <div class="e-row"><span class="e-ln">13</span><span class="j-var">courses</span><span class="c-punc">.</span><span class="j-fn">splice</span><span class="c-punc">(</span><span class="j-num">1</span><span class="c-punc">,</span><span class="j-num">1</span><span class="c-punc">);</span></div>
+          <div class="e-row"><span class="e-ln">14</span><span class="j-fn">console</span><span class="c-punc">.</span><span class="j-fn">log</span><span class="c-punc">(</span><span class="j-var">courses</span><span class="c-punc">);</span></div>
+          <div class="e-row"><span class="e-ln">15</span></div>
+          <div class="e-row"><span class="e-ln">16</span><span class="j-fn">console</span><span class="c-punc">.</span><span class="j-fn">log</span><span class="c-punc">(</span><span class="j-var">courses</span><span class="c-punc">.</span><span class="j-prop">length</span><span class="c-punc">);</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="section-label">visualised — splice(1, 1)</div>
+        <div style="display:flex;flex-direction:column;gap:10px;align-items:center;padding:10px 0">
+          <div>
+            <div style="font-size:11px;color:#888;text-align:center;margin-bottom:4px">Before</div>
+            <div class="array-box">
+              <div class="array-cell filled"><span class="idx">0</span>HTML</div>
+              <div class="array-cell filled" style="background:#fde68a;color:#92400e"><span class="idx">1</span>CSS</div>
+              <div class="array-cell filled"><span class="idx">2</span>JS</div>
+            </div>
+          </div>
+          <i class="ti ti-arrow-down" style="color:#d97706;font-size:18px"></i>
+          <div>
+            <div style="font-size:11px;color:#888;text-align:center;margin-bottom:4px">After splice(1, 1)</div>
+            <div class="array-box">
+              <div class="array-cell filled"><span class="idx">0</span>HTML</div>
+              <div class="array-cell filled"><span class="idx">1</span>JS</div>
+            </div>
+          </div>
+        </div>
+        <div style="font-size:11px;color:#888;text-align:center;margin-top:4px">Item at index 1 removed — everything shifts left</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="card">
+          <span class="method-chip" style="background:#ffe4e6;color:#9f1239">.splice(start, count)</span>
+          <div style="font-size:12px;color:#555;margin-top:8px;line-height:1.6">
+            <strong>start</strong> = index to begin removing from.<br>
+            <strong>count</strong> = how many items to remove.<br>
+            <code>splice(1, 1)</code> = "starting at index 1, remove 1 item."
+          </div>
+        </div>
+        <div class="card">
+          <span class="method-chip" style="background:#dbeafe;color:#1e40af">.length</span>
+          <div style="font-size:12px;color:#555;margin-top:8px;line-height:1.6">Not a method — a <strong>property</strong>. No parentheses needed. Returns how many items are currently in the array.</div>
+        </div>
+        <div class="console-panel">
+          <div class="console-bar"><span class="console-tab active">Console</span></div>
+          <div class="console-body">
+            <div class="con-prompt-row"><span style="color:#3fb950;font-size:11px">▶</span><span class="con-arr">["HTML", "JavaScript"]</span></div>
+            <div class="con-prompt-row" style="margin-top:2px"><span style="color:#3fb950;font-size:11px">▶</span><span class="con-num">2</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="warn-box">
+      <i class="ti ti-alert-triangle" style="color:#d97706;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+      <div style="font-size:13px;color:#92400e;line-height:1.6"><strong>Note:</strong> splice() mutates (changes) the original array directly — it doesn't create a new one. This matters later when we work with React state, where we'll prefer non-mutating approaches.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-5"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">The Object Problem <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 6  THE OBJECT PROBLEM ═══ -->
+  <div class="slide" id="slide-6">
+    <div class="slide-header">
+      <span class="badge b-purple">Part 3 · 20 min</span>
+      <div>
+        <div class="slide-title">The Object Problem</div>
+        <div class="slide-subtitle">Can an array store a student's name, email, phone, AND course together?</div>
+      </div>
+    </div>
+    <div class="card card-gray">
+      <div style="font-size:14px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px">
+        <i class="ti ti-message-question" style="color:#d97706;font-size:20px"></i>
+        Can a single Array hold a student's name, email, phone, and course — connected together?
+      </div>
+      <div class="editor" style="border-radius:8px;margin-bottom:12px">
+        <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">trying with an array — confusing!</span></div>
+        <div class="editor-body">
+          <div class="e-row"><span class="j-kw">let</span> <span class="j-var">student</span> <span class="j-op">=</span> <span class="c-punc">[</span><span class="j-str">"Rahul"</span><span class="c-punc">,</span><span class="j-str">"rahul@gmail.com"</span><span class="c-punc">,</span><span class="j-str">"MERN"</span><span class="c-punc">];</span></div>
+          <div class="e-row"><span class="j-fn">console</span><span class="c-punc">.</span><span class="j-fn">log</span><span class="c-punc">(</span><span class="j-var">student</span><span class="c-punc">[</span><span class="j-num">0</span><span class="c-punc">]);</span> <span class="j-com">// Is this the name? Or the email? Unclear!</span></div>
+        </div>
+      </div>
+      <button class="reveal-btn" onclick="toggle('obj-ans')">Reveal the answer</button>
+      <div class="reveal-content" id="obj-ans">
+        <div style="margin-top:10px;padding:14px 16px;background:#fff;border-radius:10px;border:1px solid #c4b5fd">
+          <div style="font-size:18px;font-weight:800;color:#5b21b6;text-align:center;margin-bottom:6px">No — not cleanly.</div>
+          <div style="font-size:13px;color:#444;text-align:center;line-height:1.7">An array only has numeric positions (0, 1, 2…). You'd have to <em>remember</em> that index 0 = name, index 1 = email. Confusing and error-prone.<br><strong>We need an Object</strong> — labelled data instead of numbered data.</div>
+        </div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="card" style="border-color:#fca5a5">
+        <div style="font-size:13px;font-weight:700;color:#dc2626;margin-bottom:8px"><i class="ti ti-x" style="margin-right:4px"></i> Array — numbered, unclear</div>
+        <div class="array-box">
+          <div class="array-cell filled"><span class="idx">0</span>Rahul</div>
+          <div class="array-cell filled"><span class="idx">1</span>email</div>
+          <div class="array-cell filled"><span class="idx">2</span>MERN</div>
+        </div>
+        <div style="font-size:11px;color:#888;margin-top:8px">"Is index 0 the name or the ID? You have to remember."</div>
+      </div>
+      <div class="card" style="border-color:#86efac">
+        <div style="font-size:13px;font-weight:700;color:#16a34a;margin-bottom:8px"><i class="ti ti-check" style="margin-right:4px"></i> Object — labelled, clear</div>
+        <div class="obj-box">
+          <div class="obj-key-row"><span style="color:#f8f8f2">{</span></div>
+          <div class="obj-key-row"><span style="display:inline-block;width:16px"></span><span class="j-key">name</span><span style="color:#f8f8f2">:</span> <span class="j-str">"Rahul"</span></div>
+          <div class="obj-key-row"><span style="display:inline-block;width:16px"></span><span class="j-key">email</span><span style="color:#f8f8f2">:</span> <span class="j-str">"…"</span></div>
+          <div class="obj-key-row"><span style="display:inline-block;width:16px"></span><span class="j-key">course</span><span style="color:#f8f8f2">:</span> <span class="j-str">"MERN"</span></div>
+          <div class="obj-key-row"><span style="color:#f8f8f2">}</span></div>
+        </div>
+        <div style="font-size:11px;color:#888;margin-top:8px">"name is obviously the name. Self-explanatory."</div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-6"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">What Is an Object? <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 7  WHAT IS AN OBJECT ═══ -->
+  <div class="slide" id="slide-7">
+    <div class="slide-header">
+      <span class="badge b-teal">Concept</span>
+      <div>
+        <div class="slide-title">What Is an Object?</div>
+        <div class="slide-subtitle">Data stored as key : value pairs — each value has a name</div>
+      </div>
+    </div>
+    <div class="activity-box">
+      <div class="activity-title"><i class="ti ti-keyboard"></i> Type this in script.js</div>
+      <div class="editor" style="border-radius:8px">
+        <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">frontend/js/script.js</span></div>
+        <div class="editor-body">
+          <div class="e-row"><span class="e-ln">18</span><span class="j-kw">let</span> <span class="j-var">student</span> <span class="j-op">=</span> <span class="c-punc">{</span></div>
+          <div class="e-row"><span class="e-ln">19</span><span class="e-ind1"></span><span class="j-key">name</span><span class="c-punc">:</span><span class="j-str">"Rahul"</span><span class="c-punc">,</span></div>
+          <div class="e-row"><span class="e-ln">20</span><span class="e-ind1"></span><span class="j-key">email</span><span class="c-punc">:</span><span class="j-str">"rahul@gmail.com"</span><span class="c-punc">,</span></div>
+          <div class="e-row"><span class="e-ln">21</span><span class="e-ind1"></span><span class="j-key">course</span><span class="c-punc">:</span><span class="j-str">"MERN"</span></div>
+          <div class="e-row"><span class="e-ln">22</span><span class="c-punc">}</span></div>
+          <div class="e-row"><span class="e-ln">23</span></div>
+          <div class="e-row"><span class="e-ln">24</span><span class="j-fn">console</span><span class="c-punc">.</span><span class="j-fn">log</span><span class="c-punc">(</span><span class="j-var">student</span><span class="c-punc">);</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="section-label">object visualised</div>
+        <div class="obj-box" style="font-size:14px">
+          <div class="obj-key-row"><span style="color:#6272a4">let student = {</span></div>
+          <div class="obj-prop-row" style="margin:4px 0 4px 16px;border-color:#dbeafe" onclick="this.style.background='#1a2a40'">
+            <span class="j-key" style="color:#7ee787">name</span><span style="color:#f8f8f2">:</span> <span class="j-str">"Rahul"</span><span style="color:#f8f8f2">,</span>
+          </div>
+          <div class="obj-prop-row" style="margin:4px 0 4px 16px;border-color:#dbeafe">
+            <span class="j-key" style="color:#7ee787">email</span><span style="color:#f8f8f2">:</span> <span class="j-str">"rahul@gmail.com"</span><span style="color:#f8f8f2">,</span>
+          </div>
+          <div class="obj-prop-row" style="margin:4px 0 4px 16px;border-color:#dbeafe">
+            <span class="j-key" style="color:#7ee787">course</span><span style="color:#f8f8f2">:</span> <span class="j-str">"MERN"</span>
+          </div>
+          <div class="obj-key-row"><span style="color:#6272a4">}</span></div>
+        </div>
+        <div style="font-size:11px;color:#888;text-align:center;margin-top:8px">Each value has a label (key) — no need to remember positions</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="card card-gray">
+          <div class="section-label">object syntax basics</div>
+          <div style="font-size:13px;color:#444;line-height:1.75">
+            <code>{ }</code> creates an object — curly braces (not square brackets like arrays).<br>
+            Each line is a <strong>key: value</strong> pair, separated by commas — except the last one.<br>
+            <code>name</code>, <code>email</code>, <code>course</code> are called <strong>keys</strong> or <strong>properties</strong>.
+          </div>
+        </div>
+        <div class="console-panel">
+          <div class="console-bar"><span class="console-tab active">Console</span></div>
+          <div class="console-body">
+            <div class="con-prompt-row"><span style="color:#3fb950;font-size:11px">▶</span><span class="con-arr">{name: "Rahul", email: "rahul@gmail.com", course: "MERN"}</span></div>
+          </div>
+        </div>
+        <div class="info-box">
+          <i class="ti ti-info-circle info-icon"></i>
+          <div class="info-text"><strong>Array vs Object — when to use which:</strong> Array = a LIST of similar things (many students). Object = ONE thing with MANY properties (one student's details). We'll combine both shortly.</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-7"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Access Properties <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 8  ACCESSING PROPERTIES ═══ -->
+  <div class="slide" id="slide-8">
+    <div class="slide-header">
+      <span class="badge b-cyan">Access</span>
+      <div>
+        <div class="slide-title">Accessing Object Properties</div>
+        <div class="slide-subtitle">Use a dot (.) to reach inside an object and grab a specific value</div>
+      </div>
+    </div>
+    <div class="activity-box">
+      <div class="activity-title"><i class="ti ti-keyboard"></i> Add this below your student object</div>
+      <div class="editor" style="border-radius:8px">
+        <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">frontend/js/script.js</span></div>
+        <div class="editor-body">
+          <div class="e-row"><span class="e-ln">26</span><span class="j-fn">console</span><span class="c-punc">.</span><span class="j-fn">log</span><span class="c-punc">(</span><span class="j-var">student</span><span class="c-punc">.</span><span class="j-key">name</span><span class="c-punc">);</span></div>
+          <div class="e-row"><span class="e-ln">27</span><span class="j-fn">console</span><span class="c-punc">.</span><span class="j-fn">log</span><span class="c-punc">(</span><span class="j-var">student</span><span class="c-punc">.</span><span class="j-key">course</span><span class="c-punc">);</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="section-label">dot notation — click each property to access it</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div class="obj-prop-row" onclick="accessProp('name','Rahul')">
+            <span style="font-family:monospace;font-weight:700;color:#2563eb">student.name</span>
+            <i class="ti ti-arrow-right" style="color:#888;font-size:14px;margin-left:auto"></i>
+            <span style="font-family:monospace;color:#555">"Rahul"</span>
+          </div>
+          <div class="obj-prop-row" onclick="accessProp('email','rahul@gmail.com')">
+            <span style="font-family:monospace;font-weight:700;color:#2563eb">student.email</span>
+            <i class="ti ti-arrow-right" style="color:#888;font-size:14px;margin-left:auto"></i>
+            <span style="font-family:monospace;color:#555">"rahul@gmail.com"</span>
+          </div>
+          <div class="obj-prop-row" onclick="accessProp('course','MERN')">
+            <span style="font-family:monospace;font-weight:700;color:#2563eb">student.course</span>
+            <i class="ti ti-arrow-right" style="color:#888;font-size:14px;margin-left:auto"></i>
+            <span style="font-family:monospace;color:#555">"MERN"</span>
+          </div>
+        </div>
+        <div id="access-output" style="margin-top:10px"></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="card card-gray">
+          <div class="section-label">how to read it</div>
+          <div style="font-size:13px;color:#444;line-height:1.75">
+            <code>student.name</code> reads as: <em>"Go into the student object, find the property called name, give me its value."</em><br><br>
+            The dot <code>.</code> is the bridge between the object and the property you want.
+          </div>
+        </div>
+        <div class="console-panel">
+          <div class="console-bar"><span class="console-tab active">Console</span></div>
+          <div class="console-body">
+            <div class="con-prompt-row"><span style="color:#3fb950;font-size:11px">▶</span><span class="con-str">Rahul</span></div>
+            <div class="con-prompt-row" style="margin-top:2px"><span style="color:#3fb950;font-size:11px">▶</span><span class="con-str">MERN</span></div>
+          </div>
+        </div>
+        <div class="tip-box">
+          <i class="ti ti-bulb tip-icon"></i>
+          <div class="tip-text"><strong>Alternative syntax:</strong> <code>student["name"]</code> works too (bracket notation) — useful when the property name is stored in a variable. We'll mostly use dot notation since it's cleaner to read.</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-8"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Explain All <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 9  LINE-BY-LINE EXPLAINER ═══ -->
+  <div class="slide" id="slide-9">
+    <div class="slide-header">
+      <span class="badge b-blue">Explain</span>
+      <div>
+        <div class="slide-title">Line-by-Line — Arrays &amp; Objects</div>
+        <div class="slide-subtitle">Click any row to expand — every concept from Parts 1–3</div>
+      </div>
+    </div>
+    <div class="line-explain">
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="j-kw">let</span> <span class="j-var">x</span> <span class="j-op">=</span> <span class="c-punc">[]</span></div>
+        <div class="lex-info">
+          <div class="lex-name">[] — empty array</div>
+          <div class="lex-desc">Square brackets create an array. Empty means zero items so far.</div>
+          <div class="lex-detail">An array is an ordered LIST. Items keep the order you added them in. You'll add to it using push() or by writing values directly: let courses = ["HTML", "CSS"].</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="j-fn">.push(value)</span></div>
+        <div class="lex-info">
+          <div class="lex-name">push() — add to the end</div>
+          <div class="lex-desc">Adds a new item at the end of the array, growing its length by 1</div>
+          <div class="lex-detail">courses.push("React") — courses now has one more item, added at the end. The array variable doesn't need reassignment — push() modifies it directly (mutates it).</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="j-fn">.pop()</span></div>
+        <div class="lex-info">
+          <div class="lex-name">pop() — remove from the end</div>
+          <div class="lex-desc">Removes and returns the LAST item in the array</div>
+          <div class="lex-detail">The opposite of push(). No arguments needed — pop() always removes whatever is currently last. Useful for "undo last action" type features.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="j-fn">.splice(1,1)</span></div>
+        <div class="lex-info">
+          <div class="lex-name">splice(start, count) — remove from anywhere</div>
+          <div class="lex-desc">Removes items starting at a specific index — not just the last one</div>
+          <div class="lex-detail">splice(1, 1) means: start at index 1, remove 1 item. splice(0, 2) would remove the first 2 items. This is how we'll delete a SPECIFIC student from the dashboard later today.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="j-prop">.length</span></div>
+        <div class="lex-info">
+          <div class="lex-name">length — count of items</div>
+          <div class="lex-desc">A property (not a method) that tells you how many items are in the array</div>
+          <div class="lex-detail">No parentheses: courses.length not courses.length(). This is how we'll build the "Total Students" counter on the dashboard later today.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="j-kw">let</span> <span class="j-var">x</span> <span class="j-op">=</span> <span class="c-punc">{}</span></div>
+        <div class="lex-info">
+          <div class="lex-name">{ } — object with key:value pairs</div>
+          <div class="lex-desc">Curly braces create an object — data with labelled properties</div>
+          <div class="lex-detail">Unlike an array (ordered list), an object stores LABELLED data: { name: "Rahul", course: "MERN" }. Order doesn't matter in objects — you access by name, not position.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="j-var">student</span><span class="c-punc">.</span><span class="j-key">name</span></div>
+        <div class="lex-info">
+          <div class="lex-name">. (dot notation) — access a property</div>
+          <div class="lex-desc">Reaches into the object and retrieves the value of a specific key</div>
+          <div class="lex-detail">student.name = "go into student, find the name key, give me its value." This is the most common way to read object data in JavaScript, React, and APIs you'll build later in this course.</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-9"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Connect the Form <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+  <!-- ═══ SLIDE 10  CONNECT REGISTRATION FORM ═══ -->
+  <div class="slide" id="slide-10">
+    <div class="slide-header">
+      <span class="badge b-orange">Part 4 · 40 min</span>
+      <div>
+        <div class="slide-title">Connect the Registration Form</div>
+        <div class="slide-subtitle">Students already have a Registration Form — now we wire it to memory</div>
+      </div>
+    </div>
+    <div class="activity-box">
+      <div class="activity-title"><i class="ti ti-keyboard"></i> Step 1 — create the students array at the top of script.js</div>
+      <div class="editor" style="border-radius:8px">
+        <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">frontend/js/script.js — top of file</span></div>
+        <div class="editor-body">
+          <div class="e-row"><span class="e-ln">1</span><span class="j-kw">let</span> <span class="j-var">students</span> <span class="j-op">=</span> <span class="c-punc">[];</span> <span class="j-com">// holds every registered student</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="section-label">step 2 — inside your form's submit function</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">inside registerStudent()</span></div>
+          <div class="editor-body" style="font-size:11.5px">
+            <div class="e-row"><span class="j-com">// name, email, course already validated</span></div>
+            <div class="e-row"><span class="j-com">// (from Day 8's form validation)</span></div>
+            <div class="e-row"><span class="e-ln"> </span></div>
+            <div class="e-row"><span class="j-kw">let</span> <span class="j-var">student</span> <span class="j-op">=</span> <span class="c-punc">{</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="j-key">name</span><span class="c-punc">:</span><span class="j-var">name</span><span class="c-punc">,</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="j-key">email</span><span class="c-punc">:</span><span class="j-var">email</span><span class="c-punc">,</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="j-key">course</span><span class="c-punc">:</span><span class="j-var">course</span></div>
+            <div class="e-row"><span class="c-punc">};</span></div>
+            <div class="e-row"><span class="e-ln"> </span></div>
+            <div class="e-row" style="background:#1a2a1a"><span class="j-var" style="color:#80ffea">students</span><span class="c-punc">.</span><span class="j-fn" style="color:#80ffea">push</span><span class="c-punc">(</span><span class="j-var">student</span><span class="c-punc">);</span></div>
+            <div class="e-row" style="background:#1a2a1a"><span class="j-fn">console</span><span class="c-punc">.</span><span class="j-fn">log</span><span class="c-punc">(</span><span class="j-var">students</span><span class="c-punc">);</span></div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="card card-gray">
+          <div class="section-label">what just happened</div>
+          <div style="font-size:13px;color:#444;line-height:1.7">
+            Step 1 → Form values (name, email, course) get packed into one <strong>object</strong>.<br><br>
+            Step 2 → That object gets <strong>pushed</strong> into the students array.<br><br>
+            Every new registration adds one more object to the array — without ever overwriting the previous ones.
+          </div>
+        </div>
+        <div class="console-panel">
+          <div class="console-bar"><span class="console-tab active">Console — after 2 registrations</span></div>
+          <div class="console-body" style="font-size:11px">
+            <div class="con-prompt-row"><span style="color:#3fb950;font-size:11px">▶</span></div>
+            <div style="color:#a5d6ff;margin-left:18px">[</div>
+            <div style="color:#a5d6ff;margin-left:30px">{name: "Rahul", email: "…", course: "MERN"},</div>
+            <div style="color:#a5d6ff;margin-left:30px">{name: "Priya", email: "…", course: "MERN"}</div>
+            <div style="color:#a5d6ff;margin-left:18px">]</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="success-box">
+      <i class="ti ti-sparkles" style="color:#16a34a;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+      <div style="font-size:13px;color:#166534;line-height:1.65"><strong>This is real data storage.</strong> Every time someone registers, their info is captured as a structured object and saved into your array. This array — sitting in browser memory — is the foundation for everything we build in the next 90 minutes: the dashboard table, delete buttons, and student counter.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-10"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">See the Flow <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 11  FLOW DIAGRAM ═══ -->
+  <div class="slide" id="slide-11">
+    <div class="slide-header">
+      <span class="badge b-indigo">Flow</span>
+      <div>
+        <div class="slide-title">Form → Object → Array → Memory</div>
+        <div class="slide-subtitle">Students now understand the complete data journey — visualised step by step</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="flow-step">
+        <div class="flow-num">1</div>
+        <div class="flow-content">
+          <div class="flow-label">Registration Form</div>
+          User types Name, Email, Course into Bootstrap input fields and clicks Submit. This is raw input — just text in HTML form fields.
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">2</div>
+        <div class="flow-content">
+          <div class="flow-label">↓ Object</div>
+          JavaScript reads each field's value and packs them together into ONE structured object: <code>{name, email, course}</code>. Now the three separate pieces of data are connected and labelled.
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">3</div>
+        <div class="flow-content">
+          <div class="flow-label">↓ Array</div>
+          That object gets <code>push()</code>'d into the <code>students</code> array. The array now holds this student alongside every other student who has registered before.
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">4</div>
+        <div class="flow-content">
+          <div class="flow-label">↓ Memory</div>
+          The data lives in the browser's memory (RAM) for as long as the page stays open. Refreshing the page clears it — that's expected for now. (We'll connect a real database, MongoDB, much later in the course.)
+        </div>
+      </div>
+    </div>
+    <div class="info-box">
+      <i class="ti ti-info-circle info-icon"></i>
+      <div class="info-text"><strong>Why this matters:</strong> Every real-world web app — Instagram, Amazon, SkillHub's future production version — follows this exact same pattern: collect input → structure it → store it → display it. You just learned the core pattern of full-stack development.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-11"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Reference <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 12  REFERENCE ═══ -->
+  <div class="slide" id="slide-12">
+    <div class="slide-header">
+      <span class="badge b-slate">Reference</span>
+      <div>
+        <div class="slide-title">Arrays &amp; Objects Reference</div>
+        <div class="slide-subtitle">Everything covered in the first 90 minutes — keep this open while coding</div>
+      </div>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <table class="tag-table">
+        <thead><tr><th>Concept</th><th>Syntax</th><th>Example</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>Array</strong></td>
+            <td><code>let x = [];</code></td>
+            <td><code>let students = [];</code></td>
+            <td>Ordered list — square brackets</td>
+          </tr>
+          <tr>
+            <td><strong>push()</strong></td>
+            <td><code>arr.push(value);</code></td>
+            <td><code>students.push(student);</code></td>
+            <td>Adds to the end</td>
+          </tr>
+          <tr>
+            <td><strong>pop()</strong></td>
+            <td><code>arr.pop();</code></td>
+            <td><code>courses.pop();</code></td>
+            <td>Removes from the end</td>
+          </tr>
+          <tr>
+            <td><strong>splice()</strong></td>
+            <td><code>arr.splice(start, count);</code></td>
+            <td><code>students.splice(2, 1);</code></td>
+            <td>Removes from any position</td>
+          </tr>
+          <tr>
+            <td><strong>length</strong></td>
+            <td><code>arr.length</code></td>
+            <td><code>students.length</code></td>
+            <td>Property, not a method — no ()</td>
+          </tr>
+          <tr>
+            <td><strong>Object</strong></td>
+            <td><code>let x = { key: value };</code></td>
+            <td><code>{name: "Rahul", course: "MERN"}</code></td>
+            <td>Labelled data — curly braces</td>
+          </tr>
+          <tr>
+            <td><strong>Dot notation</strong></td>
+            <td><code>obj.key</code></td>
+            <td><code>student.name</code></td>
+            <td>Access a property's value</td>
+          </tr>
+          <tr>
+            <td><strong>Array of Objects</strong></td>
+            <td><code>[{…}, {…}]</code></td>
+            <td><code>students</code> after multiple pushes</td>
+            <td>The pattern behind every dashboard</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="grid-2" style="margin-top:.25rem">
+      <div class="tip-box">
+        <i class="ti ti-bulb tip-icon"></i>
+        <div class="tip-text"><strong>The big pattern:</strong> Array of Objects — <code>[{name:"Rahul"}, {name:"Priya"}]</code> — is the single most common data shape in web development. Once this clicks, working with real APIs and databases becomes much easier.</div>
+      </div>
+      <div class="info-box">
+        <i class="ti ti-info-circle info-icon"></i>
+        <div class="info-text"><strong>Next 90 minutes:</strong> We'll loop through the students array with <code>forEach()</code>, build an HTML table dynamically, and add delete buttons that call <code>splice()</code> — turning this array into a live, interactive dashboard.</div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-12"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Quiz <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 13  QUIZ ═══ -->
+  <div class="slide" id="slide-13">
+    <div class="slide-header">
+      <span class="badge b-green">Quiz</span>
+      <div>
+        <div class="slide-title">Quick Check — Arrays &amp; Objects</div>
+        <div class="slide-subtitle">5 questions covering the first 90 minutes</div>
+      </div>
+    </div>
+    <div id="quiz-container"></div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-13"></div>
+      <button class="nav-btn" onclick="goSlide(0)"><i class="ti ti-home"></i> Home</button>
+    </div>
+  </div>
+
+</div><!-- /.wrapper -->
+<script>
+  var current = 0, total = 14, quizInit = false;
+
+  /* ── Interactive array builder ── */
+  var abItems = [];
+  var abNames = ["React", "Node.js", "MongoDB", "Express", "Vite", "Tailwind", "GraphQL", "Redux"];
+  var abNameIndex = 0;
+
+  function abPush() {
+    var visual = document.getElementById('ab-visual');
+    var name = abNames[abNameIndex % abNames.length];
+    abNameIndex++;
+    abItems.push(name);
+    renderAbVisual();
+  }
+  function abPop() {
+    if (abItems.length === 0) return;
+    abItems.pop();
+    renderAbVisual();
+  }
+  function abReset() {
+    abItems = [];
+    abNameIndex = 0;
+    renderAbVisual();
+  }
+  function renderAbVisual() {
+    var visual = document.getElementById('ab-visual');
+    if (abItems.length === 0) {
+      visual.innerHTML = '<span class="ab-empty-msg">courses = []</span>';
+      return;
+    }
+    visual.innerHTML = '';
+    abItems.forEach(function(item, idx) {
+      var el = document.createElement('div');
+      el.className = 'ab-item';
+      el.innerHTML = '<span class="ab-idx">' + idx + '</span>' + item;
+      visual.appendChild(el);
+    });
+  }
+
+  /* ── Object property accessor demo ── */
+  function accessProp(key, value) {
+    var out = document.getElementById('access-output');
+    out.innerHTML = '<div class="console-panel"><div class="console-bar"><span class="console-tab active">Console</span></div>' +
+      '<div class="console-body"><div class="con-prompt-row"><span style="color:#3fb950;font-size:11px">▶</span>' +
+      '<span class="con-str">' + value + '</span></div></div></div>';
+  }
+
+  /* ── Quiz data ── */
+  var quizData = [
+    {
+      q: "Why is an Array better than 500 separate variables for storing student names?",
+      opts: [
+        "Arrays are faster to type than variable names",
+        "An array stores unlimited values under ONE variable name, and can be looped through, counted, and searched easily",
+        "JavaScript doesn't allow more than 10 variables in one file",
+        "Arrays automatically save data to a database"
+      ],
+      ans: 1,
+      exp: "500 separate variables (student1, student2...) can't be looped through or counted automatically. An array — let students = [] — holds unlimited values under one name, and JavaScript gives you built-in tools (length, forEach, push) to work with all of them at once."
+    },
+    {
+      q: "What does <code>courses.push(\"React\")</code> do?",
+      opts: [
+        "Removes 'React' from the courses array",
+        "Adds 'React' to the END of the courses array",
+        "Replaces the entire array with 'React'",
+        "Checks if 'React' already exists in the array"
+      ],
+      ans: 1,
+      exp: "push() adds a new item to the end of an array. If courses = [\"HTML\", \"CSS\"], after courses.push(\"React\") it becomes [\"HTML\", \"CSS\", \"React\"]."
+    },
+    {
+      q: "An array is <code>[\"HTML\", \"CSS\", \"JavaScript\"]</code>. What does <code>splice(1, 1)</code> remove?",
+      opts: [
+        "\"HTML\" — the first item",
+        "\"CSS\" — the item at index 1",
+        "\"JavaScript\" — the last item",
+        "All items — splice clears the whole array"
+      ],
+      ans: 1,
+      exp: "splice(start, count) — start at index 1, remove 1 item. Index 0 = HTML, index 1 = CSS, index 2 = JavaScript. So splice(1,1) removes CSS, leaving [\"HTML\", \"JavaScript\"]."
+    },
+    {
+      q: "Why use an Object instead of an Array to store one student's name, email, and course?",
+      opts: [
+        "Objects are faster than arrays in every case",
+        "Arrays cannot store text values, only numbers",
+        "An object lets you label each value with a key (name, email, course) instead of remembering numeric positions — much clearer",
+        "There is no difference — they work identically"
+      ],
+      ans: 2,
+      exp: "An array like [\"Rahul\", \"rahul@gmail.com\", \"MERN\"] forces you to remember that index 0=name, index 1=email. An object — {name: \"Rahul\", email: \"...\", course: \"MERN\"} — labels each value clearly. You access it with student.name instead of guessing student[0]."
+    },
+    {
+      q: "After running: <code>let student = {name: \"Rahul\", course: \"MERN\"}; students.push(student);</code> — what is <code>students</code> now?",
+      opts: [
+        "A single string: \"Rahul, MERN\"",
+        "An Array containing one Object: [{name: \"Rahul\", course: \"MERN\"}]",
+        "An empty array — push() failed because student is an object",
+        "Two separate variables: name and course"
+      ],
+      ans: 1,
+      exp: "students is an Array. push(student) adds the entire object as one item inside that array. The result is an Array of Objects: [{name: \"Rahul\", course: \"MERN\"}] — exactly the pattern used by every registration form and dashboard you'll build."
+    }
+  ];
+  var quizAnswered = [];
+
+  function renderQuiz() {
+    var c = document.getElementById('quiz-container'); c.innerHTML = '';
+    quizData.forEach(function(q, i) {
+      var d = document.createElement('div'); d.style.cssText = 'margin-bottom:18px';
+      d.innerHTML = '<div style="font-size:13px;font-weight:600;margin-bottom:6px">'+(i+1)+'. '+q.q+'</div>';
+      q.opts.forEach(function(opt, j) {
+        var btn = document.createElement('button'); btn.className = 'quiz-option';
+        btn.innerHTML = String.fromCharCode(65+j)+'. '+opt;
+        btn.onclick = function() {
+          if (quizAnswered[i]) return; quizAnswered[i] = true;
+          var btns = d.querySelectorAll('.quiz-option');
+          btns.forEach(function(b,k){ b.disabled=true; if(k===q.ans) b.classList.add('correct'); else if(k===j) b.classList.add('wrong'); });
+          var fb = d.querySelector('.quiz-feedback');
+          fb.innerHTML = (j===q.ans?'✅ Correct! ':'❌ Not quite. ')+q.exp;
+          fb.className = 'quiz-feedback '+(j===q.ans?'correct':'wrong');
+        };
+        d.appendChild(btn);
+      });
+      var fb = document.createElement('div'); fb.className = 'quiz-feedback'; d.appendChild(fb);
+      c.appendChild(d);
+    });
+  }
+
+  function toggleLex(row) {
+    var was = row.classList.contains('active');
+    document.querySelectorAll('.lex-row.active').forEach(function(r){ r.classList.remove('active'); });
+    if (!was) row.classList.add('active');
+  }
+
+  function toggle(id) {
+    var el = document.getElementById(id); el.classList.toggle('open');
+    var btn = el.previousElementSibling;
+    if (btn && btn.tagName === 'BUTTON') {
+      btn.textContent = el.classList.contains('open') ? 'Hide the answer' : 'Reveal the answer';
+    }
+  }
+
+  function goSlide(n) {
+    document.getElementById('slide-'+current).classList.remove('active');
+    current = n;
+    document.getElementById('slide-'+current).classList.add('active');
+    updateDots();
+    document.getElementById('slide-counter').textContent = (current+1)+' / '+total;
+    if (n===13 && !quizInit) { renderQuiz(); quizInit=true; }
+    window.scrollTo(0,0);
+  }
+  function nextSlide() { if (current < total-1) goSlide(current+1); }
+  function prevSlide() { if (current > 0) goSlide(current-1); }
+
+  function updateDots() {
+    for (var s=0; s<total; s++) {
+      var el = document.getElementById('dots-'+s); if (!el) continue;
+      el.innerHTML = '';
+      for (var d=0; d<total; d++) {
+        var dot = document.createElement('div');
+        dot.className = 'dot'+(d===current?' active':'');
+        el.appendChild(dot);
+      }
+    }
+  }
+  updateDots();
+</script>
+</body>
+</html>

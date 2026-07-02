@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Day 10 · First 90 Minutes – ES6 Features Through Project</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f4f5f7; color: #1a1a1a;
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; padding: 2rem 1rem;
+  }
+  .wrapper {
+    width: 100%; max-width: 920px; background: #fff;
+    border-radius: 16px; box-shadow: 0 2px 20px rgba(0,0,0,0.09); overflow: hidden;
+  }
+  .top-bar {
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    color: #fff; padding: 14px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .top-bar-title { font-size: 15px; font-weight: 600; }
+  .top-bar-sub   { font-size: 12px; opacity: .55; margin-top: 2px; }
+  .slide-counter { font-size: 13px; opacity: .6; font-variant-numeric: tabular-nums; }
+  .slide { display: none; padding: 1.75rem 2rem; min-height: 500px; flex-direction: column; gap: 1.2rem; }
+  .slide.active { display: flex; }
+  .slide-header { display: flex; align-items: center; gap: 10px; padding-bottom: 1rem; border-bottom: 1px solid #e8e8e8; }
+  .slide-title    { font-size: 20px; font-weight: 700; color: #111; }
+  .slide-subtitle { font-size: 13px; color: #666; margin-top: 2px; }
+
+  /* ── Badges ── */
+  .badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+  .b-blue   { background:#dbeafe; color:#1d4ed8; }
+  .b-teal   { background:#d1fae5; color:#065f46; }
+  .b-purple { background:#ede9fe; color:#5b21b6; }
+  .b-amber  { background:#fef3c7; color:#92400e; }
+  .b-green  { background:#dcfce7; color:#166534; }
+  .b-slate  { background:#e2e8f0; color:#334155; }
+  .b-rose   { background:#ffe4e6; color:#9f1239; }
+  .b-orange { background:#ffedd5; color:#9a3412; }
+  .b-indigo { background:#e0e7ff; color:#3730a3; }
+  .b-cyan   { background:#cffafe; color:#164e63; }
+  .b-pink   { background:#fce7f3; color:#9d174d; }
+  .b-yellow { background:#fef9c3; color:#854d0e; }
+  .b-js     { background:#fef9c3; color:#854d0e; }
+
+  /* ── Layout ── */
+  .section-label { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 8px; }
+  .card { background: #fff; border: 1px solid #e8e8e8; border-radius: 12px; padding: 1rem 1.25rem; }
+  .card-gray { background: #f8f9fa; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+  /* ── Code Editor (Dracula) ── */
+  .editor { background: #1e1e2e; border-radius: 12px; overflow: hidden; font-family: 'SFMono-Regular', Consolas, 'Courier New', monospace; }
+  .editor-bar { background: #13131f; padding: 9px 14px; display: flex; align-items: center; gap: 6px; }
+  .e-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .e-red { background:#ff5f57; } .e-yellow { background:#febc2e; } .e-green { background:#28c840; }
+  .e-label { font-size: 12px; color: #6272a4; margin-left: 4px; font-family: -apple-system, sans-serif; }
+  .editor-body { padding: 14px 18px; font-size: 12.5px; line-height: 1.8; }
+  .e-ln   { color: #44475a; font-size: 11px; display: inline-block; width: 22px; user-select: none; }
+  .e-txt  { color: #f8f8f2; }
+  .e-cmt  { color: #6272a4; font-style: italic; }
+  .j-kw   { color: #ff79c6; font-weight: 700; }
+  .j-fn   { color: #50fa7b; }
+  .j-str  { color: #f1fa8c; }
+  .j-num  { color: #bd93f9; }
+  .j-var  { color: #80ffea; }
+  .j-op   { color: #ff79c6; }
+  .j-dom  { color: #8be9fd; }
+  .j-prop { color: #50fa7b; }
+  .j-com  { color: #6272a4; font-style: italic; }
+  .j-ret  { color: #ff79c6; font-weight: 700; }
+  .j-key  { color: #ff79c6; }
+  .j-tpl  { color: #ff92df; }
+  .c-punc { color: #f8f8f2; }
+  .e-ind1 { display: inline-block; width: 20px; }
+  .e-ind2 { display: inline-block; width: 40px; }
+  .e-ind3 { display: inline-block; width: 60px; }
+  .e-row  { display: flex; gap: 8px; }
+
+  /* ── Tables ── */
+  .tag-table { border-collapse: collapse; width: 100%; }
+  .tag-table th { background: #f1f5f9; font-size: 12px; font-weight: 700; text-align: left; padding: 10px 14px; color: #475569; border-bottom: 2px solid #e2e8f0; }
+  .tag-table td { font-size: 13px; padding: 10px 14px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+  .tag-table tr:last-child td { border-bottom: none; }
+  .tag-table tr:hover td { background: #f8f9fa; }
+
+  /* ── Quiz ── */
+  .quiz-option { border: 1px solid #dee2e6; border-radius: 8px; padding: 10px 14px; font-size: 13px; cursor: pointer; margin-bottom: 6px; transition: all .15s; background: transparent; width: 100%; text-align: left; color: #1a1a1a; }
+  .quiz-option:hover:not(:disabled) { background: #f8f9fa; }
+  .quiz-option.correct { background: #d1fae5; border-color: #059669; color: #065f46; }
+  .quiz-option.wrong   { background: #fee2e2; border-color: #dc2626; color: #991b1b; }
+  .quiz-feedback { display: none; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-top: 4px; }
+  .quiz-feedback.correct { background: #d1fae5; color: #065f46; display: block; }
+  .quiz-feedback.wrong   { background: #fee2e2; color: #991b1b; display: block; }
+
+  /* ── Activity / challenge ── */
+  .activity-box { border: 2px dashed #a5b4fc; background: #eef2ff; border-radius: 12px; padding: 14px 18px; }
+  .activity-title { font-size: 13px; font-weight: 700; color: #3730a3; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .challenge-box { border: 2px dashed #f9a8d4; background: #fdf2f8; border-radius: 12px; padding: 14px 18px; }
+  .challenge-title { font-size: 13px; font-weight: 700; color: #9f1239; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+
+  /* ── Tip / info / warn / success ── */
+  .tip-box   { display:flex; gap:10px; align-items:flex-start; background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:10px 14px; }
+  .tip-icon  { color:#d97706; font-size:18px; flex-shrink:0; margin-top:1px; }
+  .tip-text  { font-size:13px; color:#92400e; line-height:1.6; }
+  .info-box  { display:flex; gap:10px; align-items:flex-start; background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:10px 14px; }
+  .info-icon { color:#2563eb; font-size:18px; flex-shrink:0; margin-top:1px; }
+  .info-text { font-size:13px; color:#1e40af; line-height:1.6; }
+  .warn-box  { display:flex; gap:10px; align-items:flex-start; background:#fef9ee; border:1px solid #fcd34d; border-radius:10px; padding:10px 14px; }
+  .success-box { display:flex; gap:10px; align-items:flex-start; background:#f0fdf4; border:1px solid #86efac; border-radius:10px; padding:10px 14px; }
+
+  /* ── Line explainer (JS amber accent) ── */
+  .lex-row { display:flex; align-items:stretch; cursor:pointer; transition:background .12s; border-bottom:1px solid #f0f0f0; }
+  .lex-row:last-child { border-bottom:none; }
+  .lex-row:hover { background:#f8f9fa; }
+  .lex-row.active { background:#fefce8; border-left:3px solid #d97706; }
+  .lex-code { background:#1e1e2e; padding:10px 14px; font-family:'SFMono-Regular',Consolas,monospace; font-size:12px; min-width:200px; flex-shrink:0; display:flex; align-items:center; }
+  .lex-info { padding:10px 14px; flex:1; }
+  .lex-name   { font-size:13px; font-weight:700; color:#d97706; margin-bottom:2px; }
+  .lex-desc   { font-size:12px; color:#555; line-height:1.55; }
+  .lex-detail { display:none; font-size:12px; color:#92400e; margin-top:4px; padding-top:4px; border-top:1px dashed #fde68a; }
+  .lex-row.active .lex-detail { display:block; }
+  .line-explain { border:1px solid #e8e8e8; border-radius:10px; overflow:hidden; }
+
+  /* ── Reveal ── */
+  .reveal-btn { background:#f1f3f5; border:1px solid #dee2e6; border-radius:8px; padding:7px 14px; font-size:13px; cursor:pointer; color:#333; transition:background .15s; }
+  .reveal-btn:hover { background:#e9ecef; }
+  .reveal-content { display:none; margin-top:8px; }
+  .reveal-content.open { display:block; }
+
+  /* ── Nav (JS amber) ── */
+  .nav-row { display:flex; align-items:center; justify-content:space-between; margin-top:auto; padding-top:1rem; border-top:1px solid #f0f0f0; }
+  .nav-btn { display:inline-flex; align-items:center; gap:6px; padding:9px 18px; border:1px solid #dee2e6; border-radius:8px; background:transparent; font-size:13px; cursor:pointer; color:#333; transition:background .15s; }
+  .nav-btn:hover:not(:disabled) { background:#f1f3f5; }
+  .nav-btn:disabled { opacity:.35; cursor:default; }
+  .nav-btn.primary { background:#d97706; border-color:transparent; color:#fff; }
+  .nav-btn.primary:hover { background:#b45309; }
+  .progress-dots { display:flex; gap:6px; align-items:center; }
+  .dot { width:7px; height:7px; border-radius:50%; background:#dee2e6; transition:all .2s; }
+  .dot.active { width:20px; border-radius:4px; background:#d97706; }
+
+  /* ── Home grid ── */
+  .home-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .home-card { background:#fff; border:1px solid #e8e8e8; border-radius:12px; padding:1rem 1.25rem; cursor:pointer; transition:all .15s; }
+  .home-card:hover { border-color:#d97706; box-shadow:0 2px 8px rgba(217,119,6,.12); }
+  .home-card-title { font-size:15px; font-weight:700; margin:6px 0 2px; }
+  .home-card-sub   { font-size:12px; color:#666; }
+
+  code { font-family:'SFMono-Regular',Consolas,monospace; font-size:12px; background:#f1f3f5; padding:1px 6px; border-radius:4px; border:1px solid #dee2e6; }
+
+  /* ── Checklist ── */
+  .check-item { display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:10px; border:1px solid #e8e8e8; font-size:13px; cursor:pointer; transition:all .15s; user-select:none; }
+  .check-item:hover { background:#f8f9fa; }
+  .check-item.done { background:#f0fdf4; border-color:#86efac; }
+  .check-circle { width:22px; height:22px; border-radius:50%; border:2px solid #dee2e6; display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0; transition:all .2s; color:transparent; }
+  .check-item.done .check-circle { background:#22c55e; border-color:#22c55e; color:#fff; }
+
+  /* ── Console panel ── */
+  .console-panel { background: #0d1117; border-radius: 12px; overflow: hidden; font-family: 'SFMono-Regular', Consolas, monospace; }
+  .console-bar   { background: #161b22; padding: 9px 14px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #30363d; }
+  .console-body  { padding: 12px 16px; font-size: 12.5px; line-height: 2; }
+  .con-log  { color: #f0f6fc; }
+  .con-str  { color: #a5d6ff; }
+  .con-arrow { color: #3fb950; font-size: 11px; }
+  .con-arr  { color: #d2a8ff; }
+  .con-key  { color: #7ee787; }
+  .js-logo { width: 44px; height: 44px; background: #1d4ed8; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px; color:#fff; flex-shrink: 0; font-weight:800; }
+
+  /* ── Flow steps ── */
+  .flow-step { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; border-bottom: 1px dashed #e2e8f0; }
+  .flow-step:last-child { border-bottom: none; }
+  .flow-num { width: 28px; height: 28px; border-radius: 50%; background: #d97706; color: white; font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+  .flow-content { flex: 1; font-size: 13px; color: #333; line-height: 1.6; }
+  .flow-label { font-weight: 700; color: #d97706; margin-bottom: 2px; }
+
+  /* ══ DAY 10 — ES6 SPECIFIC ══ */
+
+  /* Before/after comparison cards */
+  .compare-card { border-radius: 12px; padding: 14px 16px; border: 2px solid; }
+  .compare-card.old { background:#fef2f2; border-color:#fca5a5; }
+  .compare-card.new { background:#f0fdf4; border-color:#86efac; }
+  .compare-label { font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.04em; margin-bottom:8px; }
+  .compare-card.old .compare-label { color:#991b1b; }
+  .compare-card.new .compare-label { color:#166534; }
+
+  /* Live sandbox playground */
+  .sandbox-panel { background:#0f172a; border-radius:12px; padding:16px 18px; }
+  .sandbox-label { font-size:11px; color:#94a3b8; font-family:monospace; margin-bottom:10px; }
+  .sb-input { background:#1e293b; border:1px solid #334155; color:#f0db4f; font-family:monospace; padding:8px 12px; border-radius:6px; font-size:13px; width:100%; }
+  .sb-input:focus { outline:none; border-color:#d97706; }
+  .sb-btn { background:#d97706; border:none; border-radius:6px; padding:8px 18px; font-size:12px; font-weight:700; color:#fff; cursor:pointer; }
+  .sb-btn:hover { background:#b45309; }
+  .sb-output { background:#13131f; border-radius:8px; padding:10px 14px; margin-top:10px; font-family:monospace; font-size:13px; color:#3fb950; min-height:20px; }
+
+  /* Object unpacking visual */
+  .unpack-box { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .obj-pill { background:#1e1e2e; border-radius:8px; padding:10px 14px; font-family:monospace; font-size:12px; }
+  .unpack-arrow { color:#d97706; font-size:20px; font-weight:700; }
+  .field-pill { background:#ede9fe; color:#5b21b6; padding:6px 12px; border-radius:8px; font-size:12px; font-weight:700; font-family:monospace; }
+
+  /* Spread / rest visual blocks */
+  .arr-block { display:flex; gap:4px; flex-wrap:wrap; }
+  .arr-item { background:#1e293b; color:#80ffea; padding:6px 12px; border-radius:6px; font-size:12px; font-weight:700; font-family:monospace; }
+  .arr-item.frontend { background:#1d4ed8; color:#fff; }
+  .arr-item.backend { background:#059669; color:#fff; }
+  .merge-plus { color:#d97706; font-size:18px; font-weight:800; align-self:center; }
+
+  /* Rest operator collector visual */
+  .rest-collect { background:#1e1e2e; border-radius:10px; padding:14px; }
+  .rest-args { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px; }
+  .rest-arg-in { background:#374151; color:#e5e7eb; padding:5px 10px; border-radius:5px; font-size:11px; font-family:monospace; }
+  .rest-bracket { color:#d97706; font-size:16px; font-weight:800; }
+
+  /* Code transformation slider toggle */
+  .toggle-tabs { display:flex; gap:6px; margin-bottom:10px; }
+  .toggle-tab { padding:6px 16px; border-radius:20px; font-size:12px; font-weight:700; cursor:pointer; border:1px solid #dee2e6; background:white; color:#666; transition: all .15s; }
+  .toggle-tab.active-old { background:#fef2f2; border-color:#fca5a5; color:#991b1b; }
+  .toggle-tab.active-new { background:#f0fdf4; border-color:#86efac; color:#166534; }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <div>
+      <div class="top-bar-title">MERN Stack Training · Day 10 · First 90 Minutes</div>
+      <div class="top-bar-sub">ES6 Features Through Project — SkillHub LMS</div>
+    </div>
+    <div class="slide-counter" id="slide-counter">1 / 13</div>
+  </div>
+
+  <!-- ═══ SLIDE 0  HOME ═══ -->
+  <div class="slide active" id="slide-0">
+    <div class="slide-header">
+      <div class="js-logo">ES6</div>
+      <div>
+        <div class="slide-title">Advanced JavaScript (ES6) Through the Project</div>
+        <div class="slide-subtitle">Modern syntax that every real-world JS codebase uses — learned by upgrading SkillHub's own code</div>
+      </div>
+    </div>
+
+    <div style="background:#fef9c3;border:1px solid #fde68a;border-radius:12px;padding:12px 16px;display:flex;gap:12px;align-items:flex-start">
+      <i class="ti ti-sparkles" style="color:#d97706;font-size:22px;flex-shrink:0;margin-top:1px"></i>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#854d0e;margin-bottom:4px">First 90 Minutes Goal — Five ES6 Features That Change How You Write JS</div>
+        <div style="display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:#92400e">
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Arrow Functions</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Template Literals</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Destructuring</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Spread Operator</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Rest Operator</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="background:#0f172a;border:none">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <i class="ti ti-target-arrow" style="color:#f0db4f;font-size:18px"></i>
+        <span style="font-size:13px;font-weight:700;color:#f0db4f">Today's Project Goal — Course Management Dashboard</span>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <span style="background:#1e293b;color:#80ffea;padding:5px 12px;border-radius:6px;font-size:11px;font-weight:700">✔ Add Course</span>
+        <span style="background:#1e293b;color:#80ffea;padding:5px 12px;border-radius:6px;font-size:11px;font-weight:700">✔ Delete Course</span>
+        <span style="background:#1e293b;color:#80ffea;padding:5px 12px;border-radius:6px;font-size:11px;font-weight:700">✔ Search Course</span>
+        <span style="background:#1e293b;color:#80ffea;padding:5px 12px;border-radius:6px;font-size:11px;font-weight:700">✔ Course Cards</span>
+        <span style="background:#1e293b;color:#80ffea;padding:5px 12px;border-radius:6px;font-size:11px;font-weight:700">✔ Statistics</span>
+      </div>
+      <div style="font-size:11px;color:#94a3b8;margin-top:10px">These 5 ES6 features are the building blocks for that dashboard — built in the Second 90 Minutes today.</div>
+    </div>
+
+    <div class="home-grid">
+      <div class="home-card" onclick="goSlide(1)">
+        <span class="badge b-green">Recap</span>
+        <div class="home-card-title">Where SkillHub Stands</div>
+        <div class="home-card-sub">Two days of Student Dashboard work behind us</div>
+      </div>
+      <div class="home-card" onclick="goSlide(2)">
+        <span class="badge b-amber">Part 1 · 15 min</span>
+        <div class="home-card-title">Why ES6? — Old vs Modern</div>
+        <div class="home-card-sub">Can we write cleaner JavaScript?</div>
+      </div>
+      <div class="home-card" onclick="goSlide(3)">
+        <span class="badge b-blue">Part 2 · 20 min</span>
+        <div class="home-card-title">Arrow Functions</div>
+        <div class="home-card-sub">forEach the old way vs the arrow way</div>
+      </div>
+      <div class="home-card" onclick="goSlide(4)">
+        <span class="badge b-blue">Part 2 · continued</span>
+        <div class="home-card-title">Arrow Function Syntax Rules</div>
+        <div class="home-card-sub">All 4 valid forms, click to compare</div>
+      </div>
+      <div class="home-card" onclick="goSlide(5)">
+        <span class="badge b-purple">Part 3 · 20 min</span>
+        <div class="home-card-title">Destructuring — Object Unpacking</div>
+        <div class="home-card-sub">student.name × 3 → one clean line</div>
+      </div>
+      <div class="home-card" onclick="goSlide(6)">
+        <span class="badge b-teal">Part 4 · 15 min</span>
+        <div class="home-card-title">Spread Operator</div>
+        <div class="home-card-sub">Merge frontend + backend arrays</div>
+      </div>
+      <div class="home-card" onclick="goSlide(7)">
+        <span class="badge b-rose">Part 5 · 20 min</span>
+        <div class="home-card-title">Rest Operator</div>
+        <div class="home-card-sub">Collect unlimited arguments into one array</div>
+      </div>
+      <div class="home-card" onclick="goSlide(8)">
+        <span class="badge b-cyan">Spot the Diff</span>
+        <div class="home-card-title">Spread vs Rest — Don't Confuse Them</div>
+        <div class="home-card-sub">Same ... syntax, opposite jobs</div>
+      </div>
+      <div class="home-card" onclick="goSlide(9)">
+        <span class="badge b-orange">Live Lab</span>
+        <div class="home-card-title">Try All 5 Features Yourself</div>
+        <div class="home-card-sub">Interactive playground for each concept</div>
+      </div>
+      <div class="home-card" onclick="goSlide(10)">
+        <span class="badge b-purple">Reference</span>
+        <div class="home-card-title">ES6 Cheat Sheet</div>
+        <div class="home-card-sub">All 5 features, old vs new, on one page</div>
+      </div>
+      <div class="home-card" onclick="goSlide(11)">
+        <span class="badge b-slate">Quiz</span>
+        <div class="home-card-title">Quick-Fire Quiz</div>
+        <div class="home-card-sub">4 questions on ES6 fundamentals</div>
+      </div>
+      <div class="home-card" onclick="goSlide(12)">
+        <span class="badge b-teal">Wrap-Up</span>
+        <div class="home-card-title">90 Minutes Complete!</div>
+        <div class="home-card-sub">Ready for the Course Management Dashboard</div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" disabled><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-0"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Start <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 1  RECAP ═══ -->
+  <div class="slide" id="slide-1">
+    <div class="slide-header">
+      <span class="badge b-green">Recap</span>
+      <div>
+        <div class="slide-title">Where SkillHub Stands</div>
+        <div class="slide-subtitle">9 days of building — here's everything the platform can do before we add ES6 and Course Management</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div class="section-label">student dashboard module (days 7–9)</div>
+        <div class="check-item done"><div class="check-circle" style="background:#22c55e;border-color:#22c55e;color:#fff">✓</div><span>Events, DOM manipulation &amp; form validation</span></div>
+        <div class="check-item done"><div class="check-circle" style="background:#22c55e;border-color:#22c55e;color:#fff">✓</div><span>Add / Edit / Delete student records</span></div>
+        <div class="check-item done"><div class="check-circle" style="background:#22c55e;border-color:#22c55e;color:#fff">✓</div><span>Live search using filter()</span></div>
+        <div class="check-item done"><div class="check-circle" style="background:#22c55e;border-color:#22c55e;color:#fff">✓</div><span>Dashboard statistics &amp; localStorage persistence</span></div>
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;border:2px dashed #fde047;background:#fefce8;font-size:13px;margin-top:4px">
+          <i class="ti ti-clock-play" style="color:#d97706;font-size:18px;flex-shrink:0"></i>
+          <span style="color:#92400e;font-weight:600">Now: Learn modern ES6 syntax — then build a SECOND dashboard for Courses</span>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">why this matters</div>
+        <div class="card" style="border-left:4px solid #d97706">
+          <div style="font-size:13px;font-weight:700;color:#92400e;margin-bottom:6px"><i class="ti ti-code" style="margin-right:5px"></i>Same logic, better syntax</div>
+          <div style="font-size:12px;color:#555;line-height:1.6">Everything you've already built — loops, conditions, functions — still works exactly the same. ES6 just gives you <strong>shorter, cleaner ways</strong> to write the same logic.</div>
+        </div>
+        <div class="card" style="border-left:4px solid #2563eb;margin-top:8px">
+          <div style="font-size:13px;font-weight:700;color:#1d4ed8;margin-bottom:6px"><i class="ti ti-briefcase" style="margin-right:5px"></i>Industry standard</div>
+          <div style="font-size:12px;color:#555;line-height:1.6">React, Node.js, and virtually every modern codebase you'll work in professionally is written in ES6+. This isn't optional — it's the baseline.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-1"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Why ES6? <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 2  WHY ES6 ═══ -->
+  <div class="slide" id="slide-2">
+    <div class="slide-header">
+      <span class="badge b-amber">Part 1 · 15 min</span>
+      <div>
+        <div class="slide-title">Why ES6? — Can We Write Cleaner JavaScript?</div>
+        <div class="slide-subtitle">Ask the class this question before showing the answer</div>
+      </div>
+    </div>
+
+    <div style="background:linear-gradient(135deg,#1e1b4b,#312e81);border-radius:14px;padding:24px;text-align:center">
+      <div style="font-size:13px;font-weight:700;color:#a5b4fc;letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px">Ask The Class</div>
+      <div style="font-size:21px;font-weight:800;color:#fff;line-height:1.4">Can we write cleaner JavaScript?</div>
+    </div>
+
+    <div class="grid-2">
+      <div class="compare-card old">
+        <div class="compare-label">❌ Old (ES5)</div>
+        <div class="editor" style="border-radius:8px">
+          <div class="editor-body" style="padding:10px 14px;font-size:12px">
+            <div><span class="j-kw">function</span> <span class="j-fn">greet</span><span class="e-txt">(</span><span class="j-var">name</span><span class="e-txt">) {</span></div>
+            <div><span class="e-ind1"></span><span class="j-ret">return</span> <span class="j-str">"Welcome "</span><span class="j-op">+</span><span class="j-var">name</span><span class="e-txt">;</span></div>
+            <div><span class="e-txt">}</span></div>
+          </div>
+        </div>
+        <div style="font-size:11px;color:#991b1b;margin-top:8px">3 lines · the function keyword · string concatenation with +</div>
+      </div>
+      <div class="compare-card new">
+        <div class="compare-label">✅ Modern (ES6)</div>
+        <div class="editor" style="border-radius:8px">
+          <div class="editor-body" style="padding:10px 14px;font-size:12px">
+            <div><span class="j-kw">const</span> <span class="j-fn">greet</span> <span class="j-op">=</span> <span class="e-txt">(</span><span class="j-var">name</span><span class="e-txt">)</span> <span class="j-op">=&gt;</span> <span class="j-tpl">`Welcome ${</span><span class="j-var">name</span><span class="j-tpl">}`</span><span class="e-txt">;</span></div>
+          </div>
+        </div>
+        <div style="font-size:11px;color:#166534;margin-top:8px">1 line · arrow function · template literal — same result</div>
+      </div>
+    </div>
+
+    <div class="grid-3">
+      <div class="card" style="text-align:center">
+        <div style="font-size:22px;margin-bottom:6px">➡️</div>
+        <div style="font-size:13px;font-weight:700;margin-bottom:3px">Arrow Functions</div>
+        <div style="font-size:11px;color:#666">Shorter function syntax</div>
+      </div>
+      <div class="card" style="text-align:center">
+        <div style="font-size:22px;margin-bottom:6px">📝</div>
+        <div style="font-size:13px;font-weight:700;margin-bottom:3px">Template Literals</div>
+        <div style="font-size:11px;color:#666">Embed variables directly in strings</div>
+      </div>
+      <div class="card" style="text-align:center">
+        <div style="font-size:22px;margin-bottom:6px">✨</div>
+        <div style="font-size:13px;font-weight:700;margin-bottom:3px">Cleaner Code</div>
+        <div style="font-size:11px;color:#666">Less code, same logic, fewer bugs</div>
+      </div>
+    </div>
+
+    <div class="tip-box">
+      <i class="ti ti-bulb tip-icon"></i>
+      <div class="tip-text">ES6 (ECMAScript 2015) wasn't a totally new language — it's JavaScript with better tools added. Everything you already know still works; you're just learning shortcuts that professional developers use every day.</div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-2"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Arrow Functions <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 3  ARROW FUNCTIONS ═══ -->
+  <div class="slide" id="slide-3">
+    <div class="slide-header">
+      <span class="badge b-blue">Part 2 · 20 min</span>
+      <div>
+        <div class="slide-title">Arrow Functions</div>
+        <div class="slide-subtitle">The most-used ES6 feature — replaces the function keyword in most cases</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="compare-card old">
+        <div class="compare-label">❌ Old way</div>
+        <div class="editor" style="border-radius:8px">
+          <div class="editor-body" style="padding:10px 14px;font-size:12px">
+            <div><span class="j-var">students</span><span class="j-prop">.forEach</span><span class="e-txt">(</span><span class="j-kw">function</span><span class="e-txt">(</span><span class="j-var">student</span><span class="e-txt">) {</span></div>
+            <div><span class="e-ind1"></span><span class="j-dom">console</span><span class="j-prop">.log</span><span class="e-txt">(</span><span class="j-var">student</span><span class="e-txt">);</span></div>
+            <div><span class="e-txt">});</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="compare-card new">
+        <div class="compare-label">✅ New way</div>
+        <div class="editor" style="border-radius:8px">
+          <div class="editor-body" style="padding:10px 14px;font-size:12px">
+            <div><span class="j-var">students</span><span class="j-prop">.forEach</span><span class="e-txt">(</span><span class="j-var">student</span> <span class="j-op">=&gt;</span> <span class="e-txt">{</span></div>
+            <div><span class="e-ind1"></span><span class="j-dom">console</span><span class="j-prop">.log</span><span class="e-txt">(</span><span class="j-var">student</span><span class="e-txt">);</span></div>
+            <div><span class="e-txt">});</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-label">what changed — spot the differences</div>
+      <div class="flow-step">
+        <div class="flow-num">1</div>
+        <div class="flow-content"><span class="flow-label">The function keyword disappears</span>function(student) becomes just (student) — or student without parentheses if there's only one parameter.</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">2</div>
+        <div class="flow-content"><span class="flow-label">An arrow =&gt; replaces it</span>The "fat arrow" sits between the parameters and the function body — that's where arrow functions get their name.</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">3</div>
+        <div class="flow-content"><span class="flow-label">Behaviour is identical</span>Both versions loop through the students array and log each one — arrow functions don't change WHAT the code does, only HOW it's written.</div>
+      </div>
+    </div>
+
+    <div class="success-box">
+      <i class="ti ti-check" style="color:#16a34a;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+      <div style="font-size:13px;color:#166534;line-height:1.6">You've already used callback functions everywhere — addEventListener, forEach, the submit handler. Arrow functions are simply a shorter way to write those same callbacks.</div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-3"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Arrow Function Syntax Rules <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 4  ARROW SYNTAX RULES ═══ -->
+  <div class="slide" id="slide-4">
+    <div class="slide-header">
+      <span class="badge b-blue">Part 2 · continued</span>
+      <div>
+        <div class="slide-title">Arrow Function Syntax Rules</div>
+        <div class="slide-subtitle">Click each form to see how it differs — there are 4 valid shapes depending on parameters and body</div>
+      </div>
+    </div>
+
+    <div class="line-explain">
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="j-var">()</span> <span class="j-op">=&gt;</span> <span class="e-txt">{...}</span></div>
+        <div class="lex-info">
+          <div class="lex-name">No Parameters</div>
+          <div class="lex-desc">Empty parentheses when the function takes no arguments. Example: <code>() =&gt; { console.log("hi"); }</code></div>
+          <div class="lex-detail">You always need () even with zero parameters — it's the only form where parentheses are mandatory regardless of parameter count.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="j-var">student</span> <span class="j-op">=&gt;</span> <span class="e-txt">{...}</span></div>
+        <div class="lex-info">
+          <div class="lex-name">One Parameter — Parentheses Optional</div>
+          <div class="lex-desc">With exactly ONE parameter, you can drop the parentheses entirely. <code>student =&gt; {...}</code> is the same as <code>(student) =&gt; {...}</code></div>
+          <div class="lex-detail">Both are valid — many style guides prefer keeping the parentheses for consistency, but dropping them is common in real code, especially for single-line arrow functions.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="e-txt">(</span><span class="j-var">a, b</span><span class="e-txt">)</span> <span class="j-op">=&gt;</span> <span class="e-txt">{...}</span></div>
+        <div class="lex-info">
+          <div class="lex-name">Multiple Parameters — Parentheses Required</div>
+          <div class="lex-desc">With TWO or more parameters, parentheses are mandatory. <code>(a, b) =&gt; a + b</code></div>
+          <div class="lex-detail">This is a common error source — students forget the () are required once you have more than one parameter, since one-parameter functions let you skip them.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="j-var">name</span> <span class="j-op">=&gt;</span> <span class="j-tpl">`Hi ${</span><span class="j-var">name</span><span class="j-tpl">}`</span></div>
+        <div class="lex-info">
+          <div class="lex-name">Implicit Return — No Braces, No "return"</div>
+          <div class="lex-desc">If the function body is a SINGLE expression, you can drop the curly braces {} AND the return keyword. The value after =&gt; is automatically returned.</div>
+          <div class="lex-detail">This only works for a single expression. If you need multiple lines or statements, you must use { } and an explicit return keyword.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="warn-box">
+        <i class="ti ti-alert-triangle" style="color:#d97706;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+        <div style="font-size:13px;color:#78350f;line-height:1.6"><strong>Common mistake:</strong> writing <code>name =&gt; { `Hi ${name}` }</code> with braces but no return — this returns <code>undefined</code> because braces require an explicit return.</div>
+      </div>
+      <div class="info-box">
+        <i class="ti ti-info-circle info-icon"></i>
+        <div class="info-text">Rule of thumb: <strong>one-liner = no braces, no return.</strong> Multiple lines = use braces AND return.</div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-4"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Destructuring <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 5  DESTRUCTURING ═══ -->
+  <div class="slide" id="slide-5">
+    <div class="slide-header">
+      <span class="badge b-purple">Part 3 · 20 min</span>
+      <div>
+        <div class="slide-title">Destructuring — Object Unpacking</div>
+        <div class="slide-subtitle">Pull multiple properties out of an object in one clean line</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="compare-card old">
+        <div class="compare-label">❌ Current way</div>
+        <div class="editor" style="border-radius:8px">
+          <div class="editor-body" style="padding:10px 14px;font-size:12px">
+            <div><span class="j-var">student</span><span class="j-prop">.name</span></div>
+            <div><span class="j-var">student</span><span class="j-prop">.email</span></div>
+            <div><span class="j-var">student</span><span class="j-prop">.course</span></div>
+          </div>
+        </div>
+        <div style="font-size:11px;color:#991b1b;margin-top:8px">Repeats "student." three times — every property access is a separate lookup</div>
+      </div>
+      <div class="compare-card new">
+        <div class="compare-label">✅ Modern way</div>
+        <div class="editor" style="border-radius:8px">
+          <div class="editor-body" style="padding:10px 14px;font-size:12px">
+            <div><span class="j-kw">const</span> <span class="e-txt">{</span><span class="j-var">name</span><span class="e-txt">,</span> <span class="j-var">email</span><span class="e-txt">,</span> <span class="j-var">course</span><span class="e-txt">}</span> <span class="j-op">=</span> <span class="j-var">student</span><span class="e-txt">;</span></div>
+          </div>
+        </div>
+        <div style="font-size:11px;color:#166534;margin-top:8px">One line — "unpacks" all 3 properties into standalone variables</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-label">visualising the unpack</div>
+      <div class="unpack-box">
+        <div class="obj-pill">
+          <div style="color:#d97706;font-weight:700;margin-bottom:4px">student = {</div>
+          <div style="padding-left:10px"><span class="j-key">name</span><span class="c-punc">:</span> <span class="j-str">"Rahul"</span><span class="c-punc">,</span></div>
+          <div style="padding-left:10px"><span class="j-key">email</span><span class="c-punc">:</span> <span class="j-str">"rahul@x.com"</span><span class="c-punc">,</span></div>
+          <div style="padding-left:10px"><span class="j-key">course</span><span class="c-punc">:</span> <span class="j-str">"MERN Stack"</span></div>
+          <div style="color:#d97706;font-weight:700;margin-top:4px">}</div>
+        </div>
+        <div class="unpack-arrow">⇒</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <span class="field-pill">name = "Rahul"</span>
+          <span class="field-pill">email = "rahul@x.com"</span>
+          <span class="field-pill">course = "MERN Stack"</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <i class="ti ti-info-circle info-icon"></i>
+      <div class="info-text"><strong>Object unpacking.</strong> The variable names inside {} must match the property names exactly — destructuring matches by NAME, not by position (unlike array destructuring, which matches by order).</div>
+    </div>
+
+    <div class="tip-box">
+      <i class="ti ti-bulb tip-icon"></i>
+      <div class="tip-text">You'll use destructuring constantly once you reach React — it's the standard way to pull values out of props and state objects.</div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-5"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Spread Operator <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 6  SPREAD ═══ -->
+  <div class="slide" id="slide-6">
+    <div class="slide-header">
+      <span class="badge b-teal">Part 4 · 15 min</span>
+      <div>
+        <div class="slide-title">Spread Operator — ...</div>
+        <div class="slide-subtitle">Expands an array's items so they can be combined with others</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">the code</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><div class="e-label">script.js</div></div>
+          <div class="editor-body">
+            <div><span class="e-ln">1</span> <span class="j-kw">let</span> <span class="j-var">frontend</span> <span class="j-op">=</span> <span class="e-txt">[</span><span class="j-str">"HTML"</span><span class="e-txt">,</span> <span class="j-str">"CSS"</span><span class="e-txt">];</span></div>
+            <div><span class="e-ln">2</span> <span class="j-kw">let</span> <span class="j-var">backend</span> <span class="j-op">=</span> <span class="e-txt">[</span><span class="j-str">"Node"</span><span class="e-txt">,</span> <span class="j-str">"Express"</span><span class="e-txt">];</span></div>
+            <div><span class="e-ln">3</span></div>
+            <div><span class="e-ln">4</span> <span class="j-kw">let</span> <span class="j-var">courses</span> <span class="j-op">=</span> <span class="e-txt">[</span><span class="j-op">...</span><span class="j-var">frontend</span><span class="e-txt">,</span> <span class="j-op">...</span><span class="j-var">backend</span><span class="e-txt">];</span></div>
+          </div>
+        </div>
+
+        <div class="line-explain">
+          <div class="lex-row" onclick="toggleLex(this)">
+            <div class="lex-code"><span class="j-op">...</span><span class="j-var">frontend</span></div>
+            <div class="lex-info">
+              <div class="lex-name">"Spread" the array open</div>
+              <div class="lex-desc">The three dots "unpack" the array's individual items rather than nesting the whole array as one element.</div>
+              <div class="lex-detail">Without ..., writing [frontend, backend] would give you a nested array: [["HTML","CSS"], ["Node","Express"]] — not what we want.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="section-label">merging arrays — visualised</div>
+        <div class="card" style="background:#0f172a;border:none">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <div class="arr-block">
+              <span class="arr-item frontend">HTML</span><span class="arr-item frontend">CSS</span>
+            </div>
+            <span class="merge-plus">+</span>
+            <div class="arr-block">
+              <span class="arr-item backend">Node</span><span class="arr-item backend">Express</span>
+            </div>
+          </div>
+          <div style="text-align:center;color:#d97706;font-size:18px;margin:10px 0">↓ spread &amp; merge ↓</div>
+          <div class="arr-block" style="justify-content:center">
+            <span class="arr-item frontend">HTML</span><span class="arr-item frontend">CSS</span><span class="arr-item backend">Node</span><span class="arr-item backend">Express</span>
+          </div>
+          <div style="text-align:center;font-size:11px;color:#94a3b8;margin-top:8px">courses = ["HTML","CSS","Node","Express"] — one flat array</div>
+        </div>
+
+        <div class="success-box">
+          <i class="ti ti-check" style="color:#16a34a;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+          <div style="font-size:13px;color:#166534;line-height:1.6"><strong>Merge Arrays.</strong> Spread is also used to copy arrays/objects (<code>[...original]</code>) without mutating the original — important for things like React state updates later.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-6"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Rest Operator <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 7  REST ═══ -->
+  <div class="slide" id="slide-7">
+    <div class="slide-header">
+      <span class="badge b-rose">Part 5 · 20 min</span>
+      <div>
+        <div class="slide-title">Rest Operator — ...</div>
+        <div class="slide-subtitle">Same three dots, opposite job — collects multiple arguments INTO one array</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">the code</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><div class="e-label">script.js</div></div>
+          <div class="editor-body">
+            <div><span class="e-ln">1</span> <span class="j-kw">function</span> <span class="j-fn">totalStudents</span><span class="e-txt">(</span><span class="j-op">...</span><span class="j-var">students</span><span class="e-txt">) {</span></div>
+            <div><span class="e-ln">2</span>   <span class="j-dom">console</span><span class="j-prop">.log</span><span class="e-txt">(</span><span class="j-var">students</span><span class="e-txt">);</span></div>
+            <div><span class="e-ln">3</span> <span class="e-txt">}</span></div>
+            <div><span class="e-ln">4</span></div>
+            <div><span class="e-ln">5</span> <span class="j-fn">totalStudents</span><span class="e-txt">(</span><span class="j-str">"Rahul"</span><span class="e-txt">,</span> <span class="j-str">"Priya"</span><span class="e-txt">,</span> <span class="j-str">"Arjun"</span><span class="e-txt">);</span></div>
+          </div>
+        </div>
+
+        <div class="line-explain">
+          <div class="lex-row" onclick="toggleLex(this)">
+            <div class="lex-code"><span class="j-op">...</span><span class="j-var">students</span></div>
+            <div class="lex-info">
+              <div class="lex-name">"Rest" of the arguments</div>
+              <div class="lex-desc">Collects any number of arguments passed to the function into a single array called students — works with 1, 3, or 100 arguments.</div>
+              <div class="lex-detail">Rest must be the LAST parameter in a function. You can have regular parameters before it: function intro(greeting, ...names) is valid.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="section-label">collecting arguments — visualised</div>
+        <div class="rest-collect">
+          <div style="font-size:11px;color:#94a3b8;margin-bottom:8px;font-family:monospace">totalStudents("Rahul", "Priya", "Arjun")</div>
+          <div class="rest-args">
+            <span class="rest-arg-in">"Rahul"</span>
+            <span class="rest-arg-in">"Priya"</span>
+            <span class="rest-arg-in">"Arjun"</span>
+          </div>
+          <div style="text-align:center;color:#d97706;font-size:18px;margin:8px 0">↓ ...students collects them ↓</div>
+          <div style="background:#13131f;border-radius:8px;padding:10px 14px;font-family:monospace;font-size:12px;color:#a4e400">
+            students = ["Rahul", "Priya", "Arjun"]
+          </div>
+        </div>
+
+        <div class="success-box">
+          <i class="ti ti-check" style="color:#16a34a;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+          <div style="font-size:13px;color:#166534;line-height:1.6"><strong>Collect multiple values.</strong> Rest is perfect when you don't know in advance how many arguments will be passed — no need for a fixed parameter list.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-7"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Spread vs Rest <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 8  SPREAD VS REST ═══ -->
+  <div class="slide" id="slide-8">
+    <div class="slide-header">
+      <span class="badge b-cyan">Spot the Diff</span>
+      <div>
+        <div class="slide-title">Spread vs Rest — Don't Confuse Them</div>
+        <div class="slide-subtitle">Same ... syntax. The direction of data flow tells you which one it is.</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card" style="border-top:4px solid #059669">
+        <div style="font-size:14px;font-weight:800;color:#059669;margin-bottom:8px"><i class="ti ti-arrows-split-2" style="margin-right:5px"></i>SPREAD — unpacks (one → many)</div>
+        <div class="editor" style="border-radius:8px">
+          <div class="editor-body" style="padding:10px 14px;font-size:12px">
+            <div><span class="e-txt">[</span><span class="j-op">...</span><span class="j-var">frontend</span><span class="e-txt">,</span> <span class="j-op">...</span><span class="j-var">backend</span><span class="e-txt">]</span></div>
+          </div>
+        </div>
+        <div style="font-size:12px;color:#166534;margin-top:8px;line-height:1.6">Used when <strong>calling / building</strong> something — inside array literals, object literals, or function CALLS. Takes one array and spreads its contents out.</div>
+      </div>
+      <div class="card" style="border-top:4px solid #d97706">
+        <div style="font-size:14px;font-weight:800;color:#d97706;margin-bottom:8px"><i class="ti ti-arrows-join-2" style="margin-right:5px"></i>REST — collects (many → one)</div>
+        <div class="editor" style="border-radius:8px">
+          <div class="editor-body" style="padding:10px 14px;font-size:12px">
+            <div><span class="j-kw">function</span> <span class="j-fn">total</span><span class="e-txt">(</span><span class="j-op">...</span><span class="j-var">students</span><span class="e-txt">) {}</span></div>
+          </div>
+        </div>
+        <div style="font-size:12px;color:#92400e;margin-top:8px;line-height:1.6">Used when <strong>defining</strong> something — inside a function's parameter list. Takes many arguments and collects them into one array.</div>
+      </div>
+    </div>
+
+    <table class="tag-table">
+      <thead><tr><th>Question</th><th>Spread</th><th>Rest</th></tr></thead>
+      <tbody>
+        <tr><td>Where does it appear?</td><td>Array/object literals, function calls</td><td>Function parameter list only</td></tr>
+        <tr><td>Direction of data</td><td>Array → individual items</td><td>Individual items → array</td></tr>
+        <tr><td>Position rule</td><td>Can appear anywhere</td><td>Must be the LAST parameter</td></tr>
+        <tr><td>Memory trick</td><td>"Spread it OUT"</td><td>"REST collects what's left"</td></tr>
+      </tbody>
+    </table>
+
+    <div class="tip-box">
+      <i class="ti ti-bulb tip-icon"></i>
+      <div class="tip-text"><strong>Quick test for students:</strong> if the ... is inside [ ] or ( ) when CALLING a function — it's spread. If it's inside ( ) when DEFINING a function — it's rest.</div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-8"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Live Lab <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 9  LIVE LAB ═══ -->
+  <div class="slide" id="slide-9">
+    <div class="slide-header">
+      <span class="badge b-orange">Live Lab</span>
+      <div>
+        <div class="slide-title">Try All 5 Features Yourself</div>
+        <div class="slide-subtitle">Interactive playground — type a value, run it, see the ES6 transformation live</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <!-- Arrow function lab -->
+      <div class="sandbox-panel">
+        <div class="sandbox-label">➡️ Arrow Function — type a name</div>
+        <input class="sb-input" id="lab-arrow-input" placeholder="e.g. Rahul" value="Rahul">
+        <button class="sb-btn" style="margin-top:8px" onclick="runArrowLab()">Run greet =&gt;</button>
+        <div class="sb-output" id="lab-arrow-output"></div>
+      </div>
+
+      <!-- Template literal lab -->
+      <div class="sandbox-panel">
+        <div class="sandbox-label">📝 Template Literal — name + course</div>
+        <div style="display:flex;gap:6px">
+          <input class="sb-input" id="lab-tpl-name" placeholder="Name" value="Priya">
+          <input class="sb-input" id="lab-tpl-course" placeholder="Course" value="Java">
+        </div>
+        <button class="sb-btn" style="margin-top:8px" onclick="runTplLab()">Run Template</button>
+        <div class="sb-output" id="lab-tpl-output"></div>
+      </div>
+
+      <!-- Destructuring lab -->
+      <div class="sandbox-panel">
+        <div class="sandbox-label">📦 Destructuring — unpack an object</div>
+        <div class="sb-output" style="margin-top:0;color:#94a3b8">{ name: "Arjun", course: "Python", fees: 15000 }</div>
+        <button class="sb-btn" style="margin-top:8px" onclick="runDestructureLab()">Run const {name, course, fees} = student</button>
+        <div class="sb-output" id="lab-destructure-output"></div>
+      </div>
+
+      <!-- Spread lab -->
+      <div class="sandbox-panel">
+        <div class="sandbox-label">🔀 Spread — merge two arrays</div>
+        <div class="sb-output" style="margin-top:0;color:#94a3b8">frontend = ["HTML","CSS"] · backend = ["Node","Express"]</div>
+        <button class="sb-btn" style="margin-top:8px" onclick="runSpreadLab()">Run [...frontend, ...backend]</button>
+        <div class="sb-output" id="lab-spread-output"></div>
+      </div>
+    </div>
+
+    <!-- Rest lab full width -->
+    <div class="sandbox-panel">
+      <div class="sandbox-label">🧺 Rest Operator — add as many names as you like, comma-separated</div>
+      <input class="sb-input" id="lab-rest-input" placeholder="e.g. Rahul, Priya, Arjun, Sneha" value="Rahul, Priya, Arjun, Sneha">
+      <button class="sb-btn" style="margin-top:8px" onclick="runRestLab()">Run totalStudents(...students)</button>
+      <div class="sb-output" id="lab-rest-output"></div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-9"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">ES6 Cheat Sheet <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 10  CHEAT SHEET ═══ -->
+  <div class="slide" id="slide-10">
+    <div class="slide-header">
+      <span class="badge b-purple">Reference</span>
+      <div>
+        <div class="slide-title">ES6 Cheat Sheet — All 5 Features</div>
+        <div class="slide-subtitle">Bookmark this slide — old vs new syntax side by side</div>
+      </div>
+    </div>
+
+    <table class="tag-table">
+      <thead><tr><th>Feature</th><th>Old (ES5)</th><th>New (ES6)</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Arrow Function</strong></td>
+          <td><code>function(x){ return x; }</code></td>
+          <td><code>x =&gt; x</code></td>
+        </tr>
+        <tr>
+          <td><strong>Template Literal</strong></td>
+          <td><code>"Hi " + name + "!"</code></td>
+          <td><code>`Hi ${name}!`</code></td>
+        </tr>
+        <tr>
+          <td><strong>Destructuring</strong></td>
+          <td><code>let n = obj.name;</code></td>
+          <td><code>const {name} = obj;</code></td>
+        </tr>
+        <tr>
+          <td><strong>Spread</strong></td>
+          <td><code>arr1.concat(arr2)</code></td>
+          <td><code>[...arr1, ...arr2]</code></td>
+        </tr>
+        <tr>
+          <td><strong>Rest</strong></td>
+          <td><code>arguments</code> object (messy)</td>
+          <td><code>function f(...args){}</code></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="grid-2">
+      <div class="success-box">
+        <i class="ti ti-check" style="color:#16a34a;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+        <div style="font-size:13px;color:#166534;line-height:1.6">All 5 of these features will appear repeatedly in the Course Management Dashboard we build in the next 90 minutes — especially arrow functions and template literals.</div>
+      </div>
+      <div class="info-box">
+        <i class="ti ti-info-circle info-icon"></i>
+        <div class="info-text">You don't need to memorise this table — write code, get stuck, come back here. Recognition comes from repetition, not memorisation.</div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-10"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Quiz <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 11  QUIZ ═══ -->
+  <div class="slide" id="slide-11">
+    <div class="slide-header">
+      <span class="badge b-slate">Quiz</span>
+      <div>
+        <div class="slide-title">Quick-Fire Quiz</div>
+        <div class="slide-subtitle">4 questions covering ES6 fundamentals from the First 90 Minutes</div>
+      </div>
+    </div>
+    <div id="quiz-container"></div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-11"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Wrap Up <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 12  WRAP UP ═══ -->
+  <div class="slide" id="slide-12">
+    <div class="slide-header">
+      <span class="badge b-teal">Wrap-Up</span>
+      <div>
+        <div class="slide-title">First 90 Minutes Complete! 🎉</div>
+        <div class="slide-subtitle">5 ES6 features mastered — now ready to build the Course Management Dashboard</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-label">es6 features earned</div>
+        <div style="display:flex;flex-direction:column;gap:5px">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:#dcfce7;border-radius:8px;font-size:12px;font-weight:700;color:#166534"><span><i class="ti ti-check" style="margin-right:5px"></i>Arrow Functions</span><span class="badge b-green" style="font-size:10px">✓</span></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:#dcfce7;border-radius:8px;font-size:12px;font-weight:700;color:#166534"><span><i class="ti ti-check" style="margin-right:5px"></i>Template Literals</span><span class="badge b-green" style="font-size:10px">✓</span></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:#dcfce7;border-radius:8px;font-size:12px;font-weight:700;color:#166534"><span><i class="ti ti-check" style="margin-right:5px"></i>Destructuring</span><span class="badge b-green" style="font-size:10px">✓</span></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:#dcfce7;border-radius:8px;font-size:12px;font-weight:700;color:#166534"><span><i class="ti ti-check" style="margin-right:5px"></i>Spread Operator</span><span class="badge b-green" style="font-size:10px">✓</span></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:#dcfce7;border-radius:8px;font-size:12px;font-weight:700;color:#166534"><span><i class="ti ti-check" style="margin-right:5px"></i>Rest Operator</span><span class="badge b-green" style="font-size:10px">✓</span></div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">second 90 minutes preview</div>
+        <div style="background:linear-gradient(135deg,#0f172a,#1e3a5f);border-radius:12px;padding:16px;color:white">
+          <div style="font-size:13px;font-weight:700;margin-bottom:8px">🗓️ Next — Course Management Dashboard</div>
+          <div style="font-size:12px;opacity:.8;line-height:1.8">
+            ✦ Create the Course array &amp; object<br>
+            ✦ map() — render Course Cards<br>
+            ✦ filter() — Search Course<br>
+            ✦ find() — Find one specific course<br>
+            ✦ Statistics — total, average fees, highest/lowest
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="background:linear-gradient(135deg,#d97706,#92400e);border-radius:12px;padding:16px;color:white;text-align:center">
+      <div style="font-size:16px;font-weight:800;margin-bottom:4px">🏆 ES6 Foundations Complete!</div>
+      <div style="font-size:13px;opacity:.85">Arrow functions, template literals, destructuring, spread, and rest — these five tools will appear in literally every JavaScript file you write from here on. Take a short break, then let's build Course Management.</div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-12"></div>
+      <button class="nav-btn" disabled>Done <i class="ti ti-flag"></i></button>
+    </div>
+  </div>
+
+</div><!-- /.wrapper -->
+
+<script>
+  var current  = 0;
+  var total    = 13;
+  var quizInit = false;
+
+  /* ── Line explainer ── */
+  function toggleLex(row) {
+    var was = row.classList.contains('active');
+    document.querySelectorAll('.lex-row.active').forEach(function(r){ r.classList.remove('active'); });
+    if (!was) row.classList.add('active');
+  }
+
+  /* ── Live Lab functions ── */
+  function runArrowLab() {
+    var name = document.getElementById('lab-arrow-input').value.trim() || 'Friend';
+    var greet = n => `Welcome ${n}`;
+    document.getElementById('lab-arrow-output').textContent = '"' + greet(name) + '"';
+  }
+  function runTplLab() {
+    var name = document.getElementById('lab-tpl-name').value.trim() || 'Student';
+    var course = document.getElementById('lab-tpl-course').value.trim() || 'a course';
+    var out = `${name} is enrolled in ${course}`;
+    document.getElementById('lab-tpl-output').textContent = '"' + out + '"';
+  }
+  function runDestructureLab() {
+    var student = { name: "Arjun", course: "Python", fees: 15000 };
+    var { name, course, fees } = student;
+    document.getElementById('lab-destructure-output').innerHTML =
+      'name = "' + name + '"<br>course = "' + course + '"<br>fees = ' + fees;
+  }
+  function runSpreadLab() {
+    var frontend = ["HTML", "CSS"];
+    var backend = ["Node", "Express"];
+    var courses = [...frontend, ...backend];
+    document.getElementById('lab-spread-output').textContent = '[' + courses.map(c => '"' + c + '"').join(', ') + ']';
+  }
+  function runRestLab() {
+    var raw = document.getElementById('lab-rest-input').value;
+    var names = raw.split(',').map(n => n.trim()).filter(n => n.length > 0);
+    function totalStudents(...students) { return students; }
+    var result = totalStudents(...names);
+    document.getElementById('lab-rest-output').innerHTML =
+      '[' + result.map(s => '"' + s + '"').join(', ') + ']<br><span style="color:#94a3b8">→ ' + result.length + ' students collected</span>';
+  }
+
+  /* ── Quiz ── */
+  var quizData = [
+    {
+      q: "Which is the correct arrow function rewrite of: function(x) { return x * 2; }",
+      opts: [
+        "x => { x * 2 }",
+        "x => x * 2",
+        "(x) -> x * 2",
+        "function x => x * 2"
+      ],
+      ans: 1,
+      exp: "For a single-expression function body, arrow functions allow an 'implicit return' — no curly braces and no return keyword needed. x => x * 2 automatically returns x * 2. Option A is wrong because braces require an explicit return keyword."
+    },
+    {
+      q: "What is the key difference between the Spread operator and the Rest operator, even though both use '...'?",
+      opts: [
+        "Spread only works with strings, Rest only works with numbers",
+        "Spread expands an array into individual items; Rest collects individual items into an array",
+        "There is no difference — they are the same operator",
+        "Spread is used in CSS, Rest is used in JavaScript"
+      ],
+      ans: 1,
+      exp: "Spread (...) takes an existing array/object and 'unpacks' its contents — used in array literals, object literals, or function calls. Rest (...) does the opposite — it 'collects' multiple function arguments into a single array, and only appears in a function's parameter list."
+    },
+    {
+      q: "const { name, email } = student; — what does this line do?",
+      opts: [
+        "Creates a new object called student with name and email properties",
+        "Deletes the name and email properties from student",
+        "Unpacks the name and email properties from the student object into two standalone variables",
+        "Converts the student object into an array"
+      ],
+      ans: 2,
+      exp: "This is destructuring assignment. It reads the name and email properties FROM the student object and creates two new standalone variables (name and email) holding those values — without needing student.name and student.email every time you use them."
+    },
+    {
+      q: "A student writes: function greet(...names) { } greet(\"Rahul\", \"Priya\", \"Sam\"); What will the value of 'names' be inside the function?",
+      opts: [
+        "Just the string \"Rahul\" (the first argument only)",
+        "An array: [\"Rahul\", \"Priya\", \"Sam\"]",
+        "Three separate variables, not collected together",
+        "undefined, because rest doesn't work with strings"
+      ],
+      ans: 1,
+      exp: "The rest parameter ...names collects ALL arguments passed to the function into a single array, regardless of how many were passed. Here, names becomes [\"Rahul\", \"Priya\", \"Sam\"] — a real array you can loop over with forEach, map, etc."
+    }
+  ];
+  var quizAnswered = [];
+
+  function renderQuiz() {
+    var c = document.getElementById('quiz-container'); c.innerHTML = '';
+    quizData.forEach(function(q, i) {
+      var d = document.createElement('div'); d.style.cssText = 'margin-bottom:18px';
+      d.innerHTML = '<div style="font-size:13px;font-weight:600;margin-bottom:6px">'+(i+1)+'. '+q.q+'</div>';
+      q.opts.forEach(function(opt, j) {
+        var btn = document.createElement('button'); btn.className = 'quiz-option';
+        btn.innerHTML = String.fromCharCode(65+j)+'. '+opt;
+        btn.onclick = function() {
+          if (quizAnswered[i]) return; quizAnswered[i] = true;
+          var btns = d.querySelectorAll('.quiz-option');
+          btns.forEach(function(b,k){ b.disabled=true; if(k===q.ans) b.classList.add('correct'); else if(k===j) b.classList.add('wrong'); });
+          var fb = d.querySelector('.quiz-feedback');
+          fb.innerHTML = (j===q.ans?'✅ Correct! ':'❌ Not quite. ')+q.exp;
+          fb.className = 'quiz-feedback '+(j===q.ans?'correct':'wrong');
+        };
+        d.appendChild(btn);
+      });
+      var fb = document.createElement('div'); fb.className = 'quiz-feedback'; d.appendChild(fb);
+      c.appendChild(d);
+    });
+  }
+
+  /* ── Navigation ── */
+  function goSlide(n) {
+    document.getElementById('slide-'+current).classList.remove('active');
+    current = n;
+    document.getElementById('slide-'+current).classList.add('active');
+    updateDots();
+    document.getElementById('slide-counter').textContent = (current+1)+' / '+total;
+    if (n===11 && !quizInit) { renderQuiz(); quizInit=true; }
+    window.scrollTo(0,0);
+  }
+  function nextSlide() { if (current < total-1) goSlide(current+1); }
+  function prevSlide() { if (current > 0) goSlide(current-1); }
+
+  function updateDots() {
+    for (var s=0; s<total; s++) {
+      var el = document.getElementById('dots-'+s); if (!el) continue;
+      el.innerHTML = '';
+      for (var d=0; d<total; d++) {
+        var dot = document.createElement('div');
+        dot.className = 'dot'+(d===current?' active':'');
+        el.appendChild(dot);
+      }
+    }
+  }
+  updateDots();
+</script>
+</body>
+</html>
