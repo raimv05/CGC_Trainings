@@ -1,0 +1,1430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Git &amp; GitHub — Version Control for Developers | SkillHub LMS</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f4f5f7; color: #1a1a1a;
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; padding: 2rem 1rem;
+  }
+  .wrapper {
+    width: 100%; max-width: 920px; background: #fff;
+    border-radius: 16px; box-shadow: 0 2px 20px rgba(0,0,0,0.09); overflow: hidden;
+  }
+  .top-bar {
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    color: #fff; padding: 14px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .top-bar-title { font-size: 15px; font-weight: 600; }
+  .top-bar-sub   { font-size: 12px; opacity: .55; margin-top: 2px; }
+  .slide-counter { font-size: 13px; opacity: .6; font-variant-numeric: tabular-nums; }
+  .slide { display: none; padding: 1.75rem 2rem; min-height: 500px; flex-direction: column; gap: 1.2rem; }
+  .slide.active { display: flex; }
+  .slide-header { display: flex; align-items: center; gap: 10px; padding-bottom: 1rem; border-bottom: 1px solid #e8e8e8; }
+  .slide-title    { font-size: 20px; font-weight: 700; color: #111; }
+  .slide-subtitle { font-size: 13px; color: #666; margin-top: 2px; }
+
+  /* ── Badges ── */
+  .badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+  .b-blue   { background:#dbeafe; color:#1d4ed8; }
+  .b-teal   { background:#d1fae5; color:#065f46; }
+  .b-purple { background:#ede9fe; color:#5b21b6; }
+  .b-amber  { background:#fef3c7; color:#92400e; }
+  .b-green  { background:#dcfce7; color:#166534; }
+  .b-slate  { background:#e2e8f0; color:#334155; }
+  .b-rose   { background:#ffe4e6; color:#9f1239; }
+  .b-orange { background:#ffedd5; color:#9a3412; }
+  .b-indigo { background:#e0e7ff; color:#3730a3; }
+  .b-cyan   { background:#cffafe; color:#164e63; }
+  .b-pink   { background:#fce7f3; color:#9d174d; }
+  .b-yellow { background:#fef9c3; color:#854d0e; }
+  .b-js     { background:#fef9c3; color:#854d0e; }
+
+  /* ── Layout ── */
+  .section-label { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 8px; }
+  .card { background: #fff; border: 1px solid #e8e8e8; border-radius: 12px; padding: 1rem 1.25rem; }
+  .card-gray { background: #f8f9fa; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+  /* ── Code Editor (Dracula — identical to ref) ── */
+  .editor { background: #1e1e2e; border-radius: 12px; overflow: hidden; font-family: 'SFMono-Regular', Consolas, 'Courier New', monospace; }
+  .editor-bar { background: #13131f; padding: 9px 14px; display: flex; align-items: center; gap: 6px; }
+  .e-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .e-red { background:#ff5f57; } .e-yellow { background:#febc2e; } .e-green { background:#28c840; }
+  .e-label { font-size: 12px; color: #6272a4; margin-left: 4px; font-family: -apple-system, sans-serif; }
+  .editor-body { padding: 14px 18px; font-size: 12.5px; line-height: 1.8; }
+  .e-ln   { color: #44475a; font-size: 11px; display: inline-block; width: 22px; user-select: none; }
+  .e-tag  { color: #ff79c6; }
+  .e-att  { color: #50fa7b; }
+  .e-val  { color: #f1fa8c; }
+  .e-txt  { color: #f8f8f2; }
+  .e-cmt  { color: #6272a4; font-style: italic; }
+  .e-new  { color: #80ffea; }
+  .j-kw   { color: #ff79c6; font-weight: 700; }
+  .j-fn   { color: #50fa7b; }
+  .j-str  { color: #f1fa8c; }
+  .j-num  { color: #bd93f9; }
+  .j-var  { color: #80ffea; }
+  .j-op   { color: #ff79c6; }
+  .j-dom  { color: #8be9fd; }
+  .j-prop { color: #50fa7b; }
+  .j-com  { color: #6272a4; font-style: italic; }
+  .j-ret  { color: #ff79c6; font-weight: 700; }
+  .j-key  { color: #ff79c6; }
+  .c-punc { color: #f8f8f2; }
+  .e-ind1 { display: inline-block; width: 20px; }
+  .e-ind2 { display: inline-block; width: 40px; }
+  .e-ind3 { display: inline-block; width: 60px; }
+  .e-ind4 { display: inline-block; width: 80px; }
+  .e-row  { display: flex; gap: 8px; }
+
+  /* ── Browser frame ── */
+  .browser { border-radius: 12px; overflow: hidden; border: 1px solid #e0e0e0; }
+  .browser-bar { background: #f1f3f4; padding: 9px 14px; display: flex; align-items: center; gap: 7px; border-bottom: 1px solid #e0e0e0; }
+  .b-dot2 { width: 10px; height: 10px; border-radius: 50%; }
+  .b-r { background:#ff5f57; } .b-y { background:#febc2e; } .b-g { background:#28c840; }
+  .b-url { flex:1; background:#fff; border:1px solid #dadce0; border-radius:20px; padding:4px 14px; font-size:12px; color:#555; }
+
+  /* ── Tables ── */
+  .tag-table { border-collapse: collapse; width: 100%; }
+  .tag-table th { background: #f1f5f9; font-size: 12px; font-weight: 700; text-align: left; padding: 10px 14px; color: #475569; border-bottom: 2px solid #e2e8f0; }
+  .tag-table td { font-size: 13px; padding: 10px 14px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+  .tag-table tr:last-child td { border-bottom: none; }
+  .tag-table tr:hover td { background: #f8f9fa; }
+
+  /* ── Quiz ── */
+  .quiz-option { border: 1px solid #dee2e6; border-radius: 8px; padding: 10px 14px; font-size: 13px; cursor: pointer; margin-bottom: 6px; transition: all .15s; background: transparent; width: 100%; text-align: left; color: #1a1a1a; }
+  .quiz-option:hover:not(:disabled) { background: #f8f9fa; }
+  .quiz-option.correct { background: #d1fae5; border-color: #059669; color: #065f46; }
+  .quiz-option.wrong   { background: #fee2e2; border-color: #dc2626; color: #991b1b; }
+  .quiz-feedback { display: none; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-top: 4px; }
+  .quiz-feedback.correct { background: #d1fae5; color: #065f46; display: block; }
+  .quiz-feedback.wrong   { background: #fee2e2; color: #991b1b; display: block; }
+
+  /* ── Activity / challenge ── */
+  .activity-box { border: 2px dashed #a5b4fc; background: #eef2ff; border-radius: 12px; padding: 14px 18px; }
+  .activity-title { font-size: 13px; font-weight: 700; color: #3730a3; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .challenge-box { border: 2px dashed #f9a8d4; background: #fdf2f8; border-radius: 12px; padding: 14px 18px; }
+  .challenge-title { font-size: 13px; font-weight: 700; color: #9f1239; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+
+  /* ── Tip / info / warn / success ── */
+  .tip-box   { display:flex; gap:10px; align-items:flex-start; background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:10px 14px; }
+  .tip-icon  { color:#d97706; font-size:18px; flex-shrink:0; margin-top:1px; }
+  .tip-text  { font-size:13px; color:#92400e; line-height:1.6; }
+  .info-box  { display:flex; gap:10px; align-items:flex-start; background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:10px 14px; }
+  .info-icon { color:#2563eb; font-size:18px; flex-shrink:0; margin-top:1px; }
+  .info-text { font-size:13px; color:#1e40af; line-height:1.6; }
+  .warn-box  { display:flex; gap:10px; align-items:flex-start; background:#fef9ee; border:1px solid #fcd34d; border-radius:10px; padding:10px 14px; }
+  .success-box { display:flex; gap:10px; align-items:flex-start; background:#f0fdf4; border:1px solid #86efac; border-radius:10px; padding:10px 14px; }
+
+  /* ── Line explainer (JS amber accent) ── */
+  .lex-row { display:flex; align-items:stretch; cursor:pointer; transition:background .12s; border-bottom:1px solid #f0f0f0; }
+  .lex-row:last-child { border-bottom:none; }
+  .lex-row:hover { background:#f8f9fa; }
+  .lex-row.active { background:#fefce8; border-left:3px solid #d97706; }
+  .lex-code { background:#1e1e2e; padding:10px 14px; font-family:'SFMono-Regular',Consolas,monospace; font-size:12px; min-width:200px; flex-shrink:0; display:flex; align-items:center; }
+  .lex-info { padding:10px 14px; flex:1; }
+  .lex-name   { font-size:13px; font-weight:700; color:#d97706; margin-bottom:2px; }
+  .lex-desc   { font-size:12px; color:#555; line-height:1.55; }
+  .lex-detail { display:none; font-size:12px; color:#92400e; margin-top:4px; padding-top:4px; border-top:1px dashed #fde68a; }
+  .lex-row.active .lex-detail { display:block; }
+  .line-explain { border:1px solid #e8e8e8; border-radius:10px; overflow:hidden; }
+
+  /* ── Reveal ── */
+  .reveal-btn { background:#f1f3f5; border:1px solid #dee2e6; border-radius:8px; padding:7px 14px; font-size:13px; cursor:pointer; color:#333; transition:background .15s; }
+  .reveal-btn:hover { background:#e9ecef; }
+  .reveal-content { display:none; margin-top:8px; }
+  .reveal-content.open { display:block; }
+
+  /* ── Nav (JS amber) ── */
+  .nav-row { display:flex; align-items:center; justify-content:space-between; margin-top:auto; padding-top:1rem; border-top:1px solid #f0f0f0; }
+  .nav-btn { display:inline-flex; align-items:center; gap:6px; padding:9px 18px; border:1px solid #dee2e6; border-radius:8px; background:transparent; font-size:13px; cursor:pointer; color:#333; transition:background .15s; }
+  .nav-btn:hover:not(:disabled) { background:#f1f3f5; }
+  .nav-btn:disabled { opacity:.35; cursor:default; }
+  .nav-btn.primary { background:#d97706; border-color:transparent; color:#fff; }
+  .nav-btn.primary:hover { background:#b45309; }
+  .progress-dots { display:flex; gap:6px; align-items:center; }
+  .dot { width:7px; height:7px; border-radius:50%; background:#dee2e6; transition:all .2s; }
+  .dot.active { width:20px; border-radius:4px; background:#d97706; }
+
+  /* ── Home grid ── */
+  .home-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .home-card { background:#fff; border:1px solid #e8e8e8; border-radius:12px; padding:1rem 1.25rem; cursor:pointer; transition:all .15s; }
+  .home-card:hover { border-color:#d97706; box-shadow:0 2px 8px rgba(217,119,6,.12); }
+  .home-card-title { font-size:15px; font-weight:700; margin:6px 0 2px; }
+  .home-card-sub   { font-size:12px; color:#666; }
+
+  code { font-family:'SFMono-Regular',Consolas,monospace; font-size:12px; background:#f1f3f5; padding:1px 6px; border-radius:4px; border:1px solid #dee2e6; }
+
+  /* ── Checklist ── */
+  .check-item { display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:10px; border:1px solid #e8e8e8; font-size:13px; cursor:pointer; transition:all .15s; user-select:none; }
+  .check-item:hover { background:#f8f9fa; }
+  .check-item.done { background:#f0fdf4; border-color:#86efac; }
+  .check-circle { width:22px; height:22px; border-radius:50%; border:2px solid #dee2e6; display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0; transition:all .2s; color:transparent; }
+  .check-item.done .check-circle { background:#22c55e; border-color:#22c55e; color:#fff; }
+
+  /* ── Console panel (identical to ref) ── */
+  .console-panel { background: #0d1117; border-radius: 12px; overflow: hidden; font-family: 'SFMono-Regular', Consolas, monospace; }
+  .console-bar   { background: #161b22; padding: 9px 14px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #30363d; }
+  .console-tab   { font-size: 12px; color: #8b949e; padding-bottom: 3px; }
+  .console-tab.active { color: #f0f6fc; border-bottom: 2px solid #d97706; }
+  .console-body  { padding: 12px 16px; font-size: 12.5px; line-height: 2; }
+  .con-log  { color: #f0f6fc; }
+  .con-str  { color: #a5d6ff; }
+  .con-num  { color: #79c0ff; }
+  .con-arrow { color: #3fb950; font-size: 11px; }
+  .con-prompt-sym { color: #3fb950; }
+  .con-prompt-row { display: flex; align-items: center; gap: 8px; }
+  .con-arr  { color: #d2a8ff; }
+  .con-key  { color: #7ee787; }
+  .js-logo { width: 44px; height: 44px; background: #f0db4f; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-family: 'SFMono-Regular', Consolas, monospace; font-size: 16px; font-weight: 900; color: #323330; flex-shrink: 0; }
+
+  /* ── Flow steps (identical to ref) ── */
+  .flow-step { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; border-bottom: 1px dashed #e2e8f0; }
+  .flow-step:last-child { border-bottom: none; }
+  .flow-num { width: 28px; height: 28px; border-radius: 50%; background: #d97706; color: white; font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+  .flow-content { flex: 1; font-size: 13px; color: #333; line-height: 1.6; }
+  .flow-label { font-weight: 700; color: #d97706; margin-bottom: 2px; }
+
+  /* ── Bootstrap form mockup (identical to ref) ── */
+  .bs-form-group { margin-bottom: 14px; }
+  .bs-label { display: block; font-size: 12px; font-weight: 600; color: #333; margin-bottom: 4px; }
+  .bs-input { width: 100%; padding: 7px 12px; border: 1px solid #ced4da; border-radius: 5px; font-size: 13px; font-family: -apple-system, sans-serif; color: #333; }
+  .bs-input:focus { outline: none; border-color: #86b7fe; }
+  .bs-btn-submit { background: #0d6efd; color: white; border: none; border-radius: 5px; padding: 8px 22px; font-size: 13px; font-weight: 700; cursor: pointer; width: 100%; }
+  .bs-btn-submit:hover { background: #0b5ed7; }
+
+  /* ══ DAY 9 — ARRAYS / OBJECTS SPECIFIC ══ */
+
+  /* Array box visualisation */
+  .array-box { display: inline-flex; border: 2px solid #1e293b; border-radius: 8px; overflow: hidden; }
+  .array-cell { padding: 10px 16px; font-family: monospace; font-size: 13px; font-weight: 700; border-right: 1px solid #1e293b; position: relative; min-width: 60px; text-align: center; }
+  .array-cell:last-child { border-right: none; }
+  .array-cell .idx { position: absolute; top: -18px; left: 50%; transform: translateX(-50%); font-size: 10px; color: #888; font-weight: 400; }
+  .array-cell.empty { background: #f8f9fa; color: #cbd5e1; font-style: italic; }
+  .array-cell.filled { background: #dbeafe; color: #1e40af; }
+  .array-cell.removed { background: #fee2e2; color: #dc2626; text-decoration: line-through; opacity: .5; }
+
+  /* Object box visualisation */
+  .obj-box { background: #1e1e2e; border-radius: 10px; padding: 14px 18px; font-family: monospace; font-size: 13px; }
+  .obj-key-row { display: flex; gap: 8px; padding: 3px 0; }
+
+  /* Why array problem cards */
+  .bad-var-row { display: flex; gap: 8px; align-items: center; padding: 6px 0; font-family: monospace; font-size: 12px; opacity: .8; }
+
+  /* Interactive array builder */
+  .array-builder { background: #0f172a; border-radius: 12px; padding: 16px 18px; }
+  .ab-controls { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+  .ab-btn { background: #1e293b; border: 1px solid #334155; color: #f0db4f; font-family: monospace; font-size: 12px; font-weight: 700; padding: 6px 14px; border-radius: 6px; cursor: pointer; transition: all .15s; }
+  .ab-btn:hover { background: #334155; border-color: #d97706; }
+  .ab-btn.danger { color: #ff7b86; }
+  .ab-visual { display: flex; gap: 6px; flex-wrap: wrap; min-height: 50px; align-items: center; padding: 10px; background: #1e1e2e; border-radius: 8px; }
+  .ab-item { background: #2563eb; color: white; padding: 8px 14px; border-radius: 6px; font-family: monospace; font-size: 12px; font-weight: 700; position: relative; animation: popIn .25s ease; }
+  .ab-item .ab-idx { position: absolute; top: -16px; left: 0; font-size: 9px; color: #6272a4; }
+  @keyframes popIn { from { transform: scale(0.5); opacity:0; } to { transform: scale(1); opacity:1; } }
+  .ab-empty-msg { color: #6272a4; font-family: monospace; font-size: 12px; font-style: italic; }
+
+  /* Method explainer chips */
+  .method-chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 20px; font-family: monospace; font-size: 12px; font-weight: 700; }
+
+  /* Object property explorer */
+  .obj-prop-row { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 8px; border: 1px solid #e8e8e8; cursor: pointer; transition: all .15s; }
+  .obj-prop-row:hover { background: #f8f9fa; border-color: #d97706; }
+
+  /* ══ COURSE CATALOG — DOM / SEARCH / DELETE / LOCAL STORAGE SPECIFIC ══ */
+
+  .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px; }
+
+  /* Project structure pipeline */
+  .pipeline { display: flex; flex-direction: column; }
+  .pl-step { display: flex; align-items: center; gap: 12px; position: relative; padding: 8px 0; }
+  .pl-dot { width: 12px; height: 12px; border-radius: 50%; background: #cbd5e1; flex-shrink: 0; z-index: 1; }
+  .pl-step.done .pl-dot { background: #22c55e; }
+  .pl-step.today .pl-dot { background: #d97706; box-shadow: 0 0 0 4px #fde68a; }
+  .pl-line { position: absolute; left: 5px; top: 20px; bottom: -8px; width: 2px; background: #e2e8f0; }
+  .pl-step:last-child .pl-line { display: none; }
+  .pl-label { font-size: 13px; font-weight: 700; color: #333; }
+  .pl-step.done .pl-label { color: #16a34a; }
+  .pl-step.today .pl-label { color: #b45309; }
+  .pl-tag { margin-left: auto; font-size: 10px; }
+
+  /* Bootstrap-style course card mockup */
+  .cc-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .cc-card { background: #fff; border: 1px solid #e8e8e8; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,.05); overflow: hidden; animation: popIn .2s ease; }
+  .cc-body { padding: 12px 14px; }
+  .cc-title { font-size: 14px; font-weight: 800; color: #1a1a1a; margin-bottom: 4px; }
+  .cc-meta { font-size: 11.5px; color: #666; margin-bottom: 3px; }
+  .cc-del { width: 100%; margin-top: 8px; background: #dc3545; color: #fff; border: none; border-radius: 6px; padding: 6px 0; font-size: 11.5px; font-weight: 700; cursor: pointer; }
+  .cc-del:hover { background: #bb2d3b; }
+  .cc-badges { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 6px; }
+  .cc-badge { font-size: 9.5px; font-weight: 700; padding: 2px 8px; border-radius: 12px; }
+  .cc-cat-web { background: #dbeafe; color: #1e40af; }
+  .cc-cat-prog { background: #ede9fe; color: #5b21b6; }
+  .cc-cat-ai { background: #ffedd5; color: #9a3412; }
+  .cc-cat-blockchain { background: #fce7f3; color: #9d174d; }
+  .cc-stat-available { background: #dcfce7; color: #166534; }
+  .cc-stat-upcoming { background: #fef9c3; color: #854d0e; }
+  .cc-diff-beginner { background: #e0f2fe; color: #075985; }
+  .cc-diff-intermediate { background: #fef3c7; color: #92400e; }
+  .cc-diff-advanced { background: #fee2e2; color: #991b1b; }
+
+  /* Live "Try It" demo panel */
+  .live-panel { background: #f8f9fa; border: 1px solid #e8e8e8; border-radius: 12px; padding: 16px; }
+  .live-form-row { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 8px; margin-bottom: 12px; }
+  .live-input { padding: 8px 12px; border: 1px solid #ced4da; border-radius: 7px; font-size: 12.5px; font-family: -apple-system, sans-serif; }
+  .live-input:focus { outline: none; border-color: #d97706; }
+  .live-add-btn { background: #0d6efd; color: #fff; border: none; border-radius: 7px; padding: 8px 16px; font-size: 12.5px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+  .live-add-btn:hover { background: #0b5ed7; }
+  .live-search-row { position: relative; margin-bottom: 12px; }
+  .live-search-input { width: 100%; padding: 8px 14px 8px 34px; border: 1px solid #ced4da; border-radius: 7px; font-size: 12.5px; }
+  .live-search-icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: #999; font-size: 14px; }
+  .live-cards { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; min-height: 70px; }
+  .live-empty { grid-column: 1/-1; text-align: center; color: #aaa; font-size: 12px; font-style: italic; padding: 18px 0; }
+  .live-count-bar { display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #888; margin-bottom: 10px; }
+  .live-reset-btn { background: #f1f3f5; border: 1px solid #dee2e6; border-radius: 6px; padding: 5px 12px; font-size: 11px; cursor: pointer; color: #555; }
+  .live-reset-btn:hover { background: #e9ecef; }
+
+  /* Local storage visual */
+  .ls-box { background: #1e1e2e; border-radius: 10px; padding: 14px 18px; font-family: monospace; font-size: 12.5px; min-height: 46px; }
+  .ls-row { display: flex; align-items: flex-start; gap: 10px; padding: 5px 0; word-break: break-all; }
+  .ls-key { color: #ff79c6; font-weight: 700; flex-shrink: 0; }
+  .ls-arrow { color: #6272a4; font-size: 11px; flex-shrink: 0; }
+  .ls-val { color: #f1fa8c; }
+  .ls-empty-msg { color: #6272a4; font-family: monospace; font-size: 12px; font-style: italic; }
+  .ls-demo-controls { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+  .ls-btn { background: #1e293b; border: 1px solid #334155; color: #f0db4f; font-family: monospace; font-size: 11.5px; font-weight: 700; padding: 6px 13px; border-radius: 6px; cursor: pointer; transition: all .15s; }
+  .ls-btn:hover { background: #334155; border-color: #d97706; }
+  .ls-btn.danger { color: #ff7b86; }
+
+  /* Counter / dashboard card */
+  .counter-card { display: flex; align-items: center; gap: 14px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 14px 18px; }
+  .counter-icon { width: 44px; height: 44px; border-radius: 10px; background: #2563eb; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+  .counter-num { font-size: 28px; font-weight: 800; color: #1e40af; line-height: 1; }
+  .counter-label { font-size: 12px; color: #3b5f9e; font-weight: 600; margin-top: 2px; }
+
+  /* Empty state */
+  .empty-state { border: 2px dashed #dee2e6; border-radius: 12px; padding: 26px 16px; text-align: center; color: #aaa; }
+  .empty-state i { font-size: 26px; display: block; margin-bottom: 8px; color: #ccc; }
+  .empty-state .es-text { font-size: 13px; font-weight: 600; color: #999; }
+
+  /* Selector demo console-style buttons */
+  .sel-demo-controls { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+  .sel-btn { background: #1e293b; border: 1px solid #334155; color: #79c0ff; font-family: monospace; font-size: 11.5px; font-weight: 700; padding: 6px 13px; border-radius: 6px; cursor: pointer; }
+  .sel-btn:hover { background: #334155; border-color: #d97706; }
+
+  
+  /* ══ DAY 12 — GIT & GITHUB SPECIFIC ══ */
+  .terminal { background:#0d1117; border-radius:12px; overflow:hidden; font-family:'SFMono-Regular',Consolas,monospace; }
+  .terminal-bar { background:#161b22; padding:9px 14px; display:flex; align-items:center; gap:6px; border-bottom:1px solid #30363d; }
+  .terminal-body { padding:14px 18px; font-size:12.5px; line-height:2; }
+  .t-prompt { color:#3fb950; }
+  .t-path { color:#79c0ff; }
+  .t-cmd { color:#f0f6fc; }
+  .t-out { color:#8b949e; }
+  .t-comment { color:#6272a4; font-style:italic; }
+
+  .status-track { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  .status-chip { padding:8px 16px; border-radius:20px; font-size:12px; font-weight:700; border:2px solid transparent; opacity:.35; transition:all .2s; }
+  .status-chip.active { opacity:1; transform:scale(1.05); }
+  .status-chip.s-untracked { background:#fee2e2; color:#991b1b; }
+  .status-chip.s-modified { background:#fef3c7; color:#92400e; }
+  .status-chip.s-staged { background:#dbeafe; color:#1d4ed8; }
+  .status-chip.s-committed { background:#dcfce7; color:#166534; }
+  .status-arrow { color:#ccc; font-size:16px; }
+
+  .branch-pill { display:inline-flex; align-items:center; gap:6px; padding:8px 16px; border-radius:20px; font-size:13px; font-weight:700; font-family:monospace; border:2px solid #dee2e6; background:#fff; color:#888; transition:all .2s; }
+  .branch-pill.current { border-color:#d97706; background:#fef3c7; color:#92400e; }
+  .branch-pill .bp-dot { width:8px; height:8px; border-radius:50%; background:currentColor; }
+  .branch-log { background:#0d1117; border-radius:10px; padding:12px 16px; font-family:monospace; font-size:12px; color:#8b949e; min-height:60px; max-height:150px; overflow-y:auto; }
+  .branch-log-row { padding:3px 0; }
+  .branch-log-row .p { color:#3fb950; }
+  .branch-btn { background:#1e293b; border:1px solid #334155; color:#79c0ff; font-family:monospace; font-size:11.5px; font-weight:700; padding:7px 14px; border-radius:6px; cursor:pointer; transition:all .15s; }
+  .branch-btn:hover:not(:disabled) { background:#334155; border-color:#d97706; }
+  .branch-btn:disabled { opacity:.3; cursor:default; }
+
+  .commit-timeline { position:relative; padding-left:22px; }
+  .commit-node { position:relative; padding:8px 0 8px 10px; border-left:2px solid #e2e8f0; }
+  .commit-node:last-child { border-left:2px solid transparent; }
+  .commit-node::before { content:''; position:absolute; left:-7px; top:13px; width:12px; height:12px; border-radius:50%; background:#d97706; border:2px solid #fff; box-shadow:0 0 0 2px #d97706; }
+  .commit-hash { font-family:monospace; font-size:11px; color:#d97706; font-weight:700; }
+  .commit-msg { font-size:13px; font-weight:600; color:#333; margin-top:2px; }
+
+</style>
+
+
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <div>
+      <div class="top-bar-title">MERN Stack Training · Day 12 · Full Session (3 Hours)</div>
+      <div class="top-bar-sub">Git &amp; GitHub — Version Control for Developers · SkillHub LMS</div>
+    </div>
+    <div class="slide-counter" id="slide-counter">1 / 18</div>
+  </div>
+
+  <!-- ═══ SLIDE 0  HOME ═══ -->
+  <div class="slide active" id="slide-0">
+    <div class="slide-header">
+      <div class="js-logo" style="background:#f0511f;color:#fff">🔀</div>
+      <div>
+        <div class="slide-title">Git &amp; GitHub — Version Control for Developers</div>
+        <div class="slide-subtitle">SkillHub LMS gets uploaded to GitHub and starts living like a real software project</div>
+      </div>
+    </div>
+
+    <div style="background:#fef9c3;border:1px solid #fde68a;border-radius:12px;padding:12px 16px;display:flex;gap:12px;align-items:flex-start">
+      <i class="ti ti-target-arrow" style="color:#d97706;font-size:22px;flex-shrink:0;margin-top:1px"></i>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#854d0e;margin-bottom:4px">Today's Goal — Upload &amp; maintain SkillHub LMS on GitHub like a real project</div>
+        <div style="display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:#92400e">
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Initialize Git</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Track &amp; Commit</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Push to GitHub</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Create Branches</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Merge Workflow</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="home-grid">
+      <div class="home-card" onclick="goSlide(1)">
+        <span class="badge b-green">Intro</span>
+        <div class="home-card-title">Project Goal &amp; Learning Outcomes</div>
+        <div class="home-card-sub">What version control means and why we need it</div>
+      </div>
+      <div class="home-card" onclick="goSlide(2)">
+        <span class="badge b-amber">Roadmap</span>
+        <div class="home-card-title">Project Structure</div>
+        <div class="home-card-sub">Where Git &amp; GitHub fits in SkillHub LMS's journey</div>
+      </div>
+      <div class="home-card" onclick="goSlide(3)">
+        <span class="badge b-js">Part 1 · 15 min</span>
+        <div class="home-card-title">Why Version Control?</div>
+        <div class="home-card-sub">The "Project_Final_Real_Final.doc" problem</div>
+      </div>
+      <div class="home-card" onclick="goSlide(4)">
+        <span class="badge b-blue">Part 2 · 10 min</span>
+        <div class="home-card-title">Git vs GitHub</div>
+        <div class="home-card-sub">Local tool vs cloud home for your repositories</div>
+      </div>
+      <div class="home-card" onclick="goSlide(5)">
+        <span class="badge b-purple">Part 3 · 20 min</span>
+        <div class="home-card-title">Install, Configure &amp; Initialize</div>
+        <div class="home-card-sub">git --version, git config, git init</div>
+      </div>
+      <div class="home-card" onclick="goSlide(6)">
+        <span class="badge b-orange">Part 4 · 15 min</span>
+        <div class="home-card-title">Git Status &amp; Staging</div>
+        <div class="home-card-sub">Untracked → Modified → Staged → Committed</div>
+      </div>
+      <div class="home-card" onclick="goSlide(7)">
+        <span class="badge b-orange">Part 4 · 15 min</span>
+        <div class="home-card-title">The First Commit</div>
+        <div class="home-card-sub">A commit is a project checkpoint</div>
+      </div>
+      <div class="home-card" onclick="goSlide(8)">
+        <span class="badge b-indigo">Explain</span>
+        <div class="home-card-title">Line-by-Line — Core Git Commands</div>
+        <div class="home-card-sub">init · status · add · commit, explained</div>
+      </div>
+    </div>
+
+    <div class="grid-2" style="gap:10px">
+      <div class="home-card" onclick="goSlide(9)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge b-rose">2nd 90 · 15 min</span>
+          <span style="font-size:14px;font-weight:700">Create GitHub Repo &amp; Push</span>
+          <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+        </div>
+      </div>
+      <div class="home-card" onclick="goSlide(10)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge b-teal">2nd 90 · 10 min</span>
+          <span style="font-size:14px;font-weight:700">Git Log &amp; History</span>
+          <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+        </div>
+      </div>
+    </div>
+    <div class="home-card" onclick="goSlide(11)" style="cursor:pointer">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="badge b-cyan">Try It</span>
+        <span style="font-size:14px;font-weight:700">Branching — Create, Switch &amp; Verify</span>
+        <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+      </div>
+    </div>
+    <div class="grid-2" style="gap:10px">
+      <div class="home-card" onclick="goSlide(12)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge b-amber">2nd 90</span>
+          <span style="font-size:14px;font-weight:700">Modify, Commit &amp; Switch Back</span>
+          <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+        </div>
+      </div>
+      <div class="home-card" onclick="goSlide(13)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge b-green">Merge</span>
+          <span style="font-size:14px;font-weight:700">Merge — Feature Workflow</span>
+          <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+        </div>
+      </div>
+    </div>
+    <div class="home-card" onclick="goSlide(14)" style="cursor:pointer">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="badge b-indigo">Activity</span>
+        <span style="font-size:14px;font-weight:700">feature-dashboard — Build, Merge, Push</span>
+        <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+      </div>
+    </div>
+    <div class="home-card" onclick="goSlide(15)" style="cursor:pointer">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="badge b-orange">Assignment</span>
+        <span style="font-size:14px;font-weight:700">GitHub Workflow Checklist</span>
+        <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+      </div>
+    </div>
+    <div class="home-card" onclick="goSlide(16)" style="cursor:pointer">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="badge b-slate">Deliverable</span>
+        <span style="font-size:14px;font-weight:700">End Result &amp; What's Next</span>
+        <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+      </div>
+    </div>
+    <div class="home-card" onclick="goSlide(17)" style="cursor:pointer">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="badge b-green">Quiz</span>
+        <span style="font-size:14px;font-weight:700">Quick Check — 7 Questions</span>
+        <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <div></div>
+      <div class="progress-dots" id="dots-0"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Start <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 1  PROJECT GOAL & LEARNING OUTCOMES ═══ -->
+  <div class="slide" id="slide-1">
+    <div class="slide-header">
+      <span class="badge b-green">Intro</span>
+      <div>
+        <div class="slide-title">Project Goal</div>
+        <div class="slide-subtitle">Today, SkillHub LMS leaves your laptop and becomes a real, tracked software project</div>
+      </div>
+    </div>
+    <div class="card card-gray">
+      <div style="font-size:13px;color:#444;line-height:1.7">By the end of today's session, students will:</div>
+      <div class="grid-3" style="margin-top:10px">
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="font-size:12px;font-weight:700;color:#166534"><i class="ti ti-check" style="margin-right:5px"></i>Understand Version Control</div>
+          <div style="font-size:12px;font-weight:700;color:#166534"><i class="ti ti-check" style="margin-right:5px"></i>Understand Git vs GitHub</div>
+          <div style="font-size:12px;font-weight:700;color:#166534"><i class="ti ti-check" style="margin-right:5px"></i>Initialize a Git repository</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="font-size:12px;font-weight:700;color:#166534"><i class="ti ti-check" style="margin-right:5px"></i>Track files</div>
+          <div style="font-size:12px;font-weight:700;color:#166534"><i class="ti ti-check" style="margin-right:5px"></i>Commit changes</div>
+          <div style="font-size:12px;font-weight:700;color:#166534"><i class="ti ti-check" style="margin-right:5px"></i>Create branches</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="font-size:12px;font-weight:700;color:#166534"><i class="ti ti-check" style="margin-right:5px"></i>Push code to GitHub</div>
+          <div style="font-size:12px;font-weight:700;color:#166534"><i class="ti ti-check" style="margin-right:5px"></i>Understand collaboration workflow</div>
+        </div>
+      </div>
+    </div>
+    <div class="success-box">
+      <i class="ti ti-sparkles" style="color:#16a34a;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+      <div style="font-size:13px;color:#166534;line-height:1.65"><strong>Project Goal:</strong> Upload the SkillHub LMS project to GitHub and maintain it like a real software project — with history, branches and a clean commit trail.</div>
+    </div>
+    <div class="section-label">core concepts today</div>
+    <div class="grid-3">
+      <div class="card" style="text-align:center">
+        <i class="ti ti-history" style="font-size:20px;color:#2563eb"></i>
+        <div style="font-size:12px;font-weight:700;margin-top:6px">Version History</div>
+      </div>
+      <div class="card" style="text-align:center">
+        <i class="ti ti-git-branch" style="font-size:20px;color:#7c3aed"></i>
+        <div style="font-size:12px;font-weight:700;margin-top:6px">Branching</div>
+      </div>
+      <div class="card" style="text-align:center">
+        <i class="ti ti-git-commit" style="font-size:20px;color:#16a34a"></i>
+        <div style="font-size:12px;font-weight:700;margin-top:6px">Commits</div>
+      </div>
+      <div class="card" style="text-align:center">
+        <i class="ti ti-cloud-upload" style="font-size:20px;color:#d97706"></i>
+        <div style="font-size:12px;font-weight:700;margin-top:6px">Pushing to Remote</div>
+      </div>
+      <div class="card" style="text-align:center">
+        <i class="ti ti-git-merge" style="font-size:20px;color:#dc2626"></i>
+        <div style="font-size:12px;font-weight:700;margin-top:6px">Merging</div>
+      </div>
+      <div class="card" style="text-align:center">
+        <i class="ti ti-users" style="font-size:20px;color:#0891b2"></i>
+        <div style="font-size:12px;font-weight:700;margin-top:6px">Collaboration</div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-1"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Project Structure <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 2  PROJECT STRUCTURE ═══ -->
+  <div class="slide" id="slide-2">
+    <div class="slide-header">
+      <span class="badge b-amber">Roadmap</span>
+      <div>
+        <div class="slide-title">Project Structure — SkillHub LMS</div>
+        <div class="slide-subtitle">Where today's Git &amp; GitHub module fits into the bigger picture</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="pipeline">
+        <div class="pl-step done"><div class="pl-line"></div><div class="pl-dot"></div><div class="pl-label">Frontend LMS (DOM, Local Storage, Dashboard)</div><span class="badge b-green pl-tag">done</span></div>
+        <div class="pl-step today"><div class="pl-line"></div><div class="pl-dot"></div><div class="pl-label">Git &amp; GitHub — Version Control</div><span class="badge b-js pl-tag">today</span></div>
+        <div class="pl-step today"><div class="pl-line"></div><div class="pl-dot"></div><div class="pl-label">Branching &amp; Merging</div><span class="badge b-js pl-tag">today</span></div>
+        <div class="pl-step today"><div class="pl-line"></div><div class="pl-dot"></div><div class="pl-label">Push to GitHub Repository</div><span class="badge b-js pl-tag">today</span></div>
+        <div class="pl-step"><div class="pl-line"></div><div class="pl-dot"></div><div class="pl-label">Node.js Runtime</div><span class="badge b-slate pl-tag">next</span></div>
+        <div class="pl-step"><div class="pl-dot"></div><div class="pl-label">Backend + API + Database</div><span class="badge b-slate pl-tag">upcoming</span></div>
+      </div>
+    </div>
+    <div class="info-box">
+      <i class="ti ti-info-circle info-icon"></i>
+      <div class="info-text"><strong>Why this matters now:</strong> every future day — Node.js, Express, MongoDB — adds new code to this same project. From today onward, every change gets tracked, committed and pushed, exactly like it would on a real development team.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-2"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Why Version Control? <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 3  WHY VERSION CONTROL ═══ -->
+  <div class="slide" id="slide-3">
+    <div class="slide-header">
+      <span class="badge b-js">Part 1</span>
+      <div>
+        <div class="slide-title">Why Version Control?</div>
+        <div class="slide-subtitle">Start with a story before any command is typed</div>
+      </div>
+    </div>
+    <div class="card card-gray">
+      <div style="font-size:13px;font-weight:700;color:#333;margin-bottom:8px"><i class="ti ti-message-circle" style="margin-right:6px;color:#d97706"></i>Ask students:</div>
+      <div style="font-size:14px;font-style:italic;color:#444;line-height:1.7">"Yesterday, you accidentally deleted your entire project. What will you do?"</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+        <span class="badge b-slate">Undo</span>
+        <span class="badge b-slate">Recycle Bin</span>
+        <span class="badge b-slate">Backup</span>
+      </div>
+    </div>
+    <div class="warn-box">
+      <i class="ti ti-alert-triangle" style="color:#d97706;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+      <div style="font-size:13px;color:#854d0e;line-height:1.65">Professional developers don't depend on luck. <strong>They use Git.</strong></div>
+    </div>
+    <div class="section-label">the other classic problem — file naming</div>
+    <div class="card">
+      <div style="display:flex;flex-direction:column;gap:6px;font-family:monospace;font-size:12.5px;color:#555">
+        <div>📄 Project.doc</div>
+        <div style="padding-left:14px;color:#999">↓</div>
+        <div>📄 Project_Final.doc</div>
+        <div style="padding-left:14px;color:#999">↓</div>
+        <div>📄 Project_Final2.doc</div>
+        <div style="padding-left:14px;color:#999">↓</div>
+        <div style="color:#dc2626;font-weight:700">📄 Project_Final_Real_Final.doc 😂</div>
+      </div>
+    </div>
+    <div class="success-box">
+      <i class="ti ti-sparkles" style="color:#16a34a;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+      <div style="font-size:13px;color:#166534;line-height:1.65">Git keeps every version automatically — no more renamed files, no more guessing which one is "real". One project folder, a complete history, forever.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-3"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Git vs GitHub <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 4  GIT VS GITHUB ═══ -->
+  <div class="slide" id="slide-4">
+    <div class="slide-header">
+      <span class="badge b-blue">Part 2</span>
+      <div>
+        <div class="slide-title">Git vs GitHub</div>
+        <div class="slide-subtitle">One lives on your laptop. The other lives in the cloud.</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="flow-step">
+        <div class="flow-num">1</div>
+        <div class="flow-content"><div class="flow-label">VS Code</div>Where you write the SkillHub LMS code.</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">2</div>
+        <div class="flow-content"><div class="flow-label">Git — Local Version Control</div>Tracks every change to that code, right there on your machine.</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">3</div>
+        <div class="flow-content"><div class="flow-label">GitHub — Cloud Repository</div>Stores your Git history online, so it's backed up and shareable.</div>
+      </div>
+    </div>
+    <div class="section-label">side by side</div>
+    <table class="tag-table">
+      <tr><th></th><th>Git</th><th>GitHub</th></tr>
+      <tr><td>What it is</td><td><span class="badge b-slate">Software</span></td><td><span class="badge b-blue">Website</span></td></tr>
+      <tr><td>Where it lives</td><td>Local — on your computer</td><td>Online — in the cloud</td></tr>
+      <tr><td>What it does</td><td>Tracks changes</td><td>Stores repositories</td></tr>
+      <tr><td>Works without internet?</td><td><i class="ti ti-check" style="color:#16a34a"></i> Yes</td><td><i class="ti ti-x" style="color:#dc2626"></i> No</td></tr>
+    </table>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-4"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Install &amp; Initialize <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 5  INSTALL, CONFIGURE & INITIALIZE ═══ -->
+  <div class="slide" id="slide-5">
+    <div class="slide-header">
+      <span class="badge b-purple">Part 3</span>
+      <div>
+        <div class="slide-title">Install, Configure &amp; Initialize</div>
+        <div class="slide-subtitle">Get Git ready, then turn the LMS folder into a repository</div>
+      </div>
+    </div>
+    <div class="section-label">1 — verify install</div>
+    <div class="terminal">
+      <div class="terminal-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">terminal</span></div>
+      <div class="terminal-body">
+        <div><span class="t-prompt">$</span> <span class="t-cmd">git --version</span></div>
+        <div class="t-out">git version 2.44.0</div>
+      </div>
+    </div>
+    <div class="section-label">2 — configure identity</div>
+    <div class="terminal">
+      <div class="terminal-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">terminal</span></div>
+      <div class="terminal-body">
+        <div><span class="t-prompt">$</span> <span class="t-cmd">git config --global user.name "Your Name"</span></div>
+        <div><span class="t-prompt">$</span> <span class="t-cmd">git config --global user.email "your@email.com"</span></div>
+      </div>
+    </div>
+    <div class="tip-box">
+      <i class="ti ti-bulb tip-icon"></i>
+      <div class="tip-text">This runs once per machine. Every commit you make afterward gets stamped with this name and email — it's how Git (and GitHub) know who did what.</div>
+    </div>
+    <div class="section-label">3 — initialize the repository</div>
+    <div class="terminal">
+      <div class="terminal-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">~/skillhub-lms</span></div>
+      <div class="terminal-body">
+        <div><span class="t-prompt">$</span> <span class="t-cmd">git init</span></div>
+        <div class="t-out">Initialized empty Git repository in ~/skillhub-lms/.git/</div>
+      </div>
+    </div>
+    <div class="info-box">
+      <i class="ti ti-info-circle info-icon"></i>
+      <div class="info-text">A hidden <code>.git</code> folder appears. That's the entire local repository — every commit, branch and history entry lives inside it. Delete it, and Git forgets everything.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-5"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Git Status &amp; Staging <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 6  GIT STATUS & STAGING ═══ -->
+  <div class="slide" id="slide-6">
+    <div class="slide-header">
+      <span class="badge b-orange">Part 4</span>
+      <div>
+        <div class="slide-title">Git Status &amp; Staging</div>
+        <div class="slide-subtitle">A file moves through four states on its way to being saved</div>
+      </div>
+    </div>
+    <div class="section-label">try it live — click a stage to see the file move through it</div>
+    <div class="live-panel">
+      <div class="status-track" id="status-track">
+        <div class="status-chip s-untracked" id="chip-0">Untracked</div>
+        <span class="status-arrow"><i class="ti ti-arrow-right"></i></span>
+        <div class="status-chip s-modified" id="chip-1">Modified</div>
+        <span class="status-arrow"><i class="ti ti-arrow-right"></i></span>
+        <div class="status-chip s-staged" id="chip-2">Staged</div>
+        <span class="status-arrow"><i class="ti ti-arrow-right"></i></span>
+        <div class="status-chip s-committed" id="chip-3">Committed</div>
+      </div>
+      <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="branch-btn" onclick="statusStep()">Run next command <i class="ti ti-player-play"></i></button>
+        <button class="branch-btn" onclick="statusReset()">Reset <i class="ti ti-refresh"></i></button>
+      </div>
+      <div class="branch-log" id="status-log" style="margin-top:12px">
+        <div class="branch-log-row t-comment">// index.html is a new file — run a command to move it forward</div>
+      </div>
+    </div>
+    <div class="section-label">the two commands that drive it</div>
+    <div class="grid-2">
+      <div class="card">
+        <div style="font-family:monospace;font-size:13px;font-weight:700;color:#d97706"><i class="ti ti-list-check" style="margin-right:5px"></i>git status</div>
+        <div style="font-size:12px;color:#555;margin-top:6px;line-height:1.6">Shows what state every file is in — untracked, modified, staged, or clean.</div>
+      </div>
+      <div class="card">
+        <div style="font-family:monospace;font-size:13px;font-weight:700;color:#d97706"><i class="ti ti-plus" style="margin-right:5px"></i>git add .</div>
+        <div style="font-size:12px;color:#555;margin-top:6px;line-height:1.6">Moves every changed file into the <strong>staging area</strong> — the waiting room before a commit.</div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-6"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">The First Commit <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 7  THE FIRST COMMIT ═══ -->
+  <div class="slide" id="slide-7">
+    <div class="slide-header">
+      <span class="badge b-orange">Part 4</span>
+      <div>
+        <div class="slide-title">The First Commit</div>
+        <div class="slide-subtitle">A commit is a project checkpoint</div>
+      </div>
+    </div>
+    <div class="terminal">
+      <div class="terminal-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">~/skillhub-lms</span></div>
+      <div class="terminal-body">
+        <div><span class="t-prompt">$</span> <span class="t-cmd">git commit -m "Initial LMS Frontend Project"</span></div>
+        <div class="t-out">[main (root-commit) a1b2c3d] Initial LMS Frontend Project</div>
+        <div class="t-out"> 4 files changed, 210 insertions(+)</div>
+      </div>
+    </div>
+    <div class="success-box">
+      <i class="ti ti-sparkles" style="color:#16a34a;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+      <div style="font-size:13px;color:#166534;line-height:1.65"><strong>A commit is a snapshot in time.</strong> No matter what happens next, this exact version of the project can always be recovered.</div>
+    </div>
+    <div class="section-label">what makes a good commit message</div>
+    <div class="grid-2">
+      <div class="card" style="border-color:#86efac;background:#f0fdf4">
+        <div style="font-size:12px;font-weight:700;color:#166534;margin-bottom:4px"><i class="ti ti-check" style="margin-right:5px"></i>Good</div>
+        <div style="font-family:monospace;font-size:12px;color:#166534">"Initial LMS Frontend Project"</div>
+        <div style="font-family:monospace;font-size:12px;color:#166534;margin-top:4px">"Added Login Button"</div>
+      </div>
+      <div class="card" style="border-color:#fca5a5;background:#fef2f2">
+        <div style="font-size:12px;font-weight:700;color:#991b1b;margin-bottom:4px"><i class="ti ti-x" style="margin-right:5px"></i>Not great</div>
+        <div style="font-family:monospace;font-size:12px;color:#991b1b">"stuff"</div>
+        <div style="font-family:monospace;font-size:12px;color:#991b1b;margin-top:4px">"final update 2 fixed"</div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-7"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Line-by-Line Explainer <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 8  LINE-BY-LINE EXPLAINER ═══ -->
+  <div class="slide" id="slide-8">
+    <div class="slide-header">
+      <span class="badge b-indigo">Explain</span>
+      <div>
+        <div class="slide-title">Line-by-Line — Core Git Commands</div>
+        <div class="slide-subtitle">Click any command to see what it actually does</div>
+      </div>
+    </div>
+    <div class="line-explain">
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="t-prompt">$</span>&nbsp;git init</div>
+        <div class="lex-info">
+          <div class="lex-name">git init</div>
+          <div class="lex-desc">Turns the current folder into a Git repository by creating a hidden .git folder.</div>
+          <div class="lex-detail">This only runs once per project. Everything Git needs to track history lives inside .git — delete that folder and the project loses all version history.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="t-prompt">$</span>&nbsp;git status</div>
+        <div class="lex-info">
+          <div class="lex-name">git status</div>
+          <div class="lex-desc">Shows the current state of every file — untracked, modified, staged, or nothing to commit.</div>
+          <div class="lex-detail">Run this constantly. It's the safest way to know exactly what Git will do before you commit anything.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="t-prompt">$</span>&nbsp;git add .</div>
+        <div class="lex-info">
+          <div class="lex-name">git add .</div>
+          <div class="lex-desc">Stages every changed file in the current folder, preparing them for the next commit.</div>
+          <div class="lex-detail">The "." means "everything in this directory". You can also stage a single file with git add filename.js.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="t-prompt">$</span>&nbsp;git commit -m "..."</div>
+        <div class="lex-info">
+          <div class="lex-name">git commit -m "message"</div>
+          <div class="lex-desc">Saves the staged files as a permanent snapshot, labeled with the message you provide.</div>
+          <div class="lex-detail">-m lets you write the message inline. Without it, Git opens a text editor and waits for you to type one there instead.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="t-prompt">$</span>&nbsp;git remote add origin &lt;url&gt;</div>
+        <div class="lex-info">
+          <div class="lex-name">git remote add origin &lt;url&gt;</div>
+          <div class="lex-desc">Links your local repository to a GitHub repository, naming that link "origin".</div>
+          <div class="lex-detail">"origin" is just a nickname for the remote URL, so future commands can say origin instead of the full GitHub link every time.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="t-prompt">$</span>&nbsp;git push -u origin main</div>
+        <div class="lex-info">
+          <div class="lex-name">git push -u origin main</div>
+          <div class="lex-desc">Uploads local commits to GitHub, onto the main branch.</div>
+          <div class="lex-detail">-u remembers this origin/main pairing, so afterward a plain git push is enough — no need to repeat the destination every time.</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-8"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Create GitHub Repo &amp; Push <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 9  CREATE GITHUB REPO & PUSH ═══ -->
+  <div class="slide" id="slide-9">
+    <div class="slide-header">
+      <span class="badge b-rose">2nd 90 min</span>
+      <div>
+        <div class="slide-title">Create GitHub Repo &amp; Push</div>
+        <div class="slide-subtitle">Connect the local repository to a home in the cloud</div>
+      </div>
+    </div>
+    <div class="section-label">1 — create the repository on GitHub</div>
+    <div class="browser">
+      <div class="browser-bar"><div class="b-dot2 b-r"></div><div class="b-dot2 b-y"></div><div class="b-dot2 b-g"></div><div class="b-url">github.com/new</div></div>
+      <div style="padding:16px;background:#fff">
+        <div class="bs-form-group">
+          <label class="bs-label">Repository name</label>
+          <input class="bs-input" value="skillhub-lms" readonly>
+        </div>
+        <button class="bs-btn-submit" style="background:#238636">Create repository</button>
+      </div>
+    </div>
+    <div class="section-label">2 — connect &amp; push</div>
+    <div class="terminal">
+      <div class="terminal-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">~/skillhub-lms</span></div>
+      <div class="terminal-body">
+        <div><span class="t-prompt">$</span> <span class="t-cmd">git remote add origin https://github.com/username/skillhub-lms.git</span></div>
+        <div><span class="t-prompt">$</span> <span class="t-cmd">git branch -M main</span></div>
+        <div><span class="t-prompt">$</span> <span class="t-cmd">git push -u origin main</span></div>
+        <div class="t-out">Enumerating objects: 6, done.</div>
+        <div class="t-out">Branch 'main' set up to track 'origin/main'.</div>
+      </div>
+    </div>
+    <div class="success-box">
+      <i class="ti ti-cloud-check" style="color:#16a34a;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+      <div style="font-size:13px;color:#166534;line-height:1.65">Students now see their project online — refresh the GitHub repository page and the SkillHub LMS files are right there.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-9"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Git Log &amp; History <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 10  GIT LOG & HISTORY ═══ -->
+  <div class="slide" id="slide-10">
+    <div class="slide-header">
+      <span class="badge b-teal">2nd 90 min</span>
+      <div>
+        <div class="slide-title">Git Log &amp; History</div>
+        <div class="slide-subtitle">Every commit ever made, in order</div>
+      </div>
+    </div>
+    <div class="terminal">
+      <div class="terminal-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">~/skillhub-lms</span></div>
+      <div class="terminal-body">
+        <div><span class="t-prompt">$</span> <span class="t-cmd">git log</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="commit-timeline">
+        <div class="commit-node">
+          <div class="commit-hash">commit a1b2c3d</div>
+          <div class="commit-msg">Initial LMS Frontend Project</div>
+        </div>
+        <div class="commit-node">
+          <div class="commit-hash">commit e4f5g6h</div>
+          <div class="commit-msg">Added Login Button</div>
+        </div>
+        <div class="commit-node">
+          <div class="commit-hash">commit i7j8k9l</div>
+          <div class="commit-msg">Merge branch 'feature-login'</div>
+        </div>
+      </div>
+    </div>
+    <div class="tip-box">
+      <i class="ti ti-bulb tip-icon"></i>
+      <div class="tip-text">Every commit remembers who made it, when, and exactly what changed. That's a complete, permanent history of the project — nothing like a folder full of "Final_v2" files.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-10"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Branching <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 11  BRANCHING — INTERACTIVE ═══ -->
+  <div class="slide" id="slide-11">
+    <div class="slide-header">
+      <span class="badge b-cyan">Try It</span>
+      <div>
+        <div class="slide-title">Branching — Create, Switch &amp; Verify</div>
+        <div class="slide-subtitle">A branch is a safe copy of the project to experiment on</div>
+      </div>
+    </div>
+    <div class="live-panel">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px">
+        <div class="branch-pill current" id="pill-main"><span class="bp-dot"></span>main</div>
+        <div class="branch-pill" id="pill-feature" style="display:none"><span class="bp-dot"></span>feature-login</div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+        <button class="branch-btn" id="btn-create" onclick="gitBranchCreate()">git branch feature-login</button>
+        <button class="branch-btn" id="btn-checkout" onclick="gitCheckout()" disabled>git switch feature-login</button>
+        <button class="branch-btn" id="btn-verify" onclick="gitBranchVerify()">git branch</button>
+        <button class="branch-btn" id="btn-main" onclick="gitSwitchMain()" disabled>git switch main</button>
+        <button class="branch-btn" id="btn-branch-reset" onclick="gitBranchReset()">Reset <i class="ti ti-refresh"></i></button>
+      </div>
+      <div class="branch-log" id="branch-log">
+        <div class="branch-log-row t-comment">// only one branch exists so far — main</div>
+      </div>
+    </div>
+    <div class="section-label">what just happened</div>
+    <div class="grid-3">
+      <div class="card" style="text-align:center">
+        <i class="ti ti-git-branch" style="font-size:20px;color:#2563eb"></i>
+        <div style="font-size:12px;font-weight:700;margin-top:6px">git branch feature-login</div>
+        <div style="font-size:11px;color:#666;margin-top:2px">Creates a new branch, but stays on main</div>
+      </div>
+      <div class="card" style="text-align:center">
+        <i class="ti ti-arrows-left-right" style="font-size:20px;color:#7c3aed"></i>
+        <div style="font-size:12px;font-weight:700;margin-top:6px">git switch feature-login</div>
+        <div style="font-size:11px;color:#666;margin-top:2px">Moves you onto that branch (git checkout works too)</div>
+      </div>
+      <div class="card" style="text-align:center">
+        <i class="ti ti-list-check" style="font-size:20px;color:#16a34a"></i>
+        <div style="font-size:12px;font-weight:700;margin-top:6px">git branch</div>
+        <div style="font-size:11px;color:#666;margin-top:2px">Lists all branches — a * marks the current one</div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-11"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Modify &amp; Commit <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 12  MODIFY, COMMIT & SWITCH BACK ═══ -->
+  <div class="slide" id="slide-12">
+    <div class="slide-header">
+      <span class="badge b-amber">2nd 90 min</span>
+      <div>
+        <div class="slide-title">Modify, Commit &amp; Switch Back</div>
+        <div class="slide-subtitle">Changes on a branch stay isolated until they're merged</div>
+      </div>
+    </div>
+    <div class="section-label">on feature-login — add the change</div>
+    <div class="grid-2">
+      <div class="editor">
+        <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">index.html</span></div>
+        <div class="editor-body">
+          <div class="e-row"><span class="e-ln">1</span><span class="e-tag">&lt;button</span> <span class="e-att">class</span>=<span class="e-val">"login-btn"</span><span class="e-tag">&gt;</span>Login<span class="e-tag">&lt;/button&gt;</span></div>
+        </div>
+      </div>
+      <div class="terminal">
+        <div class="terminal-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">terminal</span></div>
+        <div class="terminal-body">
+          <div><span class="t-prompt">$</span> <span class="t-cmd">git add .</span></div>
+          <div><span class="t-prompt">$</span> <span class="t-cmd">git commit -m "Added Login Button"</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="section-label">switch back to main</div>
+    <div class="terminal">
+      <div class="terminal-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">terminal</span></div>
+      <div class="terminal-body">
+        <div><span class="t-prompt">$</span> <span class="t-cmd">git switch main</span></div>
+      </div>
+    </div>
+    <div class="warn-box">
+      <i class="ti ti-eye-off" style="color:#d97706;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+      <div style="font-size:13px;color:#854d0e;line-height:1.65"><strong>Students observe:</strong> the Login Button is gone from main! It only exists on feature-login. That's the entire point of branching — main stays clean and stable while new work happens somewhere safe.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-12"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Merge <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 13  MERGE ═══ -->
+  <div class="slide" id="slide-13">
+    <div class="slide-header">
+      <span class="badge b-green">Merge</span>
+      <div>
+        <div class="slide-title">Merge — Bringing the Feature Back</div>
+        <div class="slide-subtitle">Merging combines a branch's work into another branch</div>
+      </div>
+    </div>
+    <div class="terminal">
+      <div class="terminal-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">~/skillhub-lms (main)</span></div>
+      <div class="terminal-body">
+        <div><span class="t-prompt">$</span> <span class="t-cmd">git merge feature-login</span></div>
+        <div class="t-out">Updating a1b2c3d..e4f5g6h</div>
+        <div class="t-out">Fast-forward</div>
+      </div>
+    </div>
+    <div class="section-label">the feature development workflow</div>
+    <div class="card">
+      <div class="flow-step">
+        <div class="flow-num">1</div>
+        <div class="flow-content"><div class="flow-label">Branch off main</div>git branch feature-name, then switch to it.</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">2</div>
+        <div class="flow-content"><div class="flow-label">Build the feature</div>Edit, add, commit — as many times as needed.</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">3</div>
+        <div class="flow-content"><div class="flow-label">Switch back to main</div>git switch main.</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">4</div>
+        <div class="flow-content"><div class="flow-label">Merge it in</div>git merge feature-name — main now has the feature too.</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">5</div>
+        <div class="flow-content"><div class="flow-label">Push</div>git push — the updated main goes to GitHub.</div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-13"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Activity <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 14  ACTIVITY ═══ -->
+  <div class="slide" id="slide-14">
+    <div class="slide-header">
+      <span class="badge b-indigo">Activity</span>
+      <div>
+        <div class="slide-title">feature-dashboard — Build, Merge, Push</div>
+        <div class="slide-subtitle">Now students repeat the whole workflow on their own</div>
+      </div>
+    </div>
+    <div class="activity-box">
+      <div class="activity-title"><i class="ti ti-flask"></i>In-Class Activity</div>
+      <div style="font-size:13px;color:#3730a3;line-height:1.8">
+        Students create: <code>feature-dashboard</code><br>
+        1. Add one feature to the SkillHub LMS (anything small — a heading, a badge, a card)<br>
+        2. Commit the change with a clear message<br>
+        3. Switch back to main and merge feature-dashboard into it<br>
+        4. Push the final, merged main branch to GitHub
+      </div>
+    </div>
+    <div class="section-label">quick reference — commands you'll need</div>
+    <div class="terminal">
+      <div class="terminal-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">terminal</span></div>
+      <div class="terminal-body">
+        <div><span class="t-prompt">$</span> <span class="t-cmd">git branch feature-dashboard</span></div>
+        <div><span class="t-prompt">$</span> <span class="t-cmd">git switch feature-dashboard</span></div>
+        <div class="t-comment">// make your change, then...</div>
+        <div><span class="t-prompt">$</span> <span class="t-cmd">git add .</span></div>
+        <div><span class="t-prompt">$</span> <span class="t-cmd">git commit -m "Added dashboard section"</span></div>
+        <div><span class="t-prompt">$</span> <span class="t-cmd">git switch main</span></div>
+        <div><span class="t-prompt">$</span> <span class="t-cmd">git merge feature-dashboard</span></div>
+        <div><span class="t-prompt">$</span> <span class="t-cmd">git push</span></div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-14"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Assignment <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 15  ASSIGNMENT ═══ -->
+  <div class="slide" id="slide-15">
+    <div class="slide-header">
+      <span class="badge b-orange">Assignment</span>
+      <div>
+        <div class="slide-title">GitHub Workflow Checklist</div>
+        <div class="slide-subtitle">Click each item off as you complete it</div>
+      </div>
+    </div>
+    <div class="challenge-box">
+      <div class="challenge-title"><i class="ti ti-flag-3"></i>Each student must:</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="check-item" onclick="this.classList.toggle('done')"><div class="check-circle"><i class="ti ti-check"></i></div>Create a GitHub account (if not already)</div>
+        <div class="check-item" onclick="this.classList.toggle('done')"><div class="check-circle"><i class="ti ti-check"></i></div>Upload the SkillHub LMS project</div>
+        <div class="check-item" onclick="this.classList.toggle('done')"><div class="check-circle"><i class="ti ti-check"></i></div>Create one feature branch</div>
+        <div class="check-item" onclick="this.classList.toggle('done')"><div class="check-circle"><i class="ti ti-check"></i></div>Make one commit</div>
+        <div class="check-item" onclick="this.classList.toggle('done')"><div class="check-circle"><i class="ti ti-check"></i></div>Merge it into main</div>
+        <div class="check-item" onclick="this.classList.toggle('done')"><div class="check-circle"><i class="ti ti-check"></i></div>Push the final code</div>
+      </div>
+    </div>
+    <div class="tip-box">
+      <i class="ti ti-bulb tip-icon"></i>
+      <div class="tip-text">This is the exact rhythm used on every real engineering team: branch → build → commit → merge → push. Get comfortable with it now, and it becomes second nature by the time you're job-ready.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-15"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">End Result <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 16  END RESULT ═══ -->
+  <div class="slide" id="slide-16">
+    <div class="slide-header">
+      <span class="badge b-slate">Deliverable</span>
+      <div>
+        <div class="slide-title">End Result &amp; What's Next</div>
+        <div class="slide-subtitle">SkillHub LMS now behaves like a professional codebase</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="pipeline">
+        <div class="pl-step done"><div class="pl-line"></div><div class="pl-dot"></div><div class="pl-label">SkillHub LMS</div><span class="badge b-green pl-tag">✓</span></div>
+        <div class="pl-step done"><div class="pl-line"></div><div class="pl-dot"></div><div class="pl-label">Git Repository</div><span class="badge b-green pl-tag">✓</span></div>
+        <div class="pl-step done"><div class="pl-line"></div><div class="pl-dot"></div><div class="pl-label">GitHub Repository</div><span class="badge b-green pl-tag">✓</span></div>
+        <div class="pl-step today"><div class="pl-dot"></div><div class="pl-label">Professional Workflow</div><span class="badge b-js pl-tag">🎯 achieved</span></div>
+      </div>
+    </div>
+    <div class="success-box">
+      <i class="ti ti-trophy" style="color:#16a34a;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+      <div style="font-size:13px;color:#166534;line-height:1.65">The project is now version-controlled, backed up on GitHub, and built using a real branch-and-merge workflow — the same one used at every software company.</div>
+    </div>
+    <div class="info-box">
+      <i class="ti ti-arrow-right info-icon"></i>
+      <div class="info-text"><strong>Coming up next — Day 13:</strong> Node.js Fundamentals. SkillHub LMS steps out of the browser for the first time and starts running on a real server, beginning with a terminal-based Student Management CLI.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-16"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Quiz <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 17  QUIZ ═══ -->
+  <div class="slide" id="slide-17">
+    <div class="slide-header">
+      <span class="badge b-green">Quiz</span>
+      <div>
+        <div class="slide-title">Quick Check — Git &amp; GitHub</div>
+        <div class="slide-subtitle">Test what stuck from today's session</div>
+      </div>
+    </div>
+    <div id="quiz-container"></div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-17"></div>
+      <button class="nav-btn primary" onclick="goSlide(0)"><i class="ti ti-home"></i> Home</button>
+    </div>
+  </div>
+
+</div><!-- /.wrapper -->
+
+<script>
+  var current = 0, total = 18, quizInit = false;
+
+  // ── Status track (staging demo) ──
+  var statusIdx = 0;
+  var statusMsgs = [
+    { cmd: 'git status', out: '"index.html" — Untracked' },
+    { cmd: '(edit index.html)', out: 'index.html — Modified' },
+    { cmd: 'git add .', out: 'index.html — Staged' },
+    { cmd: 'git commit -m "Add index.html"', out: 'index.html — Committed ✓' }
+  ];
+  function renderStatus() {
+    for (var i = 0; i < 4; i++) {
+      document.getElementById('chip-' + i).classList.toggle('active', i === statusIdx);
+    }
+  }
+  function statusStep() {
+    if (statusIdx >= 3) return;
+    statusIdx++;
+    renderStatus();
+    var log = document.getElementById('status-log');
+    var m = statusMsgs[statusIdx];
+    var row = document.createElement('div');
+    row.className = 'branch-log-row';
+    row.innerHTML = '<span class="p">$</span> ' + m.cmd + '<br><span style="color:#8b949e">' + m.out + '</span>';
+    log.appendChild(row);
+    log.scrollTop = log.scrollHeight;
+  }
+  function statusReset() {
+    statusIdx = 0;
+    renderStatus();
+    document.getElementById('status-log').innerHTML = '<div class="branch-log-row t-comment">// index.html is a new file — run a command to move it forward</div>';
+  }
+  renderStatus();
+
+  // ── Branching demo ──
+  var branchState = { created: false, onFeature: false };
+  function branchLog(cmd, out) {
+    var log = document.getElementById('branch-log');
+    var row = document.createElement('div');
+    row.className = 'branch-log-row';
+    row.innerHTML = '<span class="p">$</span> ' + cmd + (out ? '<br><span style="color:#8b949e">' + out + '</span>' : '');
+    log.appendChild(row);
+    log.scrollTop = log.scrollHeight;
+  }
+  function renderBranchUI() {
+    document.getElementById('pill-feature').style.display = branchState.created ? 'inline-flex' : 'none';
+    document.getElementById('pill-main').classList.toggle('current', !branchState.onFeature);
+    document.getElementById('pill-feature').classList.toggle('current', branchState.onFeature);
+    document.getElementById('btn-checkout').disabled = !branchState.created || branchState.onFeature;
+    document.getElementById('btn-main').disabled = !branchState.onFeature;
+    document.getElementById('btn-create').disabled = branchState.created;
+  }
+  function gitBranchCreate() {
+    if (branchState.created) return;
+    branchState.created = true;
+    branchLog('git branch feature-login', "Created branch 'feature-login' (still on main)");
+    renderBranchUI();
+  }
+  function gitCheckout() {
+    if (!branchState.created || branchState.onFeature) return;
+    branchState.onFeature = true;
+    branchLog('git switch feature-login', "Switched to branch 'feature-login'");
+    renderBranchUI();
+  }
+  function gitSwitchMain() {
+    if (!branchState.onFeature) return;
+    branchState.onFeature = false;
+    branchLog('git switch main', "Switched to branch 'main'");
+    renderBranchUI();
+  }
+  function gitBranchVerify() {
+    var list = branchState.created
+      ? (branchState.onFeature ? '  main\n* feature-login' : '* main\n  feature-login')
+      : '* main';
+    branchLog('git branch', list.replace(/\n/g, '<br>'));
+  }
+  function gitBranchReset() {
+    branchState = { created: false, onFeature: false };
+    document.getElementById('branch-log').innerHTML = '<div class="branch-log-row t-comment">// only one branch exists so far — main</div>';
+    renderBranchUI();
+  }
+  renderBranchUI();
+
+  // ── Quiz ──
+  var quizData = [
+    {
+      q: "A student accidentally deletes their entire project folder. What's the professional-developer safety net?",
+      opts: ["Hoping there's a Recycle Bin backup", "Git — every committed change is recoverable", "Renaming files defensively (Final_v2, Final_Real)", "There isn't one, it's just gone"],
+      ans: 1,
+      exp: "Git stores every committed snapshot, so a deleted working folder can be restored by re-cloning or checking out the last commit — no luck required."
+    },
+    {
+      q: "Which statement correctly separates Git from GitHub?",
+      opts: ["Git is the website, GitHub is the software", "They are two names for the exact same tool", "Git is local version-control software; GitHub is the cloud service that hosts Git repositories", "GitHub works without Git installed"],
+      ans: 2,
+      exp: "Git runs on your machine and tracks history locally. GitHub is a website that stores and shares Git repositories online — you push your local Git history up to it."
+    },
+    {
+      q: "What does git init actually create?",
+      opts: ["A GitHub account", "A hidden .git folder that turns the current directory into a repository", "A new branch called main", "A commit"],
+      ans: 1,
+      exp: "git init creates a hidden .git folder in the current directory. That folder is the entire local repository — history, branches, everything."
+    },
+    {
+      q: "Why run git add . before git commit?",
+      opts: ["add . deletes untracked files", "It moves changed files into the staging area so the next commit knows exactly what to include", "It pushes the code to GitHub", "It's optional and has no real effect"],
+      ans: 1,
+      exp: "Commits only include what's staged. git add . stages every change in the current folder, so git commit knows precisely what to snapshot."
+    },
+    {
+      q: "A student runs git branch feature-login. Are they now working on feature-login?",
+      opts: ["Yes, branch automatically switches to it", "No — git branch only creates the branch; git switch or git checkout is needed to move onto it", "No, it deletes main instead", "Yes, but only after a commit"],
+      ans: 1,
+      exp: "git branch <name> creates a new branch but leaves you on your current branch. You must explicitly git switch (or git checkout) to that new branch to start working on it."
+    },
+    {
+      q: "After switching back to main, the Login Button added on feature-login has disappeared from the code. Why?",
+      opts: ["It was deleted by mistake", "Branches are isolated — changes committed on one branch don't appear on another until merged", "main automatically updates itself", "Git lost the change"],
+      ans: 1,
+      exp: "Each branch holds its own version of the project. The Login Button exists only on feature-login's commits — it reappears on main only after running git merge feature-login."
+    },
+    {
+      q: "What does git push -u origin main accomplish the first time it's run?",
+      opts: ["It only checks for errors, nothing uploads", "It uploads local commits to the main branch on GitHub and remembers that pairing for future pushes", "It deletes the remote repository", "It merges two branches together"],
+      ans: 1,
+      exp: "This pushes local commits to origin's main branch and, thanks to -u, links local main to origin/main — so later a plain git push is enough."
+    }
+  ];
+  var quizAnswered = [];
+  function renderQuiz() {
+    var c = document.getElementById('quiz-container'); c.innerHTML = '';
+    quizData.forEach(function(q, i) {
+      var d = document.createElement('div'); d.style.cssText = 'margin-bottom:18px';
+      d.innerHTML = '<div style="font-size:13px;font-weight:600;margin-bottom:6px">'+(i+1)+'. '+q.q+'</div>';
+      q.opts.forEach(function(opt, j) {
+        var btn = document.createElement('button'); btn.className = 'quiz-option';
+        btn.innerHTML = String.fromCharCode(65+j)+'. '+opt;
+        btn.onclick = function() {
+          if (quizAnswered[i]) return; quizAnswered[i] = true;
+          var btns = d.querySelectorAll('.quiz-option');
+          btns.forEach(function(b,k){ b.disabled=true; if(k===q.ans) b.classList.add('correct'); else if(k===j) b.classList.add('wrong'); });
+          var fb = d.querySelector('.quiz-feedback');
+          fb.innerHTML = (j===q.ans?'✅ Correct! ':'❌ Not quite. ')+q.exp;
+          fb.className = 'quiz-feedback '+(j===q.ans?'correct':'wrong');
+        };
+        d.appendChild(btn);
+      });
+      var fb = document.createElement('div'); fb.className = 'quiz-feedback'; d.appendChild(fb);
+      c.appendChild(d);
+    });
+  }
+
+  function toggleLex(row) {
+    var was = row.classList.contains('active');
+    document.querySelectorAll('.lex-row.active').forEach(function(r){ r.classList.remove('active'); });
+    if (!was) row.classList.add('active');
+  }
+
+  function goSlide(n) {
+    document.getElementById('slide-'+current).classList.remove('active');
+    current = n;
+    document.getElementById('slide-'+current).classList.add('active');
+    updateDots();
+    document.getElementById('slide-counter').textContent = (current+1)+' / '+total;
+    if (n===17 && !quizInit) { renderQuiz(); quizInit=true; }
+    window.scrollTo(0,0);
+  }
+  function nextSlide() { if (current < total-1) goSlide(current+1); }
+  function prevSlide() { if (current > 0) goSlide(current-1); }
+
+  function updateDots() {
+    for (var s=0; s<total; s++) {
+      var el = document.getElementById('dots-'+s); if (!el) continue;
+      el.innerHTML = '';
+      for (var d=0; d<total; d++) {
+        var dot = document.createElement('div');
+        dot.className = 'dot'+(d===current?' active':'');
+        el.appendChild(dot);
+      }
+    }
+  }
+  updateDots();
+</script>
+</body>
+</html>

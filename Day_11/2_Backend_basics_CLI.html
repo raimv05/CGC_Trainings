@@ -1,0 +1,1431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Node.js Fundamentals &amp; Student Management CLI | SkillHub LMS</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f4f5f7; color: #1a1a1a;
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; padding: 2rem 1rem;
+  }
+  .wrapper {
+    width: 100%; max-width: 920px; background: #fff;
+    border-radius: 16px; box-shadow: 0 2px 20px rgba(0,0,0,0.09); overflow: hidden;
+  }
+  .top-bar {
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    color: #fff; padding: 14px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .top-bar-title { font-size: 15px; font-weight: 600; }
+  .top-bar-sub   { font-size: 12px; opacity: .55; margin-top: 2px; }
+  .slide-counter { font-size: 13px; opacity: .6; font-variant-numeric: tabular-nums; }
+  .slide { display: none; padding: 1.75rem 2rem; min-height: 500px; flex-direction: column; gap: 1.2rem; }
+  .slide.active { display: flex; }
+  .slide-header { display: flex; align-items: center; gap: 10px; padding-bottom: 1rem; border-bottom: 1px solid #e8e8e8; }
+  .slide-title    { font-size: 20px; font-weight: 700; color: #111; }
+  .slide-subtitle { font-size: 13px; color: #666; margin-top: 2px; }
+
+  /* ── Badges ── */
+  .badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+  .b-blue   { background:#dbeafe; color:#1d4ed8; }
+  .b-teal   { background:#d1fae5; color:#065f46; }
+  .b-purple { background:#ede9fe; color:#5b21b6; }
+  .b-amber  { background:#fef3c7; color:#92400e; }
+  .b-green  { background:#dcfce7; color:#166534; }
+  .b-slate  { background:#e2e8f0; color:#334155; }
+  .b-rose   { background:#ffe4e6; color:#9f1239; }
+  .b-orange { background:#ffedd5; color:#9a3412; }
+  .b-indigo { background:#e0e7ff; color:#3730a3; }
+  .b-cyan   { background:#cffafe; color:#164e63; }
+  .b-pink   { background:#fce7f3; color:#9d174d; }
+  .b-yellow { background:#fef9c3; color:#854d0e; }
+  .b-js     { background:#fef9c3; color:#854d0e; }
+
+  /* ── Layout ── */
+  .section-label { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 8px; }
+  .card { background: #fff; border: 1px solid #e8e8e8; border-radius: 12px; padding: 1rem 1.25rem; }
+  .card-gray { background: #f8f9fa; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+  /* ── Code Editor (Dracula — identical to ref) ── */
+  .editor { background: #1e1e2e; border-radius: 12px; overflow: hidden; font-family: 'SFMono-Regular', Consolas, 'Courier New', monospace; }
+  .editor-bar { background: #13131f; padding: 9px 14px; display: flex; align-items: center; gap: 6px; }
+  .e-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .e-red { background:#ff5f57; } .e-yellow { background:#febc2e; } .e-green { background:#28c840; }
+  .e-label { font-size: 12px; color: #6272a4; margin-left: 4px; font-family: -apple-system, sans-serif; }
+  .editor-body { padding: 14px 18px; font-size: 12.5px; line-height: 1.8; }
+  .e-ln   { color: #44475a; font-size: 11px; display: inline-block; width: 22px; user-select: none; }
+  .e-tag  { color: #ff79c6; }
+  .e-att  { color: #50fa7b; }
+  .e-val  { color: #f1fa8c; }
+  .e-txt  { color: #f8f8f2; }
+  .e-cmt  { color: #6272a4; font-style: italic; }
+  .e-new  { color: #80ffea; }
+  .j-kw   { color: #ff79c6; font-weight: 700; }
+  .j-fn   { color: #50fa7b; }
+  .j-str  { color: #f1fa8c; }
+  .j-num  { color: #bd93f9; }
+  .j-var  { color: #80ffea; }
+  .j-op   { color: #ff79c6; }
+  .j-dom  { color: #8be9fd; }
+  .j-prop { color: #50fa7b; }
+  .j-com  { color: #6272a4; font-style: italic; }
+  .j-ret  { color: #ff79c6; font-weight: 700; }
+  .j-key  { color: #ff79c6; }
+  .c-punc { color: #f8f8f2; }
+  .e-ind1 { display: inline-block; width: 20px; }
+  .e-ind2 { display: inline-block; width: 40px; }
+  .e-ind3 { display: inline-block; width: 60px; }
+  .e-ind4 { display: inline-block; width: 80px; }
+  .e-row  { display: flex; gap: 8px; }
+
+  /* ── Browser frame ── */
+  .browser { border-radius: 12px; overflow: hidden; border: 1px solid #e0e0e0; }
+  .browser-bar { background: #f1f3f4; padding: 9px 14px; display: flex; align-items: center; gap: 7px; border-bottom: 1px solid #e0e0e0; }
+  .b-dot2 { width: 10px; height: 10px; border-radius: 50%; }
+  .b-r { background:#ff5f57; } .b-y { background:#febc2e; } .b-g { background:#28c840; }
+  .b-url { flex:1; background:#fff; border:1px solid #dadce0; border-radius:20px; padding:4px 14px; font-size:12px; color:#555; }
+
+  /* ── Tables ── */
+  .tag-table { border-collapse: collapse; width: 100%; }
+  .tag-table th { background: #f1f5f9; font-size: 12px; font-weight: 700; text-align: left; padding: 10px 14px; color: #475569; border-bottom: 2px solid #e2e8f0; }
+  .tag-table td { font-size: 13px; padding: 10px 14px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+  .tag-table tr:last-child td { border-bottom: none; }
+  .tag-table tr:hover td { background: #f8f9fa; }
+
+  /* ── Quiz ── */
+  .quiz-option { border: 1px solid #dee2e6; border-radius: 8px; padding: 10px 14px; font-size: 13px; cursor: pointer; margin-bottom: 6px; transition: all .15s; background: transparent; width: 100%; text-align: left; color: #1a1a1a; }
+  .quiz-option:hover:not(:disabled) { background: #f8f9fa; }
+  .quiz-option.correct { background: #d1fae5; border-color: #059669; color: #065f46; }
+  .quiz-option.wrong   { background: #fee2e2; border-color: #dc2626; color: #991b1b; }
+  .quiz-feedback { display: none; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-top: 4px; }
+  .quiz-feedback.correct { background: #d1fae5; color: #065f46; display: block; }
+  .quiz-feedback.wrong   { background: #fee2e2; color: #991b1b; display: block; }
+
+  /* ── Activity / challenge ── */
+  .activity-box { border: 2px dashed #a5b4fc; background: #eef2ff; border-radius: 12px; padding: 14px 18px; }
+  .activity-title { font-size: 13px; font-weight: 700; color: #3730a3; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .challenge-box { border: 2px dashed #f9a8d4; background: #fdf2f8; border-radius: 12px; padding: 14px 18px; }
+  .challenge-title { font-size: 13px; font-weight: 700; color: #9f1239; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+
+  /* ── Tip / info / warn / success ── */
+  .tip-box   { display:flex; gap:10px; align-items:flex-start; background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:10px 14px; }
+  .tip-icon  { color:#d97706; font-size:18px; flex-shrink:0; margin-top:1px; }
+  .tip-text  { font-size:13px; color:#92400e; line-height:1.6; }
+  .info-box  { display:flex; gap:10px; align-items:flex-start; background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:10px 14px; }
+  .info-icon { color:#2563eb; font-size:18px; flex-shrink:0; margin-top:1px; }
+  .info-text { font-size:13px; color:#1e40af; line-height:1.6; }
+  .warn-box  { display:flex; gap:10px; align-items:flex-start; background:#fef9ee; border:1px solid #fcd34d; border-radius:10px; padding:10px 14px; }
+  .success-box { display:flex; gap:10px; align-items:flex-start; background:#f0fdf4; border:1px solid #86efac; border-radius:10px; padding:10px 14px; }
+
+  /* ── Line explainer (JS amber accent) ── */
+  .lex-row { display:flex; align-items:stretch; cursor:pointer; transition:background .12s; border-bottom:1px solid #f0f0f0; }
+  .lex-row:last-child { border-bottom:none; }
+  .lex-row:hover { background:#f8f9fa; }
+  .lex-row.active { background:#fefce8; border-left:3px solid #d97706; }
+  .lex-code { background:#1e1e2e; padding:10px 14px; font-family:'SFMono-Regular',Consolas,monospace; font-size:12px; min-width:200px; flex-shrink:0; display:flex; align-items:center; }
+  .lex-info { padding:10px 14px; flex:1; }
+  .lex-name   { font-size:13px; font-weight:700; color:#d97706; margin-bottom:2px; }
+  .lex-desc   { font-size:12px; color:#555; line-height:1.55; }
+  .lex-detail { display:none; font-size:12px; color:#92400e; margin-top:4px; padding-top:4px; border-top:1px dashed #fde68a; }
+  .lex-row.active .lex-detail { display:block; }
+  .line-explain { border:1px solid #e8e8e8; border-radius:10px; overflow:hidden; }
+
+  /* ── Reveal ── */
+  .reveal-btn { background:#f1f3f5; border:1px solid #dee2e6; border-radius:8px; padding:7px 14px; font-size:13px; cursor:pointer; color:#333; transition:background .15s; }
+  .reveal-btn:hover { background:#e9ecef; }
+  .reveal-content { display:none; margin-top:8px; }
+  .reveal-content.open { display:block; }
+
+  /* ── Nav (JS amber) ── */
+  .nav-row { display:flex; align-items:center; justify-content:space-between; margin-top:auto; padding-top:1rem; border-top:1px solid #f0f0f0; }
+  .nav-btn { display:inline-flex; align-items:center; gap:6px; padding:9px 18px; border:1px solid #dee2e6; border-radius:8px; background:transparent; font-size:13px; cursor:pointer; color:#333; transition:background .15s; }
+  .nav-btn:hover:not(:disabled) { background:#f1f3f5; }
+  .nav-btn:disabled { opacity:.35; cursor:default; }
+  .nav-btn.primary { background:#d97706; border-color:transparent; color:#fff; }
+  .nav-btn.primary:hover { background:#b45309; }
+  .progress-dots { display:flex; gap:6px; align-items:center; }
+  .dot { width:7px; height:7px; border-radius:50%; background:#dee2e6; transition:all .2s; }
+  .dot.active { width:20px; border-radius:4px; background:#d97706; }
+
+  /* ── Home grid ── */
+  .home-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .home-card { background:#fff; border:1px solid #e8e8e8; border-radius:12px; padding:1rem 1.25rem; cursor:pointer; transition:all .15s; }
+  .home-card:hover { border-color:#d97706; box-shadow:0 2px 8px rgba(217,119,6,.12); }
+  .home-card-title { font-size:15px; font-weight:700; margin:6px 0 2px; }
+  .home-card-sub   { font-size:12px; color:#666; }
+
+  code { font-family:'SFMono-Regular',Consolas,monospace; font-size:12px; background:#f1f3f5; padding:1px 6px; border-radius:4px; border:1px solid #dee2e6; }
+
+  /* ── Checklist ── */
+  .check-item { display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:10px; border:1px solid #e8e8e8; font-size:13px; cursor:pointer; transition:all .15s; user-select:none; }
+  .check-item:hover { background:#f8f9fa; }
+  .check-item.done { background:#f0fdf4; border-color:#86efac; }
+  .check-circle { width:22px; height:22px; border-radius:50%; border:2px solid #dee2e6; display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0; transition:all .2s; color:transparent; }
+  .check-item.done .check-circle { background:#22c55e; border-color:#22c55e; color:#fff; }
+
+  /* ── Console panel (identical to ref) ── */
+  .console-panel { background: #0d1117; border-radius: 12px; overflow: hidden; font-family: 'SFMono-Regular', Consolas, monospace; }
+  .console-bar   { background: #161b22; padding: 9px 14px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #30363d; }
+  .console-tab   { font-size: 12px; color: #8b949e; padding-bottom: 3px; }
+  .console-tab.active { color: #f0f6fc; border-bottom: 2px solid #d97706; }
+  .console-body  { padding: 12px 16px; font-size: 12.5px; line-height: 2; }
+  .con-log  { color: #f0f6fc; }
+  .con-str  { color: #a5d6ff; }
+  .con-num  { color: #79c0ff; }
+  .con-arrow { color: #3fb950; font-size: 11px; }
+  .con-prompt-sym { color: #3fb950; }
+  .con-prompt-row { display: flex; align-items: center; gap: 8px; }
+  .con-arr  { color: #d2a8ff; }
+  .con-key  { color: #7ee787; }
+  .js-logo { width: 44px; height: 44px; background: #f0db4f; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-family: 'SFMono-Regular', Consolas, monospace; font-size: 16px; font-weight: 900; color: #323330; flex-shrink: 0; }
+
+  /* ── Flow steps (identical to ref) ── */
+  .flow-step { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; border-bottom: 1px dashed #e2e8f0; }
+  .flow-step:last-child { border-bottom: none; }
+  .flow-num { width: 28px; height: 28px; border-radius: 50%; background: #d97706; color: white; font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+  .flow-content { flex: 1; font-size: 13px; color: #333; line-height: 1.6; }
+  .flow-label { font-weight: 700; color: #d97706; margin-bottom: 2px; }
+
+  /* ── Bootstrap form mockup (identical to ref) ── */
+  .bs-form-group { margin-bottom: 14px; }
+  .bs-label { display: block; font-size: 12px; font-weight: 600; color: #333; margin-bottom: 4px; }
+  .bs-input { width: 100%; padding: 7px 12px; border: 1px solid #ced4da; border-radius: 5px; font-size: 13px; font-family: -apple-system, sans-serif; color: #333; }
+  .bs-input:focus { outline: none; border-color: #86b7fe; }
+  .bs-btn-submit { background: #0d6efd; color: white; border: none; border-radius: 5px; padding: 8px 22px; font-size: 13px; font-weight: 700; cursor: pointer; width: 100%; }
+  .bs-btn-submit:hover { background: #0b5ed7; }
+
+  /* ══ DAY 9 — ARRAYS / OBJECTS SPECIFIC ══ */
+
+  /* Array box visualisation */
+  .array-box { display: inline-flex; border: 2px solid #1e293b; border-radius: 8px; overflow: hidden; }
+  .array-cell { padding: 10px 16px; font-family: monospace; font-size: 13px; font-weight: 700; border-right: 1px solid #1e293b; position: relative; min-width: 60px; text-align: center; }
+  .array-cell:last-child { border-right: none; }
+  .array-cell .idx { position: absolute; top: -18px; left: 50%; transform: translateX(-50%); font-size: 10px; color: #888; font-weight: 400; }
+  .array-cell.empty { background: #f8f9fa; color: #cbd5e1; font-style: italic; }
+  .array-cell.filled { background: #dbeafe; color: #1e40af; }
+  .array-cell.removed { background: #fee2e2; color: #dc2626; text-decoration: line-through; opacity: .5; }
+
+  /* Object box visualisation */
+  .obj-box { background: #1e1e2e; border-radius: 10px; padding: 14px 18px; font-family: monospace; font-size: 13px; }
+  .obj-key-row { display: flex; gap: 8px; padding: 3px 0; }
+
+  /* Why array problem cards */
+  .bad-var-row { display: flex; gap: 8px; align-items: center; padding: 6px 0; font-family: monospace; font-size: 12px; opacity: .8; }
+
+  /* Interactive array builder */
+  .array-builder { background: #0f172a; border-radius: 12px; padding: 16px 18px; }
+  .ab-controls { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+  .ab-btn { background: #1e293b; border: 1px solid #334155; color: #f0db4f; font-family: monospace; font-size: 12px; font-weight: 700; padding: 6px 14px; border-radius: 6px; cursor: pointer; transition: all .15s; }
+  .ab-btn:hover { background: #334155; border-color: #d97706; }
+  .ab-btn.danger { color: #ff7b86; }
+  .ab-visual { display: flex; gap: 6px; flex-wrap: wrap; min-height: 50px; align-items: center; padding: 10px; background: #1e1e2e; border-radius: 8px; }
+  .ab-item { background: #2563eb; color: white; padding: 8px 14px; border-radius: 6px; font-family: monospace; font-size: 12px; font-weight: 700; position: relative; animation: popIn .25s ease; }
+  .ab-item .ab-idx { position: absolute; top: -16px; left: 0; font-size: 9px; color: #6272a4; }
+  @keyframes popIn { from { transform: scale(0.5); opacity:0; } to { transform: scale(1); opacity:1; } }
+  .ab-empty-msg { color: #6272a4; font-family: monospace; font-size: 12px; font-style: italic; }
+
+  /* Method explainer chips */
+  .method-chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 20px; font-family: monospace; font-size: 12px; font-weight: 700; }
+
+  /* Object property explorer */
+  .obj-prop-row { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 8px; border: 1px solid #e8e8e8; cursor: pointer; transition: all .15s; }
+  .obj-prop-row:hover { background: #f8f9fa; border-color: #d97706; }
+
+  /* ══ COURSE CATALOG — DOM / SEARCH / DELETE / LOCAL STORAGE SPECIFIC ══ */
+
+  .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px; }
+
+  /* Project structure pipeline */
+  .pipeline { display: flex; flex-direction: column; }
+  .pl-step { display: flex; align-items: center; gap: 12px; position: relative; padding: 8px 0; }
+  .pl-dot { width: 12px; height: 12px; border-radius: 50%; background: #cbd5e1; flex-shrink: 0; z-index: 1; }
+  .pl-step.done .pl-dot { background: #22c55e; }
+  .pl-step.today .pl-dot { background: #d97706; box-shadow: 0 0 0 4px #fde68a; }
+  .pl-line { position: absolute; left: 5px; top: 20px; bottom: -8px; width: 2px; background: #e2e8f0; }
+  .pl-step:last-child .pl-line { display: none; }
+  .pl-label { font-size: 13px; font-weight: 700; color: #333; }
+  .pl-step.done .pl-label { color: #16a34a; }
+  .pl-step.today .pl-label { color: #b45309; }
+  .pl-tag { margin-left: auto; font-size: 10px; }
+
+  /* Bootstrap-style course card mockup */
+  .cc-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .cc-card { background: #fff; border: 1px solid #e8e8e8; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,.05); overflow: hidden; animation: popIn .2s ease; }
+  .cc-body { padding: 12px 14px; }
+  .cc-title { font-size: 14px; font-weight: 800; color: #1a1a1a; margin-bottom: 4px; }
+  .cc-meta { font-size: 11.5px; color: #666; margin-bottom: 3px; }
+  .cc-del { width: 100%; margin-top: 8px; background: #dc3545; color: #fff; border: none; border-radius: 6px; padding: 6px 0; font-size: 11.5px; font-weight: 700; cursor: pointer; }
+  .cc-del:hover { background: #bb2d3b; }
+  .cc-badges { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 6px; }
+  .cc-badge { font-size: 9.5px; font-weight: 700; padding: 2px 8px; border-radius: 12px; }
+  .cc-cat-web { background: #dbeafe; color: #1e40af; }
+  .cc-cat-prog { background: #ede9fe; color: #5b21b6; }
+  .cc-cat-ai { background: #ffedd5; color: #9a3412; }
+  .cc-cat-blockchain { background: #fce7f3; color: #9d174d; }
+  .cc-stat-available { background: #dcfce7; color: #166534; }
+  .cc-stat-upcoming { background: #fef9c3; color: #854d0e; }
+  .cc-diff-beginner { background: #e0f2fe; color: #075985; }
+  .cc-diff-intermediate { background: #fef3c7; color: #92400e; }
+  .cc-diff-advanced { background: #fee2e2; color: #991b1b; }
+
+  /* Live "Try It" demo panel */
+  .live-panel { background: #f8f9fa; border: 1px solid #e8e8e8; border-radius: 12px; padding: 16px; }
+  .live-form-row { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 8px; margin-bottom: 12px; }
+  .live-input { padding: 8px 12px; border: 1px solid #ced4da; border-radius: 7px; font-size: 12.5px; font-family: -apple-system, sans-serif; }
+  .live-input:focus { outline: none; border-color: #d97706; }
+  .live-add-btn { background: #0d6efd; color: #fff; border: none; border-radius: 7px; padding: 8px 16px; font-size: 12.5px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+  .live-add-btn:hover { background: #0b5ed7; }
+  .live-search-row { position: relative; margin-bottom: 12px; }
+  .live-search-input { width: 100%; padding: 8px 14px 8px 34px; border: 1px solid #ced4da; border-radius: 7px; font-size: 12.5px; }
+  .live-search-icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: #999; font-size: 14px; }
+  .live-cards { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; min-height: 70px; }
+  .live-empty { grid-column: 1/-1; text-align: center; color: #aaa; font-size: 12px; font-style: italic; padding: 18px 0; }
+  .live-count-bar { display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #888; margin-bottom: 10px; }
+  .live-reset-btn { background: #f1f3f5; border: 1px solid #dee2e6; border-radius: 6px; padding: 5px 12px; font-size: 11px; cursor: pointer; color: #555; }
+  .live-reset-btn:hover { background: #e9ecef; }
+
+  /* Local storage visual */
+  .ls-box { background: #1e1e2e; border-radius: 10px; padding: 14px 18px; font-family: monospace; font-size: 12.5px; min-height: 46px; }
+  .ls-row { display: flex; align-items: flex-start; gap: 10px; padding: 5px 0; word-break: break-all; }
+  .ls-key { color: #ff79c6; font-weight: 700; flex-shrink: 0; }
+  .ls-arrow { color: #6272a4; font-size: 11px; flex-shrink: 0; }
+  .ls-val { color: #f1fa8c; }
+  .ls-empty-msg { color: #6272a4; font-family: monospace; font-size: 12px; font-style: italic; }
+  .ls-demo-controls { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+  .ls-btn { background: #1e293b; border: 1px solid #334155; color: #f0db4f; font-family: monospace; font-size: 11.5px; font-weight: 700; padding: 6px 13px; border-radius: 6px; cursor: pointer; transition: all .15s; }
+  .ls-btn:hover { background: #334155; border-color: #d97706; }
+  .ls-btn.danger { color: #ff7b86; }
+
+  /* Counter / dashboard card */
+  .counter-card { display: flex; align-items: center; gap: 14px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 14px 18px; }
+  .counter-icon { width: 44px; height: 44px; border-radius: 10px; background: #2563eb; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+  .counter-num { font-size: 28px; font-weight: 800; color: #1e40af; line-height: 1; }
+  .counter-label { font-size: 12px; color: #3b5f9e; font-weight: 600; margin-top: 2px; }
+
+  /* Empty state */
+  .empty-state { border: 2px dashed #dee2e6; border-radius: 12px; padding: 26px 16px; text-align: center; color: #aaa; }
+  .empty-state i { font-size: 26px; display: block; margin-bottom: 8px; color: #ccc; }
+  .empty-state .es-text { font-size: 13px; font-weight: 600; color: #999; }
+
+  /* Selector demo console-style buttons */
+  .sel-demo-controls { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+  .sel-btn { background: #1e293b; border: 1px solid #334155; color: #79c0ff; font-family: monospace; font-size: 11.5px; font-weight: 700; padding: 6px 13px; border-radius: 6px; cursor: pointer; }
+  .sel-btn:hover { background: #334155; border-color: #d97706; }
+
+    /* ══ DAY 12 — GIT & GITHUB SPECIFIC ══ */
+  .terminal { background:#0d1117; border-radius:12px; overflow:hidden; font-family:'SFMono-Regular',Consolas,monospace; }
+  .terminal-bar { background:#161b22; padding:9px 14px; display:flex; align-items:center; gap:6px; border-bottom:1px solid #30363d; }
+  .terminal-body { padding:14px 18px; font-size:12.5px; line-height:2; }
+  .t-prompt { color:#3fb950; }
+  .t-path { color:#79c0ff; }
+  .t-cmd { color:#f0f6fc; }
+  .t-out { color:#8b949e; }
+  .t-comment { color:#6272a4; font-style:italic; }
+
+  .status-track { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  .status-chip { padding:8px 16px; border-radius:20px; font-size:12px; font-weight:700; border:2px solid transparent; opacity:.35; transition:all .2s; }
+  .status-chip.active { opacity:1; transform:scale(1.05); }
+  .status-chip.s-untracked { background:#fee2e2; color:#991b1b; }
+  .status-chip.s-modified { background:#fef3c7; color:#92400e; }
+  .status-chip.s-staged { background:#dbeafe; color:#1d4ed8; }
+  .status-chip.s-committed { background:#dcfce7; color:#166534; }
+  .status-arrow { color:#ccc; font-size:16px; }
+
+  .branch-pill { display:inline-flex; align-items:center; gap:6px; padding:8px 16px; border-radius:20px; font-size:13px; font-weight:700; font-family:monospace; border:2px solid #dee2e6; background:#fff; color:#888; transition:all .2s; }
+  .branch-pill.current { border-color:#d97706; background:#fef3c7; color:#92400e; }
+  .branch-pill .bp-dot { width:8px; height:8px; border-radius:50%; background:currentColor; }
+  .branch-log { background:#0d1117; border-radius:10px; padding:12px 16px; font-family:monospace; font-size:12px; color:#8b949e; min-height:60px; max-height:150px; overflow-y:auto; }
+  .branch-log-row { padding:3px 0; }
+  .branch-log-row .p { color:#3fb950; }
+  .branch-btn { background:#1e293b; border:1px solid #334155; color:#79c0ff; font-family:monospace; font-size:11.5px; font-weight:700; padding:7px 14px; border-radius:6px; cursor:pointer; transition:all .15s; }
+  .branch-btn:hover:not(:disabled) { background:#334155; border-color:#d97706; }
+  .branch-btn:disabled { opacity:.3; cursor:default; }
+
+  .commit-timeline { position:relative; padding-left:22px; }
+  .commit-node { position:relative; padding:8px 0 8px 10px; border-left:2px solid #e2e8f0; }
+  .commit-node:last-child { border-left:2px solid transparent; }
+  .commit-node::before { content:''; position:absolute; left:-7px; top:13px; width:12px; height:12px; border-radius:50%; background:#d97706; border:2px solid #fff; box-shadow:0 0 0 2px #d97706; }
+  .commit-hash { font-family:monospace; font-size:11px; color:#d97706; font-weight:700; }
+  .commit-msg { font-size:13px; font-weight:600; color:#333; margin-top:2px; }
+
+  /* ══ DAY 13 — NODE.JS SPECIFIC ══ */
+  .node-console { background:#0d1117; border-radius:12px; overflow:hidden; font-family:'SFMono-Regular',Consolas,monospace; }
+  .cli-menu { background:#e2e5ea; border-radius:10px; padding:14px 18px; color:#8b949e; font-size:12.5px; line-height:1.9; white-space:pre; }
+  .cli-menu .num { color:#79c0ff; }
+  .file-tree { font-family:monospace; font-size:12.5px; color:#333; line-height:2; }
+  .file-tree .fld { color:#d97706; font-weight:700; }
+  .file-tree .fl  { color:#555; }
+  .student-row { display:grid; grid-template-columns:1fr 1fr auto; gap:10px; align-items:center; padding:8px 12px; border-radius:8px; border:1px solid #e8e8e8; font-size:12.5px; }
+  .student-row:hover { background:#f8f9fa; }
+  .student-name { font-weight:700; color:#1a1a1a; }
+  .student-course { color:#666; }
+  .student-del { background:#dc3545; color:#fff; border:none; border-radius:6px; padding:5px 10px; font-size:11px; font-weight:700; cursor:pointer; }
+  .student-del:hover { background:#bb2d3b; }
+  .student-empty { text-align:center; color:#aaa; font-size:12px; font-style:italic; padding:16px 0; }
+
+</style>
+
+
+
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <div>
+      <div class="top-bar-title">MERN Stack Training · Day 13 · Full Session (3 Hours)</div>
+      <div class="top-bar-sub">Node.js Fundamentals &amp; Student Management CLI · SkillHub LMS</div>
+    </div>
+    <div class="slide-counter" id="slide-counter">1 / 19</div>
+  </div>
+
+  <!-- ═══ SLIDE 0  HOME ═══ -->
+  <div class="slide active" id="slide-0">
+    <div class="slide-header">
+      <div class="js-logo" style="background:#68a063;color:#fff">⬢</div>
+      <div>
+        <div class="slide-title">Node.js Fundamentals &amp; Student Management CLI</div>
+        <div class="slide-subtitle">SkillHub LMS steps out of the browser and runs on a real server for the first time</div>
+      </div>
+    </div>
+
+    <div style="background:#fef9c3;border:1px solid #fde68a;border-radius:12px;padding:12px 16px;display:flex;gap:12px;align-items:flex-start">
+      <i class="ti ti-target-arrow" style="color:#d97706;font-size:22px;flex-shrink:0;margin-top:1px"></i>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#854d0e;margin-bottom:4px">Today's Goal — Build a terminal-based Student Management System</div>
+        <div style="display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:#92400e">
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Understand Node.js</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Modules &amp; require()</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Add / View / Delete Students</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Save to File (JSON)</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Read File Back</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="home-grid">
+      <div class="home-card" onclick="goSlide(1)">
+        <span class="badge b-green">Intro</span>
+        <div class="home-card-title">Project Goal &amp; Learning Outcomes</div>
+        <div class="home-card-sub">From browser-only JavaScript to a real runtime</div>
+      </div>
+      <div class="home-card" onclick="goSlide(2)">
+        <span class="badge b-amber">Roadmap</span>
+        <div class="home-card-title">Project Structure</div>
+        <div class="home-card-sub">Where Node.js fits in SkillHub LMS's journey</div>
+      </div>
+      <div class="home-card" onclick="goSlide(3)">
+        <span class="badge b-js">Part 1 · 10 min</span>
+        <div class="home-card-title">Why Node.js?</div>
+        <div class="home-card-sub">Can the browser create files or build APIs? No.</div>
+      </div>
+      <div class="home-card" onclick="goSlide(4)">
+        <span class="badge b-blue">Part 1 · 15 min</span>
+        <div class="home-card-title">Architecture &amp; Verify Install</div>
+        <div class="home-card-sub">Browser → JavaScript → Node Runtime → OS</div>
+      </div>
+      <div class="home-card" onclick="goSlide(5)">
+        <span class="badge b-purple">Part 1 · 15 min</span>
+        <div class="home-card-title">Create Backend &amp; npm init</div>
+        <div class="home-card-sub">package.json — name, version, main, scripts</div>
+      </div>
+      <div class="home-card" onclick="goSlide(6)">
+        <span class="badge b-orange">Part 1 · 20 min</span>
+        <div class="home-card-title">First Program &amp; Variables</div>
+        <div class="home-card-sub">app.js, console.log, node app.js</div>
+      </div>
+      <div class="home-card" onclick="goSlide(7)">
+        <span class="badge b-teal">Part 1 · 20 min</span>
+        <div class="home-card-title">Modules — require() &amp; module.exports</div>
+        <div class="home-card-sub">utils.js becomes reusable code</div>
+      </div>
+      <div class="home-card" onclick="goSlide(8)">
+        <span class="badge b-indigo">Explain</span>
+        <div class="home-card-title">Line-by-Line — Node Fundamentals</div>
+        <div class="home-card-sub">Every new concept from the First 90 Minutes</div>
+      </div>
+    </div>
+
+    <div class="home-card" onclick="goSlide(9)" style="cursor:pointer">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="badge b-rose">2nd 90 min</span>
+        <span style="font-size:14px;font-weight:700">Student Management CLI — Project Structure</span>
+        <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+      </div>
+    </div>
+    <div class="grid-2" style="gap:10px">
+      <div class="home-card" onclick="goSlide(10)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge b-cyan">Try It</span>
+          <span style="font-size:14px;font-weight:700">Add Student — Live</span>
+          <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+        </div>
+      </div>
+      <div class="home-card" onclick="goSlide(11)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge b-cyan">Try It</span>
+          <span style="font-size:14px;font-weight:700">View &amp; Delete Student</span>
+          <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+        </div>
+      </div>
+    </div>
+    <div class="grid-2" style="gap:10px">
+      <div class="home-card" onclick="goSlide(12)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge b-amber">2nd 90</span>
+          <span style="font-size:14px;font-weight:700">Save to File</span>
+          <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+        </div>
+      </div>
+      <div class="home-card" onclick="goSlide(13)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge b-amber">2nd 90</span>
+          <span style="font-size:14px;font-weight:700">Read File Back</span>
+          <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+        </div>
+      </div>
+    </div>
+    <div class="home-card" onclick="goSlide(14)" style="cursor:pointer">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="badge b-slate">2nd 90</span>
+        <span style="font-size:14px;font-weight:700">CLI Menu — Menu-Driven Applications</span>
+        <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+      </div>
+    </div>
+    <div class="home-card" onclick="goSlide(15)" style="cursor:pointer">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="badge b-pink">Mini Challenge</span>
+        <span style="font-size:14px;font-weight:700">Email, Phone &amp; Course Duration</span>
+        <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+      </div>
+    </div>
+    <div class="home-card" onclick="goSlide(16)" style="cursor:pointer">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="badge b-orange">Assignment</span>
+        <span style="font-size:14px;font-weight:700">Update, Search, Count &amp; Sort Students</span>
+        <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+      </div>
+    </div>
+    <div class="home-card" onclick="goSlide(17)" style="cursor:pointer">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="badge b-slate">Deliverable</span>
+        <span style="font-size:14px;font-weight:700">Project Progress &amp; What's Next</span>
+        <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+      </div>
+    </div>
+    <div class="home-card" onclick="goSlide(18)" style="cursor:pointer">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="badge b-green">Quiz</span>
+        <span style="font-size:14px;font-weight:700">Quick Check — 7 Questions</span>
+        <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <div></div>
+      <div class="progress-dots" id="dots-0"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Start <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 1  PROJECT GOAL & LEARNING OUTCOMES ═══ -->
+  <div class="slide" id="slide-1">
+    <div class="slide-header">
+      <span class="badge b-green">Intro</span>
+      <div>
+        <div class="slide-title">Project Goal</div>
+        <div class="slide-subtitle">Before web servers, students meet Node.js through a terminal app</div>
+      </div>
+    </div>
+    <div class="card card-gray">
+      <div style="font-size:13px;color:#444;line-height:1.7">Students will understand:</div>
+      <div class="grid-3" style="margin-top:10px">
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="font-size:12px;font-weight:700;color:#166534"><i class="ti ti-check" style="margin-right:5px"></i>What is Node.js?</div>
+          <div style="font-size:12px;font-weight:700;color:#166534"><i class="ti ti-check" style="margin-right:5px"></i>JavaScript Runtime</div>
+          <div style="font-size:12px;font-weight:700;color:#166534"><i class="ti ti-check" style="margin-right:5px"></i>Modules &amp; CommonJS</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="font-size:12px;font-weight:700;color:#166534"><i class="ti ti-check" style="margin-right:5px"></i>npm &amp; package.json</div>
+          <div style="font-size:12px;font-weight:700;color:#166534"><i class="ti ti-check" style="margin-right:5px"></i>Command Line Applications</div>
+          <div style="font-size:12px;font-weight:700;color:#166534"><i class="ti ti-check" style="margin-right:5px"></i>Reading User Input</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="font-size:12px;font-weight:700;color:#166534"><i class="ti ti-check" style="margin-right:5px"></i>Building a Student Management CLI</div>
+        </div>
+      </div>
+    </div>
+    <div class="success-box">
+      <i class="ti ti-sparkles" style="color:#16a34a;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+      <div style="font-size:13px;color:#166534;line-height:1.65"><strong>Project Goal:</strong> Build a terminal-based Student Management System before moving to web servers.</div>
+    </div>
+    <div class="section-label">core concepts today</div>
+    <div class="grid-3">
+      <div class="card" style="text-align:center">
+        <i class="ti ti-brand-nodejs" style="font-size:20px;color:#16a34a"></i>
+        <div style="font-size:12px;font-weight:700;margin-top:6px">Node Runtime</div>
+      </div>
+      <div class="card" style="text-align:center">
+        <i class="ti ti-puzzle" style="font-size:20px;color:#2563eb"></i>
+        <div style="font-size:12px;font-weight:700;margin-top:6px">Modules</div>
+      </div>
+      <div class="card" style="text-align:center">
+        <i class="ti ti-package" style="font-size:20px;color:#7c3aed"></i>
+        <div style="font-size:12px;font-weight:700;margin-top:6px">npm</div>
+      </div>
+      <div class="card" style="text-align:center">
+        <i class="ti ti-terminal-2" style="font-size:20px;color:#d97706"></i>
+        <div style="font-size:12px;font-weight:700;margin-top:6px">CLI Apps</div>
+      </div>
+      <div class="card" style="text-align:center">
+        <i class="ti ti-file-text" style="font-size:20px;color:#dc2626"></i>
+        <div style="font-size:12px;font-weight:700;margin-top:6px">File System (fs)</div>
+      </div>
+      <div class="card" style="text-align:center">
+        <i class="ti ti-braces" style="font-size:20px;color:#0891b2"></i>
+        <div style="font-size:12px;font-weight:700;margin-top:6px">JSON Storage</div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-1"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Project Structure <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 2  PROJECT STRUCTURE ═══ -->
+  <div class="slide" id="slide-2">
+    <div class="slide-header">
+      <span class="badge b-amber">Roadmap</span>
+      <div>
+        <div class="slide-title">Project Structure — SkillHub LMS</div>
+        <div class="slide-subtitle">Where today's Node.js module fits into the bigger picture</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="pipeline">
+        <div class="pl-step done"><div class="pl-line"></div><div class="pl-dot"></div><div class="pl-label">Frontend LMS</div><span class="badge b-green pl-tag">done</span></div>
+        <div class="pl-step done"><div class="pl-line"></div><div class="pl-dot"></div><div class="pl-label">Git &amp; GitHub</div><span class="badge b-green pl-tag">done</span></div>
+        <div class="pl-step today"><div class="pl-line"></div><div class="pl-dot"></div><div class="pl-label">Node.js Runtime</div><span class="badge b-js pl-tag">today</span></div>
+        <div class="pl-step today"><div class="pl-line"></div><div class="pl-dot"></div><div class="pl-label">Modules</div><span class="badge b-js pl-tag">today</span></div>
+        <div class="pl-step today"><div class="pl-line"></div><div class="pl-dot"></div><div class="pl-label">Student Management CLI</div><span class="badge b-js pl-tag">today</span></div>
+        <div class="pl-step today"><div class="pl-dot"></div><div class="pl-label">File System Storage (JSON)</div><span class="badge b-orange pl-tag">🎯 goal</span></div>
+      </div>
+    </div>
+    <div class="info-box">
+      <i class="ti ti-info-circle info-icon"></i>
+      <div class="info-text"><strong>Same habit as always:</strong> change the data → save it → re-render the view. You've done this with Local Storage in the browser — today the exact same pattern happens in a terminal, with Node's file system instead of the browser's storage.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-2"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Why Node.js? <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 3  WHY NODE.JS ═══ -->
+  <div class="slide" id="slide-3">
+    <div class="slide-header">
+      <span class="badge b-js">Part 1</span>
+      <div>
+        <div class="slide-title">Why Node.js?</div>
+        <div class="slide-subtitle">Our LMS currently runs only in the browser</div>
+      </div>
+    </div>
+    <div class="card card-gray">
+      <div style="font-size:13px;font-weight:700;color:#333;margin-bottom:10px"><i class="ti ti-message-circle" style="margin-right:6px;color:#d97706"></i>Ask the class:</div>
+      <div style="display:flex;flex-direction:column;gap:8px;font-size:13px;color:#444">
+        <div>Can JavaScript create files? <span style="color:#dc2626;font-weight:700">Not in the browser.</span></div>
+        <div>Can it access the operating system? <span style="color:#dc2626;font-weight:700">Not in the browser.</span></div>
+        <div>Can it build APIs? <span style="color:#dc2626;font-weight:700">Not in the browser.</span></div>
+      </div>
+    </div>
+    <div class="success-box">
+      <i class="ti ti-sparkles" style="color:#16a34a;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+      <div style="font-size:13px;color:#166534;line-height:1.65"><strong>Node.js solves this.</strong> It takes the same JavaScript language and lets it run outside the browser — on your machine, with access to files, networks, and the operating system.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-3"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Architecture &amp; Verify Install <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 4  ARCHITECTURE & VERIFY INSTALL ═══ -->
+  <div class="slide" id="slide-4">
+    <div class="slide-header">
+      <span class="badge b-blue">Part 1</span>
+      <div>
+        <div class="slide-title">Architecture &amp; Verify Install</div>
+        <div class="slide-subtitle">JavaScript now has a way down to the operating system</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="flow-step">
+        <div class="flow-num">1</div>
+        <div class="flow-content"><div class="flow-label">Browser</div>Where the LMS frontend has run so far.</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">2</div>
+        <div class="flow-content"><div class="flow-label">JavaScript</div>The same language, no longer trapped inside a browser tab.</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">3</div>
+        <div class="flow-content"><div class="flow-label">Node Runtime</div>Executes JavaScript directly on your machine.</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">4</div>
+        <div class="flow-content"><div class="flow-label">Operating System</div>Node can now read/write files, talk to networks, and more.</div>
+      </div>
+    </div>
+    <div class="section-label">verify installation</div>
+    <div class="terminal">
+      <div class="terminal-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">terminal</span></div>
+      <div class="terminal-body">
+        <div><span class="t-prompt">$</span> <span class="t-cmd">node -v</span></div>
+        <div class="t-out">v20.11.1</div>
+        <div><span class="t-prompt">$</span> <span class="t-cmd">npm -v</span></div>
+        <div class="t-out">10.2.4</div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-4"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Create Backend &amp; npm init <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 5  CREATE BACKEND & NPM INIT ═══ -->
+  <div class="slide" id="slide-5">
+    <div class="slide-header">
+      <span class="badge b-purple">Part 1</span>
+      <div>
+        <div class="slide-title">Create Backend &amp; npm init</div>
+        <div class="slide-subtitle">Every Node project starts with a package.json</div>
+      </div>
+    </div>
+    <div class="terminal">
+      <div class="terminal-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">~/skillhub-lms</span></div>
+      <div class="terminal-body">
+        <div><span class="t-prompt">$</span> <span class="t-cmd">mkdir backend &amp;&amp; cd backend</span></div>
+        <div><span class="t-prompt">$</span> <span class="t-cmd">npm init -y</span></div>
+        <div class="t-out">Wrote to backend/package.json</div>
+      </div>
+    </div>
+    <div class="section-label">package.json — key fields</div>
+    <div class="editor">
+      <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">package.json</span></div>
+      <div class="editor-body">
+        <div class="e-row"><span class="e-ln">1</span><span class="c-punc">{</span></div>
+        <div class="e-row"><span class="e-ln">2</span><span class="e-ind1"></span><span class="j-str">"name"</span><span class="j-op">:</span> <span class="j-str">"backend"</span><span class="c-punc">,</span></div>
+        <div class="e-row"><span class="e-ln">3</span><span class="e-ind1"></span><span class="j-str">"version"</span><span class="j-op">:</span> <span class="j-str">"1.0.0"</span><span class="c-punc">,</span></div>
+        <div class="e-row"><span class="e-ln">4</span><span class="e-ind1"></span><span class="j-str">"main"</span><span class="j-op">:</span> <span class="j-str">"app.js"</span><span class="c-punc">,</span></div>
+        <div class="e-row"><span class="e-ln">5</span><span class="e-ind1"></span><span class="j-str">"scripts"</span><span class="j-op">:</span> <span class="c-punc">{ ... }</span><span class="c-punc">,</span></div>
+        <div class="e-row"><span class="e-ln">6</span><span class="e-ind1"></span><span class="j-str">"dependencies"</span><span class="j-op">:</span> <span class="c-punc">{ }</span></div>
+        <div class="e-row"><span class="e-ln">7</span><span class="c-punc">}</span></div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="card"><div style="font-family:monospace;font-size:12px;font-weight:700;color:#d97706">name / version</div><div style="font-size:12px;color:#555;margin-top:4px">Identifies the project and its release number.</div></div>
+      <div class="card"><div style="font-family:monospace;font-size:12px;font-weight:700;color:#d97706">main</div><div style="font-size:12px;color:#555;margin-top:4px">The entry file Node runs first.</div></div>
+      <div class="card"><div style="font-family:monospace;font-size:12px;font-weight:700;color:#d97706">scripts</div><div style="font-size:12px;color:#555;margin-top:4px">Shortcuts like npm start.</div></div>
+      <div class="card"><div style="font-family:monospace;font-size:12px;font-weight:700;color:#d97706">dependencies</div><div style="font-size:12px;color:#555;margin-top:4px">Packages this project needs to run.</div></div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-5"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">First Program &amp; Variables <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 6  FIRST PROGRAM & VARIABLES ═══ -->
+  <div class="slide" id="slide-6">
+    <div class="slide-header">
+      <span class="badge b-orange">Part 1</span>
+      <div>
+        <div class="slide-title">First Program &amp; Variables</div>
+        <div class="slide-subtitle">app.js — the entry point of the backend</div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="editor">
+        <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">app.js</span></div>
+        <div class="editor-body">
+          <div class="e-row"><span class="e-ln">1</span><span class="j-fn">console</span><span class="c-punc">.</span><span class="j-fn">log</span><span class="c-punc">(</span><span class="j-str">"Welcome to SkillHub Backend"</span><span class="c-punc">);</span></div>
+        </div>
+      </div>
+      <div class="node-console">
+        <div class="terminal-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">terminal</span></div>
+        <div class="terminal-body">
+          <div><span class="t-prompt">$</span> <span class="t-cmd">node app.js</span></div>
+          <div class="t-out">Welcome to SkillHub Backend</div>
+        </div>
+      </div>
+    </div>
+    <div class="section-label">variables work exactly the same as in the browser</div>
+    <div class="editor">
+      <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">app.js</span></div>
+      <div class="editor-body">
+        <div class="e-row"><span class="e-ln">1</span><span class="j-kw">const</span> <span class="j-var">college</span> <span class="j-op">=</span> <span class="j-str">"SkillHub"</span><span class="c-punc">;</span></div>
+        <div class="e-row"><span class="e-ln">2</span><span class="j-fn">console</span><span class="c-punc">.</span><span class="j-fn">log</span><span class="c-punc">(</span><span class="j-var">college</span><span class="c-punc">);</span></div>
+      </div>
+    </div>
+    <div class="info-box">
+      <i class="ti ti-info-circle info-icon"></i>
+      <div class="info-text">const, let, template literals, arrays, objects — every JavaScript concept students already know carries straight over into Node. The only thing that changed is where the code runs.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-6"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Modules <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 7  MODULES ═══ -->
+  <div class="slide" id="slide-7">
+    <div class="slide-header">
+      <span class="badge b-teal">Part 1</span>
+      <div>
+        <div class="slide-title">Modules — require() &amp; module.exports</div>
+        <div class="slide-subtitle">Splitting code into reusable files</div>
+      </div>
+    </div>
+    <div class="section-label">create — utils.js</div>
+    <div class="editor">
+      <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">utils.js</span></div>
+      <div class="editor-body">
+        <div class="e-row"><span class="e-ln">1</span><span class="j-kw">function</span> <span class="j-fn">greet</span><span class="c-punc">(</span><span class="j-var">name</span><span class="c-punc">){</span></div>
+        <div class="e-row"><span class="e-ln">2</span><span class="e-ind1"></span><span class="j-ret">return</span> <span class="j-str">`Welcome ${</span><span class="j-var">name</span><span class="j-str">}`</span><span class="c-punc">;</span></div>
+        <div class="e-row"><span class="e-ln">3</span><span class="c-punc">}</span></div>
+        <div class="e-row"><span class="e-ln">4</span></div>
+        <div class="e-row"><span class="e-ln">5</span><span class="j-var">module</span><span class="c-punc">.</span><span class="j-prop">exports</span> <span class="j-op">=</span> <span class="j-var">greet</span><span class="c-punc">;</span></div>
+      </div>
+    </div>
+    <div class="section-label">import — app.js</div>
+    <div class="grid-2">
+      <div class="editor">
+        <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">app.js</span></div>
+        <div class="editor-body">
+          <div class="e-row"><span class="e-ln">1</span><span class="j-kw">const</span> <span class="j-var">greet</span> <span class="j-op">=</span> <span class="j-fn">require</span><span class="c-punc">(</span><span class="j-str">"./utils"</span><span class="c-punc">);</span></div>
+          <div class="e-row"><span class="e-ln">2</span><span class="j-fn">console</span><span class="c-punc">.</span><span class="j-fn">log</span><span class="c-punc">(</span><span class="j-fn">greet</span><span class="c-punc">(</span><span class="j-str">"Rahul"</span><span class="c-punc">));</span></div>
+        </div>
+      </div>
+      <div class="node-console">
+        <div class="terminal-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">terminal</span></div>
+        <div class="terminal-body">
+          <div><span class="t-prompt">$</span> <span class="t-cmd">node app.js</span></div>
+          <div class="t-out">Welcome Rahul</div>
+        </div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="card"><div style="font-family:monospace;font-size:12px;font-weight:700;color:#d97706">module.exports</div><div style="font-size:12px;color:#555;margin-top:4px">Marks what a file makes available to other files.</div></div>
+      <div class="card"><div style="font-family:monospace;font-size:12px;font-weight:700;color:#d97706">require()</div><div style="font-size:12px;color:#555;margin-top:4px">Pulls that exported value into the current file.</div></div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-7"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Line-by-Line Explainer <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 8  LINE-BY-LINE EXPLAINER ═══ -->
+  <div class="slide" id="slide-8">
+    <div class="slide-header">
+      <span class="badge b-indigo">Explain</span>
+      <div>
+        <div class="slide-title">Line-by-Line — Node Fundamentals</div>
+        <div class="slide-subtitle">Click any line to see what it actually does</div>
+      </div>
+    </div>
+    <div class="line-explain">
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code">node app.js</div>
+        <div class="lex-info">
+          <div class="lex-name">node app.js</div>
+          <div class="lex-desc">Tells the Node runtime to execute app.js from top to bottom.</div>
+          <div class="lex-detail">Unlike browser JS, there's no page to load — Node just runs the file directly and prints anything console.log()'d to the terminal.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code">npm init -y</div>
+        <div class="lex-info">
+          <div class="lex-name">npm init -y</div>
+          <div class="lex-desc">Generates a package.json instantly, accepting all the default answers.</div>
+          <div class="lex-detail">Without -y, npm init asks a series of questions (name, version, entry point...) one at a time.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code">module.exports</div>
+        <div class="lex-info">
+          <div class="lex-name">module.exports</div>
+          <div class="lex-desc">Whatever is assigned here becomes the thing another file receives when it calls require() on this file.</div>
+          <div class="lex-detail">You can export a single function, an object of many functions, a class, or any value at all.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code">require("./utils")</div>
+        <div class="lex-info">
+          <div class="lex-name">require("./utils")</div>
+          <div class="lex-desc">Loads utils.js and returns whatever it exported.</div>
+          <div class="lex-detail">The "./" prefix means "look in this same folder". Without it, Node assumes you mean an installed npm package instead of a local file.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code">let students = [];</div>
+        <div class="lex-info">
+          <div class="lex-name">let students = [];</div>
+          <div class="lex-desc">An empty array that will hold every student object added during this session.</div>
+          <div class="lex-detail">Because it's in memory only, this array resets every time the program restarts — that's exactly the gap fs.writeFileSync() closes later today.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code">require("fs")</div>
+        <div class="lex-info">
+          <div class="lex-name">const fs = require("fs")</div>
+          <div class="lex-desc">Loads Node's built-in File System module — no installation needed, it ships with Node itself.</div>
+          <div class="lex-detail">"fs" is a core module, unlike "./utils" which is a local file. Core modules never need a "./" prefix.</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-8"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Student Management CLI <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 9  STUDENT MANAGEMENT CLI — PROJECT STRUCTURE ═══ -->
+  <div class="slide" id="slide-9">
+    <div class="slide-header">
+      <span class="badge b-rose">2nd 90 min</span>
+      <div>
+        <div class="slide-title">Student Management CLI</div>
+        <div class="slide-subtitle">The bridge between JavaScript and backend development</div>
+      </div>
+    </div>
+    <div class="section-label">project structure</div>
+    <div class="card">
+      <div class="file-tree">
+        <div><span class="fld">backend</span></div>
+        <div>│</div>
+        <div>├── <span class="fl">app.js</span></div>
+        <div>├── <span class="fl">student.js</span></div>
+        <div>└── <span class="fl">students.json</span></div>
+      </div>
+    </div>
+    <div class="section-label">start with an empty array</div>
+    <div class="editor">
+      <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">student.js</span></div>
+      <div class="editor-body">
+        <div class="e-row"><span class="e-ln">1</span><span class="j-kw">let</span> <span class="j-var">students</span> <span class="j-op">=</span> <span class="c-punc">[];</span></div>
+      </div>
+    </div>
+    <div class="tip-box">
+      <i class="ti ti-bulb tip-icon"></i>
+      <div class="tip-text">This one array is the entire "database" for now — every add, view and delete function in the next few slides works directly on it, exactly like the courses array from the Frontend LMS.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-9"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Add Student — Live <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 10  ADD STUDENT — LIVE ═══ -->
+  <div class="slide" id="slide-10">
+    <div class="slide-header">
+      <span class="badge b-cyan">Try It</span>
+      <div>
+        <div class="slide-title">Add Student Function</div>
+        <div class="slide-subtitle">push() adds a new object onto the students array</div>
+      </div>
+    </div>
+    <div class="editor">
+      <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">student.js</span></div>
+      <div class="editor-body">
+        <div class="e-row"><span class="e-ln">1</span><span class="j-kw">function</span> <span class="j-fn">addStudent</span><span class="c-punc">(</span><span class="j-var">name</span><span class="c-punc">,</span> <span class="j-var">course</span><span class="c-punc">){</span></div>
+        <div class="e-row"><span class="e-ln">2</span><span class="e-ind1"></span><span class="j-var">students</span><span class="c-punc">.</span><span class="j-fn">push</span><span class="c-punc">({</span> <span class="j-var">name</span><span class="c-punc">,</span> <span class="j-var">course</span> <span class="c-punc">});</span></div>
+        <div class="e-row"><span class="e-ln">3</span><span class="e-ind1"></span><span class="j-fn">console</span><span class="c-punc">.</span><span class="j-fn">log</span><span class="c-punc">(</span><span class="j-str">"Student Added"</span><span class="c-punc">);</span></div>
+        <div class="e-row"><span class="e-ln">4</span><span class="c-punc">}</span></div>
+      </div>
+    </div>
+    <div class="section-label">try it live — this really adds to the array below</div>
+    <div class="live-panel">
+      <div class="live-form-row" style="grid-template-columns:1fr 1fr auto">
+        <input class="live-input" id="stu-name" placeholder="Rahul">
+        <input class="live-input" id="stu-course" placeholder="MERN">
+        <button class="live-add-btn" onclick="addStudentLive()">addStudent()</button>
+      </div>
+      <div class="node-console" style="margin-top:4px">
+        <div class="terminal-body" id="add-student-log" style="padding:10px 16px">
+          <div class="t-comment">// call addStudent(name, course) to see it here</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-10"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">View &amp; Delete Student <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 11  VIEW & DELETE STUDENT ═══ -->
+  <div class="slide" id="slide-11">
+    <div class="slide-header">
+      <span class="badge b-cyan">Try It</span>
+      <div>
+        <div class="slide-title">View Students &amp; Delete Student</div>
+        <div class="slide-subtitle">console.table() to display, filter() to remove</div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="editor">
+        <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">viewStudents()</span></div>
+        <div class="editor-body">
+          <div class="e-row"><span class="e-ln">1</span><span class="j-kw">function</span> <span class="j-fn">viewStudents</span><span class="c-punc">(){</span></div>
+          <div class="e-row"><span class="e-ln">2</span><span class="e-ind1"></span><span class="j-fn">console</span><span class="c-punc">.</span><span class="j-fn">table</span><span class="c-punc">(</span><span class="j-var">students</span><span class="c-punc">);</span></div>
+          <div class="e-row"><span class="e-ln">3</span><span class="c-punc">}</span></div>
+        </div>
+      </div>
+      <div class="editor">
+        <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">deleteStudent()</span></div>
+        <div class="editor-body">
+          <div class="e-row"><span class="e-ln">1</span><span class="j-kw">function</span> <span class="j-fn">deleteStudent</span><span class="c-punc">(</span><span class="j-var">name</span><span class="c-punc">){</span></div>
+          <div class="e-row"><span class="e-ln">2</span><span class="e-ind1"></span><span class="j-var">students</span> <span class="j-op">=</span> <span class="j-var">students</span><span class="c-punc">.</span><span class="j-fn">filter</span><span class="c-punc">(</span><span class="j-var">s</span> <span class="j-op">=&gt;</span> <span class="j-var">s</span><span class="c-punc">.</span><span class="j-prop">name</span> <span class="j-op">!==</span> <span class="j-var">name</span><span class="c-punc">);</span></div>
+          <div class="e-row"><span class="e-ln">3</span><span class="c-punc">}</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="section-label">try it live — the same students array from the previous slide</div>
+    <div class="live-panel">
+      <div class="live-count-bar">
+        <span id="student-count-label">0 students</span>
+        <button class="live-reset-btn" onclick="resetStudents()">Reset</button>
+      </div>
+      <div id="student-table" style="display:flex;flex-direction:column;gap:6px"></div>
+    </div>
+    <div class="info-box">
+      <i class="ti ti-info-circle info-icon"></i>
+      <div class="info-text">filter() never mutates the original array — it builds and returns a brand new one containing everyone except the removed student. That's why students = students.filter(...) reassigns the variable.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-11"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Save to File <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 12  SAVE TO FILE ═══ -->
+  <div class="slide" id="slide-12">
+    <div class="slide-header">
+      <span class="badge b-amber">2nd 90 min</span>
+      <div>
+        <div class="slide-title">Save to File</div>
+        <div class="slide-subtitle">fs.writeFileSync() turns the array into a real JSON file</div>
+      </div>
+    </div>
+    <div class="editor">
+      <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">student.js</span></div>
+      <div class="editor-body">
+        <div class="e-row"><span class="e-ln">1</span><span class="j-var">fs</span><span class="c-punc">.</span><span class="j-fn">writeFileSync</span><span class="c-punc">(</span></div>
+        <div class="e-row"><span class="e-ln">2</span><span class="e-ind1"></span><span class="j-str">"students.json"</span><span class="c-punc">,</span></div>
+        <div class="e-row"><span class="e-ln">3</span><span class="e-ind1"></span><span class="j-var">JSON</span><span class="c-punc">.</span><span class="j-fn">stringify</span><span class="c-punc">(</span><span class="j-var">students</span><span class="c-punc">,</span><span class="j-num">null</span><span class="c-punc">,</span><span class="j-num">2</span><span class="c-punc">)</span></div>
+        <div class="e-row"><span class="e-ln">4</span><span class="c-punc">);</span></div>
+      </div>
+    </div>
+    <div class="section-label">live — students.json (updates as you add/delete students on the previous slides)</div>
+    <div class="ls-box" id="students-json-box">
+      <div class="ls-empty-msg">students.json is empty — go add a student first</div>
+    </div>
+    <div class="warn-box">
+      <i class="ti ti-alert-triangle" style="color:#d97706;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+      <div style="font-size:13px;color:#854d0e;line-height:1.65"><strong>Why JSON.stringify?</strong> fs.writeFileSync only accepts text. Passing the array directly would write the useless string "[object Object]" — stringify() converts it into real, readable text first.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-12"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Read File Back <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 13  READ FILE BACK ═══ -->
+  <div class="slide" id="slide-13">
+    <div class="slide-header">
+      <span class="badge b-amber">2nd 90 min</span>
+      <div>
+        <div class="slide-title">Read File Back</div>
+        <div class="slide-subtitle">fs.readFileSync() + JSON.parse() bring the data back to life</div>
+      </div>
+    </div>
+    <div class="editor">
+      <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">student.js</span></div>
+      <div class="editor-body">
+        <div class="e-row"><span class="e-ln">1</span><span class="j-kw">const</span> <span class="j-var">data</span> <span class="j-op">=</span> <span class="j-var">JSON</span><span class="c-punc">.</span><span class="j-fn">parse</span><span class="c-punc">(</span></div>
+        <div class="e-row"><span class="e-ln">2</span><span class="e-ind1"></span><span class="j-var">fs</span><span class="c-punc">.</span><span class="j-fn">readFileSync</span><span class="c-punc">(</span><span class="j-str">"students.json"</span><span class="c-punc">,</span><span class="j-str">"utf8"</span><span class="c-punc">)</span></div>
+        <div class="e-row"><span class="e-ln">3</span><span class="c-punc">);</span></div>
+        <div class="e-row"><span class="e-ln">4</span><span class="j-fn">console</span><span class="c-punc">.</span><span class="j-fn">table</span><span class="c-punc">(</span><span class="j-var">data</span><span class="c-punc">);</span></div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="card"><div style="font-family:monospace;font-size:12px;font-weight:700;color:#d97706">fs.readFileSync()</div><div style="font-size:12px;color:#555;margin-top:4px">Reads the file's contents back in as plain text.</div></div>
+      <div class="card"><div style="font-family:monospace;font-size:12px;font-weight:700;color:#d97706">JSON.parse()</div><div style="font-size:12px;color:#555;margin-top:4px">Converts that text back into a real, usable array.</div></div>
+    </div>
+    <div class="success-box">
+      <i class="ti ti-sparkles" style="color:#16a34a;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+      <div style="font-size:13px;color:#166534;line-height:1.65">Restart the program and the students are still there. That's the exact same "save it → load it" pattern from Local Storage — just written with Node's file system instead of the browser's.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-13"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">CLI Menu <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 14  CLI MENU ═══ -->
+  <div class="slide" id="slide-14">
+    <div class="slide-header">
+      <span class="badge b-slate">2nd 90 min</span>
+      <div>
+        <div class="slide-title">CLI Menu (Simple Version)</div>
+        <div class="slide-subtitle">The idea of a menu-driven application</div>
+      </div>
+    </div>
+    <div class="editor">
+      <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">app.js</span></div>
+      <div class="editor-body">
+        <div class="e-row"><span class="e-ln">1</span><span class="j-fn">console</span><span class="c-punc">.</span><span class="j-fn">log</span><span class="c-punc">(`</span></div>
+        <div class="e-row"><span class="e-ln">2</span>1. Add Student</div>
+        <div class="e-row"><span class="e-ln">3</span>2. View Students</div>
+        <div class="e-row"><span class="e-ln">4</span>3. Delete Student</div>
+        <div class="e-row"><span class="e-ln">5</span>4. Exit</div>
+        <div class="e-row"><span class="e-ln">6</span><span class="c-punc">`);</span></div>
+      </div>
+    </div>
+    <div class="section-label">what students see when they run node app.js</div>
+    <div class="cli-menu"><span class="num">1.</span> Add Student
+<span class="num">2.</span> View Students
+<span class="num">3.</span> Delete Student
+<span class="num">4.</span> Exit</div>
+    <div class="tip-box">
+      <i class="ti ti-bulb tip-icon"></i>
+      <div class="tip-text">This is a simple, static preview of a menu-driven app. Interactive input using Node's readline module — actually reading what the user types — is a natural next step for the following day or as a bonus challenge.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-14"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Mini Challenge <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 15  MINI CHALLENGE ═══ -->
+  <div class="slide" id="slide-15">
+    <div class="slide-header">
+      <span class="badge b-pink">Mini Challenge</span>
+      <div>
+        <div class="slide-title">Email, Phone Number &amp; Course Duration</div>
+        <div class="slide-subtitle">Extend the student object with more fields</div>
+      </div>
+    </div>
+    <div class="challenge-box">
+      <div class="challenge-title"><i class="ti ti-flask"></i>Students add:</div>
+      <div style="font-size:13px;color:#9f1239;line-height:1.9">
+        <i class="ti ti-check" style="margin-right:5px"></i>Email<br>
+        <i class="ti ti-check" style="margin-right:5px"></i>Phone Number<br>
+        <i class="ti ti-check" style="margin-right:5px"></i>Course Duration<br><br>
+        Store everything in <code>students.json</code>.
+      </div>
+    </div>
+    <div class="section-label">extended object</div>
+    <div class="editor">
+      <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">student.js</span></div>
+      <div class="editor-body">
+        <div class="e-row"><span class="e-ln">1</span><span class="j-fn">addStudent</span><span class="c-punc">({</span></div>
+        <div class="e-row"><span class="e-ln">2</span><span class="e-ind1"></span><span class="j-var">name</span><span class="c-punc">:</span> <span class="j-str">"Aman"</span><span class="c-punc">,</span></div>
+        <div class="e-row"><span class="e-ln">3</span><span class="e-ind1"></span><span class="j-var">course</span><span class="c-punc">:</span> <span class="j-str">"Java"</span><span class="c-punc">,</span></div>
+        <div class="e-row"><span class="e-ln">4</span><span class="e-ind1"></span><span class="j-var">email</span><span class="c-punc">:</span> <span class="j-str">"aman@mail.com"</span><span class="c-punc">,</span></div>
+        <div class="e-row"><span class="e-ln">5</span><span class="e-ind1"></span><span class="j-var">phone</span><span class="c-punc">:</span> <span class="j-str">"9876543210"</span><span class="c-punc">,</span></div>
+        <div class="e-row"><span class="e-ln">6</span><span class="e-ind1"></span><span class="j-var">duration</span><span class="c-punc">:</span> <span class="j-str">"6 months"</span></div>
+        <div class="e-row"><span class="e-ln">7</span><span class="c-punc">});</span></div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-15"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Assignment <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 16  ASSIGNMENT ═══ -->
+  <div class="slide" id="slide-16">
+    <div class="slide-header">
+      <span class="badge b-orange">Assignment</span>
+      <div>
+        <div class="slide-title">Enhance the Student Management CLI</div>
+        <div class="slide-subtitle">Click each item off as you complete it</div>
+      </div>
+    </div>
+    <div class="activity-box">
+      <div class="activity-title"><i class="ti ti-flag-3"></i>Implement:</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="check-item" onclick="this.classList.toggle('done')"><div class="check-circle"><i class="ti ti-check"></i></div>Update Student</div>
+        <div class="check-item" onclick="this.classList.toggle('done')"><div class="check-circle"><i class="ti ti-check"></i></div>Search Student by Name</div>
+        <div class="check-item" onclick="this.classList.toggle('done')"><div class="check-circle"><i class="ti ti-check"></i></div>Count Total Students</div>
+        <div class="check-item" onclick="this.classList.toggle('done')"><div class="check-circle"><i class="ti ti-check"></i></div>Display students in alphabetical order</div>
+      </div>
+    </div>
+    <div class="section-label">a hint for each one</div>
+    <div class="grid-2">
+      <div class="card"><div style="font-family:monospace;font-size:12px;font-weight:700;color:#d97706">Update</div><div style="font-size:12px;color:#555;margin-top:4px">Find the student with find(), then reassign their fields.</div></div>
+      <div class="card"><div style="font-family:monospace;font-size:12px;font-weight:700;color:#d97706">Search</div><div style="font-size:12px;color:#555;margin-top:4px">filter() by name, same pattern as delete — just don't remove anything.</div></div>
+      <div class="card"><div style="font-family:monospace;font-size:12px;font-weight:700;color:#d97706">Count</div><div style="font-size:12px;color:#555;margin-top:4px">students.length is the entire answer.</div></div>
+      <div class="card"><div style="font-family:monospace;font-size:12px;font-weight:700;color:#d97706">Sort</div><div style="font-size:12px;color:#555;margin-top:4px">students.sort((a,b) =&gt; a.name.localeCompare(b.name))</div></div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-16"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Project Progress <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 17  PROJECT PROGRESS ═══ -->
+  <div class="slide" id="slide-17">
+    <div class="slide-header">
+      <span class="badge b-slate">Deliverable</span>
+      <div>
+        <div class="slide-title">Project Progress &amp; What's Next</div>
+        <div class="slide-subtitle">JavaScript now reaches all the way down to the file system</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="pipeline">
+        <div class="pl-step done"><div class="pl-line"></div><div class="pl-dot"></div><div class="pl-label">Frontend LMS</div><span class="badge b-green pl-tag">✓</span></div>
+        <div class="pl-step done"><div class="pl-line"></div><div class="pl-dot"></div><div class="pl-label">Git &amp; GitHub</div><span class="badge b-green pl-tag">✓</span></div>
+        <div class="pl-step done"><div class="pl-line"></div><div class="pl-dot"></div><div class="pl-label">Node.js Runtime</div><span class="badge b-green pl-tag">✓</span></div>
+        <div class="pl-step done"><div class="pl-line"></div><div class="pl-dot"></div><div class="pl-label">Modules</div><span class="badge b-green pl-tag">✓</span></div>
+        <div class="pl-step done"><div class="pl-line"></div><div class="pl-dot"></div><div class="pl-label">Student Management CLI</div><span class="badge b-green pl-tag">✓</span></div>
+        <div class="pl-step today"><div class="pl-dot"></div><div class="pl-label">File System Storage (JSON)</div><span class="badge b-js pl-tag">🎯 achieved</span></div>
+      </div>
+    </div>
+    <div class="info-box">
+      <i class="ti ti-arrow-right info-icon"></i>
+      <div class="info-text"><strong>Coming up next:</strong> this same Student Management logic becomes the backbone of a real Express API — the same addStudent, viewStudents and deleteStudent ideas, now reachable over HTTP instead of a terminal menu.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-17"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Quiz <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 18  QUIZ ═══ -->
+  <div class="slide" id="slide-18">
+    <div class="slide-header">
+      <span class="badge b-green">Quiz</span>
+      <div>
+        <div class="slide-title">Quick Check — Node.js Fundamentals</div>
+        <div class="slide-subtitle">Test what stuck from today's session</div>
+      </div>
+    </div>
+    <div id="quiz-container"></div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-18"></div>
+      <button class="nav-btn primary" onclick="goSlide(0)"><i class="ti ti-home"></i> Home</button>
+    </div>
+  </div>
+
+</div><!-- /.wrapper -->
+
+<script>
+  var current = 0, total = 19, quizInit = false;
+
+  // ── Shared "students" state used by Add / View-Delete / Save-to-File slides ──
+  var students = [];
+
+  function renderAllStudentViews() {
+    // Add-slide mini log
+    var addLog = document.getElementById('add-student-log');
+    if (addLog) {
+      if (students.length === 0) {
+        addLog.innerHTML = '<div class="t-comment">// call addStudent(name, course) to see it here</div>';
+      } else {
+        var last = students[students.length - 1];
+        addLog.innerHTML =
+          '<div><span class="t-prompt">$</span> <span class="t-cmd">addStudent("' + escapeHtml(last.name) + '", "' + escapeHtml(last.course) + '")</span></div>' +
+          '<div class="t-out">Student Added — ' + students.length + ' total</div>';
+      }
+    }
+
+    // View/Delete slide table
+    var table = document.getElementById('student-table');
+    var countLabel = document.getElementById('student-count-label');
+    if (table) {
+      table.innerHTML = '';
+      if (students.length === 0) {
+        table.innerHTML = '<div class="student-empty">No students yet — add one on the previous slide</div>';
+      } else {
+        students.forEach(function(s, i) {
+          var row = document.createElement('div');
+          row.className = 'student-row';
+          row.innerHTML =
+            '<span class="student-name">' + escapeHtml(s.name) + '</span>' +
+            '<span class="student-course">' + escapeHtml(s.course) + '</span>' +
+            '<button class="student-del" onclick="deleteStudentLive(' + i + ')">Delete</button>';
+          table.appendChild(row);
+        });
+      }
+    }
+    if (countLabel) countLabel.textContent = students.length + (students.length === 1 ? ' student' : ' students');
+
+    // Save-to-file slide JSON box
+    var jsonBox = document.getElementById('students-json-box');
+    if (jsonBox) {
+      if (students.length === 0) {
+        jsonBox.innerHTML = '<div class="ls-empty-msg">students.json is empty — go add a student first</div>';
+      } else {
+        var json = JSON.stringify(students, null, 2);
+        jsonBox.innerHTML = '<div class="ls-row"><span class="ls-key">students.json</span><span class="ls-arrow">→</span><span class="ls-val">' + escapeHtml(json) + '</span></div>';
+      }
+    }
+  }
+
+  function escapeHtml(str) {
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function addStudentLive() {
+    var nameInput = document.getElementById('stu-name');
+    var courseInput = document.getElementById('stu-course');
+    var name = nameInput.value.trim() || nameInput.placeholder;
+    var course = courseInput.value.trim() || courseInput.placeholder;
+    students.push({ name: name, course: course });
+    nameInput.value = '';
+    courseInput.value = '';
+    renderAllStudentViews();
+  }
+
+  function deleteStudentLive(index) {
+    var name = students[index].name;
+    students = students.filter(function(s, i) { return i !== index; });
+    renderAllStudentViews();
+  }
+
+  function resetStudents() {
+    students = [];
+    renderAllStudentViews();
+  }
+  renderAllStudentViews();
+
+  // ── Quiz ──
+  var quizData = [
+    {
+      q: "Why can't a course catalog running purely in the browser create a students.json file on the computer's disk?",
+      opts: ["Browsers can't run JavaScript", "Browser JavaScript is sandboxed and has no direct access to the file system or OS — that's exactly what Node.js adds", "JSON files are unrelated to JavaScript", "It actually can, no runtime needed"],
+      ans: 1,
+      exp: "Browser JavaScript is deliberately restricted for security — it can't touch your file system. Node.js runs the same language outside the browser, with access to the operating system, including fs for files."
+    },
+    {
+      q: "What is the very first thing that gets created inside a new backend folder when you run npm init -y?",
+      opts: ["An app.js file with code already written", "A package.json file describing the project", "A node_modules folder full of packages", "A students.json file"],
+      ans: 1,
+      exp: "npm init -y instantly generates a package.json with sensible defaults — name, version, main entry point, and empty scripts/dependencies sections."
+    },
+    {
+      q: "In utils.js, why does module.exports = greet; matter for app.js?",
+      opts: ["It's optional decoration with no effect", "It's what makes greet available to any file that calls require('./utils')", "It renames the function to 'exports'", "It automatically runs greet() immediately"],
+      ans: 1,
+      exp: "Without module.exports, require('./utils') in app.js would return an empty object — none of utils.js's internals would be reachable from outside the file."
+    },
+    {
+      q: "After addStudent('Rahul','MERN') runs, what change happens to the students array?",
+      opts: ["Nothing, the array stays empty", "A new object { name: 'Rahul', course: 'MERN' } is pushed onto the end of the array", "The entire array gets replaced with just Rahul", "It throws an error because students hasn't been declared"],
+      ans: 1,
+      exp: "students.push({ name, course }) appends a new object to the end of the array using shorthand property syntax — students keeps every previously added entry too."
+    },
+    {
+      q: "Why is students = students.filter(s => s.name !== name) written as a reassignment, rather than just calling students.filter(...) on its own?",
+      opts: ["filter() has no return value, so nothing would happen without it", "filter() always returns a brand-new array rather than modifying the original in place, so the result must be captured back into students", "It's purely stylistic and changes nothing", "filter() deletes the array entirely without reassignment"],
+      ans: 1,
+      exp: "filter() is non-mutating — it builds and returns a new array of items that passed the test. If the result isn't assigned back to students, the original array is left completely untouched."
+    },
+    {
+      q: "What does JSON.stringify(students, null, 2) accomplish before fs.writeFileSync() saves the file?",
+      opts: ["It deletes duplicate students automatically", "It converts the students array into readable text with 2-space indentation, since writeFileSync can only write strings", "It compresses the file to save space", "It sorts the students alphabetically"],
+      ans: 1,
+      exp: "fs.writeFileSync only accepts strings — an array passed directly would be written as the useless text '[object Object]'. JSON.stringify converts it to real, nicely formatted text first."
+    },
+    {
+      q: "After restarting node app.js, the console.table(data) shows all the previously saved students. What made that possible?",
+      opts: ["Node automatically remembers everything between runs", "students.json was written to disk with fs.writeFileSync, then read back and parsed with fs.readFileSync + JSON.parse on the next run", "The students array is a global variable that never resets", "console.table has built-in persistence"],
+      ans: 1,
+      exp: "In-memory arrays reset every time a program restarts. Persistence only happens because the data was explicitly saved to a file on disk, then explicitly read and JSON.parse()'d back into an array on the next run."
+    }
+  ];
+  var quizAnswered = [];
+  function renderQuiz() {
+    var c = document.getElementById('quiz-container'); c.innerHTML = '';
+    quizData.forEach(function(q, i) {
+      var d = document.createElement('div'); d.style.cssText = 'margin-bottom:18px';
+      d.innerHTML = '<div style="font-size:13px;font-weight:600;margin-bottom:6px">'+(i+1)+'. '+q.q+'</div>';
+      q.opts.forEach(function(opt, j) {
+        var btn = document.createElement('button'); btn.className = 'quiz-option';
+        btn.innerHTML = String.fromCharCode(65+j)+'. '+opt;
+        btn.onclick = function() {
+          if (quizAnswered[i]) return; quizAnswered[i] = true;
+          var btns = d.querySelectorAll('.quiz-option');
+          btns.forEach(function(b,k){ b.disabled=true; if(k===q.ans) b.classList.add('correct'); else if(k===j) b.classList.add('wrong'); });
+          var fb = d.querySelector('.quiz-feedback');
+          fb.innerHTML = (j===q.ans?'✅ Correct! ':'❌ Not quite. ')+q.exp;
+          fb.className = 'quiz-feedback '+(j===q.ans?'correct':'wrong');
+        };
+        d.appendChild(btn);
+      });
+      var fb = document.createElement('div'); fb.className = 'quiz-feedback'; d.appendChild(fb);
+      c.appendChild(d);
+    });
+  }
+
+  function toggleLex(row) {
+    var was = row.classList.contains('active');
+    document.querySelectorAll('.lex-row.active').forEach(function(r){ r.classList.remove('active'); });
+    if (!was) row.classList.add('active');
+  }
+
+  function goSlide(n) {
+    document.getElementById('slide-'+current).classList.remove('active');
+    current = n;
+    document.getElementById('slide-'+current).classList.add('active');
+    updateDots();
+    document.getElementById('slide-counter').textContent = (current+1)+' / '+total;
+    if (n===18 && !quizInit) { renderQuiz(); quizInit=true; }
+    window.scrollTo(0,0);
+  }
+  function nextSlide() { if (current < total-1) goSlide(current+1); }
+  function prevSlide() { if (current > 0) goSlide(current-1); }
+
+  function updateDots() {
+    for (var s=0; s<total; s++) {
+      var el = document.getElementById('dots-'+s); if (!el) continue;
+      el.innerHTML = '';
+      for (var d=0; d<total; d++) {
+        var dot = document.createElement('div');
+        dot.className = 'dot'+(d===current?' active':'');
+        el.appendChild(dot);
+      }
+    }
+  }
+  updateDots();
+</script>
+</body>
+</html>

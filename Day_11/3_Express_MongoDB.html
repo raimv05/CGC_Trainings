@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Express, REST, MongoDB &amp; Mongoose | SkillHub LMS</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f4f5f7; color: #1a1a1a;
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; padding: 2rem 1rem;
+  }
+  .wrapper { width: 100%; max-width: 920px; background: #fff; border-radius: 16px; box-shadow: 0 2px 20px rgba(0,0,0,0.09); overflow: hidden; }
+  .top-bar { background: linear-gradient(135deg, #0f2027, #203a43, #2c5364); color: #fff; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; }
+  .top-bar-title { font-size: 15px; font-weight: 600; }
+  .top-bar-sub   { font-size: 12px; opacity: .55; margin-top: 2px; }
+  .slide-counter { font-size: 13px; opacity: .6; font-variant-numeric: tabular-nums; }
+  .slide { display: none; padding: 1.75rem 2rem; min-height: 500px; flex-direction: column; gap: 1.2rem; }
+  .slide.active { display: flex; }
+  .slide-header { display: flex; align-items: center; gap: 10px; padding-bottom: 1rem; border-bottom: 1px solid #e8e8e8; }
+  .slide-title    { font-size: 20px; font-weight: 700; color: #111; }
+  .slide-subtitle { font-size: 13px; color: #666; margin-top: 2px; }
+
+  .badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+  .b-blue   { background:#dbeafe; color:#1d4ed8; }
+  .b-teal   { background:#d1fae5; color:#065f46; }
+  .b-purple { background:#ede9fe; color:#5b21b6; }
+  .b-amber  { background:#fef3c7; color:#92400e; }
+  .b-green  { background:#dcfce7; color:#166534; }
+  .b-slate  { background:#e2e8f0; color:#334155; }
+  .b-rose   { background:#ffe4e6; color:#9f1239; }
+  .b-orange { background:#ffedd5; color:#9a3412; }
+  .b-indigo { background:#e0e7ff; color:#3730a3; }
+  .b-cyan   { background:#cffafe; color:#164e63; }
+
+  .section-label { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 8px; }
+  .card { background: #fff; border: 1px solid #e8e8e8; border-radius: 12px; padding: 1rem 1.25rem; }
+  .card-gray { background: #f8f9fa; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; }
+
+  .editor { background: #1e1e2e; border-radius: 12px; overflow: hidden; font-family: 'SFMono-Regular', Consolas, 'Courier New', monospace; }
+  .editor-bar { background: #13131f; padding: 9px 14px; display: flex; align-items: center; gap: 6px; }
+  .e-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .e-red { background:#ff5f57; } .e-yellow { background:#febc2e; } .e-green { background:#28c840; }
+  .e-label { font-size: 12px; color: #6272a4; margin-left: 4px; font-family: -apple-system, sans-serif; }
+  .editor-body { padding: 14px 18px; font-size: 12.5px; line-height: 1.8; overflow-x:auto; }
+  .j-kw   { color: #ff79c6; font-weight: 700; }
+  .j-fn   { color: #50fa7b; }
+  .j-str  { color: #f1fa8c; }
+  .j-num  { color: #bd93f9; }
+  .j-var  { color: #80ffea; }
+  .j-op   { color: #ff79c6; }
+  .j-dom  { color: #8be9fd; }
+  .j-prop { color: #50fa7b; }
+  .j-com  { color: #6272a4; font-style: italic; }
+  .c-punc { color: #f8f8f2; }
+
+  .browser { border-radius: 12px; overflow: hidden; border: 1px solid #e0e0e0; }
+  .browser-bar { background: #f1f3f4; padding: 9px 14px; display: flex; align-items: center; gap: 7px; border-bottom: 1px solid #e0e0e0; }
+  .b-dot2 { width: 10px; height: 10px; border-radius: 50%; }
+  .b-r { background:#ff5f57; } .b-y { background:#febc2e; } .b-g { background:#28c840; }
+  .b-url { flex:1; background:#fff; border:1px solid #dadce0; border-radius:20px; padding:4px 14px; font-size:12px; color:#555; }
+  .browser-body { padding: 18px; font-size: 13px; background:#fff; min-height: 60px; font-family: -apple-system, sans-serif; }
+
+  .tag-table { border-collapse: collapse; width: 100%; }
+  .tag-table th { background: #f1f5f9; font-size: 12px; font-weight: 700; text-align: left; padding: 10px 14px; color: #475569; border-bottom: 2px solid #e2e8f0; }
+  .tag-table td { font-size: 13px; padding: 10px 14px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+  .tag-table tr:last-child td { border-bottom: none; }
+  .tag-table tr:hover td { background: #f8f9fa; }
+
+  .quiz-option { border: 1px solid #dee2e6; border-radius: 8px; padding: 10px 14px; font-size: 13px; cursor: pointer; margin-bottom: 6px; transition: all .15s; background: transparent; width: 100%; text-align: left; color: #1a1a1a; }
+  .quiz-option:hover:not(:disabled) { background: #f8f9fa; }
+  .quiz-option.correct { background: #d1fae5; border-color: #059669; color: #065f46; }
+  .quiz-option.wrong   { background: #fee2e2; border-color: #dc2626; color: #991b1b; }
+  .quiz-feedback { display: none; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-top: 4px; }
+  .quiz-feedback.correct { background: #d1fae5; color: #065f46; display: block; }
+  .quiz-feedback.wrong   { background: #fee2e2; color: #991b1b; display: block; }
+
+  .activity-box { border: 2px dashed #a5b4fc; background: #eef2ff; border-radius: 12px; padding: 14px 18px; }
+  .activity-title { font-size: 13px; font-weight: 700; color: #3730a3; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .challenge-box { border: 2px dashed #f9a8d4; background: #fdf2f8; border-radius: 12px; padding: 14px 18px; }
+  .challenge-title { font-size: 13px; font-weight: 700; color: #9f1239; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+
+  .tip-box   { display:flex; gap:10px; align-items:flex-start; background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:10px 14px; }
+  .tip-icon  { color:#d97706; font-size:18px; flex-shrink:0; margin-top:1px; }
+  .tip-text  { font-size:13px; color:#92400e; line-height:1.6; }
+  .info-box  { display:flex; gap:10px; align-items:flex-start; background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:10px 14px; }
+  .info-icon { color:#2563eb; font-size:18px; flex-shrink:0; margin-top:1px; }
+  .info-text { font-size:13px; color:#1e40af; line-height:1.6; }
+  .warn-box  { display:flex; gap:10px; align-items:flex-start; background:#fef9ee; border:1px solid #fcd34d; border-radius:10px; padding:10px 14px; }
+  .warn-text { font-size:13px; color:#92400e; line-height:1.6; }
+  .success-box { display:flex; gap:10px; align-items:flex-start; background:#f0fdf4; border:1px solid #86efac; border-radius:10px; padding:10px 14px; }
+  .success-text { font-size:13px; color:#166534; line-height:1.6; }
+
+  .nav-row { display:flex; align-items:center; justify-content:space-between; margin-top:auto; padding-top:1rem; border-top:1px solid #f0f0f0; }
+  .nav-btn { display:inline-flex; align-items:center; gap:6px; padding:9px 18px; border:1px solid #dee2e6; border-radius:8px; background:transparent; font-size:13px; cursor:pointer; color:#333; transition:background .15s; }
+  .nav-btn:hover:not(:disabled) { background:#f1f3f5; }
+  .nav-btn:disabled { opacity:.35; cursor:default; }
+  .nav-btn.primary { background:#2563eb; border-color:transparent; color:#fff; }
+  .nav-btn.primary:hover { background:#1d4ed8; }
+  .progress-dots { display:flex; gap:6px; align-items:center; flex-wrap:wrap; max-width:340px; }
+  .dot { width:7px; height:7px; border-radius:50%; background:#dee2e6; transition:all .2s; }
+  .dot.active { width:20px; border-radius:4px; background:#2563eb; }
+
+  .home-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .home-card { background:#fff; border:1px solid #e8e8e8; border-radius:12px; padding:1rem 1.25rem; cursor:pointer; transition:all .15s; }
+  .home-card:hover { border-color:#2563eb; box-shadow:0 2px 8px rgba(37,99,235,.12); }
+  .home-card-title { font-size:15px; font-weight:700; margin:6px 0 2px; }
+  .home-card-sub   { font-size:12px; color:#666; }
+
+  code { font-family:'SFMono-Regular',Consolas,monospace; font-size:12px; background:#f1f3f5; padding:1px 6px; border-radius:4px; border:1px solid #dee2e6; }
+
+  .check-item { display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:10px; border:1px solid #e8e8e8; font-size:13px; cursor:pointer; transition:all .15s; user-select:none; }
+  .check-item:hover { background:#f8f9fa; }
+  .check-item.done { background:#f0fdf4; border-color:#86efac; }
+  .check-circle { width:22px; height:22px; border-radius:50%; border:2px solid #dee2e6; display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0; transition:all .2s; color:transparent; }
+  .check-item.done .check-circle { background:#22c55e; border-color:#22c55e; color:#fff; }
+
+  .flow-step { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; border-bottom: 1px dashed #e2e8f0; transition: opacity .2s; }
+  .flow-step:last-child { border-bottom: none; }
+  .flow-num { width: 28px; height: 28px; border-radius: 50%; background: #2563eb; color: white; font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; transition: all .2s; }
+  .flow-content { flex: 1; font-size: 13px; color: #333; line-height: 1.6; }
+  .flow-label { font-weight: 700; color: #2563eb; margin-bottom: 2px; }
+  .flow-step.dim { opacity: .3; }
+  .flow-step.hit .flow-num { background:#f59e0b; transform:scale(1.15); }
+  .flow-step.hit .flow-label { color:#f59e0b; }
+
+  .file-tree { font-family:monospace; font-size:12.5px; color:#333; line-height:2; }
+  .file-tree .fld { color:#2563eb; font-weight:700; }
+  .file-tree .fl  { color:#555; }
+
+  .terminal { background:#0d1117; border-radius:12px; overflow:hidden; font-family:'SFMono-Regular',Consolas,monospace; }
+  .terminal-bar { background:#161b22; padding:9px 14px; display:flex; align-items:center; gap:6px; border-bottom:1px solid #30363d; }
+  .terminal-body { padding:14px 18px; font-size:12.5px; line-height:2; }
+  .t-prompt { color:#3fb950; }
+  .t-cmd { color:#f0f6fc; }
+  .t-out { color:#8b949e; }
+  .t-comment { color:#6272a4; font-style:italic; }
+
+  .method-chip { display: inline-flex; align-items: center; gap: 6px; padding: 5px 14px; border-radius: 20px; font-family: monospace; font-size: 12px; font-weight: 700; cursor:pointer; border:2px solid transparent; transition:all .15s; }
+  .method-chip.get    { background:#dbeafe; color:#1d4ed8; }
+  .method-chip.post   { background:#dcfce7; color:#166534; }
+  .method-chip.put    { background:#fef3c7; color:#92400e; }
+  .method-chip.delete { background:#fee2e2; color:#991b1b; }
+  .method-chip.active { border-color:currentColor; transform:scale(1.05); }
+
+  .status-pill { display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border-radius:8px; font-family:monospace; font-size:13px; font-weight:800; }
+  .status-200 { background:#dcfce7; color:#166534; }
+  .status-201 { background:#dbeafe; color:#1d4ed8; }
+  .status-400 { background:#fef3c7; color:#92400e; }
+  .status-404 { background:#fee2e2; color:#991b1b; }
+  .status-500 { background:#f3e8ff; color:#6b21a8; }
+
+  .mongo-box { display:flex; flex-direction:column; align-items:center; gap:4px; cursor:pointer; }
+  .mongo-shape { padding:14px 22px; border-radius:12px; font-family:monospace; font-weight:700; font-size:13px; border:2px solid transparent; transition:all .15s; text-align:center; }
+  .mongo-shape:hover { transform:translateY(-2px); }
+  .m-db   { background:#e0e7ff; color:#3730a3; }
+  .m-coll { background:#dbeafe; color:#1d4ed8; }
+  .m-doc  { background:#dcfce7; color:#166534; font-family:'SFMono-Regular',Consolas,monospace; text-align:left; }
+  .mongo-arrow { color:#aaa; font-size:20px; }
+
+  .course-row { display:grid; grid-template-columns:1fr 1fr auto; gap:10px; align-items:center; padding:8px 12px; border-radius:8px; border:1px solid #e8e8e8; font-size:12.5px; }
+  .course-row:hover { background:#f8f9fa; }
+  .course-name { font-weight:700; color:#1a1a1a; }
+  .course-dur { color:#666; }
+  .course-del { background:#dc3545; color:#fff; border:none; border-radius:6px; padding:5px 10px; font-size:11px; font-weight:700; cursor:pointer; }
+  .course-del:hover { background:#bb2d3b; }
+  .course-empty { text-align:center; color:#aaa; font-size:12px; font-style:italic; padding:16px 0; }
+  .form-input { padding:7px 12px; border:1px solid #ced4da; border-radius:6px; font-size:13px; font-family:-apple-system,sans-serif; flex:1; min-width:0; }
+  .form-btn { background:#2563eb; color:#fff; border:none; border-radius:6px; padding:7px 16px; font-size:12.5px; font-weight:700; cursor:pointer; white-space:nowrap; }
+  .form-btn:hover { background:#1d4ed8; }
+  .form-btn.warn { background:#f59e0b; } .form-btn.warn:hover { background:#d97706; }
+
+  .schema-field { display:flex; justify-content:space-between; padding:6px 12px; border-bottom:1px solid #f0f0f0; font-family:monospace; font-size:12.5px; }
+  .schema-field:last-child { border-bottom:none; }
+  .schema-field .fname { color:#1d4ed8; font-weight:700; }
+  .schema-field .ftype { color:#92400e; }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <div class="top-bar">
+    <div>
+      <div class="top-bar-title" id="top-bar-title">MERN Stack Training · Day 14 · Express.js Fundamentals</div>
+      <div class="top-bar-sub">SkillHub LMS moves from a CLI tool to a real backend server</div>
+    </div>
+    <div class="slide-counter" id="slide-counter">1 / 24</div>
+  </div>
+
+  <!-- ═══ SLIDE 0 — HOME ═══ -->
+  <div class="slide active" id="slide-0">
+    <div class="slide-header">
+      <div style="width:44px;height:44px;background:#2563eb;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;flex-shrink:0"><i class="ti ti-server-2"></i></div>
+      <div>
+        <div class="slide-title">Express, REST, MongoDB &amp; Mongoose</div>
+        <div class="slide-subtitle">Days 14–17 · SkillHub LMS gets a real, persistent backend</div>
+      </div>
+    </div>
+
+    <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:12px 16px;display:flex;gap:12px;align-items:flex-start">
+      <i class="ti ti-route" style="color:#2563eb;font-size:22px;flex-shrink:0;margin-top:1px"></i>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#1e40af;margin-bottom:4px">Where we left off (Day 13)</div>
+        <div style="font-size:12.5px;color:#1e40af;line-height:1.6">We built a terminal-based Student Management CLI in Node.js — arrays in memory, saved to <code>students.json</code> with <code>fs</code>. Great start, but it only runs on your machine, in a terminal, for one user at a time.</div>
+      </div>
+    </div>
+
+    <div style="background:#fef9c3;border:1px solid #fde68a;border-radius:12px;padding:12px 16px;display:flex;gap:12px;align-items:flex-start">
+      <i class="ti ti-target-arrow" style="color:#d97706;font-size:22px;flex-shrink:0;margin-top:1px"></i>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#854d0e;margin-bottom:4px">Where we're going — a real backend for SkillHub LMS</div>
+        <div style="display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:#92400e">
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Express Server &amp; Routing</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>REST CRUD APIs</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>MongoDB Atlas</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Mongoose Schemas &amp; Models</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="home-grid">
+      <div class="home-card" onclick="goSlide(1)">
+        <span class="badge b-blue">Day 14</span>
+        <div class="home-card-title">Express.js Fundamentals</div>
+        <div class="home-card-sub">Server, routing, middleware &amp; the first Course API</div>
+      </div>
+      <div class="home-card" onclick="goSlide(9)">
+        <span class="badge b-teal">Day 15</span>
+        <div class="home-card-title">REST APIs</div>
+        <div class="home-card-sub">Full CRUD — GET, POST, PUT, DELETE</div>
+      </div>
+      <div class="home-card" onclick="goSlide(13)">
+        <span class="badge b-purple">Day 16</span>
+        <div class="home-card-title">MongoDB Atlas</div>
+        <div class="home-card-sub">From in-memory arrays to a real database</div>
+      </div>
+      <div class="home-card" onclick="goSlide(18)">
+        <span class="badge b-orange">Day 17</span>
+        <div class="home-card-title">Mongoose ODM</div>
+        <div class="home-card-sub">Schemas, models &amp; a production-ready folder structure</div>
+      </div>
+    </div>
+
+    <div class="card card-gray" style="text-align:center">
+      <div style="font-size:12.5px;color:#666;margin-bottom:10px">The build-up across these 4 days</div>
+      <div style="font-family:monospace;font-size:12.5px;color:#333;line-height:2.1">
+        Express Server → Routing → Middleware → REST CRUD → MongoDB Atlas → Mongoose Models
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <div></div>
+      <button class="nav-btn primary" onclick="goSlide(1)">Start Day 14 <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 1 — WHY EXPRESS ═══ -->
+  <div class="slide" id="slide-1">
+    <div class="slide-header">
+      <span class="badge b-blue">Day 14 · Part 1</span>
+      <div><div class="slide-title">Why Express?</div><div class="slide-subtitle">3 Hours · Learning Outcomes: Server, Routing, Middleware, Request, Response, JSON, HTTP Status Codes</div></div>
+    </div>
+
+    <div class="card">
+      <div class="section-label">Project Goal</div>
+      <div style="font-size:14px;font-weight:600">Create the first backend server for SkillHub LMS.</div>
+    </div>
+
+    <div class="card card-gray">
+      <div class="section-label">Start with a question</div>
+      <div style="font-size:13px;line-height:1.8;color:#333">
+        Yesterday we wrote plain <b>Node.js</b>. Can Node create APIs easily? <b>Yes</b> — but it takes too much manual code for routing, parsing request bodies, and handling every URL by hand.
+      </div>
+    </div>
+
+    <div class="info-box"><i class="ti ti-bulb info-icon"></i><div class="info-text"><b>Express</b> is a minimal web framework built on top of Node.js. It gives us routing, middleware, and clean request/response handling out of the box — so we stop reinventing the wheel for every route.</div></div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="section-label">Final Deliverable — Today</div>
+        <ul style="font-size:12.5px;color:#333;line-height:2;padding-left:18px">
+          <li><code>GET /courses</code></li>
+          <li><code>POST /courses</code></li>
+          <li>Custom Middleware</li>
+          <li>Express Server Running</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="section-label">Install Express</div>
+        <div class="terminal">
+          <div class="terminal-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div></div>
+          <div class="terminal-body"><span class="t-prompt">$</span> <span class="t-cmd">npm install express</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(0)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-1"></div>
+      <button class="nav-btn primary" onclick="goSlide(2)">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 2 — CREATE SERVER ═══ -->
+  <div class="slide" id="slide-2">
+    <div class="slide-header">
+      <span class="badge b-blue">Day 14</span>
+      <div><div class="slide-title">Creating Your First Express Server</div><div class="slide-subtitle">app.js — three lines to get a server listening</div></div>
+    </div>
+
+    <div class="editor">
+      <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">app.js</span></div>
+      <div class="editor-body"><pre style="margin:0;white-space:pre-wrap"><span class="j-kw">const</span> <span class="j-var">express</span> <span class="j-op">=</span> <span class="j-fn">require</span>(<span class="j-str">"express"</span>);
+
+<span class="j-kw">const</span> <span class="j-var">app</span> <span class="j-op">=</span> <span class="j-fn">express</span>();
+
+<span class="j-kw">const</span> <span class="j-var">PORT</span> <span class="j-op">=</span> <span class="j-num">5000</span>;
+
+<span class="j-var">app</span>.<span class="j-fn">listen</span>(<span class="j-var">PORT</span>, <span class="j-op">()</span> <span class="j-op">=></span> {
+  <span class="j-var">console</span>.<span class="j-fn">log</span>(<span class="j-str">`Server Running on Port ${PORT}`</span>);
+});</pre></div>
+    </div>
+
+    <div class="grid-2">
+      <div class="terminal">
+        <div class="terminal-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label" style="color:#8b949e">Terminal</span></div>
+        <div class="terminal-body"><span class="t-prompt">$</span> <span class="t-cmd">node app.js</span><br><span class="t-out">Server Running on Port 5000</span></div>
+      </div>
+      <div class="browser">
+        <div class="browser-bar"><div class="b-dot2 b-r"></div><div class="b-dot2 b-y"></div><div class="b-dot2 b-g"></div><div class="b-url">localhost:5000</div></div>
+        <div class="browser-body" style="color:#aaa;font-style:italic">Nothing happens... <br><span style="color:#dc3545;font-style:normal;font-weight:600">Cannot GET /</span> — we haven't defined a route yet.</div>
+      </div>
+    </div>
+
+    <div class="tip-box"><i class="ti ti-alert-triangle tip-icon"></i><div class="tip-text">Starting the server ≠ handling requests. Express needs a <b>route</b> to know what to respond with. That's next.</div></div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(1)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-2"></div>
+      <button class="nav-btn primary" onclick="goSlide(3)">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 3 — FIRST ROUTE + REQ/RES ═══ -->
+  <div class="slide" id="slide-3">
+    <div class="slide-header">
+      <span class="badge b-blue">Day 14</span>
+      <div><div class="slide-title">First Route &amp; the (req, res) Object</div><div class="slide-subtitle">Every route handler receives a Request and sends back a Response</div></div>
+    </div>
+
+    <div class="editor">
+      <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">app.js</span></div>
+      <div class="editor-body"><pre style="margin:0;white-space:pre-wrap"><span class="j-var">app</span>.<span class="j-fn">get</span>(<span class="j-str">"/"</span>, (<span class="j-var">req</span>, <span class="j-var">res</span>) <span class="j-op">=></span> {
+  <span class="j-var">res</span>.<span class="j-fn">send</span>(<span class="j-str">"Welcome to SkillHub Backend"</span>);
+});</pre></div>
+    </div>
+
+    <div class="browser">
+      <div class="browser-bar"><div class="b-dot2 b-r"></div><div class="b-dot2 b-y"></div><div class="b-dot2 b-g"></div><div class="b-url">localhost:5000</div></div>
+      <div class="browser-body" style="font-weight:600;color:#166534">Welcome to SkillHub Backend</div>
+    </div>
+
+    <div class="card card-gray">
+      <div class="section-label">The request → response cycle</div>
+      <div style="text-align:center;font-family:monospace;font-size:13px;color:#333;line-height:2.2">Request <span style="color:#2563eb">↓</span> Server <span style="color:#2563eb">↓</span> Response</div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card"><div class="section-label">req</div><div style="font-size:13px;color:#333">Incoming Request — method, URL, params, body, headers.</div></div>
+      <div class="card"><div class="section-label">res</div><div style="font-size:13px;color:#333">Outgoing Response — what we send back to the client.</div></div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(2)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-3"></div>
+      <button class="nav-btn primary" onclick="goSlide(4)">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 4 — ROUTING (interactive) ═══ -->
+  <div class="slide" id="slide-4">
+    <div class="slide-header">
+      <span class="badge b-blue">Day 14 · Part 2</span>
+      <div><div class="slide-title">Routing &amp; Route Parameters</div><div class="slide-subtitle">Click a route below to see what the server sends back</div></div>
+    </div>
+
+    <div class="grid-2">
+      <div class="editor">
+        <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">app.js</span></div>
+        <div class="editor-body" style="font-size:11.5px"><pre style="margin:0;white-space:pre-wrap"><span class="j-var">app</span>.<span class="j-fn">get</span>(<span class="j-str">"/courses"</span>, ...);
+<span class="j-var">app</span>.<span class="j-fn">get</span>(<span class="j-str">"/students"</span>, ...);
+<span class="j-var">app</span>.<span class="j-fn">get</span>(<span class="j-str">"/about"</span>, ...);
+<span class="j-var">app</span>.<span class="j-fn">get</span>(<span class="j-str">"/student/:id"</span>, (<span class="j-var">req</span>,<span class="j-var">res</span>)<span class="j-op">=></span>{
+  <span class="j-var">res</span>.<span class="j-fn">send</span>(<span class="j-var">req</span>.<span class="j-prop">params</span>.<span class="j-prop">id</span>);
+});</pre></div>
+      </div>
+      <div>
+        <div style="font-size:12px;color:#888;margin-bottom:8px;font-weight:700">TRY A ROUTE</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px">
+          <button class="method-chip get" onclick="tryRoute('/courses','Course API')">/courses</button>
+          <button class="method-chip get" onclick="tryRoute('/students','Student API')">/students</button>
+          <button class="method-chip get" onclick="tryRoute('/about','SkillHub LMS')">/about</button>
+          <button class="method-chip get" onclick="tryRoute('/student/101','101')">/student/101</button>
+        </div>
+        <div class="browser">
+          <div class="browser-bar"><div class="b-dot2 b-r"></div><div class="b-dot2 b-y"></div><div class="b-dot2 b-g"></div><div class="b-url" id="route-url">localhost:5000</div></div>
+          <div class="browser-body" id="route-output" style="color:#aaa;font-style:italic">Click a route to see the response...</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-box"><i class="ti ti-bulb info-icon"></i><div class="info-text"><code>req.params.id</code> reads whatever comes after <code>/student/</code> in the URL — that's how one route handles infinite different IDs.</div></div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(3)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-4"></div>
+      <button class="nav-btn primary" onclick="goSlide(5)">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 5 — MIDDLEWARE ═══ -->
+  <div class="slide" id="slide-5">
+    <div class="slide-header">
+      <span class="badge b-blue">Day 14 · Part 2</span>
+      <div><div class="slide-title">What is Middleware?</div><div class="slide-subtitle">Airport security — every passenger passes through checks before boarding</div></div>
+    </div>
+
+    <div class="card card-gray" style="text-align:center">
+      <div style="font-family:monospace;font-size:13px;color:#333">Passenger <span style="color:#2563eb">↓</span> Security Check <span style="color:#2563eb">↓</span> Flight</div>
+      <div style="font-family:monospace;font-size:13px;color:#333;margin-top:8px">Request <span style="color:#2563eb">↓</span> Middleware <span style="color:#2563eb">↓</span> Route</div>
+    </div>
+
+    <div class="line-explain" style="border:1px solid #e8e8e8;border-radius:10px;overflow:hidden" id="mw-flow">
+      <div class="flow-step" id="mw-0"><div class="flow-num">1</div><div class="flow-content"><div class="flow-label">Request Arrives</div>Browser sends GET /courses to the server.</div></div>
+      <div class="flow-step" id="mw-1"><div class="flow-num">2</div><div class="flow-content"><div class="flow-label">app.use(express.json())</div>Built-in middleware — parses incoming JSON so req.body isn't undefined.</div></div>
+      <div class="flow-step" id="mw-2"><div class="flow-num">3</div><div class="flow-content"><div class="flow-label">Logger Middleware</div>console.log(req.method, req.url) then calls next() to continue.</div></div>
+      <div class="flow-step" id="mw-3"><div class="flow-num">4</div><div class="flow-content"><div class="flow-label">Route Handler</div>app.get("/courses", ...) finally runs and sends the response.</div></div>
+    </div>
+    <div style="text-align:center"><button class="nav-btn" onclick="runMiddlewareFlow()"><i class="ti ti-player-play"></i> Run a Request Through Middleware</button></div>
+
+    <div class="editor">
+      <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">app.js</span></div>
+      <div class="editor-body" style="font-size:11.5px"><pre style="margin:0;white-space:pre-wrap"><span class="j-var">app</span>.<span class="j-fn">use</span>(<span class="j-var">express</span>.<span class="j-fn">json</span>());
+
+<span class="j-var">app</span>.<span class="j-fn">use</span>((<span class="j-var">req</span>,<span class="j-var">res</span>,<span class="j-var">next</span>)<span class="j-op">=></span>{
+  <span class="j-var">console</span>.<span class="j-fn">log</span>(<span class="j-var">req</span>.<span class="j-prop">method</span>);
+  <span class="j-var">console</span>.<span class="j-fn">log</span>(<span class="j-var">req</span>.<span class="j-prop">url</span>);
+  <span class="j-fn">next</span>(); <span class="j-com">// continue to the next step</span>
+});</pre></div>
+    </div>
+
+    <div class="warn-box"><i class="ti ti-alert-triangle tip-icon" style="color:#d97706"></i><div class="warn-text">Without <code>express.json()</code>, a POST request's body cannot be read — <code>req.body</code> would be <code>undefined</code>.</div></div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(4)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-5"></div>
+      <button class="nav-btn primary" onclick="goSlide(6)">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 6 — COURSE API (GET/POST live) ═══ -->
+  <div class="slide" id="slide-6">
+    <div class="slide-header">
+      <span class="badge b-blue">Day 14 · Part 2</span>
+      <div><div class="slide-title">Building the Course API</div><div class="slide-subtitle">Try it live — this in-memory `courses` array carries through the rest of today and tomorrow</div></div>
+    </div>
+
+    <div class="editor">
+      <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">app.js</span></div>
+      <div class="editor-body" style="font-size:11.5px"><pre style="margin:0;white-space:pre-wrap"><span class="j-kw">let</span> <span class="j-var">courses</span> <span class="j-op">=</span> [];
+
+<span class="j-var">app</span>.<span class="j-fn">get</span>(<span class="j-str">"/courses"</span>, (<span class="j-var">req</span>,<span class="j-var">res</span>)<span class="j-op">=></span>{ <span class="j-var">res</span>.<span class="j-fn">json</span>(<span class="j-var">courses</span>); });
+
+<span class="j-var">app</span>.<span class="j-fn">post</span>(<span class="j-str">"/courses"</span>, (<span class="j-var">req</span>,<span class="j-var">res</span>)<span class="j-op">=></span>{
+  <span class="j-var">courses</span>.<span class="j-fn">push</span>(<span class="j-var">req</span>.<span class="j-prop">body</span>);
+  <span class="j-var">res</span>.<span class="j-fn">json</span>({ <span class="j-prop">message</span>: <span class="j-str">"Course Added"</span> });
+});</pre></div>
+    </div>
+
+    <div class="card">
+      <div class="section-label">POST /courses — add a course (Postman body)</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+        <input class="form-input" id="c-name-6" placeholder="name (e.g. MERN)">
+        <input class="form-input" id="c-dur-6" placeholder="duration (e.g. 12 Weeks)">
+        <button class="form-btn" onclick="addCourse('6')">POST /courses</button>
+      </div>
+      <div class="section-label">GET /courses — response</div>
+      <div id="course-list-6"></div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(5)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-6"></div>
+      <button class="nav-btn primary" onclick="goSlide(7)">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 7 — STATUS CODES ═══ -->
+  <div class="slide" id="slide-7">
+    <div class="slide-header">
+      <span class="badge b-blue">Day 14 · Part 2</span>
+      <div><div class="slide-title">HTTP Status Codes</div><div class="slide-subtitle">res.status(201) — click a code to see when it's used</div></div>
+    </div>
+
+    <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
+      <span class="status-pill status-200" onclick="showStatus(this,'200 OK — request succeeded, e.g. a successful GET.')" style="cursor:pointer">200</span>
+      <span class="status-pill status-201" onclick="showStatus(this,'201 Created — a new resource was successfully created, e.g. a successful POST.')" style="cursor:pointer">201</span>
+      <span class="status-pill status-400" onclick="showStatus(this,'400 Bad Request — the client sent invalid or incomplete data.')" style="cursor:pointer">400</span>
+      <span class="status-pill status-404" onclick="showStatus(this,'404 Not Found — the requested resource or route does not exist.')" style="cursor:pointer">404</span>
+      <span class="status-pill status-500" onclick="showStatus(this,'500 Internal Server Error — something went wrong on the server itself.')" style="cursor:pointer">500</span>
+    </div>
+    <div class="card card-gray" id="status-detail" style="text-align:center;font-size:13px;color:#555">Click a status code above.</div>
+
+    <div class="activity-box">
+      <div class="activity-title"><i class="ti ti-puzzle"></i> Mini Challenge</div>
+      <div style="font-size:13px;color:#3730a3">Build <code>GET /trainers</code>, <code>GET /dashboard</code>, and <code>POST /students</code> using what you've learned.</div>
+    </div>
+    <div class="challenge-box">
+      <div class="challenge-title"><i class="ti ti-flag"></i> Assignment</div>
+      <div style="font-size:13px;color:#9f1239">Create a Course API, Student API, and Trainer API — all using Express.</div>
+    </div>
+
+    <div class="card">
+      <div class="section-label">End Result — Day 14</div>
+      <div style="text-align:center;font-family:monospace;font-size:12.5px;color:#333">Express Server → Routing → Middleware → GET → POST</div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(6)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-7"></div>
+      <button class="nav-btn primary" onclick="goSlide(8)">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 8 — DAY 14 RECAP ═══ -->
+  <div class="slide" id="slide-8">
+    <div class="slide-header">
+      <span class="badge b-blue">Day 14 · Recap</span>
+      <div><div class="slide-title">Day 14 Complete ✅</div><div class="slide-subtitle">Express Fundamentals</div></div>
+    </div>
+    <div class="success-box"><i class="ti ti-circle-check" style="color:#16a34a;font-size:18px"></i><div class="success-text">You now have a running Express server with routes, middleware, and a working Course API (GET + POST). Tomorrow we complete the full CRUD set.</div></div>
+    <div class="grid-2">
+      <div class="check-item done"><div class="check-circle"><i class="ti ti-check"></i></div>npm install express</div>
+      <div class="check-item done"><div class="check-circle"><i class="ti ti-check"></i></div>app.listen(PORT)</div>
+      <div class="check-item done"><div class="check-circle"><i class="ti ti-check"></i></div>Routing &amp; req.params</div>
+      <div class="check-item done"><div class="check-circle"><i class="ti ti-check"></i></div>Middleware &amp; next()</div>
+      <div class="check-item done"><div class="check-circle"><i class="ti ti-check"></i></div>GET /courses, POST /courses</div>
+      <div class="check-item done"><div class="check-circle"><i class="ti ti-check"></i></div>HTTP status codes</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(7)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-8"></div>
+      <button class="nav-btn primary" onclick="goSlide(9)">Start Day 15 <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 9 — REST CONCEPTS ═══ -->
+  <div class="slide" id="slide-9">
+    <div class="slide-header">
+      <span class="badge b-teal">Day 15 · Part 1</span>
+      <div><div class="slide-title">REST Concepts</div><div class="slide-subtitle">3 Hours · Learning Outcomes: REST, CRUD, GET/POST/PUT/DELETE, Postman</div></div>
+    </div>
+    <div class="card"><div class="section-label">Project Goal</div><div style="font-size:14px;font-weight:600">Complete Course CRUD APIs.</div></div>
+    <div class="card card-gray" style="text-align:center">
+      <div style="font-family:monospace;font-size:13px;color:#333">Frontend <span style="color:#2563eb">↓</span> GET · POST · PUT · DELETE <span style="color:#2563eb">↓</span> Backend</div>
+    </div>
+    <table class="tag-table">
+      <thead><tr><th>Method</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><span class="method-chip get">GET</span></td><td>Read</td></tr>
+        <tr><td><span class="method-chip post">POST</span></td><td>Create</td></tr>
+        <tr><td><span class="method-chip put">PUT</span></td><td>Update</td></tr>
+        <tr><td><span class="method-chip delete">DELETE</span></td><td>Delete</td></tr>
+      </tbody>
+    </table>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(8)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-9"></div>
+      <button class="nav-btn primary" onclick="goSlide(10)">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 10 — GET & POST ═══ -->
+  <div class="slide" id="slide-10">
+    <div class="slide-header">
+      <span class="badge b-teal">Day 15</span>
+      <div><div class="slide-title">GET &amp; POST — Revisited with Status Codes</div><div class="slide-subtitle">Same handlers as Day 14, now returning proper status codes</div></div>
+    </div>
+    <div class="editor">
+      <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">app.js</span></div>
+      <div class="editor-body" style="font-size:11.5px"><pre style="margin:0;white-space:pre-wrap"><span class="j-var">app</span>.<span class="j-fn">get</span>(<span class="j-str">"/courses"</span>, (<span class="j-var">req</span>,<span class="j-var">res</span>)<span class="j-op">=></span>{ <span class="j-var">res</span>.<span class="j-fn">json</span>(<span class="j-var">courses</span>); });
+
+<span class="j-var">app</span>.<span class="j-fn">post</span>(<span class="j-str">"/courses"</span>, (<span class="j-var">req</span>,<span class="j-var">res</span>)<span class="j-op">=></span>{
+  <span class="j-var">courses</span>.<span class="j-fn">push</span>(<span class="j-var">req</span>.<span class="j-prop">body</span>);
+  <span class="j-var">res</span>.<span class="j-fn">status</span>(<span class="j-num">201</span>).<span class="j-fn">json</span>({ <span class="j-prop">message</span>: <span class="j-str">"Course Created"</span> });
+});</pre></div>
+    </div>
+    <div class="info-box"><i class="ti ti-bulb info-icon"></i><div class="info-text">Postman Demo: send a <code>POST</code> to <code>localhost:5000/courses</code> with a JSON body — you'll get back <code>201 Created</code>.</div></div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(9)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-10"></div>
+      <button class="nav-btn primary" onclick="goSlide(11)">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 11 — PUT & DELETE (live CRUD) ═══ -->
+  <div class="slide" id="slide-11">
+    <div class="slide-header">
+      <span class="badge b-teal">Day 15 · Part 2</span>
+      <div><div class="slide-title">PUT &amp; DELETE — Completing the CRUD</div><div class="slide-subtitle">This is the same `courses` array from Day 14 — now update and delete are live too</div></div>
+    </div>
+    <div class="editor">
+      <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">app.js</span></div>
+      <div class="editor-body" style="font-size:11.5px"><pre style="margin:0;white-space:pre-wrap"><span class="j-var">app</span>.<span class="j-fn">put</span>(<span class="j-str">"/courses/:id"</span>, (<span class="j-var">req</span>,<span class="j-var">res</span>)<span class="j-op">=></span>{
+  <span class="j-var">courses</span>[<span class="j-var">req</span>.<span class="j-prop">params</span>.<span class="j-prop">id</span>] <span class="j-op">=</span> <span class="j-var">req</span>.<span class="j-prop">body</span>;
+  <span class="j-var">res</span>.<span class="j-fn">json</span>({ <span class="j-prop">message</span>: <span class="j-str">"Updated"</span> });
+});
+
+<span class="j-var">app</span>.<span class="j-fn">delete</span>(<span class="j-str">"/courses/:id"</span>, (<span class="j-var">req</span>,<span class="j-var">res</span>)<span class="j-op">=></span>{
+  <span class="j-var">courses</span>.<span class="j-fn">splice</span>(<span class="j-var">req</span>.<span class="j-prop">params</span>.<span class="j-prop">id</span>, <span class="j-num">1</span>);
+  <span class="j-var">res</span>.<span class="j-fn">json</span>({ <span class="j-prop">message</span>: <span class="j-str">"Deleted"</span> });
+});</pre></div>
+    </div>
+    <div class="card">
+      <div class="section-label">Full CRUD Tester — Postman-style</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+        <input class="form-input" id="c-name-11" placeholder="name">
+        <input class="form-input" id="c-dur-11" placeholder="duration">
+        <button class="form-btn" onclick="addCourse('11')">POST</button>
+      </div>
+      <div id="course-list-11"></div>
+      <div style="font-size:11px;color:#999;margin-top:6px">Use <b>PUT</b> to edit a row inline, <b>DELETE</b> to remove it.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(10)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-11"></div>
+      <button class="nav-btn primary" onclick="goSlide(12)">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 12 — TEST + ASSIGNMENT ═══ -->
+  <div class="slide" id="slide-12">
+    <div class="slide-header">
+      <span class="badge b-teal">Day 15 · Recap</span>
+      <div><div class="slide-title">Test Every API &amp; Assignment</div><div class="slide-subtitle">Course CRUD complete — now extend the pattern</div></div>
+    </div>
+    <div class="tip-box"><i class="ti ti-checklist tip-icon"></i><div class="tip-text">Students test GET, POST, PUT, and DELETE using Postman for every route before moving on.</div></div>
+    <div class="challenge-box">
+      <div class="challenge-title"><i class="ti ti-flag"></i> Assignment</div>
+      <div style="font-size:13px;color:#9f1239">Complete a Student CRUD API and a Trainer CRUD API using the same pattern.</div>
+    </div>
+    <div class="card"><div class="section-label">End Result — Day 15</div><div style="text-align:center;font-family:monospace;font-size:12.5px;color:#333">Complete Course CRUD → Postman Tested</div></div>
+    <div class="warn-box"><i class="ti ti-alert-triangle tip-icon" style="color:#d97706"></i><div class="warn-text">Restart the server right now and the <code>courses</code> array is gone — everything lived only in memory. That's the exact problem Day 16 solves.</div></div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(11)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-12"></div>
+      <button class="nav-btn primary" onclick="goSlide(13)">Start Day 16 <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 13 — WHY DATABASE ═══ -->
+  <div class="slide" id="slide-13">
+    <div class="slide-header">
+      <span class="badge b-purple">Day 16 · Part 1</span>
+      <div><div class="slide-title">MongoDB Atlas — Why a Database?</div><div class="slide-subtitle">3 Hours · Learning Outcomes: MongoDB, Collections, Documents, CRUD, Atlas, Compass</div></div>
+    </div>
+    <div class="card"><div class="section-label">Project Goal</div><div style="font-size:14px;font-weight:600">Replace in-memory arrays with MongoDB.</div></div>
+    <div class="card card-gray">
+      <div class="section-label">The Problem</div>
+      <div style="font-family:monospace;font-size:13px;color:#333;text-align:center">let courses = []; <span style="color:#2563eb">↓</span> Server Restart <span style="color:#2563eb">↓</span> <span style="color:#dc2626;font-weight:700">Everything Lost.</span></div>
+    </div>
+    <div class="info-box"><i class="ti ti-database info-icon"></i><div class="info-text">We need storage that survives a restart — a real <b>database</b>.</div></div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(12)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-13"></div>
+      <button class="nav-btn primary" onclick="goSlide(14)">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 14 — MONGODB CONCEPTS (drill-down) ═══ -->
+  <div class="slide" id="slide-14">
+    <div class="slide-header">
+      <span class="badge b-purple">Day 16</span>
+      <div><div class="slide-title">MongoDB Concepts</div><div class="slide-subtitle">Click each box to drill down — Database → Collection → Document</div></div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap">
+      <div class="mongo-box" onclick="mongoStep(0)"><div class="mongo-shape m-db">SkillHub<br><span style="font-weight:400;font-size:10px">(Database)</span></div></div>
+      <div class="mongo-arrow">→</div>
+      <div class="mongo-box" onclick="mongoStep(1)"><div class="mongo-shape m-coll">courses<br><span style="font-weight:400;font-size:10px">(Collection)</span></div></div>
+      <div class="mongo-arrow">→</div>
+      <div class="mongo-box" onclick="mongoStep(2)"><div class="mongo-shape m-doc">{ name: "React" }<br><span style="font-weight:400;font-size:10px;font-family:-apple-system,sans-serif">(Document)</span></div></div>
+    </div>
+    <div class="card card-gray" id="mongo-detail" style="font-size:13px;color:#333;min-height:44px;display:flex;align-items:center;justify-content:center;text-align:center">Click a box above to see what it means.</div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(13)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-14"></div>
+      <button class="nav-btn primary" onclick="goSlide(15)">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 15 — ATLAS SETUP CHECKLIST ═══ -->
+  <div class="slide" id="slide-15">
+    <div class="slide-header">
+      <span class="badge b-purple">Day 16</span>
+      <div><div class="slide-title">Setting Up MongoDB Atlas</div><div class="slide-subtitle">Click each step as you complete it</div></div>
+    </div>
+    <div class="check-item" onclick="this.classList.toggle('done')"><div class="check-circle"><i class="ti ti-check"></i></div>Create Account</div>
+    <div class="check-item" onclick="this.classList.toggle('done')"><div class="check-circle"><i class="ti ti-check"></i></div>Create Cluster</div>
+    <div class="check-item" onclick="this.classList.toggle('done')"><div class="check-circle"><i class="ti ti-check"></i></div>Whitelist IP</div>
+    <div class="check-item" onclick="this.classList.toggle('done')"><div class="check-circle"><i class="ti ti-check"></i></div>Create Database User</div>
+    <div class="check-item" onclick="this.classList.toggle('done')"><div class="check-circle"><i class="ti ti-check"></i></div>Copy Connection String</div>
+    <div class="info-box"><i class="ti ti-bulb info-icon"></i><div class="info-text">Use <b>Compass</b> (MongoDB's desktop GUI) to browse your cluster's databases, collections, and documents visually.</div></div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(14)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-15"></div>
+      <button class="nav-btn primary" onclick="goSlide(16)">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 16 — DRIVER + CRUD ═══ -->
+  <div class="slide" id="slide-16">
+    <div class="slide-header">
+      <span class="badge b-purple">Day 16 · Part 2</span>
+      <div><div class="slide-title">Connecting with the MongoDB Driver</div><div class="slide-subtitle">Install → Connect → CRUD</div></div>
+    </div>
+    <div class="terminal">
+      <div class="terminal-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div></div>
+      <div class="terminal-body"><span class="t-prompt">$</span> <span class="t-cmd">npm install mongodb</span></div>
+    </div>
+    <div class="editor">
+      <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">db.js</span></div>
+      <div class="editor-body" style="font-size:11.5px"><pre style="margin:0;white-space:pre-wrap"><span class="j-kw">const</span> { <span class="j-var">MongoClient</span> } <span class="j-op">=</span> <span class="j-fn">require</span>(<span class="j-str">"mongodb"</span>);
+
+<span class="j-kw">const</span> <span class="j-var">client</span> <span class="j-op">=</span> <span class="j-kw">new</span> <span class="j-fn">MongoClient</span>(<span class="j-var">uri</span>);
+<span class="j-kw">await</span> <span class="j-var">client</span>.<span class="j-fn">connect</span>();</pre></div>
+    </div>
+    <table class="tag-table">
+      <thead><tr><th>Operation</th><th>Method</th></tr></thead>
+      <tbody>
+        <tr><td>Insert</td><td><code>db.collection("courses").insertOne({ name: "React" })</code></td></tr>
+        <tr><td>Find</td><td><code>find()</code></td></tr>
+        <tr><td>Update</td><td><code>updateOne()</code></td></tr>
+        <tr><td>Delete</td><td><code>deleteOne()</code></td></tr>
+      </tbody>
+    </table>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(15)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-16"></div>
+      <button class="nav-btn primary" onclick="goSlide(17)">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 17 — DAY 16 ASSIGNMENT ═══ -->
+  <div class="slide" id="slide-17">
+    <div class="slide-header">
+      <span class="badge b-purple">Day 16 · Recap</span>
+      <div><div class="slide-title">Assignment &amp; End Result</div><div class="slide-subtitle">Day 16 wrap-up</div></div>
+    </div>
+    <div class="challenge-box">
+      <div class="challenge-title"><i class="ti ti-flag"></i> Assignment</div>
+      <div style="font-size:13px;color:#9f1239">Create <code>students</code>, <code>courses</code>, and <code>trainers</code> collections in your Atlas cluster.</div>
+    </div>
+    <div class="card"><div class="section-label">End Result — Day 16</div><div style="text-align:center;font-family:monospace;font-size:12.5px;color:#333">Express → MongoDB Atlas → Persistent Database</div></div>
+    <div class="success-box"><i class="ti ti-circle-check" style="color:#16a34a;font-size:18px"></i><div class="success-text">Data now survives a server restart. But raw driver code has no structure or validation — that's what Mongoose fixes tomorrow.</div></div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(16)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-17"></div>
+      <button class="nav-btn primary" onclick="goSlide(18)">Start Day 17 <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 18 — MONGOOSE INSTALL + SCHEMAS ═══ -->
+  <div class="slide" id="slide-18">
+    <div class="slide-header">
+      <span class="badge b-orange">Day 17 · Part 1</span>
+      <div><div class="slide-title">Mongoose ODM — Schemas &amp; Models</div><div class="slide-subtitle">3 Hours · Learning Outcomes: Mongoose, ODM, Schemas, Models, Validation</div></div>
+    </div>
+    <div class="card"><div class="section-label">Project Goal</div><div style="font-size:14px;font-weight:600">Build a production-ready backend for SkillHub LMS.</div></div>
+    <div class="terminal">
+      <div class="terminal-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div></div>
+      <div class="terminal-body"><span class="t-prompt">$</span> <span class="t-cmd">npm install mongoose</span><br><span class="t-comment">// mongoose.connect(MONGO_URI);</span></div>
+    </div>
+    <div style="font-size:12px;color:#888;margin-bottom:-6px;font-weight:700">CLICK A SCHEMA</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="method-chip get" id="sch-btn-course" onclick="showSchema('course')">Course Schema</button>
+      <button class="method-chip post" id="sch-btn-student" onclick="showSchema('student')">Student Schema</button>
+      <button class="method-chip put" id="sch-btn-enrollment" onclick="showSchema('enrollment')">Enrollment Schema</button>
+    </div>
+    <div class="card" id="schema-display"><div class="course-empty">Select a schema above.</div></div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(17)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-18"></div>
+      <button class="nav-btn primary" onclick="goSlide(19)">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 19 — CRUD WITH MONGOOSE ═══ -->
+  <div class="slide" id="slide-19">
+    <div class="slide-header">
+      <span class="badge b-orange">Day 17 · Part 2</span>
+      <div><div class="slide-title">CRUD with Mongoose</div><div class="slide-subtitle">Compare this to the raw driver code from Day 16 — much cleaner</div></div>
+    </div>
+    <div class="editor">
+      <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">controllers/courseController.js</span></div>
+      <div class="editor-body" style="font-size:11.5px"><pre style="margin:0;white-space:pre-wrap"><span class="j-com">// Create</span>
+<span class="j-kw">await</span> <span class="j-var">Course</span>.<span class="j-fn">create</span>(<span class="j-var">req</span>.<span class="j-prop">body</span>);
+
+<span class="j-com">// Read</span>
+<span class="j-kw">await</span> <span class="j-var">Course</span>.<span class="j-fn">find</span>();
+
+<span class="j-com">// Update</span>
+<span class="j-kw">await</span> <span class="j-var">Course</span>.<span class="j-fn">findByIdAndUpdate</span>(<span class="j-var">id</span>, <span class="j-var">req</span>.<span class="j-prop">body</span>);
+
+<span class="j-com">// Delete</span>
+<span class="j-kw">await</span> <span class="j-var">Course</span>.<span class="j-fn">findByIdAndDelete</span>(<span class="j-var">id</span>);</pre></div>
+    </div>
+    <div class="info-box"><i class="ti ti-bulb info-icon"></i><div class="info-text">Every Mongoose model method returns a Promise — always <code>await</code> it inside an <code>async</code> route handler.</div></div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(18)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-19"></div>
+      <button class="nav-btn primary" onclick="goSlide(20)">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 20 — FOLDER STRUCTURE ═══ -->
+  <div class="slide" id="slide-20">
+    <div class="slide-header">
+      <span class="badge b-orange">Day 17</span>
+      <div><div class="slide-title">Folder Structure — Separation of Concerns</div><div class="slide-subtitle">Why we split a backend into layers</div></div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="file-tree">
+          <div><span class="fld">backend/</span></div>
+          <div style="padding-left:14px"><span class="fld">controllers/</span></div>
+          <div style="padding-left:14px"><span class="fld">models/</span></div>
+          <div style="padding-left:14px"><span class="fld">routes/</span></div>
+          <div style="padding-left:14px"><span class="fld">config/</span></div>
+          <div style="padding-left:14px"><span class="fld">middleware/</span></div>
+          <div style="padding-left:14px"><span class="fl">app.js</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="section-label">Why separate concerns?</div>
+        <ul style="font-size:12.5px;color:#333;line-height:1.9;padding-left:18px">
+          <li><b>models/</b> — Mongoose schemas only</li>
+          <li><b>controllers/</b> — business logic (what a route does)</li>
+          <li><b>routes/</b> — which URL maps to which controller</li>
+          <li><b>middleware/</b> — auth, logging, validation</li>
+          <li><b>config/</b> — DB connection, env setup</li>
+        </ul>
+      </div>
+    </div>
+    <div class="activity-box">
+      <div class="activity-title"><i class="ti ti-puzzle"></i> Mini Challenge</div>
+      <div style="font-size:13px;color:#3730a3">Create a Trainer schema, a Batch schema, and add validation for required fields.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(19)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-20"></div>
+      <button class="nav-btn primary" onclick="goSlide(21)">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 21 — DAY 17 ASSIGNMENT / END RESULT ═══ -->
+  <div class="slide" id="slide-21">
+    <div class="slide-header">
+      <span class="badge b-orange">Day 17 · Recap</span>
+      <div><div class="slide-title">Assignment &amp; End Result</div><div class="slide-subtitle">The backend is now production-ready</div></div>
+    </div>
+    <div class="challenge-box">
+      <div class="challenge-title"><i class="ti ti-flag"></i> Assignment — Refactor the LMS backend so that:</div>
+      <ul style="font-size:13px;color:#9f1239;line-height:1.9;padding-left:18px">
+        <li>All routes use Mongoose models.</li>
+        <li>Course, Student, and Enrollment data are stored in MongoDB Atlas.</li>
+        <li>Validation is added (required fields, email format where applicable).</li>
+        <li>All CRUD endpoints are tested with Postman.</li>
+      </ul>
+    </div>
+    <div class="card"><div class="section-label">4-Day Journey — End Result</div><div style="text-align:center;font-family:monospace;font-size:12px;color:#333;line-height:2">Express Server → Routing → Middleware → REST CRUD → MongoDB Atlas → Mongoose Models</div></div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(20)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-21"></div>
+      <button class="nav-btn primary" onclick="goSlide(22)">Take the Quiz <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 22 — QUIZ ═══ -->
+  <div class="slide" id="slide-22">
+    <div class="slide-header">
+      <span class="badge b-indigo">Check Your Understanding</span>
+      <div><div class="slide-title">Days 14–17 Quiz</div><div class="slide-subtitle">Answer each question — feedback appears instantly</div></div>
+    </div>
+    <div id="quiz-container"></div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(21)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-22"></div>
+      <button class="nav-btn primary" onclick="goSlide(23)">Finish <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 23 — WRAP UP ═══ -->
+  <div class="slide" id="slide-23">
+    <div class="slide-header">
+      <span class="badge b-green">Wrap-Up</span>
+      <div><div class="slide-title">SkillHub LMS Backend — Complete</div><div class="slide-subtitle">From a Node.js CLI to a production-ready MongoDB-backed API</div></div>
+    </div>
+    <div class="success-box"><i class="ti ti-trophy" style="color:#16a34a;font-size:18px"></i><div class="success-text">Over four days you went from a bare Node.js script to a layered Express + MongoDB + Mongoose backend with full CRUD, validation, and a clean folder structure.</div></div>
+    <div class="grid-2">
+      <div class="home-card" onclick="goSlide(1)"><span class="badge b-blue">Day 14</span><div class="home-card-title">Express Fundamentals</div></div>
+      <div class="home-card" onclick="goSlide(9)"><span class="badge b-teal">Day 15</span><div class="home-card-title">REST APIs</div></div>
+      <div class="home-card" onclick="goSlide(13)"><span class="badge b-purple">Day 16</span><div class="home-card-title">MongoDB Atlas</div></div>
+      <div class="home-card" onclick="goSlide(18)"><span class="badge b-orange">Day 17</span><div class="home-card-title">Mongoose ODM</div></div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(22)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-23"></div>
+      <button class="nav-btn primary" onclick="goSlide(0)"><i class="ti ti-home"></i> Back to Home</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  var current = 0, total = 24, quizInit = false;
+  var dayTitles = {0:"Overview",1:"Day 14 · Express.js Fundamentals",2:"Day 14 · Express.js Fundamentals",3:"Day 14 · Express.js Fundamentals",4:"Day 14 · Express.js Fundamentals",5:"Day 14 · Express.js Fundamentals",6:"Day 14 · Express.js Fundamentals",7:"Day 14 · Express.js Fundamentals",8:"Day 14 · Express.js Fundamentals",9:"Day 15 · REST APIs",10:"Day 15 · REST APIs",11:"Day 15 · REST APIs",12:"Day 15 · REST APIs",13:"Day 16 · MongoDB Atlas",14:"Day 16 · MongoDB Atlas",15:"Day 16 · MongoDB Atlas",16:"Day 16 · MongoDB Atlas",17:"Day 16 · MongoDB Atlas",18:"Day 17 · Mongoose ODM",19:"Day 17 · Mongoose ODM",20:"Day 17 · Mongoose ODM",21:"Day 17 · Mongoose ODM",22:"Quiz",23:"Wrap-Up"};
+
+  // ── Shared Course CRUD state (Day 14 → Day 15) ──
+  var courses = [];
+
+  function renderCourses() {
+    ['6','11'].forEach(function(sfx) {
+      var el = document.getElementById('course-list-'+sfx);
+      if (!el) return;
+      if (courses.length === 0) { el.innerHTML = '<div class="course-empty">No courses yet — add one above.</div>'; return; }
+      var html = '';
+      courses.forEach(function(c, i) {
+        html += '<div class="course-row" style="margin-bottom:6px" id="row-'+sfx+'-'+i+'">' +
+          '<span class="course-name">'+escapeHtml(c.name)+'</span>' +
+          '<span class="course-dur">'+escapeHtml(c.duration)+'</span>' +
+          '<span style="display:flex;gap:6px">' +
+          (sfx==='11' ? '<button class="form-btn warn" style="padding:5px 10px;font-size:11px" onclick="editCourse('+i+')">PUT</button>' : '') +
+          (sfx==='11' ? '<button class="course-del" onclick="deleteCourse('+i+')">DELETE</button>' : '') +
+          '</span></div>';
+      });
+      el.innerHTML = html;
+    });
+  }
+  function addCourse(sfx) {
+    var name = document.getElementById('c-name-'+sfx).value.trim() || 'MERN';
+    var dur = document.getElementById('c-dur-'+sfx).value.trim() || '12 Weeks';
+    courses.push({ name: name, duration: dur });
+    document.getElementById('c-name-'+sfx).value = '';
+    document.getElementById('c-dur-'+sfx).value = '';
+    renderCourses();
+  }
+  function editCourse(i) {
+    var name = prompt('New name for this course:', courses[i].name);
+    if (name === null) return;
+    var dur = prompt('New duration:', courses[i].duration);
+    if (dur === null) return;
+    courses[i] = { name: name || courses[i].name, duration: dur || courses[i].duration };
+    renderCourses();
+  }
+  function deleteCourse(i) {
+    courses.splice(i, 1);
+    renderCourses();
+  }
+  function escapeHtml(str) { return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  renderCourses();
+
+  // ── Route tester (Day 14) ──
+  function tryRoute(path, response) {
+    document.getElementById('route-url').textContent = 'localhost:5000' + path;
+    document.getElementById('route-output').style.cssText = 'font-weight:600;color:#166534';
+    document.getElementById('route-output').textContent = response;
+  }
+
+  // ── Middleware flow animation ──
+  function runMiddlewareFlow() {
+    var steps = ['mw-0','mw-1','mw-2','mw-3'];
+    steps.forEach(function(id){ document.getElementById(id).classList.remove('hit'); document.getElementById(id).classList.add('dim'); });
+    steps.forEach(function(id, i) {
+      setTimeout(function() {
+        document.getElementById(id).classList.remove('dim');
+        document.getElementById(id).classList.add('hit');
+        if (i > 0) document.getElementById(steps[i-1]).classList.remove('hit');
+      }, i * 650);
+    });
+    setTimeout(function(){ steps.forEach(function(id){ document.getElementById(id).classList.remove('dim','hit'); }); }, steps.length * 650 + 400);
+  }
+
+  // ── Status code detail ──
+  function showStatus(el, text) {
+    document.getElementById('status-detail').textContent = text;
+  }
+
+  // ── Mongo drill-down ──
+  var mongoTexts = [
+    'A Database groups related collections together — e.g. "SkillHub" holds everything for this LMS.',
+    'A Collection is like a table — a named group of similar documents, e.g. "courses" holds every course document.',
+    'A Document is a single record stored as JSON-like data — e.g. { name: "React" } is one course.'
+  ];
+  function mongoStep(i) { document.getElementById('mongo-detail').textContent = mongoTexts[i]; }
+
+  // ── Mongoose schema viewer ──
+  var schemas = {
+    course: { title: 'courseSchema', color:'#1d4ed8', fields: [['name','String'],['duration','String'],['fees','Number']] },
+    student: { title: 'studentSchema', color:'#166534', fields: [['name','String'],['email','String'],['course','String']] },
+    enrollment: { title: 'enrollmentSchema', color:'#92400e', fields: [['studentId','String'],['courseId','String'],['enrolledAt','Date']] }
+  };
+  function showSchema(key) {
+    document.querySelectorAll('#slide-18 .method-chip').forEach(function(b){ b.classList.remove('active'); });
+    document.getElementById('sch-btn-'+key).classList.add('active');
+    var s = schemas[key];
+    var html = '<div class="section-label">'+s.title+'</div>';
+    s.fields.forEach(function(f) { html += '<div class="schema-field"><span class="fname">'+f[0]+'</span><span class="ftype">'+f[1]+'</span></div>'; });
+    document.getElementById('schema-display').innerHTML = html;
+  }
+
+  // ── Quiz ──
+  var quizData = [
+    { q: "Why do we install Express instead of writing routing logic by hand in plain Node.js?", opts: ["Node.js can't handle HTTP requests at all", "Express gives us routing, middleware, and request/response helpers, so we don't rewrite that boilerplate for every route", "Express replaces JavaScript entirely", "Express is required to install npm"], ans: 1, exp: "Node.js can create servers, but Express adds a clean layer for routing, middleware, and body parsing so we write far less repetitive code." },
+    { q: "In app.get('/student/:id', (req,res)=>{ res.send(req.params.id); }), what does req.params.id contain when visiting /student/101?", opts: ["undefined", "'101' — whatever value appears in that position of the URL", "The entire request object", "It throws an error"], ans: 1, exp: "Route parameters (the :id part) capture whatever value appears in that segment of the URL, accessible via req.params." },
+    { q: "What does calling next() inside a middleware function do?", opts: ["Stops the server immediately", "Sends the final response to the browser", "Passes control forward to the next middleware or route handler in the chain", "Deletes the current request"], ans: 2, exp: "Middleware runs in sequence. Calling next() hands off control to whatever comes next — another middleware or the matching route handler." },
+    { q: "Without app.use(express.json()), what happens when a POST request sends a JSON body?", opts: ["req.body is automatically parsed anyway", "req.body will be undefined because nothing parsed the incoming JSON", "The server crashes immediately", "The GET route runs instead"], ans: 1, exp: "express.json() is the middleware that reads and parses an incoming JSON body into req.body. Without it, req.body is undefined." },
+    { q: "Which status code should a successful POST that creates a new course return?", opts: ["200", "201", "404", "500"], ans: 1, exp: "201 Created specifically signals that a new resource was successfully created — the correct choice for a successful POST." },
+    { q: "Why does courses.splice(req.params.id, 1) inside a DELETE route remove exactly one course?", opts: ["splice() clears the whole array", "The second argument, 1, tells splice() to remove exactly one element starting at that index", "DELETE requests always empty every array", "It only works with strings, not arrays"], ans: 1, exp: "Array.prototype.splice(startIndex, deleteCount) removes deleteCount elements starting at startIndex — here, exactly one course at the given index." },
+    { q: "Why did in-memory arrays like `let courses = []` stop being good enough by Day 16?", opts: ["Arrays can't store objects", "Every time the server restarts, anything stored only in a variable is wiped out — a real database is needed to persist data", "Express doesn't support arrays", "MongoDB is required to run Express at all"], ans: 1, exp: "Variables live in RAM. The moment the Node process restarts, that memory is cleared — a database like MongoDB stores data on disk so it survives restarts." },
+    { q: "In MongoDB's structure, how do a Database, a Collection, and a Document relate?", opts: ["They're three unrelated terms for the same thing", "A Database contains Collections, and each Collection contains many Documents (individual JSON-like records)", "A Document contains many Databases", "A Collection is a single record inside a Document"], ans: 1, exp: "The hierarchy is Database → Collection → Document: SkillHub (database) holds a courses collection, which holds many individual course documents." },
+    { q: "What advantage does Mongoose give over the raw MongoDB driver's db.collection().insertOne()?", opts: ["Mongoose is slower on purpose for safety", "Mongoose lets you define Schemas and Models, giving structure, defaults, and validation to your data before it's saved", "Mongoose removes the need for a database entirely", "Mongoose only works with SQL databases"], ans: 1, exp: "Mongoose is an ODM — it maps JavaScript objects to MongoDB documents through defined Schemas, adding structure and validation the raw driver doesn't enforce." },
+    { q: "Why does a backend get split into controllers/, models/, routes/, and middleware/ folders instead of one giant app.js?", opts: ["It's required by Node.js itself", "Separating concerns keeps each file focused on one job — schemas in models/, logic in controllers/, URL mapping in routes/ — making the codebase easier to maintain and scale", "It makes the app run faster automatically", "Express refuses to start without these folders"], ans: 1, exp: "This is an organizational convention, not a technical requirement — it keeps large backends maintainable by giving each concern (data shape, business logic, URL routing) its own place." }
+  ];
+  function renderQuiz() {
+    var c = document.getElementById('quiz-container'); c.innerHTML = '';
+    quizData.forEach(function(q, i) {
+      var d = document.createElement('div'); d.style.cssText = 'margin-bottom:18px';
+      d.innerHTML = '<div style="font-size:13px;font-weight:600;margin-bottom:6px">'+(i+1)+'. '+q.q+'</div>';
+      q.opts.forEach(function(opt, j) {
+        var btn = document.createElement('button'); btn.className = 'quiz-option';
+        btn.innerHTML = String.fromCharCode(65+j)+'. '+opt;
+        btn.onclick = function() {
+          var btns = d.querySelectorAll('.quiz-option');
+          if (btns[0].disabled) return;
+          btns.forEach(function(b,k){ b.disabled=true; if(k===q.ans) b.classList.add('correct'); else if(k===j) b.classList.add('wrong'); });
+          var fb = d.querySelector('.quiz-feedback');
+          fb.innerHTML = (j===q.ans?'✅ Correct! ':'❌ Not quite. ')+q.exp;
+          fb.className = 'quiz-feedback '+(j===q.ans?'correct':'wrong');
+        };
+        d.appendChild(btn);
+      });
+      var fb = document.createElement('div'); fb.className = 'quiz-feedback'; d.appendChild(fb);
+      c.appendChild(d);
+    });
+  }
+
+  function goSlide(n) {
+    document.getElementById('slide-'+current).classList.remove('active');
+    current = n;
+    document.getElementById('slide-'+current).classList.add('active');
+    updateDots();
+    document.getElementById('slide-counter').textContent = (current+1)+' / '+total;
+    document.getElementById('top-bar-title').textContent = 'MERN Stack Training · ' + dayTitles[current];
+    if (n===22 && !quizInit) { renderQuiz(); quizInit=true; }
+    window.scrollTo(0,0);
+  }
+  function updateDots() {
+    for (var s=0; s<total; s++) {
+      var el = document.getElementById('dots-'+s); if (!el) continue;
+      el.innerHTML = '';
+      for (var d=0; d<total; d++) {
+        var dot = document.createElement('div');
+        dot.className = 'dot'+(d===current?' active':'');
+        el.appendChild(dot);
+      }
+    }
+  }
+  updateDots();
+</script>
+</body>
+</html>
