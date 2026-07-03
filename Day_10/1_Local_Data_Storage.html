@@ -1,0 +1,1694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Day 10 · Persistent Student Management System — Local Storage, Search &amp; Update</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f4f5f7; color: #1a1a1a;
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; padding: 2rem 1rem;
+  }
+  .wrapper {
+    width: 100%; max-width: 920px; background: #fff;
+    border-radius: 16px; box-shadow: 0 2px 20px rgba(0,0,0,0.09); overflow: hidden;
+  }
+  .top-bar {
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    color: #fff; padding: 14px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .top-bar-title { font-size: 15px; font-weight: 600; }
+  .top-bar-sub   { font-size: 12px; opacity: .55; margin-top: 2px; }
+  .slide-counter { font-size: 13px; opacity: .6; font-variant-numeric: tabular-nums; }
+  .slide { display: none; padding: 1.75rem 2rem; min-height: 500px; flex-direction: column; gap: 1.2rem; }
+  .slide.active { display: flex; }
+  .slide-header { display: flex; align-items: center; gap: 10px; padding-bottom: 1rem; border-bottom: 1px solid #e8e8e8; }
+  .slide-title    { font-size: 20px; font-weight: 700; color: #111; }
+  .slide-subtitle { font-size: 13px; color: #666; margin-top: 2px; }
+
+  /* ── Badges ── */
+  .badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+  .b-blue   { background:#dbeafe; color:#1d4ed8; }
+  .b-teal   { background:#d1fae5; color:#065f46; }
+  .b-purple { background:#ede9fe; color:#5b21b6; }
+  .b-amber  { background:#fef3c7; color:#92400e; }
+  .b-green  { background:#dcfce7; color:#166534; }
+  .b-slate  { background:#e2e8f0; color:#334155; }
+  .b-rose   { background:#ffe4e6; color:#9f1239; }
+  .b-orange { background:#ffedd5; color:#9a3412; }
+  .b-indigo { background:#e0e7ff; color:#3730a3; }
+  .b-cyan   { background:#cffafe; color:#164e63; }
+  .b-pink   { background:#fce7f3; color:#9d174d; }
+  .b-yellow { background:#fef9c3; color:#854d0e; }
+  .b-js     { background:#fef9c3; color:#854d0e; }
+
+  /* ── Layout ── */
+  .section-label { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 8px; }
+  .card { background: #fff; border: 1px solid #e8e8e8; border-radius: 12px; padding: 1rem 1.25rem; }
+  .card-gray { background: #f8f9fa; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+  /* ── Code Editor (Dracula — identical to ref) ── */
+  .editor { background: #1e1e2e; border-radius: 12px; overflow: hidden; font-family: 'SFMono-Regular', Consolas, 'Courier New', monospace; }
+  .editor-bar { background: #13131f; padding: 9px 14px; display: flex; align-items: center; gap: 6px; }
+  .e-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .e-red { background:#ff5f57; } .e-yellow { background:#febc2e; } .e-green { background:#28c840; }
+  .e-label { font-size: 12px; color: #6272a4; margin-left: 4px; font-family: -apple-system, sans-serif; }
+  .editor-body { padding: 14px 18px; font-size: 12.5px; line-height: 1.8; }
+  .e-ln   { color: #44475a; font-size: 11px; display: inline-block; width: 22px; user-select: none; }
+  .e-tag  { color: #ff79c6; }
+  .e-att  { color: #50fa7b; }
+  .e-val  { color: #f1fa8c; }
+  .e-txt  { color: #f8f8f2; }
+  .e-cmt  { color: #6272a4; font-style: italic; }
+  .e-new  { color: #80ffea; }
+  .j-kw   { color: #ff79c6; font-weight: 700; }
+  .j-fn   { color: #50fa7b; }
+  .j-str  { color: #f1fa8c; }
+  .j-num  { color: #bd93f9; }
+  .j-var  { color: #80ffea; }
+  .j-op   { color: #ff79c6; }
+  .j-dom  { color: #8be9fd; }
+  .j-prop { color: #50fa7b; }
+  .j-com  { color: #6272a4; font-style: italic; }
+  .j-ret  { color: #ff79c6; font-weight: 700; }
+  .j-key  { color: #ff79c6; }
+  .c-punc { color: #f8f8f2; }
+  .e-ind1 { display: inline-block; width: 20px; }
+  .e-ind2 { display: inline-block; width: 40px; }
+  .e-ind3 { display: inline-block; width: 60px; }
+  .e-ind4 { display: inline-block; width: 80px; }
+  .e-row  { display: flex; gap: 8px; }
+
+  /* ── Browser frame ── */
+  .browser { border-radius: 12px; overflow: hidden; border: 1px solid #e0e0e0; }
+  .browser-bar { background: #f1f3f4; padding: 9px 14px; display: flex; align-items: center; gap: 7px; border-bottom: 1px solid #e0e0e0; }
+  .b-dot2 { width: 10px; height: 10px; border-radius: 50%; }
+  .b-r { background:#ff5f57; } .b-y { background:#febc2e; } .b-g { background:#28c840; }
+  .b-url { flex:1; background:#fff; border:1px solid #dadce0; border-radius:20px; padding:4px 14px; font-size:12px; color:#555; }
+
+  /* ── Tables ── */
+  .tag-table { border-collapse: collapse; width: 100%; }
+  .tag-table th { background: #f1f5f9; font-size: 12px; font-weight: 700; text-align: left; padding: 10px 14px; color: #475569; border-bottom: 2px solid #e2e8f0; }
+  .tag-table td { font-size: 13px; padding: 10px 14px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+  .tag-table tr:last-child td { border-bottom: none; }
+  .tag-table tr:hover td { background: #f8f9fa; }
+
+  /* ── Quiz ── */
+  .quiz-option { border: 1px solid #dee2e6; border-radius: 8px; padding: 10px 14px; font-size: 13px; cursor: pointer; margin-bottom: 6px; transition: all .15s; background: transparent; width: 100%; text-align: left; color: #1a1a1a; }
+  .quiz-option:hover:not(:disabled) { background: #f8f9fa; }
+  .quiz-option.correct { background: #d1fae5; border-color: #059669; color: #065f46; }
+  .quiz-option.wrong   { background: #fee2e2; border-color: #dc2626; color: #991b1b; }
+  .quiz-feedback { display: none; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-top: 4px; }
+  .quiz-feedback.correct { background: #d1fae5; color: #065f46; display: block; }
+  .quiz-feedback.wrong   { background: #fee2e2; color: #991b1b; display: block; }
+
+  /* ── Activity / challenge ── */
+  .activity-box { border: 2px dashed #a5b4fc; background: #eef2ff; border-radius: 12px; padding: 14px 18px; }
+  .activity-title { font-size: 13px; font-weight: 700; color: #3730a3; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .challenge-box { border: 2px dashed #f9a8d4; background: #fdf2f8; border-radius: 12px; padding: 14px 18px; }
+  .challenge-title { font-size: 13px; font-weight: 700; color: #9f1239; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+
+  /* ── Tip / info / warn / success ── */
+  .tip-box   { display:flex; gap:10px; align-items:flex-start; background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:10px 14px; }
+  .tip-icon  { color:#d97706; font-size:18px; flex-shrink:0; margin-top:1px; }
+  .tip-text  { font-size:13px; color:#92400e; line-height:1.6; }
+  .info-box  { display:flex; gap:10px; align-items:flex-start; background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:10px 14px; }
+  .info-icon { color:#2563eb; font-size:18px; flex-shrink:0; margin-top:1px; }
+  .info-text { font-size:13px; color:#1e40af; line-height:1.6; }
+  .warn-box  { display:flex; gap:10px; align-items:flex-start; background:#fef9ee; border:1px solid #fcd34d; border-radius:10px; padding:10px 14px; }
+  .success-box { display:flex; gap:10px; align-items:flex-start; background:#f0fdf4; border:1px solid #86efac; border-radius:10px; padding:10px 14px; }
+
+  /* ── Line explainer (JS amber accent) ── */
+  .lex-row { display:flex; align-items:stretch; cursor:pointer; transition:background .12s; border-bottom:1px solid #f0f0f0; }
+  .lex-row:last-child { border-bottom:none; }
+  .lex-row:hover { background:#f8f9fa; }
+  .lex-row.active { background:#fefce8; border-left:3px solid #d97706; }
+  .lex-code { background:#1e1e2e; padding:10px 14px; font-family:'SFMono-Regular',Consolas,monospace; font-size:12px; min-width:200px; flex-shrink:0; display:flex; align-items:center; }
+  .lex-info { padding:10px 14px; flex:1; }
+  .lex-name   { font-size:13px; font-weight:700; color:#d97706; margin-bottom:2px; }
+  .lex-desc   { font-size:12px; color:#555; line-height:1.55; }
+  .lex-detail { display:none; font-size:12px; color:#92400e; margin-top:4px; padding-top:4px; border-top:1px dashed #fde68a; }
+  .lex-row.active .lex-detail { display:block; }
+  .line-explain { border:1px solid #e8e8e8; border-radius:10px; overflow:hidden; }
+
+  /* ── Reveal ── */
+  .reveal-btn { background:#f1f3f5; border:1px solid #dee2e6; border-radius:8px; padding:7px 14px; font-size:13px; cursor:pointer; color:#333; transition:background .15s; }
+  .reveal-btn:hover { background:#e9ecef; }
+  .reveal-content { display:none; margin-top:8px; }
+  .reveal-content.open { display:block; }
+
+  /* ── Nav (JS amber) ── */
+  .nav-row { display:flex; align-items:center; justify-content:space-between; margin-top:auto; padding-top:1rem; border-top:1px solid #f0f0f0; }
+  .nav-btn { display:inline-flex; align-items:center; gap:6px; padding:9px 18px; border:1px solid #dee2e6; border-radius:8px; background:transparent; font-size:13px; cursor:pointer; color:#333; transition:background .15s; }
+  .nav-btn:hover:not(:disabled) { background:#f1f3f5; }
+  .nav-btn:disabled { opacity:.35; cursor:default; }
+  .nav-btn.primary { background:#d97706; border-color:transparent; color:#fff; }
+  .nav-btn.primary:hover { background:#b45309; }
+  .progress-dots { display:flex; gap:6px; align-items:center; }
+  .dot { width:7px; height:7px; border-radius:50%; background:#dee2e6; transition:all .2s; }
+  .dot.active { width:20px; border-radius:4px; background:#d97706; }
+
+  /* ── Home grid ── */
+  .home-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .home-card { background:#fff; border:1px solid #e8e8e8; border-radius:12px; padding:1rem 1.25rem; cursor:pointer; transition:all .15s; }
+  .home-card:hover { border-color:#d97706; box-shadow:0 2px 8px rgba(217,119,6,.12); }
+  .home-card-title { font-size:15px; font-weight:700; margin:6px 0 2px; }
+  .home-card-sub   { font-size:12px; color:#666; }
+
+  code { font-family:'SFMono-Regular',Consolas,monospace; font-size:12px; background:#f1f3f5; padding:1px 6px; border-radius:4px; border:1px solid #dee2e6; }
+
+  /* ── Checklist ── */
+  .check-item { display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:10px; border:1px solid #e8e8e8; font-size:13px; cursor:pointer; transition:all .15s; user-select:none; }
+  .check-item:hover { background:#f8f9fa; }
+  .check-item.done { background:#f0fdf4; border-color:#86efac; }
+  .check-circle { width:22px; height:22px; border-radius:50%; border:2px solid #dee2e6; display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0; transition:all .2s; color:transparent; }
+  .check-item.done .check-circle { background:#22c55e; border-color:#22c55e; color:#fff; }
+
+  /* ── Console panel (identical to ref) ── */
+  .console-panel { background: #0d1117; border-radius: 12px; overflow: hidden; font-family: 'SFMono-Regular', Consolas, monospace; }
+  .console-bar   { background: #161b22; padding: 9px 14px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #30363d; }
+  .console-tab   { font-size: 12px; color: #8b949e; padding-bottom: 3px; }
+  .console-tab.active { color: #f0f6fc; border-bottom: 2px solid #d97706; }
+  .console-body  { padding: 12px 16px; font-size: 12.5px; line-height: 2; }
+  .con-log  { color: #f0f6fc; }
+  .con-str  { color: #a5d6ff; }
+  .con-num  { color: #79c0ff; }
+  .con-arrow { color: #3fb950; font-size: 11px; }
+  .con-prompt-sym { color: #3fb950; }
+  .con-prompt-row { display: flex; align-items: center; gap: 8px; }
+  .con-arr  { color: #d2a8ff; }
+  .con-key  { color: #7ee787; }
+  .js-logo { width: 44px; height: 44px; background: #f0db4f; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-family: 'SFMono-Regular', Consolas, monospace; font-size: 16px; font-weight: 900; color: #323330; flex-shrink: 0; }
+
+  /* ── Flow steps (identical to ref) ── */
+  .flow-step { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; border-bottom: 1px dashed #e2e8f0; }
+  .flow-step:last-child { border-bottom: none; }
+  .flow-num { width: 28px; height: 28px; border-radius: 50%; background: #d97706; color: white; font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+  .flow-content { flex: 1; font-size: 13px; color: #333; line-height: 1.6; }
+  .flow-label { font-weight: 700; color: #d97706; margin-bottom: 2px; }
+
+  /* ── Bootstrap form mockup (identical to ref) ── */
+  .bs-form-group { margin-bottom: 14px; }
+  .bs-label { display: block; font-size: 12px; font-weight: 600; color: #333; margin-bottom: 4px; }
+  .bs-input { width: 100%; padding: 7px 12px; border: 1px solid #ced4da; border-radius: 5px; font-size: 13px; font-family: -apple-system, sans-serif; color: #333; }
+  .bs-input:focus { outline: none; border-color: #86b7fe; }
+  .bs-btn-submit { background: #0d6efd; color: white; border: none; border-radius: 5px; padding: 8px 22px; font-size: 13px; font-weight: 700; cursor: pointer; width: 100%; }
+  .bs-btn-submit:hover { background: #0b5ed7; }
+
+  /* ══ DAY 9 — ARRAYS / OBJECTS SPECIFIC ══ */
+
+  /* Array box visualisation */
+  .array-box { display: inline-flex; border: 2px solid #1e293b; border-radius: 8px; overflow: hidden; }
+  .array-cell { padding: 10px 16px; font-family: monospace; font-size: 13px; font-weight: 700; border-right: 1px solid #1e293b; position: relative; min-width: 60px; text-align: center; }
+  .array-cell:last-child { border-right: none; }
+  .array-cell .idx { position: absolute; top: -18px; left: 50%; transform: translateX(-50%); font-size: 10px; color: #888; font-weight: 400; }
+  .array-cell.empty { background: #f8f9fa; color: #cbd5e1; font-style: italic; }
+  .array-cell.filled { background: #dbeafe; color: #1e40af; }
+  .array-cell.removed { background: #fee2e2; color: #dc2626; text-decoration: line-through; opacity: .5; }
+
+  /* Object box visualisation */
+  .obj-box { background: #1e1e2e; border-radius: 10px; padding: 14px 18px; font-family: monospace; font-size: 13px; }
+  .obj-key-row { display: flex; gap: 8px; padding: 3px 0; }
+
+  /* Why array problem cards */
+  .bad-var-row { display: flex; gap: 8px; align-items: center; padding: 6px 0; font-family: monospace; font-size: 12px; opacity: .8; }
+
+  /* Interactive array builder */
+  .array-builder { background: #0f172a; border-radius: 12px; padding: 16px 18px; }
+  .ab-controls { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+  .ab-btn { background: #1e293b; border: 1px solid #334155; color: #f0db4f; font-family: monospace; font-size: 12px; font-weight: 700; padding: 6px 14px; border-radius: 6px; cursor: pointer; transition: all .15s; }
+  .ab-btn:hover { background: #334155; border-color: #d97706; }
+  .ab-btn.danger { color: #ff7b86; }
+  .ab-visual { display: flex; gap: 6px; flex-wrap: wrap; min-height: 50px; align-items: center; padding: 10px; background: #1e1e2e; border-radius: 8px; }
+  .ab-item { background: #2563eb; color: white; padding: 8px 14px; border-radius: 6px; font-family: monospace; font-size: 12px; font-weight: 700; position: relative; animation: popIn .25s ease; }
+  .ab-item .ab-idx { position: absolute; top: -16px; left: 0; font-size: 9px; color: #6272a4; }
+  @keyframes popIn { from { transform: scale(0.5); opacity:0; } to { transform: scale(1); opacity:1; } }
+  .ab-empty-msg { color: #6272a4; font-family: monospace; font-size: 12px; font-style: italic; }
+
+  /* Method explainer chips */
+  .method-chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 20px; font-family: monospace; font-size: 12px; font-weight: 700; }
+
+  /* Object property explorer */
+  .obj-prop-row { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 8px; border: 1px solid #e8e8e8; cursor: pointer; transition: all .15s; }
+  .obj-prop-row:hover { background: #f8f9fa; border-color: #d97706; }
+
+  /* ══ DAY 10 — LOCAL STORAGE / SEARCH / UPDATE SPECIFIC ══ */
+
+  .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px; }
+
+  /* Local Storage key:value visual box */
+  .ls-box { background: #1e1e2e; border-radius: 10px; padding: 14px 18px; font-family: monospace; font-size: 13px; min-height: 46px; }
+  .ls-row { display: flex; align-items: center; gap: 10px; padding: 5px 0; }
+  .ls-key { color: #ff79c6; font-weight: 700; }
+  .ls-arrow { color: #6272a4; font-size: 11px; }
+  .ls-val { color: #f1fa8c; }
+  .ls-empty-msg { color: #6272a4; font-family: monospace; font-size: 12px; font-style: italic; }
+
+  /* Interactive localStorage demo */
+  .ls-demo { background: #0f172a; border-radius: 12px; padding: 16px 18px; }
+  .ls-controls { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+  .ls-btn { background: #1e293b; border: 1px solid #334155; color: #f0db4f; font-family: monospace; font-size: 12px; font-weight: 700; padding: 6px 14px; border-radius: 6px; cursor: pointer; transition: all .15s; }
+  .ls-btn:hover { background: #334155; border-color: #d97706; }
+  .ls-btn.danger { color: #ff7b86; }
+
+  /* Live search demo */
+  .search-demo { background: #f8f9fa; border: 1px solid #e8e8e8; border-radius: 12px; padding: 14px 16px; }
+  .search-input-row { position: relative; margin-bottom: 12px; }
+  .search-input { width: 100%; padding: 9px 14px 9px 36px; border: 1px solid #ced4da; border-radius: 8px; font-size: 13px; font-family: -apple-system, sans-serif; color: #333; }
+  .search-input:focus { outline: none; border-color: #d97706; }
+  .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #999; font-size: 15px; }
+  .search-results { display: flex; flex-direction: column; gap: 6px; min-height: 60px; }
+  .search-result-row { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: #fff; border: 1px solid #eee; border-radius: 8px; font-size: 12.5px; animation: popIn .2s ease; }
+  .search-result-row .sr-name { font-weight: 700; color: #1a1a1a; min-width: 90px; }
+  .search-result-row .sr-course { margin-left: auto; }
+  .search-empty { color: #aaa; font-size: 12px; font-style: italic; text-align: center; padding: 14px 0; }
+  .search-count { font-size: 11px; color: #888; margin-bottom: 8px; }
+
+  /* Dashboard stat cards */
+  .stat-card { border-radius: 12px; padding: 14px 16px; text-align: center; transition: transform .15s; }
+  .stat-num { font-size: 26px; font-weight: 800; line-height: 1.1; }
+  .stat-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; margin-top: 4px; opacity: .8; }
+  .stat-blue   { background: #dbeafe; color: #1e40af; }
+  .stat-purple { background: #ede9fe; color: #5b21b6; }
+  .stat-orange { background: #ffedd5; color: #9a3412; }
+  .stat-green  { background: #dcfce7; color: #166534; }
+  @keyframes bump { 0% { transform: scale(1); } 40% { transform: scale(1.12); } 100% { transform: scale(1); } }
+  .stat-card.bump { animation: bump .3s ease; }
+
+  /* Status badges (active/inactive) */
+  .status-pill { display: inline-flex; align-items: center; gap: 5px; font-size: 10.5px; font-weight: 700; padding: 3px 10px; border-radius: 20px; }
+  .status-active   { background: #dcfce7; color: #166534; }
+  .status-inactive { background: #f1f5f9; color: #64748b; }
+  .status-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+  /* Mini student table (dashboard preview) */
+  .mini-table { border-collapse: collapse; width: 100%; font-size: 12px; }
+  .mini-table th { background: #f1f5f9; font-size: 10.5px; font-weight: 700; text-align: left; padding: 7px 10px; color: #64748b; text-transform: uppercase; letter-spacing: .03em; }
+  .mini-table td { padding: 8px 10px; border-top: 1px solid #f0f0f0; vertical-align: middle; }
+  .mini-table .row-edit  { color: #2563eb; cursor: pointer; margin-right: 10px; }
+  .mini-table .row-del   { color: #dc2626; cursor: pointer; }
+
+  /* Checklist grid reuse spacing */
+  .checklist-col { display: flex; flex-direction: column; gap: 8px; }
+
+  /* Timeline / roadmap table highlight row */
+  .tag-table tr.today-row td { background: #fef9c3; font-weight: 700; }
+  .tag-table tr.done-row td { color: #94a3b8; }
+  .tag-table tr.done-row td:first-child { text-decoration: none; }
+
+  /* localStorage refresh demo (browser reload illustration) */
+  .refresh-demo { display: flex; align-items: center; justify-content: center; gap: 18px; padding: 10px 0; }
+  .refresh-icon-circle { width: 54px; height: 54px; border-radius: 50%; background: #fef9c3; display: flex; align-items: center; justify-content: center; color: #d97706; font-size: 24px; }
+
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <div>
+      <div class="top-bar-title">MERN Stack Training · Day 10 · Full Session (3 Hours)</div>
+      <div class="top-bar-sub">Persistent Student Management System — Local Storage, Search &amp; Update · SkillHub LMS</div>
+    </div>
+    <div class="slide-counter" id="slide-counter">1 / 17</div>
+  </div>
+
+  <!-- ═══ SLIDE 0  HOME ═══ -->
+  <div class="slide active" id="slide-0">
+    <div class="slide-header">
+      <div class="js-logo">💾</div>
+      <div>
+        <div class="slide-title">Persistent Student Management System</div>
+        <div class="slide-subtitle">Local Storage + JSON + Update + Search + Dashboard Statistics</div>
+      </div>
+    </div>
+
+    <div style="background:#fef9c3;border:1px solid #fde68a;border-radius:12px;padding:12px 16px;display:flex;gap:12px;align-items:flex-start">
+      <i class="ti ti-database" style="color:#d97706;font-size:22px;flex-shrink:0;margin-top:1px"></i>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#854d0e;margin-bottom:4px">Today's Goal — Make the Dashboard Survive a Refresh</div>
+        <div style="display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:#92400e">
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>localStorage — save data in the browser</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>JSON.stringify / JSON.parse</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Edit, Search &amp; live Dashboard Statistics</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="home-grid">
+      <div class="home-card" onclick="goSlide(1)">
+        <span class="badge b-green">Recap</span>
+        <div class="home-card-title">Day 9 Deliverable</div>
+        <div class="home-card-sub">Student Dashboard + CRUD — where we left off</div>
+      </div>
+      <div class="home-card" onclick="goSlide(2)">
+        <span class="badge b-amber">Part 1 · 20 min</span>
+        <div class="home-card-title">Refresh the Page…</div>
+        <div class="home-card-sub">Everything disappears. Why?</div>
+      </div>
+      <div class="home-card" onclick="goSlide(3)">
+        <span class="badge b-js">Concept</span>
+        <div class="home-card-title">Local Storage Basics</div>
+        <div class="home-card-sub">setItem, getItem, removeItem</div>
+      </div>
+      <div class="home-card" onclick="goSlide(4)">
+        <span class="badge b-purple">Problem</span>
+        <div class="home-card-title">The JSON Problem</div>
+        <div class="home-card-sub">Can Local Storage save an Array? No — need JSON</div>
+      </div>
+      <div class="home-card" onclick="goSlide(5)">
+        <span class="badge b-orange">Build</span>
+        <div class="home-card-title">Connect the Dashboard</div>
+        <div class="home-card-sub">Save on register, load on refresh</div>
+      </div>
+      <div class="home-card" onclick="goSlide(6)">
+        <span class="badge b-blue">Explain</span>
+        <div class="home-card-title">Line-by-Line — Storage &amp; JSON</div>
+        <div class="home-card-sub">Every new line explained in detail</div>
+      </div>
+      <div class="home-card" onclick="goSlide(7)">
+        <span class="badge b-cyan">Part 2 · 20 min</span>
+        <div class="home-card-title">Edit Student</div>
+        <div class="home-card-sub">Edit / Delete buttons + editIndex</div>
+      </div>
+      <div class="home-card" onclick="goSlide(8)">
+        <span class="badge b-indigo">Build</span>
+        <div class="home-card-title">Update Logic</div>
+        <div class="home-card-sub">Add new OR update existing — one submit handler</div>
+      </div>
+    </div>
+
+    <div class="grid-2" style="gap:10px">
+      <div class="home-card" onclick="goSlide(9)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge b-teal">Part 2</span>
+          <span style="font-size:14px;font-weight:700">Search Student — filter()</span>
+          <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+        </div>
+      </div>
+      <div class="home-card" onclick="goSlide(10)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge b-rose">Part 2</span>
+          <span style="font-size:14px;font-weight:700">Dashboard Statistics</span>
+          <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+        </div>
+      </div>
+    </div>
+    <div class="grid-2" style="gap:10px">
+      <div class="home-card" onclick="goSlide(11)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge b-pink">Bonus</span>
+          <span style="font-size:14px;font-weight:700">Clear All, Confirm Delete &amp; Badges</span>
+          <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+        </div>
+      </div>
+      <div class="home-card" onclick="goSlide(12)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge b-indigo">Flow</span>
+          <span style="font-size:14px;font-weight:700">The Full Persistence Journey</span>
+          <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+        </div>
+      </div>
+    </div>
+    <div class="grid-2" style="gap:10px">
+      <div class="home-card" onclick="goSlide(13)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge b-slate">Ref</span>
+          <span style="font-size:14px;font-weight:700">Day 10 Reference Sheet</span>
+          <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+        </div>
+      </div>
+      <div class="home-card" onclick="goSlide(14)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge b-amber">Roadmap</span>
+          <span style="font-size:14px;font-weight:700">New Project Timeline (Day 1–12)</span>
+          <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+        </div>
+      </div>
+    </div>
+    <div class="home-card" onclick="goSlide(15)" style="cursor:pointer">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="badge b-orange">Assignment</span>
+        <span style="font-size:14px;font-weight:700">Build Your Own Admin Dashboard</span>
+        <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+      </div>
+    </div>
+    <div class="home-card" onclick="goSlide(16)" style="cursor:pointer">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="badge b-green">Quiz</span>
+        <span style="font-size:14px;font-weight:700">Quick Check — 6 Questions</span>
+        <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+      </div>
+    </div>
+    <div class="nav-row">
+      <div></div>
+      <div class="progress-dots" id="dots-0"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Start <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 1  RECAP ═══ -->
+  <div class="slide" id="slide-1">
+    <div class="slide-header">
+      <span class="badge b-green">Recap</span>
+      <div>
+        <div class="slide-title">Day 9 Deliverable</div>
+        <div class="slide-subtitle">A working Student Dashboard — register, display, delete — all in one array of objects</div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="section-label">what we built in day 9</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#dbeafe;border-radius:8px;font-size:12px;font-weight:700;color:#1e40af">
+            <span>Arrays &amp; Objects — students = []</span><span class="badge b-green" style="font-size:10px">✓</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#ede9fe;border-radius:8px;font-size:12px;font-weight:700;color:#5b21b6">
+            <span>Registration Form pushes into the array</span><span class="badge b-green" style="font-size:10px">✓</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#d1fae5;border-radius:8px;font-size:12px;font-weight:700;color:#065f46">
+            <span>displayStudents() — forEach() renders the table</span><span class="badge b-green" style="font-size:10px">✓</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#dcfce7;border-radius:8px;font-size:12px;font-weight:700;color:#166534">
+            <span>deleteStudent(index) — splice() removes a row</span><span class="badge b-green" style="font-size:10px">✓</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#fef9c3;border-radius:8px;font-size:12px;font-weight:700;color:#854d0e;border:2px solid #fde68a">
+            <span>Local Storage, Update &amp; Search (Day 10 — today)</span><span class="badge b-js" style="font-size:10px">← start</span>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">the gap we close today</div>
+        <div class="card card-gray">
+          <div style="font-size:13px;color:#444;line-height:1.7">
+            The dashboard <strong>works</strong> — but everything lives inside one JavaScript array in RAM. The moment the browser tab is refreshed:
+          </div>
+          <div style="display:flex;flex-direction:column;gap:5px;margin-top:8px">
+            <div style="font-size:12px;color:#888"><i class="ti ti-x" style="color:#dc2626;font-size:12px;margin-right:4px"></i>Every registered student is gone</div>
+            <div style="font-size:12px;color:#888"><i class="ti ti-x" style="color:#dc2626;font-size:12px;margin-right:4px"></i>There's no way to fix a typo after saving</div>
+            <div style="font-size:12px;color:#888"><i class="ti ti-x" style="color:#dc2626;font-size:12px;margin-right:4px"></i>Finding one student means scrolling the whole list</div>
+          </div>
+        </div>
+        <div class="info-box" style="margin-top:10px">
+          <i class="ti ti-info-circle info-icon"></i>
+          <div class="info-text"><strong>Today's fix:</strong> Local Storage makes data survive a refresh. Edit logic lets you fix a mistake without deleting. filter() gives you Search and live Dashboard Statistics. This turns your project into a real, usable Admin Dashboard.</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-1"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Why Does Data Disappear? <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 2  START WITH QUESTION ═══ -->
+  <div class="slide" id="slide-2">
+    <div class="slide-header">
+      <span class="badge b-amber">Part 1 · 5 min</span>
+      <div>
+        <div class="slide-title">Refresh the Page. Everything Disappears.</div>
+        <div class="slide-subtitle">Register 5 students. Press F5. Try it right now.</div>
+      </div>
+    </div>
+    <div class="card card-gray">
+      <div style="font-size:14px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px">
+        <i class="ti ti-message-question" style="color:#d97706;font-size:20px"></i>
+        Your dashboard was full of students. You refreshed the browser. Why is it empty again?
+      </div>
+      <div class="refresh-demo">
+        <div style="text-align:center">
+          <div class="refresh-icon-circle"><i class="ti ti-table"></i></div>
+          <div style="font-size:11px;color:#888;margin-top:6px">5 students<br>on screen</div>
+        </div>
+        <i class="ti ti-arrow-right" style="color:#d97706;font-size:22px"></i>
+        <div style="text-align:center">
+          <div class="refresh-icon-circle"><i class="ti ti-refresh"></i></div>
+          <div style="font-size:11px;color:#888;margin-top:6px">Browser<br>refresh (F5)</div>
+        </div>
+        <i class="ti ti-arrow-right" style="color:#d97706;font-size:22px"></i>
+        <div style="text-align:center">
+          <div class="refresh-icon-circle" style="background:#fee2e2;color:#dc2626"><i class="ti ti-table-off"></i></div>
+          <div style="font-size:11px;color:#888;margin-top:6px">0 students<br>on screen</div>
+        </div>
+      </div>
+      <button class="reveal-btn" onclick="toggle('q-ans')">Reveal the answer</button>
+      <div class="reveal-content" id="q-ans">
+        <div style="margin-top:10px;padding:14px 16px;background:#fff;border-radius:10px;border:1px solid #fde68a">
+          <div style="font-size:18px;font-weight:800;color:#854d0e;text-align:center;margin-bottom:8px">Your <code>students</code> array lives in RAM.</div>
+          <div style="font-size:13px;color:#444;text-align:center;line-height:1.7">RAM is temporary memory. The instant the browser reloads the page, JavaScript starts fresh — <code>let students = [];</code> runs again as an EMPTY array. Everything you had is gone.<br>We need somewhere that survives a refresh.</div>
+        </div>
+      </div>
+    </div>
+    <div class="grid-3">
+      <div class="card" style="text-align:center">
+        <div style="font-size:14px;font-weight:800;color:#333">RAM</div>
+        <div style="font-size:11px;color:#888;margin-top:4px">Your array lives here — fast, but temporary</div>
+      </div>
+      <div class="card" style="text-align:center">
+        <i class="ti ti-arrow-down" style="font-size:20px;color:#d97706"></i>
+        <div style="font-size:14px;font-weight:800;color:#333;margin-top:2px">Refresh</div>
+        <div style="font-size:11px;color:#888;margin-top:4px">JavaScript re-runs from line 1</div>
+      </div>
+      <div class="card" style="text-align:center;border-color:#fca5a5">
+        <div style="font-size:14px;font-weight:800;color:#dc2626">Memory Lost</div>
+        <div style="font-size:11px;color:#888;margin-top:4px"><code>students = []</code> — back to empty</div>
+      </div>
+    </div>
+    <div class="info-box">
+      <i class="ti ti-info-circle info-icon"></i>
+      <div class="info-text"><strong>What we need:</strong> Browser Storage — a place inside the browser itself that keeps data even after a refresh, a tab close, or a computer restart. That's exactly what <code>localStorage</code> is for.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-2"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Local Storage Basics <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 3  LOCAL STORAGE BASICS ═══ -->
+  <div class="slide" id="slide-3">
+    <div class="slide-header">
+      <span class="badge b-js">Concept</span>
+      <div>
+        <div class="slide-title">Local Storage</div>
+        <div class="slide-subtitle">A key : value store built into every browser — survives refresh, tab close, even restart</div>
+      </div>
+    </div>
+    <div class="activity-box">
+      <div class="activity-title"><i class="ti ti-keyboard"></i> Try this in the browser console (F12)</div>
+      <div class="editor" style="border-radius:8px">
+        <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">console</span></div>
+        <div class="editor-body">
+          <div class="e-row"><span class="j-com">// save</span></div>
+          <div class="e-row"><span class="j-var">localStorage</span><span class="c-punc">.</span><span class="j-fn">setItem</span><span class="c-punc">(</span><span class="j-str">"trainer"</span><span class="c-punc">,</span> <span class="j-str">"Manish"</span><span class="c-punc">);</span></div>
+          <div class="e-row"><span class="e-ln"> </span></div>
+          <div class="e-row"><span class="j-com">// retrieve</span></div>
+          <div class="e-row"><span class="j-var">localStorage</span><span class="c-punc">.</span><span class="j-fn">getItem</span><span class="c-punc">(</span><span class="j-str">"trainer"</span><span class="c-punc">);</span></div>
+          <div class="e-row"><span class="e-ln"> </span></div>
+          <div class="e-row"><span class="j-com">// remove</span></div>
+          <div class="e-row"><span class="j-var">localStorage</span><span class="c-punc">.</span><span class="j-fn">removeItem</span><span class="c-punc">(</span><span class="j-str">"trainer"</span><span class="c-punc">);</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="section-label">try it live — click the buttons below</div>
+    <div class="ls-demo">
+      <div class="ls-controls">
+        <button class="ls-btn" onclick="lsDemoSet()">localStorage.setItem("trainer","Manish")</button>
+        <button class="ls-btn" onclick="lsDemoGet()">localStorage.getItem("trainer")</button>
+        <button class="ls-btn danger" onclick="lsDemoRemove()">localStorage.removeItem("trainer")</button>
+      </div>
+      <div class="section-label" style="color:#8b949e">localStorage — key : value store</div>
+      <div class="ls-box" id="ls-visual"><span class="ls-empty-msg">localStorage is empty</span></div>
+      <div class="console-panel" style="margin-top:10px">
+        <div class="console-bar"><span class="console-tab active">Console</span></div>
+        <div class="console-body" id="ls-console"><div class="con-prompt-row"><span style="color:#3fb950;font-size:11px">▶</span><span style="color:#6272a4">// output appears here</span></div></div>
+      </div>
+    </div>
+    <div class="grid-3">
+      <div class="card" style="text-align:center">
+        <span class="method-chip" style="background:#dbeafe;color:#1e40af">setItem(key, value)</span>
+        <div style="font-size:11px;color:#666;margin-top:8px">Saves a value under a key. Both must be <strong>strings</strong>.</div>
+      </div>
+      <div class="card" style="text-align:center">
+        <span class="method-chip" style="background:#dcfce7;color:#166534">getItem(key)</span>
+        <div style="font-size:11px;color:#666;margin-top:8px">Returns the saved value, or <code>null</code> if it doesn't exist.</div>
+      </div>
+      <div class="card" style="text-align:center">
+        <span class="method-chip" style="background:#ffe4e6;color:#9f1239">removeItem(key)</span>
+        <div style="font-size:11px;color:#666;margin-top:8px">Deletes that one key from storage permanently.</div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-3"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">The JSON Problem <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 4  THE JSON PROBLEM ═══ -->
+  <div class="slide" id="slide-4">
+    <div class="slide-header">
+      <span class="badge b-purple">Problem</span>
+      <div>
+        <div class="slide-title">The JSON Problem</div>
+        <div class="slide-subtitle">Our students variable is an Array of Objects. Can localStorage save that directly?</div>
+      </div>
+    </div>
+    <div class="card card-gray">
+      <div style="font-size:14px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px">
+        <i class="ti ti-message-question" style="color:#d97706;font-size:20px"></i>
+        Can Local Storage save an Array (like our students list) the same way it saved "Manish"?
+      </div>
+      <div class="editor" style="border-radius:8px;margin-bottom:12px">
+        <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">the wrong way</span></div>
+        <div class="editor-body">
+          <div class="e-row"><span class="j-var">localStorage</span><span class="c-punc">.</span><span class="j-fn">setItem</span><span class="c-punc">(</span><span class="j-str">"students"</span><span class="c-punc">,</span> <span class="j-var">students</span><span class="c-punc">);</span></div>
+          <div class="e-row"><span class="j-fn">console</span><span class="c-punc">.</span><span class="j-fn">log</span><span class="c-punc">(</span><span class="j-var">localStorage</span><span class="c-punc">.</span><span class="j-fn">getItem</span><span class="c-punc">(</span><span class="j-str">"students"</span><span class="c-punc">));</span></div>
+          <div class="e-row"><span class="j-com">// "[object Object],[object Object]"  ← data destroyed!</span></div>
+        </div>
+      </div>
+      <button class="reveal-btn" onclick="toggle('json-ans')">Reveal the answer</button>
+      <div class="reveal-content" id="json-ans">
+        <div style="margin-top:10px;padding:14px 16px;background:#fff;border-radius:10px;border:1px solid #c4b5fd">
+          <div style="font-size:18px;font-weight:800;color:#5b21b6;text-align:center;margin-bottom:6px">No.</div>
+          <div style="font-size:13px;color:#444;text-align:center;line-height:1.7">localStorage can only store <strong>plain text (strings)</strong>. Give it an Array or Object and JavaScript silently converts it to the useless text <code>"[object Object]"</code> — all the real data is lost.<br>We need to convert our data into a text format first: <strong>JSON</strong>.</div>
+        </div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="section-label">saving — JSON.stringify()</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">frontend/js/script.js</span></div>
+          <div class="editor-body">
+            <div class="e-row"><span class="j-var">localStorage</span><span class="c-punc">.</span><span class="j-fn">setItem</span><span class="c-punc">(</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="j-str">"students"</span><span class="c-punc">,</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="j-var" style="color:#80ffea">JSON</span><span class="c-punc">.</span><span class="j-fn" style="color:#80ffea">stringify</span><span class="c-punc">(</span><span class="j-var">students</span><span class="c-punc">)</span></div>
+            <div class="e-row"><span class="c-punc">);</span></div>
+          </div>
+        </div>
+        <div style="font-size:11px;color:#888;margin-top:6px">Turns the Array of Objects into a plain <strong>text string</strong> that localStorage can safely store.</div>
+      </div>
+      <div>
+        <div class="section-label">loading — JSON.parse()</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">frontend/js/script.js</span></div>
+          <div class="editor-body">
+            <div class="e-row"><span class="j-kw">let</span> <span class="j-var">students</span> <span class="j-op">=</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="j-var" style="color:#80ffea">JSON</span><span class="c-punc">.</span><span class="j-fn" style="color:#80ffea">parse</span><span class="c-punc">(</span></div>
+            <div class="e-row"><span class="e-ind2"></span><span class="j-var">localStorage</span><span class="c-punc">.</span><span class="j-fn">getItem</span><span class="c-punc">(</span><span class="j-str">"students"</span><span class="c-punc">)</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="c-punc">) </span><span class="j-op">||</span> <span class="c-punc">[];</span></div>
+          </div>
+        </div>
+        <div style="font-size:11px;color:#888;margin-top:6px">Turns the text string back into a real, usable Array of Objects.</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-label">the round trip</div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;padding:8px 0;font-size:13px;font-weight:700;color:#444">
+        <span style="padding:6px 12px;background:#dbeafe;border-radius:8px;color:#1e40af">Object / Array</span>
+        <i class="ti ti-arrow-right" style="color:#d97706"></i>
+        <span style="padding:6px 12px;background:#fef9c3;border-radius:8px;color:#854d0e">JSON.stringify()</span>
+        <i class="ti ti-arrow-right" style="color:#d97706"></i>
+        <span style="padding:6px 12px;background:#dcfce7;border-radius:8px;color:#166534">Text in localStorage</span>
+        <i class="ti ti-arrow-right" style="color:#d97706"></i>
+        <span style="padding:6px 12px;background:#fef9c3;border-radius:8px;color:#854d0e">JSON.parse()</span>
+        <i class="ti ti-arrow-right" style="color:#d97706"></i>
+        <span style="padding:6px 12px;background:#dbeafe;border-radius:8px;color:#1e40af">Object / Array again</span>
+      </div>
+    </div>
+    <div class="warn-box">
+      <i class="ti ti-alert-triangle" style="color:#d97706;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+      <div style="font-size:13px;color:#92400e;line-height:1.6"><strong><code>|| []</code> matters:</strong> The very first time the page loads, <code>getItem("students")</code> returns <code>null</code> — nothing has been saved yet. <code>JSON.parse(null)</code> would give <code>null</code>, and calling <code>.push()</code> on <code>null</code> crashes. <code>|| []</code> falls back to an empty array so the app never breaks.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-4"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Connect the Dashboard <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 5  CONNECT THE DASHBOARD ═══ -->
+  <div class="slide" id="slide-5">
+    <div class="slide-header">
+      <span class="badge b-orange">Build · 30 min</span>
+      <div>
+        <div class="slide-title">Connect Dashboard to Local Storage</div>
+        <div class="slide-subtitle">Two hooks: save after every change, load once when the page opens</div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="section-label">step 1 — save after registration</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">inside registerStudent(), after push</span></div>
+          <div class="editor-body" style="font-size:11.5px">
+            <div class="e-row"><span class="j-var">students</span><span class="c-punc">.</span><span class="j-fn">push</span><span class="c-punc">(</span><span class="j-var">student</span><span class="c-punc">);</span></div>
+            <div class="e-row"><span class="e-ln"> </span></div>
+            <div class="e-row" style="background:#1a2a1a"><span class="j-var" style="color:#80ffea">localStorage</span><span class="c-punc">.</span><span class="j-fn" style="color:#80ffea">setItem</span><span class="c-punc">(</span></div>
+            <div class="e-row" style="background:#1a2a1a"><span class="e-ind1"></span><span class="j-str">"students"</span><span class="c-punc">,</span></div>
+            <div class="e-row" style="background:#1a2a1a"><span class="e-ind1"></span><span class="j-var" style="color:#80ffea">JSON</span><span class="c-punc">.</span><span class="j-fn" style="color:#80ffea">stringify</span><span class="c-punc">(</span><span class="j-var">students</span><span class="c-punc">)</span></div>
+            <div class="e-row" style="background:#1a2a1a"><span class="c-punc">);</span></div>
+            <div class="e-row"><span class="e-ln"> </span></div>
+            <div class="e-row"><span class="j-fn">displayStudents</span><span class="c-punc">();</span></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">step 2 — load when the page opens</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">top of frontend/js/script.js</span></div>
+          <div class="editor-body" style="font-size:11.5px">
+            <div class="e-row" style="background:#1a2a1a"><span class="j-kw">let</span> <span class="j-var" style="color:#80ffea">students</span> <span class="j-op">=</span></div>
+            <div class="e-row" style="background:#1a2a1a"><span class="e-ind1"></span><span class="j-var" style="color:#80ffea">JSON</span><span class="c-punc">.</span><span class="j-fn" style="color:#80ffea">parse</span><span class="c-punc">(</span></div>
+            <div class="e-row" style="background:#1a2a1a"><span class="e-ind2"></span><span class="j-var">localStorage</span><span class="c-punc">.</span><span class="j-fn">getItem</span><span class="c-punc">(</span><span class="j-str">"students"</span><span class="c-punc">)</span></div>
+            <div class="e-row" style="background:#1a2a1a"><span class="e-ind1"></span><span class="c-punc">) </span><span class="j-op">||</span> <span class="c-punc">[];</span></div>
+            <div class="e-row"><span class="e-ln"> </span></div>
+            <div class="e-row"><span class="j-kw">let</span> <span class="j-var">editIndex</span> <span class="j-op">=</span> <span class="j-num">-1</span><span class="c-punc">;</span> <span class="j-com">// used later today</span></div>
+            <div class="e-row"><span class="e-ln"> </span></div>
+            <div class="e-row"><span class="j-fn">displayStudents</span><span class="c-punc">();</span> <span class="j-com">// render on load</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card card-gray">
+      <div class="section-label">what just happened</div>
+      <div style="font-size:13px;color:#444;line-height:1.7">
+        Step 1 → Every time a student registers, the ENTIRE array is converted to text and saved to localStorage.<br><br>
+        Step 2 → The moment <code>script.js</code> loads (even after a refresh), it reads that text back out and rebuilds the array — <em>before</em> the page has even shown anything.
+      </div>
+    </div>
+    <div class="success-box">
+      <i class="ti ti-sparkles" style="color:#16a34a;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+      <div style="font-size:13px;color:#166534;line-height:1.65">
+        <strong>Now try it:</strong> Register a few students. Press F5 to refresh the browser. Watch the table — <strong>the data is still there.</strong> This is a huge achievement: your app just went from "temporary demo" to "something that behaves like a real product."
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-5"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Explain Every Line <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 6  LINE-BY-LINE EXPLAINER ═══ -->
+  <div class="slide" id="slide-6">
+    <div class="slide-header">
+      <span class="badge b-blue">Explain</span>
+      <div>
+        <div class="slide-title">Line-by-Line — Local Storage &amp; JSON</div>
+        <div class="slide-subtitle">Click any row to expand — every piece of syntax from Part 1</div>
+      </div>
+    </div>
+    <div class="line-explain">
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="j-var">localStorage</span></div>
+        <div class="lex-info">
+          <div class="lex-name">localStorage — the browser's storage object</div>
+          <div class="lex-desc">A built-in object every browser gives you, for free, to store text data</div>
+          <div class="lex-detail">Data saved here belongs to this website only (other sites can't read it) and stays until it's explicitly removed or the browser storage is cleared — refreshing or closing the tab does NOT delete it.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="j-fn">.setItem(k,v)</span></div>
+        <div class="lex-info">
+          <div class="lex-name">setItem(key, value) — save data</div>
+          <div class="lex-desc">Stores a value under a named key, overwriting any old value for that key</div>
+          <div class="lex-detail">Both key and value must be strings. Calling setItem("students", ...) a second time completely replaces the first save — it doesn't add to it.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="j-fn">.getItem(k)</span></div>
+        <div class="lex-info">
+          <div class="lex-name">getItem(key) — read data</div>
+          <div class="lex-desc">Returns the string stored under that key, or null if nothing was ever saved</div>
+          <div class="lex-detail">This is a read-only lookup — it doesn't remove the data. You'll typically wrap it in JSON.parse() when the value is an array or object.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="j-var" style="color:#80ffea">JSON</span><span class="c-punc">.</span><span class="j-fn" style="color:#80ffea">stringify</span></div>
+        <div class="lex-info">
+          <div class="lex-name">JSON.stringify(value) — object/array → text</div>
+          <div class="lex-desc">Converts a JavaScript array or object into a JSON-formatted string</div>
+          <div class="lex-detail">This is the ONLY safe way to put an array or object into localStorage. Without it, JavaScript converts your data to the useless text "[object Object]".</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="j-var" style="color:#80ffea">JSON</span><span class="c-punc">.</span><span class="j-fn" style="color:#80ffea">parse</span></div>
+        <div class="lex-info">
+          <div class="lex-name">JSON.parse(string) — text → object/array</div>
+          <div class="lex-desc">Converts a JSON-formatted string back into a real JavaScript array or object</div>
+          <div class="lex-detail">The exact reverse of stringify(). You need this every time you read array/object data back out of localStorage — otherwise you just get plain text you can't push() or loop through.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="j-op">||</span> <span class="c-punc">[]</span></div>
+        <div class="lex-info">
+          <div class="lex-name">|| [] — safe fallback</div>
+          <div class="lex-desc">If the left side is null, undefined, or falsy, use an empty array instead</div>
+          <div class="lex-detail">On the very first visit, localStorage has nothing saved yet, so getItem() returns null. || [] catches that case so students always starts as a usable array, never null.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="j-fn">.removeItem(k)</span></div>
+        <div class="lex-info">
+          <div class="lex-name">removeItem(key) — delete one key</div>
+          <div class="lex-desc">Permanently removes that key and its value from storage</div>
+          <div class="lex-detail">We'll use this later today for the "Clear All" button — removeItem("students") wipes the entire saved dashboard in one line.</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-6"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Edit Student <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 7  EDIT STUDENT ═══ -->
+  <div class="slide" id="slide-7">
+    <div class="slide-header">
+      <span class="badge b-cyan">Part 2 · 20 min</span>
+      <div>
+        <div class="slide-title">Edit Student</div>
+        <div class="slide-subtitle">Add an Edit button next to Delete — fill the form, don't retype it</div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="section-label">dashboard row — two actions now</div>
+        <div class="card" style="padding:0;overflow:hidden">
+          <table class="mini-table">
+            <thead><tr><th>Name</th><th>Course</th><th>Actions</th></tr></thead>
+            <tbody>
+              <tr>
+                <td>Rahul</td><td>MERN</td>
+                <td><span class="row-edit"><i class="ti ti-edit"></i> Edit</span><span class="row-del"><i class="ti ti-trash"></i> Delete</span></td>
+              </tr>
+              <tr>
+                <td>Priya</td><td>Java</td>
+                <td><span class="row-edit"><i class="ti ti-edit"></i> Edit</span><span class="row-del"><i class="ti ti-trash"></i> Delete</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="font-size:11px;color:#888;margin-top:8px">Every row's buttons pass that row's own <code>index</code> into the function that handles them.</div>
+      </div>
+      <div>
+        <div class="section-label">the html button</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">inside displayStudents() row template</span></div>
+          <div class="editor-body" style="font-size:11.5px">
+            <div class="e-row"><span class="e-tag">&lt;button</span> <span class="e-att">onclick</span><span class="c-punc">=</span><span class="e-val">"editStudent(<span style="color:#f1fa8c">${index}</span>)"</span><span class="e-tag">&gt;</span></div>
+            <div class="e-row"><span class="e-ind1"></span>Edit</div>
+            <div class="e-row"><span class="e-tag">&lt;/button&gt;</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="activity-box">
+      <div class="activity-title"><i class="ti ti-keyboard"></i> Write editStudent(index)</div>
+      <div class="editor" style="border-radius:8px">
+        <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">frontend/js/script.js</span></div>
+        <div class="editor-body" style="font-size:12px">
+          <div class="e-row"><span class="j-kw">function</span> <span class="j-fn">editStudent</span><span class="c-punc">(</span><span class="j-var">index</span><span class="c-punc">) {</span></div>
+          <div class="e-row"><span class="e-ind1"></span><span class="j-var" style="color:#80ffea">editIndex</span> <span class="j-op">=</span> <span class="j-var">index</span><span class="c-punc">;</span> <span class="j-com">// remember WHICH student we're editing</span></div>
+          <div class="e-row"><span class="e-ln"> </span></div>
+          <div class="e-row"><span class="e-ind1"></span><span class="j-dom">document</span><span class="c-punc">.</span><span class="j-fn">getElementById</span><span class="c-punc">(</span><span class="j-str">"name"</span><span class="c-punc">).</span><span class="j-key">value</span> <span class="j-op">=</span></div>
+          <div class="e-row"><span class="e-ind2"></span><span class="j-var">students</span><span class="c-punc">[</span><span class="j-var">index</span><span class="c-punc">].</span><span class="j-key">name</span><span class="c-punc">;</span></div>
+          <div class="e-row"><span class="e-ind1"></span><span class="j-dom">document</span><span class="c-punc">.</span><span class="j-fn">getElementById</span><span class="c-punc">(</span><span class="j-str">"email"</span><span class="c-punc">).</span><span class="j-key">value</span> <span class="j-op">=</span></div>
+          <div class="e-row"><span class="e-ind2"></span><span class="j-var">students</span><span class="c-punc">[</span><span class="j-var">index</span><span class="c-punc">].</span><span class="j-key">email</span><span class="c-punc">;</span></div>
+          <div class="e-row"><span class="e-ind1"></span><span class="j-dom">document</span><span class="c-punc">.</span><span class="j-fn">getElementById</span><span class="c-punc">(</span><span class="j-str">"course"</span><span class="c-punc">).</span><span class="j-key">value</span> <span class="j-op">=</span></div>
+          <div class="e-row"><span class="e-ind2"></span><span class="j-var">students</span><span class="c-punc">[</span><span class="j-var">index</span><span class="c-punc">].</span><span class="j-key">course</span><span class="c-punc">;</span></div>
+          <div class="e-row"><span class="c-punc">}</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="info-box">
+      <i class="ti ti-info-circle info-icon"></i>
+      <div class="info-text"><strong><code>editIndex</code> is the whole trick:</strong> it starts at <code>-1</code>, meaning "not editing anyone." Clicking Edit sets it to that student's position in the array. The submit button will check this value to decide whether to add a new student or update an existing one — that's next.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-7"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Update Logic <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 8  UPDATE LOGIC ═══ -->
+  <div class="slide" id="slide-8">
+    <div class="slide-header">
+      <span class="badge b-indigo">Build · 20 min</span>
+      <div>
+        <div class="slide-title">One Submit Button, Two Jobs</div>
+        <div class="slide-subtitle">Add a NEW student, or UPDATE the one being edited — same button decides which</div>
+      </div>
+    </div>
+    <div class="activity-box">
+      <div class="activity-title"><i class="ti ti-keyboard"></i> Update inside your submit handler</div>
+      <div class="editor" style="border-radius:8px">
+        <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">inside registerStudent() / form submit</span></div>
+        <div class="editor-body" style="font-size:12px">
+          <div class="e-row"><span class="j-com">// name, email, course read from the form as usual</span></div>
+          <div class="e-row"><span class="j-kw">let</span> <span class="j-var">student</span> <span class="j-op">=</span> <span class="c-punc">{ </span><span class="j-key">name</span><span class="c-punc">, </span><span class="j-key">email</span><span class="c-punc">, </span><span class="j-key">course</span> <span class="c-punc">};</span></div>
+          <div class="e-row"><span class="e-ln"> </span></div>
+          <div class="e-row" style="background:#1a2a1a"><span class="j-ret">if</span><span class="c-punc"> (</span><span class="j-var">editIndex</span> <span class="j-op">==</span> <span class="j-num">-1</span><span class="c-punc">) {</span></div>
+          <div class="e-row" style="background:#1a2a1a"><span class="e-ind1"></span><span class="j-var">students</span><span class="c-punc">.</span><span class="j-fn">push</span><span class="c-punc">(</span><span class="j-var">student</span><span class="c-punc">);</span> <span class="j-com">// new student</span></div>
+          <div class="e-row" style="background:#1a2a1a"><span class="c-punc">} </span><span class="j-ret">else</span><span class="c-punc"> {</span></div>
+          <div class="e-row" style="background:#1a2a1a"><span class="e-ind1"></span><span class="j-var">students</span><span class="c-punc">[</span><span class="j-var">editIndex</span><span class="c-punc">] </span><span class="j-op">=</span> <span class="j-var">student</span><span class="c-punc">;</span> <span class="j-com">// overwrite existing</span></div>
+          <div class="e-row" style="background:#1a2a1a"><span class="e-ind1"></span><span class="j-var">editIndex</span> <span class="j-op">=</span> <span class="j-num">-1</span><span class="c-punc">;</span> <span class="j-com">// reset — back to "add" mode</span></div>
+          <div class="e-row" style="background:#1a2a1a"><span class="c-punc">}</span></div>
+          <div class="e-row"><span class="e-ln"> </span></div>
+          <div class="e-row"><span class="j-var">localStorage</span><span class="c-punc">.</span><span class="j-fn">setItem</span><span class="c-punc">(</span><span class="j-str">"students"</span><span class="c-punc">, </span><span class="j-var" style="color:#80ffea">JSON</span><span class="c-punc">.</span><span class="j-fn" style="color:#80ffea">stringify</span><span class="c-punc">(</span><span class="j-var">students</span><span class="c-punc">));</span></div>
+          <div class="e-row"><span class="j-fn">displayStudents</span><span class="c-punc">();</span></div>
+          <div class="e-row"><span class="j-var">form</span><span class="c-punc">.</span><span class="j-fn">reset</span><span class="c-punc">();</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="card" style="border-color:#93c5fd">
+        <div style="font-size:13px;font-weight:700;color:#1e40af;margin-bottom:8px"><i class="ti ti-user-plus" style="margin-right:4px"></i> editIndex == -1 → ADD</div>
+        <div style="font-size:12px;color:#555;line-height:1.6">The form is in its normal state. <code>push()</code> adds the new student object as one more item at the end of the array.</div>
+      </div>
+      <div class="card" style="border-color:#c4b5fd">
+        <div style="font-size:13px;font-weight:700;color:#5b21b6;margin-bottom:8px"><i class="ti ti-edit" style="margin-right:4px"></i> editIndex != -1 → UPDATE</div>
+        <div style="font-size:12px;color:#555;line-height:1.6">The form was pre-filled by <code>editStudent()</code>. Instead of adding a new item, we overwrite <code>students[editIndex]</code> with the edited values.</div>
+      </div>
+    </div>
+    <div class="warn-box">
+      <i class="ti ti-alert-triangle" style="color:#d97706;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+      <div style="font-size:13px;color:#92400e;line-height:1.6"><strong>Don't forget to reset editIndex back to -1</strong> after an update. If you skip this, the very next "new" registration will silently overwrite the student you just edited instead of adding a fresh one.</div>
+    </div>
+    <div class="success-box">
+      <i class="ti ti-sparkles" style="color:#16a34a;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+      <div style="font-size:13px;color:#166534;line-height:1.65"><strong>Same button, both jobs.</strong> Every save — new or edited — runs through the same <code>localStorage.setItem</code> line, so persistence keeps working automatically. No extra code needed for that part.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-8"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Search Student <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 9  SEARCH STUDENT ═══ -->
+  <div class="slide" id="slide-9">
+    <div class="slide-header">
+      <span class="badge b-teal">Part 2 · 15 min</span>
+      <div>
+        <div class="slide-title">Search Student</div>
+        <div class="slide-subtitle">filter() keeps only the items that match a condition — everything else is dropped</div>
+      </div>
+    </div>
+    <div class="activity-box">
+      <div class="activity-title"><i class="ti ti-keyboard"></i> Live search — runs on every keystroke</div>
+      <div class="editor" style="border-radius:8px">
+        <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">frontend/js/script.js</span></div>
+        <div class="editor-body" style="font-size:12px">
+          <div class="e-row"><span class="j-dom">document</span><span class="c-punc">.</span><span class="j-fn">getElementById</span><span class="c-punc">(</span><span class="j-str">"search"</span><span class="c-punc">).</span><span class="j-fn">addEventListener</span><span class="c-punc">(</span><span class="j-str">"keyup"</span><span class="c-punc">, </span><span class="j-kw">function</span><span class="c-punc">() {</span></div>
+          <div class="e-row"><span class="e-ind1"></span><span class="j-kw">let</span> <span class="j-var">text</span> <span class="j-op">=</span> <span class="j-dom">this</span><span class="c-punc">.</span><span class="j-key">value</span><span class="c-punc">.</span><span class="j-fn">toLowerCase</span><span class="c-punc">();</span></div>
+          <div class="e-row"><span class="e-ln"> </span></div>
+          <div class="e-row" style="background:#1a2a1a"><span class="j-kw">let</span> <span class="j-var" style="color:#80ffea">result</span> <span class="j-op">=</span> <span class="j-var">students</span><span class="c-punc">.</span><span class="j-fn" style="color:#80ffea">filter</span><span class="c-punc">(</span><span class="j-var">s</span> <span class="j-op">=&gt;</span></div>
+          <div class="e-row" style="background:#1a2a1a"><span class="e-ind1"></span><span class="j-var">s</span><span class="c-punc">.</span><span class="j-key">name</span><span class="c-punc">.</span><span class="j-fn">toLowerCase</span><span class="c-punc">().</span><span class="j-fn">includes</span><span class="c-punc">(</span><span class="j-var">text</span><span class="c-punc">)</span></div>
+          <div class="e-row" style="background:#1a2a1a"><span class="c-punc">);</span></div>
+          <div class="e-row"><span class="e-ln"> </span></div>
+          <div class="e-row"><span class="j-fn">displayStudents</span><span class="c-punc">(</span><span class="j-var">result</span><span class="c-punc">);</span> <span class="j-com">// render only the matches</span></div>
+          <div class="e-row"><span class="c-punc">});</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="section-label">try it live — type a name below</div>
+    <div class="search-demo">
+      <div class="search-input-row">
+        <i class="ti ti-search search-icon"></i>
+        <input type="text" class="search-input" id="live-search-input" placeholder="Search by name…" oninput="renderSearchDemo(this.value)">
+      </div>
+      <div class="search-count" id="search-count">6 of 6 students</div>
+      <div class="search-results" id="search-results"></div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="section-label">what filter() does</div>
+        <div style="display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;font-size:12px;font-weight:700;padding:6px 0">
+          <span style="padding:5px 10px;background:#dbeafe;border-radius:8px;color:#1e40af">Original Array</span>
+          <i class="ti ti-arrow-right" style="color:#d97706;font-size:14px"></i>
+          <span style="padding:5px 10px;background:#fef9c3;border-radius:8px;color:#854d0e">filter(test)</span>
+          <i class="ti ti-arrow-right" style="color:#d97706;font-size:14px"></i>
+          <span style="padding:5px 10px;background:#dcfce7;border-radius:8px;color:#166534">Matching Records</span>
+        </div>
+        <div style="font-size:11px;color:#888;text-align:center;margin-top:6px">filter() never changes the original array — it returns a brand new, smaller one.</div>
+      </div>
+      <div class="card">
+        <span class="method-chip" style="background:#d1fae5;color:#065f46">.filter(callback)</span>
+        <div style="font-size:12px;color:#555;margin-top:8px;line-height:1.6"><code>includes(text)</code> checks if the name <em>contains</em> the typed letters — not just starts with them. Combined with <code>keyup</code>, this is what makes the table update on every single keystroke.</div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-9"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Dashboard Statistics <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 10  DASHBOARD STATISTICS ═══ -->
+  <div class="slide" id="slide-10">
+    <div class="slide-header">
+      <span class="badge b-rose">Part 2 · 15 min</span>
+      <div>
+        <div class="slide-title">Dashboard Statistics</div>
+        <div class="slide-subtitle">Live counter cards — Total Students, Total MERN, Total Java, Total Python</div>
+      </div>
+    </div>
+    <div class="activity-box">
+      <div class="activity-title"><i class="ti ti-keyboard"></i> Write calculateStats()</div>
+      <div class="editor" style="border-radius:8px">
+        <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">frontend/js/script.js</span></div>
+        <div class="editor-body" style="font-size:12px">
+          <div class="e-row"><span class="j-kw">function</span> <span class="j-fn">calculateStats</span><span class="c-punc">() {</span></div>
+          <div class="e-row"><span class="e-ind1"></span><span class="j-dom">document</span><span class="c-punc">.</span><span class="j-fn">getElementById</span><span class="c-punc">(</span><span class="j-str">"totalStudents"</span><span class="c-punc">).</span><span class="j-key">innerText</span> <span class="j-op">=</span></div>
+          <div class="e-row"><span class="e-ind2"></span><span class="j-var">students</span><span class="c-punc">.</span><span class="j-prop">length</span><span class="c-punc">;</span></div>
+          <div class="e-row"><span class="e-ln"> </span></div>
+          <div class="e-row"><span class="e-ind1"></span><span class="j-dom">document</span><span class="c-punc">.</span><span class="j-fn">getElementById</span><span class="c-punc">(</span><span class="j-str">"totalMERN"</span><span class="c-punc">).</span><span class="j-key">innerText</span> <span class="j-op">=</span></div>
+          <div class="e-row"><span class="e-ind2"></span><span class="j-var">students</span><span class="c-punc">.</span><span class="j-fn" style="color:#80ffea">filter</span><span class="c-punc">(</span><span class="j-var">s</span> <span class="j-op">=&gt;</span> <span class="j-var">s</span><span class="c-punc">.</span><span class="j-key">course</span><span class="j-op">==</span><span class="j-str">"MERN"</span><span class="c-punc">).</span><span class="j-prop">length</span><span class="c-punc">;</span></div>
+          <div class="e-row"><span class="e-ln"> </span></div>
+          <div class="e-row"><span class="e-ind1"></span><span class="j-com">// same pattern for totalJava, totalPython...</span></div>
+          <div class="e-row"><span class="c-punc">}</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="section-label">try it live — click to simulate new registrations</div>
+    <div class="grid-4" id="stats-grid">
+      <div class="stat-card stat-blue" id="stat-total">
+        <div class="stat-num" id="stat-total-num">0</div>
+        <div class="stat-label">Total Students</div>
+      </div>
+      <div class="stat-card stat-purple" id="stat-mern">
+        <div class="stat-num" id="stat-mern-num">0</div>
+        <div class="stat-label">MERN</div>
+      </div>
+      <div class="stat-card stat-orange" id="stat-java">
+        <div class="stat-num" id="stat-java-num">0</div>
+        <div class="stat-label">Java</div>
+      </div>
+      <div class="stat-card stat-green" id="stat-python">
+        <div class="stat-num" id="stat-python-num">0</div>
+        <div class="stat-label">Python</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+      <button class="reveal-btn" onclick="statsAddStudent()"><i class="ti ti-user-plus"></i> Register a Random Student</button>
+      <button class="reveal-btn" onclick="statsReset()"><i class="ti ti-refresh"></i> Reset</button>
+    </div>
+    <div class="info-box">
+      <i class="ti ti-info-circle info-icon"></i>
+      <div class="info-text"><strong>Call calculateStats() every time the data changes</strong> — after register, after edit, after delete, and after Clear All. That keeps the counters always accurate, without a page refresh.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-10"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Bonus Features <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 11  BONUS FEATURES ═══ -->
+  <div class="slide" id="slide-11">
+    <div class="slide-header">
+      <span class="badge b-pink">Bonus</span>
+      <div>
+        <div class="slide-title">Clear All, Confirm Delete &amp; Status Badges</div>
+        <div class="slide-subtitle">Small touches that make the dashboard feel like a finished product</div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="section-label">clear all — wipe everything</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">frontend/js/script.js</span></div>
+          <div class="editor-body" style="font-size:11.5px">
+            <div class="e-row"><span class="j-kw">function</span> <span class="j-fn">clearAll</span><span class="c-punc">() {</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="j-var">students</span> <span class="j-op">=</span> <span class="c-punc">[];</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="j-var">localStorage</span><span class="c-punc">.</span><span class="j-fn">removeItem</span><span class="c-punc">(</span><span class="j-str">"students"</span><span class="c-punc">);</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="j-fn">displayStudents</span><span class="c-punc">();</span></div>
+            <div class="e-row"><span class="c-punc">}</span></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">confirm before deleting</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">inside deleteStudent(index)</span></div>
+          <div class="editor-body" style="font-size:11.5px">
+            <div class="e-row"><span class="j-kw">function</span> <span class="j-fn">deleteStudent</span><span class="c-punc">(</span><span class="j-var">index</span><span class="c-punc">) {</span></div>
+            <div class="e-row" style="background:#1a2a1a"><span class="e-ind1"></span><span class="j-ret">if</span><span class="c-punc"> (!</span><span class="j-fn">confirm</span><span class="c-punc">(</span><span class="j-str">"Delete this student?"</span><span class="c-punc">))</span></div>
+            <div class="e-row" style="background:#1a2a1a"><span class="e-ind2"></span><span class="j-ret">return</span><span class="c-punc">;</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="j-var">students</span><span class="c-punc">.</span><span class="j-fn">splice</span><span class="c-punc">(</span><span class="j-var">index</span><span class="c-punc">,</span><span class="j-num">1</span><span class="c-punc">);</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="j-var">localStorage</span><span class="c-punc">.</span><span class="j-fn">setItem</span><span class="c-punc">(</span><span class="j-str">"students"</span><span class="c-punc">, </span><span class="j-var" style="color:#80ffea">JSON</span><span class="c-punc">.</span><span class="j-fn" style="color:#80ffea">stringify</span><span class="c-punc">(</span><span class="j-var">students</span><span class="c-punc">));</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="j-fn">displayStudents</span><span class="c-punc">();</span></div>
+            <div class="e-row"><span class="c-punc">}</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="section-label">bootstrap badges — active / inactive status</div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <table class="mini-table">
+          <thead><tr><th>Name</th><th>Course</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Rahul</td><td>MERN</td>
+              <td><span class="status-pill status-active"><span class="status-dot"></span> Active</span></td>
+            </tr>
+            <tr>
+              <td>Aman</td><td>Java</td>
+              <td><span class="status-pill status-inactive"><span class="status-dot"></span> Inactive</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="editor" style="margin-top:8px">
+        <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">row template — Bootstrap badge classes</span></div>
+        <div class="editor-body" style="font-size:11.5px">
+          <div class="e-row"><span class="e-tag">&lt;span</span> <span class="e-att">class</span><span class="c-punc">=</span><span class="e-val">"badge ${s.active ? 'bg-success' : 'bg-secondary'}"</span><span class="e-tag">&gt;</span></div>
+          <div class="e-row"><span class="e-ind1"></span><span class="c-punc">${s.active ? 'Active' : 'Inactive'}</span></div>
+          <div class="e-row"><span class="e-tag">&lt;/span&gt;</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="tip-box">
+      <i class="ti ti-bulb tip-icon"></i>
+      <div class="tip-text"><strong>Same pattern, every time:</strong> change the array → save to localStorage → call displayStudents() (and calculateStats()). Once this habit is automatic, adding any new feature becomes easy.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-11"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">See the Full Flow <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 12  FLOW DIAGRAM ═══ -->
+  <div class="slide" id="slide-12">
+    <div class="slide-header">
+      <span class="badge b-indigo">Flow</span>
+      <div>
+        <div class="slide-title">The Full Persistence Journey</div>
+        <div class="slide-subtitle">From typing in a form to surviving a browser refresh — every step, in order</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="flow-step">
+        <div class="flow-num">1</div>
+        <div class="flow-content">
+          <div class="flow-label">Form → Object → Array</div>
+          The student types into the form. JavaScript builds an object and pushes it into the <code>students</code> array — exactly what Day 9 already built.
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">2</div>
+        <div class="flow-content">
+          <div class="flow-label">Array → JSON.stringify() → Text</div>
+          Right after the push, the whole array is converted into one long text string using <code>JSON.stringify()</code>.
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">3</div>
+        <div class="flow-content">
+          <div class="flow-label">Text → localStorage.setItem()</div>
+          That text string is saved into the browser's localStorage under the key <code>"students"</code> — this is what makes it durable.
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">4</div>
+        <div class="flow-content">
+          <div class="flow-label">↓ Refresh happens</div>
+          The browser reloads. RAM is wiped. Every variable, including <code>students</code>, resets. But localStorage is untouched — it lives outside RAM.
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">5</div>
+        <div class="flow-content">
+          <div class="flow-label">localStorage.getItem() → JSON.parse() → Array</div>
+          At the top of <code>script.js</code>, the saved text is read back out and converted back into a real array with <code>JSON.parse()</code>.
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">6</div>
+        <div class="flow-content">
+          <div class="flow-label">Array → displayStudents() → Table</div>
+          The restored array is looped through with <code>forEach()</code> and rendered — the dashboard looks exactly like it did before the refresh.
+        </div>
+      </div>
+    </div>
+    <div class="info-box">
+      <i class="ti ti-info-circle info-icon"></i>
+      <div class="info-text"><strong>Why this matters:</strong> This save → stringify → store → refresh → parse → restore cycle is the exact same pattern every real app uses to keep your session alive — the only difference is that production apps save to a database (MongoDB, later in this course) instead of localStorage.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-12"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Reference <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 13  REFERENCE ═══ -->
+  <div class="slide" id="slide-13">
+    <div class="slide-header">
+      <span class="badge b-slate">Reference</span>
+      <div>
+        <div class="slide-title">Day 10 Reference Sheet</div>
+        <div class="slide-subtitle">Everything covered today — keep this open while coding</div>
+      </div>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <table class="tag-table">
+        <thead><tr><th>Concept</th><th>Syntax</th><th>Example</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>Save</strong></td>
+            <td><code>localStorage.setItem(k,v)</code></td>
+            <td><code>setItem("students", data)</code></td>
+            <td>Both key and value must be strings</td>
+          </tr>
+          <tr>
+            <td><strong>Read</strong></td>
+            <td><code>localStorage.getItem(k)</code></td>
+            <td><code>getItem("students")</code></td>
+            <td>Returns null if nothing was saved</td>
+          </tr>
+          <tr>
+            <td><strong>Delete</strong></td>
+            <td><code>localStorage.removeItem(k)</code></td>
+            <td><code>removeItem("students")</code></td>
+            <td>Used for the Clear All button</td>
+          </tr>
+          <tr>
+            <td><strong>Object/Array → Text</strong></td>
+            <td><code>JSON.stringify(x)</code></td>
+            <td><code>JSON.stringify(students)</code></td>
+            <td>Required before saving arrays/objects</td>
+          </tr>
+          <tr>
+            <td><strong>Text → Object/Array</strong></td>
+            <td><code>JSON.parse(x)</code></td>
+            <td><code>JSON.parse(getItem(...)) || []</code></td>
+            <td>Always pair with <code>|| []</code></td>
+          </tr>
+          <tr>
+            <td><strong>editIndex</strong></td>
+            <td><code>let editIndex = -1;</code></td>
+            <td><code>editIndex = index;</code></td>
+            <td>-1 = add mode, else = update mode</td>
+          </tr>
+          <tr>
+            <td><strong>Update branch</strong></td>
+            <td><code>if (editIndex==-1) push() else students[editIndex]=x</code></td>
+            <td>one submit handler, two outcomes</td>
+            <td>Reset editIndex to -1 after updating</td>
+          </tr>
+          <tr>
+            <td><strong>Search</strong></td>
+            <td><code>arr.filter(fn)</code></td>
+            <td><code>students.filter(s =&gt; s.name.includes(text))</code></td>
+            <td>Returns a new array, original unchanged</td>
+          </tr>
+          <tr>
+            <td><strong>Live search</strong></td>
+            <td><code>input.addEventListener("keyup", fn)</code></td>
+            <td>runs filter() on every keystroke</td>
+            <td>Re-render the table with the filtered result</td>
+          </tr>
+          <tr>
+            <td><strong>Statistics</strong></td>
+            <td><code>arr.filter(fn).length</code></td>
+            <td><code>students.filter(s=&gt;s.course=="MERN").length</code></td>
+            <td>Recalculate after every data change</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="grid-2" style="margin-top:.25rem">
+      <div class="tip-box">
+        <i class="ti ti-bulb tip-icon"></i>
+        <div class="tip-text"><strong>The habit to build:</strong> change data → <code>localStorage.setItem</code> → <code>displayStudents()</code> → <code>calculateStats()</code>. Repeat that sequence after every add, edit, delete, and clear.</div>
+      </div>
+      <div class="info-box">
+        <i class="ti ti-info-circle info-icon"></i>
+        <div class="info-text"><strong>Next up:</strong> Day 11 takes these same array methods further — destructuring, spread/rest, and more ES6 array methods (map, reduce) — all applied straight back into this LMS project.</div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-13"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Project Timeline <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 14  PROJECT TIMELINE ═══ -->
+  <div class="slide" id="slide-14">
+    <div class="slide-header">
+      <span class="badge b-amber">Roadmap</span>
+      <div>
+        <div class="slide-title">New Project Timeline</div>
+        <div class="slide-subtitle">12 days — from a blank folder to a deployed Mini LMS frontend</div>
+      </div>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <table class="tag-table">
+        <thead><tr><th style="width:60px">Day</th><th>Deliverable</th></tr></thead>
+        <tbody>
+          <tr class="done-row"><td>1</td><td>Project Setup + HTML Intro</td></tr>
+          <tr class="done-row"><td>2</td><td>Semantic HTML + Landing Page</td></tr>
+          <tr class="done-row"><td>3</td><td>CSS Styling</td></tr>
+          <tr class="done-row"><td>4</td><td>Flexbox + Professional UI</td></tr>
+          <tr class="done-row"><td>5</td><td>Responsive Design</td></tr>
+          <tr class="done-row"><td>6</td><td>Bootstrap 5</td></tr>
+          <tr class="done-row"><td>7</td><td>JavaScript Basics + DOM</td></tr>
+          <tr class="done-row"><td>8</td><td>Registration Form + Validation</td></tr>
+          <tr class="done-row"><td>9</td><td>Student Dashboard + CRUD (Create, Read, Delete)</td></tr>
+          <tr class="today-row"><td>10</td><td>Local Storage + Update + Search + Dashboard Statistics <span class="badge b-js" style="margin-left:6px">← today</span></td></tr>
+          <tr><td>11</td><td>Advanced JavaScript (ES6, Destructuring, Spread, Rest, Array Methods) integrated into the LMS</td></tr>
+          <tr><td>12</td><td>Mini LMS Frontend Complete + GitHub Deployment</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="info-box">
+      <i class="ti ti-info-circle info-icon"></i>
+      <div class="info-text"><strong>Where we stand:</strong> Days 1–9 built the interface and the in-memory data logic. Today (Day 10) makes it persistent, searchable, and editable. Days 11–12 polish the JavaScript and ship the project.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-14"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Assignment <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 15  ASSIGNMENT ═══ -->
+  <div class="slide" id="slide-15">
+    <div class="slide-header">
+      <span class="badge b-orange">Assignment</span>
+      <div>
+        <div class="slide-title">Build Your Own Admin Dashboard</div>
+        <div class="slide-subtitle">Tick each box off as you complete it in your own project</div>
+      </div>
+    </div>
+    <div class="card card-gray">
+      <div style="font-size:13px;color:#444;line-height:1.7">Take today's Student Dashboard and make sure every one of these works end-to-end before the next session:</div>
+    </div>
+    <div class="grid-2">
+      <div class="checklist-col">
+        <div class="check-item" onclick="this.classList.toggle('done')">
+          <div class="check-circle"><i class="ti ti-check"></i></div>
+          <div>Search — live filter by name as you type</div>
+        </div>
+        <div class="check-item" onclick="this.classList.toggle('done')">
+          <div class="check-circle"><i class="ti ti-check"></i></div>
+          <div>Edit — click Edit, form fills, save updates that row</div>
+        </div>
+        <div class="check-item" onclick="this.classList.toggle('done')">
+          <div class="check-circle"><i class="ti ti-check"></i></div>
+          <div>Delete — with a confirm() prompt before removing</div>
+        </div>
+        <div class="check-item" onclick="this.classList.toggle('done')">
+          <div class="check-circle"><i class="ti ti-check"></i></div>
+          <div>Counter — Total Students always accurate</div>
+        </div>
+      </div>
+      <div class="checklist-col">
+        <div class="check-item" onclick="this.classList.toggle('done')">
+          <div class="check-circle"><i class="ti ti-check"></i></div>
+          <div>Statistics — per-course counts (MERN / Java / Python)</div>
+        </div>
+        <div class="check-item" onclick="this.classList.toggle('done')">
+          <div class="check-circle"><i class="ti ti-check"></i></div>
+          <div>Local Storage — data survives a full page refresh</div>
+        </div>
+        <div class="check-item" onclick="this.classList.toggle('done')">
+          <div class="check-circle"><i class="ti ti-check"></i></div>
+          <div>Clear All — wipes both the array and localStorage</div>
+        </div>
+        <div class="check-item" onclick="this.classList.toggle('done')">
+          <div class="check-circle"><i class="ti ti-check"></i></div>
+          <div>Bonus — Active/Inactive Bootstrap badges on each row</div>
+        </div>
+      </div>
+    </div>
+    <div class="success-box">
+      <i class="ti ti-sparkles" style="color:#16a34a;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+      <div style="font-size:13px;color:#166534;line-height:1.65"><strong>This is a portfolio-ready piece.</strong> A searchable, persistent, editable admin dashboard is exactly the kind of feature real companies ask for in interviews — you're not just learning syntax, you're shipping the real thing.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-15"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Quick Check <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 16  QUIZ ═══ -->
+  <div class="slide" id="slide-16">
+    <div class="slide-header">
+      <span class="badge b-green">Quiz</span>
+      <div>
+        <div class="slide-title">Quick Check — Local Storage, Search &amp; Update</div>
+        <div class="slide-subtitle">6 questions covering the full 3-hour session</div>
+      </div>
+    </div>
+    <div id="quiz-container"></div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-16"></div>
+      <button class="nav-btn" onclick="goSlide(0)"><i class="ti ti-home"></i> Home</button>
+    </div>
+  </div>
+
+</div><!-- /.wrapper -->
+<script>
+  var current = 0, total = 17, quizInit = false;
+
+  /* ── Local Storage interactive demo ── */
+  var lsDemoStore = {};
+  function renderLsVisual() {
+    var box = document.getElementById('ls-visual');
+    var keys = Object.keys(lsDemoStore);
+    if (keys.length === 0) {
+      box.innerHTML = '<span class="ls-empty-msg">localStorage is empty</span>';
+      return;
+    }
+    var html = '';
+    keys.forEach(function(k) {
+      html += '<div class="ls-row"><span class="ls-key">"' + k + '"</span><span class="ls-arrow">→</span><span class="ls-val">"' + lsDemoStore[k] + '"</span></div>';
+    });
+    box.innerHTML = html;
+  }
+  function lsConsoleLog(text, colorClass) {
+    var c = document.getElementById('ls-console');
+    c.innerHTML = '<div class="con-prompt-row"><span style="color:#3fb950;font-size:11px">▶</span><span class="' + (colorClass || 'con-str') + '">' + text + '</span></div>';
+  }
+  function lsDemoSet() {
+    lsDemoStore['trainer'] = 'Manish';
+    renderLsVisual();
+    lsConsoleLog('undefined  // saved successfully', 'con-log');
+  }
+  function lsDemoGet() {
+    var val = lsDemoStore['trainer'];
+    if (val === undefined) {
+      lsConsoleLog('null  // nothing saved yet', 'con-log');
+    } else {
+      lsConsoleLog('"' + val + '"');
+    }
+  }
+  function lsDemoRemove() {
+    delete lsDemoStore['trainer'];
+    renderLsVisual();
+    lsConsoleLog('undefined  // "trainer" key removed', 'con-log');
+  }
+
+  /* ── Live search interactive demo ── */
+  var searchSampleData = [
+    { name: 'Rahul Sharma', course: 'MERN' },
+    { name: 'Priya Singh', course: 'Java' },
+    { name: 'Aman Verma', course: 'Python' },
+    { name: 'Riya Kapoor', course: 'MERN' },
+    { name: 'Karan Mehta', course: 'Java' },
+    { name: 'Neha Gupta', course: 'Python' }
+  ];
+  function renderSearchDemo(text) {
+    text = (text || '').toLowerCase();
+    var result = searchSampleData.filter(function(s) { return s.name.toLowerCase().includes(text); });
+    var box = document.getElementById('search-results');
+    var count = document.getElementById('search-count');
+    if (!box || !count) return;
+    count.textContent = result.length + ' of ' + searchSampleData.length + ' students';
+    if (result.length === 0) {
+      box.innerHTML = '<div class="search-empty">No students match "' + text + '"</div>';
+      return;
+    }
+    var courseColor = { MERN: '#1e40af', Java: '#9a3412', Python: '#166534' };
+    var courseBg = { MERN: '#dbeafe', Java: '#ffedd5', Python: '#dcfce7' };
+    var html = '';
+    result.forEach(function(s) {
+      html += '<div class="search-result-row"><span class="sr-name">' + s.name + '</span>' +
+        '<span class="sr-course" style="padding:2px 10px;border-radius:12px;font-size:11px;font-weight:700;background:' + courseBg[s.course] + ';color:' + courseColor[s.course] + '">' + s.course + '</span></div>';
+    });
+    box.innerHTML = html;
+  }
+
+  /* ── Dashboard statistics interactive demo ── */
+  var statsPool = [
+    { name: 'Sana', course: 'MERN' }, { name: 'Dev', course: 'Java' }, { name: 'Meera', course: 'Python' },
+    { name: 'Arjun', course: 'MERN' }, { name: 'Ishita', course: 'Java' }, { name: 'Kabir', course: 'Python' },
+    { name: 'Tara', course: 'MERN' }, { name: 'Yash', course: 'Java' }
+  ];
+  var statsStudents = [];
+  var statsPoolIndex = 0;
+  function updateStatsUI() {
+    var total = statsStudents.length;
+    var mern = statsStudents.filter(function(s) { return s.course === 'MERN'; }).length;
+    var java = statsStudents.filter(function(s) { return s.course === 'Java'; }).length;
+    var python = statsStudents.filter(function(s) { return s.course === 'Python'; }).length;
+    document.getElementById('stat-total-num').textContent = total;
+    document.getElementById('stat-mern-num').textContent = mern;
+    document.getElementById('stat-java-num').textContent = java;
+    document.getElementById('stat-python-num').textContent = python;
+    ['stat-total', 'stat-mern', 'stat-java', 'stat-python'].forEach(function(id) {
+      var el = document.getElementById(id);
+      el.classList.remove('bump');
+      void el.offsetWidth;
+      el.classList.add('bump');
+    });
+  }
+  function statsAddStudent() {
+    if (statsPoolIndex >= statsPool.length) statsPoolIndex = 0;
+    statsStudents.push(statsPool[statsPoolIndex]);
+    statsPoolIndex++;
+    updateStatsUI();
+  }
+  function statsReset() {
+    statsStudents = [];
+    statsPoolIndex = 0;
+    updateStatsUI();
+  }
+
+  /* ── Quiz data ── */
+  var quizData = [
+    {
+      q: "Why does the students array become empty every time the browser is refreshed?",
+      opts: [
+        "JavaScript deletes arrays automatically after 5 minutes",
+        "The array lives in RAM, and refreshing re-runs the script from the top, resetting every variable",
+        "Bootstrap clears all form data on refresh",
+        "Arrays can only hold data for one session by default in every language"
+      ],
+      ans: 1,
+      exp: "Variables — including arrays — exist in RAM while the page is open. A refresh reloads the page, JavaScript runs again from line 1, and let students = [] creates a brand new empty array. Nothing is preserved unless it's saved somewhere outside RAM, like localStorage."
+    },
+    {
+      q: "What happens if you run localStorage.setItem(\"students\", students) directly, without JSON.stringify()?",
+      opts: [
+        "It works perfectly — localStorage supports arrays natively",
+        "It throws an error and stops the script",
+        "The array gets silently converted to the useless text \"[object Object]\" — the real data is lost",
+        "It saves only the first student in the array"
+      ],
+      ans: 2,
+      exp: "localStorage can only store plain strings. Passing an array or object directly forces JavaScript to convert it to text using its default (and useless) toString() behavior, producing \"[object Object]\" and losing all the actual data. JSON.stringify() is required to convert it properly."
+    },
+    {
+      q: "Why is <code>|| []</code> added after <code>JSON.parse(localStorage.getItem(\"students\"))</code>?",
+      opts: [
+        "It makes the array load faster",
+        "It sorts the students alphabetically",
+        "On the very first visit, getItem() returns null — JSON.parse(null) needs a safe fallback so students starts as a usable empty array instead of null",
+        "It's required syntax with no real purpose"
+      ],
+      ans: 2,
+      exp: "Before anything has ever been saved, localStorage.getItem(\"students\") returns null. JSON.parse(null) evaluates to null, and calling .push() on null would crash the app. || [] provides a safe empty array fallback so the code never breaks."
+    },
+    {
+      q: "In the submit handler, what does <code>if (editIndex == -1) { students.push(student); }</code> mean?",
+      opts: [
+        "If no student is currently being edited, add this as a brand new student",
+        "If the student's index is negative, delete them",
+        "If the form is empty, push an empty object",
+        "editIndex must always equal -1 or the app crashes"
+      ],
+      ans: 0,
+      exp: "editIndex starts at -1, meaning \"not editing anyone.\" If it's still -1 when the form is submitted, the code treats this as a NEW registration and pushes a fresh object. Any other value means an existing student is being updated instead."
+    },
+    {
+      q: "After typing \"ri\" into a live search box wired to <code>students.filter(s => s.name.toLowerCase().includes(text))</code>, what happens to the original students array?",
+      opts: [
+        "It gets permanently reduced to only the matching students",
+        "It stays exactly the same — filter() returns a brand new array without changing the original",
+        "It gets sorted alphabetically",
+        "It gets cleared and needs re-registering"
+      ],
+      ans: 1,
+      exp: "filter() never mutates the array it's called on. It builds and returns a completely new array containing only the items that passed the test — the original students array, and everything saved in localStorage, is untouched."
+    },
+    {
+      q: "Why must calculateStats() be called again after every register, edit, delete, and Clear All?",
+      opts: [
+        "It isn't necessary — the counters update automatically on their own",
+        "Because the counter cards read students.length and filtered counts at the moment they're called — if the data changes but calculateStats() isn't re-run, the numbers on screen go stale",
+        "calculateStats() also saves data to localStorage, so skipping it breaks persistence",
+        "It's only needed once, when the page first loads"
+      ],
+      ans: 1,
+      exp: "calculateStats() calculates fresh numbers from whatever students currently contains at the moment it runs — it has no memory of past state. If the array changes (add/edit/delete/clear) and the function isn't called again, the displayed counters simply won't reflect the new data."
+    }
+  ];
+  var quizAnswered = [];
+
+  function renderQuiz() {
+    var c = document.getElementById('quiz-container'); c.innerHTML = '';
+    quizData.forEach(function(q, i) {
+      var d = document.createElement('div'); d.style.cssText = 'margin-bottom:18px';
+      d.innerHTML = '<div style="font-size:13px;font-weight:600;margin-bottom:6px">'+(i+1)+'. '+q.q+'</div>';
+      q.opts.forEach(function(opt, j) {
+        var btn = document.createElement('button'); btn.className = 'quiz-option';
+        btn.innerHTML = String.fromCharCode(65+j)+'. '+opt;
+        btn.onclick = function() {
+          if (quizAnswered[i]) return; quizAnswered[i] = true;
+          var btns = d.querySelectorAll('.quiz-option');
+          btns.forEach(function(b,k){ b.disabled=true; if(k===q.ans) b.classList.add('correct'); else if(k===j) b.classList.add('wrong'); });
+          var fb = d.querySelector('.quiz-feedback');
+          fb.innerHTML = (j===q.ans?'✅ Correct! ':'❌ Not quite. ')+q.exp;
+          fb.className = 'quiz-feedback '+(j===q.ans?'correct':'wrong');
+        };
+        d.appendChild(btn);
+      });
+      var fb = document.createElement('div'); fb.className = 'quiz-feedback'; d.appendChild(fb);
+      c.appendChild(d);
+    });
+  }
+
+  function toggleLex(row) {
+    var was = row.classList.contains('active');
+    document.querySelectorAll('.lex-row.active').forEach(function(r){ r.classList.remove('active'); });
+    if (!was) row.classList.add('active');
+  }
+
+  function toggle(id) {
+    var el = document.getElementById(id); el.classList.toggle('open');
+    var btn = el.previousElementSibling;
+    if (btn && btn.tagName === 'BUTTON') {
+      btn.textContent = el.classList.contains('open') ? 'Hide the answer' : 'Reveal the answer';
+    }
+  }
+
+  function goSlide(n) {
+    document.getElementById('slide-'+current).classList.remove('active');
+    current = n;
+    document.getElementById('slide-'+current).classList.add('active');
+    updateDots();
+    document.getElementById('slide-counter').textContent = (current+1)+' / '+total;
+    if (n===16 && !quizInit) { renderQuiz(); quizInit=true; }
+    window.scrollTo(0,0);
+  }
+  function nextSlide() { if (current < total-1) goSlide(current+1); }
+  function prevSlide() { if (current > 0) goSlide(current-1); }
+
+  function updateDots() {
+    for (var s=0; s<total; s++) {
+      var el = document.getElementById('dots-'+s); if (!el) continue;
+      el.innerHTML = '';
+      for (var d=0; d<total; d++) {
+        var dot = document.createElement('div');
+        dot.className = 'dot'+(d===current?' active':'');
+        el.appendChild(dot);
+      }
+    }
+  }
+  updateDots();
+  renderSearchDemo('');
+</script>
+</body>
+</html>

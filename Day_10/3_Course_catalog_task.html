@@ -1,0 +1,1909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Interactive Course Catalog — DOM &amp; Local Storage | SkillHub LMS</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f4f5f7; color: #1a1a1a;
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; padding: 2rem 1rem;
+  }
+  .wrapper {
+    width: 100%; max-width: 920px; background: #fff;
+    border-radius: 16px; box-shadow: 0 2px 20px rgba(0,0,0,0.09); overflow: hidden;
+  }
+  .top-bar {
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    color: #fff; padding: 14px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .top-bar-title { font-size: 15px; font-weight: 600; }
+  .top-bar-sub   { font-size: 12px; opacity: .55; margin-top: 2px; }
+  .slide-counter { font-size: 13px; opacity: .6; font-variant-numeric: tabular-nums; }
+  .slide { display: none; padding: 1.75rem 2rem; min-height: 500px; flex-direction: column; gap: 1.2rem; }
+  .slide.active { display: flex; }
+  .slide-header { display: flex; align-items: center; gap: 10px; padding-bottom: 1rem; border-bottom: 1px solid #e8e8e8; }
+  .slide-title    { font-size: 20px; font-weight: 700; color: #111; }
+  .slide-subtitle { font-size: 13px; color: #666; margin-top: 2px; }
+
+  /* ── Badges ── */
+  .badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+  .b-blue   { background:#dbeafe; color:#1d4ed8; }
+  .b-teal   { background:#d1fae5; color:#065f46; }
+  .b-purple { background:#ede9fe; color:#5b21b6; }
+  .b-amber  { background:#fef3c7; color:#92400e; }
+  .b-green  { background:#dcfce7; color:#166534; }
+  .b-slate  { background:#e2e8f0; color:#334155; }
+  .b-rose   { background:#ffe4e6; color:#9f1239; }
+  .b-orange { background:#ffedd5; color:#9a3412; }
+  .b-indigo { background:#e0e7ff; color:#3730a3; }
+  .b-cyan   { background:#cffafe; color:#164e63; }
+  .b-pink   { background:#fce7f3; color:#9d174d; }
+  .b-yellow { background:#fef9c3; color:#854d0e; }
+  .b-js     { background:#fef9c3; color:#854d0e; }
+
+  /* ── Layout ── */
+  .section-label { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 8px; }
+  .card { background: #fff; border: 1px solid #e8e8e8; border-radius: 12px; padding: 1rem 1.25rem; }
+  .card-gray { background: #f8f9fa; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+  /* ── Code Editor (Dracula — identical to ref) ── */
+  .editor { background: #1e1e2e; border-radius: 12px; overflow: hidden; font-family: 'SFMono-Regular', Consolas, 'Courier New', monospace; }
+  .editor-bar { background: #13131f; padding: 9px 14px; display: flex; align-items: center; gap: 6px; }
+  .e-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .e-red { background:#ff5f57; } .e-yellow { background:#febc2e; } .e-green { background:#28c840; }
+  .e-label { font-size: 12px; color: #6272a4; margin-left: 4px; font-family: -apple-system, sans-serif; }
+  .editor-body { padding: 14px 18px; font-size: 12.5px; line-height: 1.8; }
+  .e-ln   { color: #44475a; font-size: 11px; display: inline-block; width: 22px; user-select: none; }
+  .e-tag  { color: #ff79c6; }
+  .e-att  { color: #50fa7b; }
+  .e-val  { color: #f1fa8c; }
+  .e-txt  { color: #f8f8f2; }
+  .e-cmt  { color: #6272a4; font-style: italic; }
+  .e-new  { color: #80ffea; }
+  .j-kw   { color: #ff79c6; font-weight: 700; }
+  .j-fn   { color: #50fa7b; }
+  .j-str  { color: #f1fa8c; }
+  .j-num  { color: #bd93f9; }
+  .j-var  { color: #80ffea; }
+  .j-op   { color: #ff79c6; }
+  .j-dom  { color: #8be9fd; }
+  .j-prop { color: #50fa7b; }
+  .j-com  { color: #6272a4; font-style: italic; }
+  .j-ret  { color: #ff79c6; font-weight: 700; }
+  .j-key  { color: #ff79c6; }
+  .c-punc { color: #f8f8f2; }
+  .e-ind1 { display: inline-block; width: 20px; }
+  .e-ind2 { display: inline-block; width: 40px; }
+  .e-ind3 { display: inline-block; width: 60px; }
+  .e-ind4 { display: inline-block; width: 80px; }
+  .e-row  { display: flex; gap: 8px; }
+
+  /* ── Browser frame ── */
+  .browser { border-radius: 12px; overflow: hidden; border: 1px solid #e0e0e0; }
+  .browser-bar { background: #f1f3f4; padding: 9px 14px; display: flex; align-items: center; gap: 7px; border-bottom: 1px solid #e0e0e0; }
+  .b-dot2 { width: 10px; height: 10px; border-radius: 50%; }
+  .b-r { background:#ff5f57; } .b-y { background:#febc2e; } .b-g { background:#28c840; }
+  .b-url { flex:1; background:#fff; border:1px solid #dadce0; border-radius:20px; padding:4px 14px; font-size:12px; color:#555; }
+
+  /* ── Tables ── */
+  .tag-table { border-collapse: collapse; width: 100%; }
+  .tag-table th { background: #f1f5f9; font-size: 12px; font-weight: 700; text-align: left; padding: 10px 14px; color: #475569; border-bottom: 2px solid #e2e8f0; }
+  .tag-table td { font-size: 13px; padding: 10px 14px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+  .tag-table tr:last-child td { border-bottom: none; }
+  .tag-table tr:hover td { background: #f8f9fa; }
+
+  /* ── Quiz ── */
+  .quiz-option { border: 1px solid #dee2e6; border-radius: 8px; padding: 10px 14px; font-size: 13px; cursor: pointer; margin-bottom: 6px; transition: all .15s; background: transparent; width: 100%; text-align: left; color: #1a1a1a; }
+  .quiz-option:hover:not(:disabled) { background: #f8f9fa; }
+  .quiz-option.correct { background: #d1fae5; border-color: #059669; color: #065f46; }
+  .quiz-option.wrong   { background: #fee2e2; border-color: #dc2626; color: #991b1b; }
+  .quiz-feedback { display: none; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-top: 4px; }
+  .quiz-feedback.correct { background: #d1fae5; color: #065f46; display: block; }
+  .quiz-feedback.wrong   { background: #fee2e2; color: #991b1b; display: block; }
+
+  /* ── Activity / challenge ── */
+  .activity-box { border: 2px dashed #a5b4fc; background: #eef2ff; border-radius: 12px; padding: 14px 18px; }
+  .activity-title { font-size: 13px; font-weight: 700; color: #3730a3; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .challenge-box { border: 2px dashed #f9a8d4; background: #fdf2f8; border-radius: 12px; padding: 14px 18px; }
+  .challenge-title { font-size: 13px; font-weight: 700; color: #9f1239; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+
+  /* ── Tip / info / warn / success ── */
+  .tip-box   { display:flex; gap:10px; align-items:flex-start; background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:10px 14px; }
+  .tip-icon  { color:#d97706; font-size:18px; flex-shrink:0; margin-top:1px; }
+  .tip-text  { font-size:13px; color:#92400e; line-height:1.6; }
+  .info-box  { display:flex; gap:10px; align-items:flex-start; background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:10px 14px; }
+  .info-icon { color:#2563eb; font-size:18px; flex-shrink:0; margin-top:1px; }
+  .info-text { font-size:13px; color:#1e40af; line-height:1.6; }
+  .warn-box  { display:flex; gap:10px; align-items:flex-start; background:#fef9ee; border:1px solid #fcd34d; border-radius:10px; padding:10px 14px; }
+  .success-box { display:flex; gap:10px; align-items:flex-start; background:#f0fdf4; border:1px solid #86efac; border-radius:10px; padding:10px 14px; }
+
+  /* ── Line explainer (JS amber accent) ── */
+  .lex-row { display:flex; align-items:stretch; cursor:pointer; transition:background .12s; border-bottom:1px solid #f0f0f0; }
+  .lex-row:last-child { border-bottom:none; }
+  .lex-row:hover { background:#f8f9fa; }
+  .lex-row.active { background:#fefce8; border-left:3px solid #d97706; }
+  .lex-code { background:#1e1e2e; padding:10px 14px; font-family:'SFMono-Regular',Consolas,monospace; font-size:12px; min-width:200px; flex-shrink:0; display:flex; align-items:center; }
+  .lex-info { padding:10px 14px; flex:1; }
+  .lex-name   { font-size:13px; font-weight:700; color:#d97706; margin-bottom:2px; }
+  .lex-desc   { font-size:12px; color:#555; line-height:1.55; }
+  .lex-detail { display:none; font-size:12px; color:#92400e; margin-top:4px; padding-top:4px; border-top:1px dashed #fde68a; }
+  .lex-row.active .lex-detail { display:block; }
+  .line-explain { border:1px solid #e8e8e8; border-radius:10px; overflow:hidden; }
+
+  /* ── Reveal ── */
+  .reveal-btn { background:#f1f3f5; border:1px solid #dee2e6; border-radius:8px; padding:7px 14px; font-size:13px; cursor:pointer; color:#333; transition:background .15s; }
+  .reveal-btn:hover { background:#e9ecef; }
+  .reveal-content { display:none; margin-top:8px; }
+  .reveal-content.open { display:block; }
+
+  /* ── Nav (JS amber) ── */
+  .nav-row { display:flex; align-items:center; justify-content:space-between; margin-top:auto; padding-top:1rem; border-top:1px solid #f0f0f0; }
+  .nav-btn { display:inline-flex; align-items:center; gap:6px; padding:9px 18px; border:1px solid #dee2e6; border-radius:8px; background:transparent; font-size:13px; cursor:pointer; color:#333; transition:background .15s; }
+  .nav-btn:hover:not(:disabled) { background:#f1f3f5; }
+  .nav-btn:disabled { opacity:.35; cursor:default; }
+  .nav-btn.primary { background:#d97706; border-color:transparent; color:#fff; }
+  .nav-btn.primary:hover { background:#b45309; }
+  .progress-dots { display:flex; gap:6px; align-items:center; }
+  .dot { width:7px; height:7px; border-radius:50%; background:#dee2e6; transition:all .2s; }
+  .dot.active { width:20px; border-radius:4px; background:#d97706; }
+
+  /* ── Home grid ── */
+  .home-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .home-card { background:#fff; border:1px solid #e8e8e8; border-radius:12px; padding:1rem 1.25rem; cursor:pointer; transition:all .15s; }
+  .home-card:hover { border-color:#d97706; box-shadow:0 2px 8px rgba(217,119,6,.12); }
+  .home-card-title { font-size:15px; font-weight:700; margin:6px 0 2px; }
+  .home-card-sub   { font-size:12px; color:#666; }
+
+  code { font-family:'SFMono-Regular',Consolas,monospace; font-size:12px; background:#f1f3f5; padding:1px 6px; border-radius:4px; border:1px solid #dee2e6; }
+
+  /* ── Checklist ── */
+  .check-item { display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:10px; border:1px solid #e8e8e8; font-size:13px; cursor:pointer; transition:all .15s; user-select:none; }
+  .check-item:hover { background:#f8f9fa; }
+  .check-item.done { background:#f0fdf4; border-color:#86efac; }
+  .check-circle { width:22px; height:22px; border-radius:50%; border:2px solid #dee2e6; display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0; transition:all .2s; color:transparent; }
+  .check-item.done .check-circle { background:#22c55e; border-color:#22c55e; color:#fff; }
+
+  /* ── Console panel (identical to ref) ── */
+  .console-panel { background: #0d1117; border-radius: 12px; overflow: hidden; font-family: 'SFMono-Regular', Consolas, monospace; }
+  .console-bar   { background: #161b22; padding: 9px 14px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #30363d; }
+  .console-tab   { font-size: 12px; color: #8b949e; padding-bottom: 3px; }
+  .console-tab.active { color: #f0f6fc; border-bottom: 2px solid #d97706; }
+  .console-body  { padding: 12px 16px; font-size: 12.5px; line-height: 2; }
+  .con-log  { color: #f0f6fc; }
+  .con-str  { color: #a5d6ff; }
+  .con-num  { color: #79c0ff; }
+  .con-arrow { color: #3fb950; font-size: 11px; }
+  .con-prompt-sym { color: #3fb950; }
+  .con-prompt-row { display: flex; align-items: center; gap: 8px; }
+  .con-arr  { color: #d2a8ff; }
+  .con-key  { color: #7ee787; }
+  .js-logo { width: 44px; height: 44px; background: #f0db4f; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-family: 'SFMono-Regular', Consolas, monospace; font-size: 16px; font-weight: 900; color: #323330; flex-shrink: 0; }
+
+  /* ── Flow steps (identical to ref) ── */
+  .flow-step { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; border-bottom: 1px dashed #e2e8f0; }
+  .flow-step:last-child { border-bottom: none; }
+  .flow-num { width: 28px; height: 28px; border-radius: 50%; background: #d97706; color: white; font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+  .flow-content { flex: 1; font-size: 13px; color: #333; line-height: 1.6; }
+  .flow-label { font-weight: 700; color: #d97706; margin-bottom: 2px; }
+
+  /* ── Bootstrap form mockup (identical to ref) ── */
+  .bs-form-group { margin-bottom: 14px; }
+  .bs-label { display: block; font-size: 12px; font-weight: 600; color: #333; margin-bottom: 4px; }
+  .bs-input { width: 100%; padding: 7px 12px; border: 1px solid #ced4da; border-radius: 5px; font-size: 13px; font-family: -apple-system, sans-serif; color: #333; }
+  .bs-input:focus { outline: none; border-color: #86b7fe; }
+  .bs-btn-submit { background: #0d6efd; color: white; border: none; border-radius: 5px; padding: 8px 22px; font-size: 13px; font-weight: 700; cursor: pointer; width: 100%; }
+  .bs-btn-submit:hover { background: #0b5ed7; }
+
+  /* ══ DAY 9 — ARRAYS / OBJECTS SPECIFIC ══ */
+
+  /* Array box visualisation */
+  .array-box { display: inline-flex; border: 2px solid #1e293b; border-radius: 8px; overflow: hidden; }
+  .array-cell { padding: 10px 16px; font-family: monospace; font-size: 13px; font-weight: 700; border-right: 1px solid #1e293b; position: relative; min-width: 60px; text-align: center; }
+  .array-cell:last-child { border-right: none; }
+  .array-cell .idx { position: absolute; top: -18px; left: 50%; transform: translateX(-50%); font-size: 10px; color: #888; font-weight: 400; }
+  .array-cell.empty { background: #f8f9fa; color: #cbd5e1; font-style: italic; }
+  .array-cell.filled { background: #dbeafe; color: #1e40af; }
+  .array-cell.removed { background: #fee2e2; color: #dc2626; text-decoration: line-through; opacity: .5; }
+
+  /* Object box visualisation */
+  .obj-box { background: #1e1e2e; border-radius: 10px; padding: 14px 18px; font-family: monospace; font-size: 13px; }
+  .obj-key-row { display: flex; gap: 8px; padding: 3px 0; }
+
+  /* Why array problem cards */
+  .bad-var-row { display: flex; gap: 8px; align-items: center; padding: 6px 0; font-family: monospace; font-size: 12px; opacity: .8; }
+
+  /* Interactive array builder */
+  .array-builder { background: #0f172a; border-radius: 12px; padding: 16px 18px; }
+  .ab-controls { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+  .ab-btn { background: #1e293b; border: 1px solid #334155; color: #f0db4f; font-family: monospace; font-size: 12px; font-weight: 700; padding: 6px 14px; border-radius: 6px; cursor: pointer; transition: all .15s; }
+  .ab-btn:hover { background: #334155; border-color: #d97706; }
+  .ab-btn.danger { color: #ff7b86; }
+  .ab-visual { display: flex; gap: 6px; flex-wrap: wrap; min-height: 50px; align-items: center; padding: 10px; background: #1e1e2e; border-radius: 8px; }
+  .ab-item { background: #2563eb; color: white; padding: 8px 14px; border-radius: 6px; font-family: monospace; font-size: 12px; font-weight: 700; position: relative; animation: popIn .25s ease; }
+  .ab-item .ab-idx { position: absolute; top: -16px; left: 0; font-size: 9px; color: #6272a4; }
+  @keyframes popIn { from { transform: scale(0.5); opacity:0; } to { transform: scale(1); opacity:1; } }
+  .ab-empty-msg { color: #6272a4; font-family: monospace; font-size: 12px; font-style: italic; }
+
+  /* Method explainer chips */
+  .method-chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 20px; font-family: monospace; font-size: 12px; font-weight: 700; }
+
+  /* Object property explorer */
+  .obj-prop-row { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 8px; border: 1px solid #e8e8e8; cursor: pointer; transition: all .15s; }
+  .obj-prop-row:hover { background: #f8f9fa; border-color: #d97706; }
+
+  /* ══ COURSE CATALOG — DOM / SEARCH / DELETE / LOCAL STORAGE SPECIFIC ══ */
+
+  .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px; }
+
+  /* Project structure pipeline */
+  .pipeline { display: flex; flex-direction: column; }
+  .pl-step { display: flex; align-items: center; gap: 12px; position: relative; padding: 8px 0; }
+  .pl-dot { width: 12px; height: 12px; border-radius: 50%; background: #cbd5e1; flex-shrink: 0; z-index: 1; }
+  .pl-step.done .pl-dot { background: #22c55e; }
+  .pl-step.today .pl-dot { background: #d97706; box-shadow: 0 0 0 4px #fde68a; }
+  .pl-line { position: absolute; left: 5px; top: 20px; bottom: -8px; width: 2px; background: #e2e8f0; }
+  .pl-step:last-child .pl-line { display: none; }
+  .pl-label { font-size: 13px; font-weight: 700; color: #333; }
+  .pl-step.done .pl-label { color: #16a34a; }
+  .pl-step.today .pl-label { color: #b45309; }
+  .pl-tag { margin-left: auto; font-size: 10px; }
+
+  /* Bootstrap-style course card mockup */
+  .cc-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .cc-card { background: #fff; border: 1px solid #e8e8e8; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,.05); overflow: hidden; animation: popIn .2s ease; }
+  .cc-body { padding: 12px 14px; }
+  .cc-title { font-size: 14px; font-weight: 800; color: #1a1a1a; margin-bottom: 4px; }
+  .cc-meta { font-size: 11.5px; color: #666; margin-bottom: 3px; }
+  .cc-del { width: 100%; margin-top: 8px; background: #dc3545; color: #fff; border: none; border-radius: 6px; padding: 6px 0; font-size: 11.5px; font-weight: 700; cursor: pointer; }
+  .cc-del:hover { background: #bb2d3b; }
+  .cc-badges { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 6px; }
+  .cc-badge { font-size: 9.5px; font-weight: 700; padding: 2px 8px; border-radius: 12px; }
+  .cc-cat-web { background: #dbeafe; color: #1e40af; }
+  .cc-cat-prog { background: #ede9fe; color: #5b21b6; }
+  .cc-cat-ai { background: #ffedd5; color: #9a3412; }
+  .cc-cat-blockchain { background: #fce7f3; color: #9d174d; }
+  .cc-stat-available { background: #dcfce7; color: #166534; }
+  .cc-stat-upcoming { background: #fef9c3; color: #854d0e; }
+  .cc-diff-beginner { background: #e0f2fe; color: #075985; }
+  .cc-diff-intermediate { background: #fef3c7; color: #92400e; }
+  .cc-diff-advanced { background: #fee2e2; color: #991b1b; }
+
+  /* Live "Try It" demo panel */
+  .live-panel { background: #f8f9fa; border: 1px solid #e8e8e8; border-radius: 12px; padding: 16px; }
+  .live-form-row { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 8px; margin-bottom: 12px; }
+  .live-input { padding: 8px 12px; border: 1px solid #ced4da; border-radius: 7px; font-size: 12.5px; font-family: -apple-system, sans-serif; }
+  .live-input:focus { outline: none; border-color: #d97706; }
+  .live-add-btn { background: #0d6efd; color: #fff; border: none; border-radius: 7px; padding: 8px 16px; font-size: 12.5px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+  .live-add-btn:hover { background: #0b5ed7; }
+  .live-search-row { position: relative; margin-bottom: 12px; }
+  .live-search-input { width: 100%; padding: 8px 14px 8px 34px; border: 1px solid #ced4da; border-radius: 7px; font-size: 12.5px; }
+  .live-search-icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: #999; font-size: 14px; }
+  .live-cards { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; min-height: 70px; }
+  .live-empty { grid-column: 1/-1; text-align: center; color: #aaa; font-size: 12px; font-style: italic; padding: 18px 0; }
+  .live-count-bar { display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #888; margin-bottom: 10px; }
+  .live-reset-btn { background: #f1f3f5; border: 1px solid #dee2e6; border-radius: 6px; padding: 5px 12px; font-size: 11px; cursor: pointer; color: #555; }
+  .live-reset-btn:hover { background: #e9ecef; }
+
+  /* Local storage visual */
+  .ls-box { background: #1e1e2e; border-radius: 10px; padding: 14px 18px; font-family: monospace; font-size: 12.5px; min-height: 46px; }
+  .ls-row { display: flex; align-items: flex-start; gap: 10px; padding: 5px 0; word-break: break-all; }
+  .ls-key { color: #ff79c6; font-weight: 700; flex-shrink: 0; }
+  .ls-arrow { color: #6272a4; font-size: 11px; flex-shrink: 0; }
+  .ls-val { color: #f1fa8c; }
+  .ls-empty-msg { color: #6272a4; font-family: monospace; font-size: 12px; font-style: italic; }
+  .ls-demo-controls { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+  .ls-btn { background: #1e293b; border: 1px solid #334155; color: #f0db4f; font-family: monospace; font-size: 11.5px; font-weight: 700; padding: 6px 13px; border-radius: 6px; cursor: pointer; transition: all .15s; }
+  .ls-btn:hover { background: #334155; border-color: #d97706; }
+  .ls-btn.danger { color: #ff7b86; }
+
+  /* Counter / dashboard card */
+  .counter-card { display: flex; align-items: center; gap: 14px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 14px 18px; }
+  .counter-icon { width: 44px; height: 44px; border-radius: 10px; background: #2563eb; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+  .counter-num { font-size: 28px; font-weight: 800; color: #1e40af; line-height: 1; }
+  .counter-label { font-size: 12px; color: #3b5f9e; font-weight: 600; margin-top: 2px; }
+
+  /* Empty state */
+  .empty-state { border: 2px dashed #dee2e6; border-radius: 12px; padding: 26px 16px; text-align: center; color: #aaa; }
+  .empty-state i { font-size: 26px; display: block; margin-bottom: 8px; color: #ccc; }
+  .empty-state .es-text { font-size: 13px; font-weight: 600; color: #999; }
+
+  /* Selector demo console-style buttons */
+  .sel-demo-controls { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+  .sel-btn { background: #1e293b; border: 1px solid #334155; color: #79c0ff; font-family: monospace; font-size: 11.5px; font-weight: 700; padding: 6px 13px; border-radius: 6px; cursor: pointer; }
+  .sel-btn:hover { background: #334155; border-color: #d97706; }
+
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <div>
+      <div class="top-bar-title">MERN Stack Training · Full Session (3 Hours)</div>
+      <div class="top-bar-sub">Interactive Course Catalog using DOM &amp; Local Storage · SkillHub LMS</div>
+    </div>
+    <div class="slide-counter" id="slide-counter">1 / 21</div>
+  </div>
+
+  <!-- ═══ SLIDE 0  HOME ═══ -->
+  <div class="slide active" id="slide-0">
+    <div class="slide-header">
+      <div class="js-logo">📚</div>
+      <div>
+        <div class="slide-title">Interactive Course Catalog</div>
+        <div class="slide-subtitle">DOM Manipulation + Local Storage — SkillHub LMS gets its first real dynamic module</div>
+      </div>
+    </div>
+
+    <div style="background:#fef9c3;border:1px solid #fde68a;border-radius:12px;padding:12px 16px;display:flex;gap:12px;align-items:flex-start">
+      <i class="ti ti-target-arrow" style="color:#d97706;font-size:22px;flex-shrink:0;margin-top:1px"></i>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#854d0e;margin-bottom:4px">Today's Goal — a Mini Frontend LMS by the end of the day</div>
+        <div style="display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:#92400e">
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Add Course</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Display Course</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Search Course</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Delete Course</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Store in Local Storage</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Load After Refresh</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="home-grid">
+      <div class="home-card" onclick="goSlide(1)">
+        <span class="badge b-green">Intro</span>
+        <div class="home-card-title">Project Goal &amp; Learning Outcomes</div>
+        <div class="home-card-sub">What we're building, and what you'll understand by the end</div>
+      </div>
+      <div class="home-card" onclick="goSlide(2)">
+        <span class="badge b-amber">Roadmap</span>
+        <div class="home-card-title">Project Structure</div>
+        <div class="home-card-sub">Where the Course Catalog fits in SkillHub LMS</div>
+      </div>
+      <div class="home-card" onclick="goSlide(3)">
+        <span class="badge b-js">Part 1 · 15 min</span>
+        <div class="home-card-title">Introduction to the DOM</div>
+        <div class="home-card-sub">Can HTML create a card by itself? No.</div>
+      </div>
+      <div class="home-card" onclick="goSlide(4)">
+        <span class="badge b-blue">Part 2 · 15 min</span>
+        <div class="home-card-title">Selecting Elements</div>
+        <div class="home-card-sub">getElementById, querySelector, querySelectorAll</div>
+      </div>
+      <div class="home-card" onclick="goSlide(5)">
+        <span class="badge b-purple">Part 3 · 20 min</span>
+        <div class="home-card-title">Creating the Course Form</div>
+        <div class="home-card-sub">Name, Trainer, Duration + Add Course button</div>
+      </div>
+      <div class="home-card" onclick="goSlide(6)">
+        <span class="badge b-orange">Part 4 · 40 min</span>
+        <div class="home-card-title">Add Course Dynamically</div>
+        <div class="home-card-sub">Input → Object → Array → Display</div>
+      </div>
+      <div class="home-card" onclick="goSlide(7)">
+        <span class="badge b-orange">Part 4</span>
+        <div class="home-card-title">Display Courses</div>
+        <div class="home-card-sub">forEach() renders Bootstrap cards</div>
+      </div>
+      <div class="home-card" onclick="goSlide(8)">
+        <span class="badge b-indigo">Explain</span>
+        <div class="home-card-title">Line-by-Line — DOM &amp; Rendering</div>
+        <div class="home-card-sub">Every new line from the First 90 Minutes</div>
+      </div>
+    </div>
+
+    <div class="grid-2" style="gap:10px">
+      <div class="home-card" onclick="goSlide(9)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge b-rose">2nd 90 · 20 min</span>
+          <span style="font-size:14px;font-weight:700">Delete Course</span>
+          <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+        </div>
+      </div>
+      <div class="home-card" onclick="goSlide(10)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge b-teal">2nd 90 · 20 min</span>
+          <span style="font-size:14px;font-weight:700">Search Course</span>
+          <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+        </div>
+      </div>
+    </div>
+    <div class="home-card" onclick="goSlide(11)" style="cursor:pointer">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="badge b-green">Try It</span>
+        <span style="font-size:14px;font-weight:700">Live Demo — the Full Catalog, Working</span>
+        <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+      </div>
+    </div>
+    <div class="grid-2" style="gap:10px">
+      <div class="home-card" onclick="goSlide(12)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge b-amber">2nd 90 · 25 min</span>
+          <span style="font-size:14px;font-weight:700">Why Local Storage?</span>
+          <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+        </div>
+      </div>
+      <div class="home-card" onclick="goSlide(13)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge b-amber">2nd 90</span>
+          <span style="font-size:14px;font-weight:700">Save &amp; Load Courses</span>
+          <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+        </div>
+      </div>
+    </div>
+    <div class="grid-2" style="gap:10px">
+      <div class="home-card" onclick="goSlide(14)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge b-cyan">Proof</span>
+          <span style="font-size:14px;font-weight:700">Refresh Test — Persistence</span>
+          <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+        </div>
+      </div>
+      <div class="home-card" onclick="goSlide(15)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge b-blue">2nd 90 · 25 min</span>
+          <span style="font-size:14px;font-weight:700">Dashboard Counter</span>
+          <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+        </div>
+      </div>
+    </div>
+    <div class="grid-2" style="gap:10px">
+      <div class="home-card" onclick="goSlide(16)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge b-pink">Bonus</span>
+          <span style="font-size:14px;font-weight:700">Categories, Status &amp; Difficulty Badges</span>
+          <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+        </div>
+      </div>
+      <div class="home-card" onclick="goSlide(17)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge b-rose">Challenge</span>
+          <span style="font-size:14px;font-weight:700">Fee, Image URL &amp; Rating</span>
+          <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+        </div>
+      </div>
+    </div>
+    <div class="home-card" onclick="goSlide(18)" style="cursor:pointer">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="badge b-orange">Assignment</span>
+        <span style="font-size:14px;font-weight:700">Complete the Course Catalog</span>
+        <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+      </div>
+    </div>
+    <div class="home-card" onclick="goSlide(19)" style="cursor:pointer">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="badge b-slate">Deliverable</span>
+        <span style="font-size:14px;font-weight:700">Final Deliverable — Mini Frontend LMS</span>
+        <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+      </div>
+    </div>
+    <div class="home-card" onclick="goSlide(20)" style="cursor:pointer">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="badge b-green">Quiz</span>
+        <span style="font-size:14px;font-weight:700">Quick Check — 7 Questions</span>
+        <i class="ti ti-arrow-right" style="margin-left:auto;color:#aaa"></i>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <div></div>
+      <div class="progress-dots" id="dots-0"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Start <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 1  PROJECT GOAL & LEARNING OUTCOMES ═══ -->
+  <div class="slide" id="slide-1">
+    <div class="slide-header">
+      <span class="badge b-green">Intro</span>
+      <div>
+        <div class="slide-title">Project Goal</div>
+        <div class="slide-subtitle">Today, SkillHub LMS gets its first real dynamic module</div>
+      </div>
+    </div>
+    <div class="card card-gray">
+      <div style="font-size:13px;color:#444;line-height:1.7">Students will build a <strong>Course Catalog</strong> where they can:</div>
+      <div class="grid-3" style="margin-top:10px">
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="font-size:12px;font-weight:700;color:#166534"><i class="ti ti-check" style="margin-right:5px"></i>Add Course</div>
+          <div style="font-size:12px;font-weight:700;color:#166534"><i class="ti ti-check" style="margin-right:5px"></i>Display Course</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="font-size:12px;font-weight:700;color:#166534"><i class="ti ti-check" style="margin-right:5px"></i>Search Course</div>
+          <div style="font-size:12px;font-weight:700;color:#166534"><i class="ti ti-check" style="margin-right:5px"></i>Delete Course</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="font-size:12px;font-weight:700;color:#166534"><i class="ti ti-check" style="margin-right:5px"></i>Store in Local Storage</div>
+          <div style="font-size:12px;font-weight:700;color:#166534"><i class="ti ti-check" style="margin-right:5px"></i>Load After Refresh</div>
+        </div>
+      </div>
+    </div>
+    <div class="success-box">
+      <i class="ti ti-sparkles" style="color:#16a34a;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+      <div style="font-size:13px;color:#166534;line-height:1.65"><strong>By the end of the day, students will have a Mini Frontend LMS</strong> — not a demo, a real dynamic, searchable, persistent catalog.</div>
+    </div>
+    <div class="section-label">learning outcomes — students will understand</div>
+    <div class="grid-3">
+      <div class="card" style="text-align:center">
+        <i class="ti ti-code-dots" style="font-size:20px;color:#2563eb"></i>
+        <div style="font-size:12px;font-weight:700;margin-top:6px">DOM Manipulation</div>
+      </div>
+      <div class="card" style="text-align:center">
+        <i class="ti ti-route" style="font-size:20px;color:#7c3aed"></i>
+        <div style="font-size:12px;font-weight:700;margin-top:6px">DOM Traversal</div>
+      </div>
+      <div class="card" style="text-align:center">
+        <i class="ti ti-square-plus" style="font-size:20px;color:#16a34a"></i>
+        <div style="font-size:12px;font-weight:700;margin-top:6px">Creating Elements</div>
+      </div>
+      <div class="card" style="text-align:center">
+        <i class="ti ti-edit" style="font-size:20px;color:#d97706"></i>
+        <div style="font-size:12px;font-weight:700;margin-top:6px">Updating Elements</div>
+      </div>
+      <div class="card" style="text-align:center">
+        <i class="ti ti-trash" style="font-size:20px;color:#dc2626"></i>
+        <div style="font-size:12px;font-weight:700;margin-top:6px">Removing Elements</div>
+      </div>
+      <div class="card" style="text-align:center">
+        <i class="ti ti-click" style="font-size:20px;color:#0891b2"></i>
+        <div style="font-size:12px;font-weight:700;margin-top:6px">Event Handling</div>
+      </div>
+      <div class="card" style="text-align:center">
+        <i class="ti ti-database" style="font-size:20px;color:#be185d"></i>
+        <div style="font-size:12px;font-weight:700;margin-top:6px">Local Storage</div>
+      </div>
+      <div class="card" style="text-align:center">
+        <i class="ti ti-braces" style="font-size:20px;color:#4338ca"></i>
+        <div style="font-size:12px;font-weight:700;margin-top:6px">JSON</div>
+      </div>
+      <div class="card" style="text-align:center">
+        <i class="ti ti-refresh-dot" style="font-size:20px;color:#059669"></i>
+        <div style="font-size:12px;font-weight:700;margin-top:6px">Dynamic Rendering</div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-1"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Project Structure <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 2  PROJECT STRUCTURE ═══ -->
+  <div class="slide" id="slide-2">
+    <div class="slide-header">
+      <span class="badge b-amber">Roadmap</span>
+      <div>
+        <div class="slide-title">Project Structure — SkillHub LMS</div>
+        <div class="slide-subtitle">Where today's Course Catalog module fits into the bigger picture</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="pipeline">
+        <div class="pl-step done"><div class="pl-line"></div><div class="pl-dot"></div><div class="pl-label">Landing Page</div><span class="badge b-green pl-tag">done</span></div>
+        <div class="pl-step today"><div class="pl-line"></div><div class="pl-dot"></div><div class="pl-label">Course Catalog</div><span class="badge b-js pl-tag">today</span></div>
+        <div class="pl-step today"><div class="pl-line"></div><div class="pl-dot"></div><div class="pl-label">Add Course</div><span class="badge b-js pl-tag">today</span></div>
+        <div class="pl-step today"><div class="pl-line"></div><div class="pl-dot"></div><div class="pl-label">Search Course</div><span class="badge b-js pl-tag">today</span></div>
+        <div class="pl-step today"><div class="pl-line"></div><div class="pl-dot"></div><div class="pl-label">Delete Course</div><span class="badge b-js pl-tag">today</span></div>
+        <div class="pl-step today"><div class="pl-line"></div><div class="pl-dot"></div><div class="pl-label">Save Courses</div><span class="badge b-js pl-tag">today</span></div>
+        <div class="pl-step today"><div class="pl-line"></div><div class="pl-dot"></div><div class="pl-label">Load Courses</div><span class="badge b-js pl-tag">today</span></div>
+        <div class="pl-step today"><div class="pl-dot"></div><div class="pl-label">Mini LMS</div><span class="badge b-orange pl-tag">🎯 goal</span></div>
+      </div>
+    </div>
+    <div class="info-box">
+      <i class="ti ti-info-circle info-icon"></i>
+      <div class="info-text"><strong>Same habit as always:</strong> change the data → save it → re-render the screen. You've used this exact pattern before with the Student Dashboard — today we apply it to Courses instead of Students, using the DOM directly instead of a Bootstrap table.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-2"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Introduction to the DOM <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 3  INTRODUCTION TO THE DOM ═══ -->
+  <div class="slide" id="slide-3">
+    <div class="slide-header">
+      <span class="badge b-js">Part 1 · 15 min</span>
+      <div>
+        <div class="slide-title">Introduction to the DOM</div>
+        <div class="slide-subtitle">Yesterday we created static HTML. Today, HTML learns to move.</div>
+      </div>
+    </div>
+    <div class="card card-gray">
+      <div style="font-size:14px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px">
+        <i class="ti ti-message-question" style="color:#d97706;font-size:20px"></i>
+        Can HTML create a brand new Course Card by itself, with no JavaScript at all?
+      </div>
+      <button class="reveal-btn" onclick="toggle('dom-ans')">Reveal the answer</button>
+      <div class="reveal-content" id="dom-ans">
+        <div style="margin-top:10px;padding:14px 16px;background:#fff;border-radius:10px;border:1px solid #fde68a">
+          <div style="font-size:18px;font-weight:800;color:#854d0e;text-align:center;margin-bottom:8px">No.</div>
+          <div style="font-size:13px;color:#444;text-align:center;line-height:1.7">HTML is static — it describes what's already there. It has no way to react to a click or generate a new card on demand. <strong>JavaScript</strong> is what manipulates HTML after the page has loaded, by talking to something called the <strong>DOM</strong>.</div>
+        </div>
+      </div>
+    </div>
+    <div class="grid-4">
+      <div class="card" style="text-align:center">
+        <div style="font-size:13px;font-weight:800;color:#333">HTML</div>
+        <div style="font-size:10.5px;color:#888;margin-top:4px">The page's starting structure</div>
+      </div>
+      <div class="card" style="text-align:center">
+        <i class="ti ti-arrow-right" style="font-size:16px;color:#d97706"></i>
+        <div style="font-size:13px;font-weight:800;color:#333;margin-top:2px">DOM</div>
+        <div style="font-size:10.5px;color:#888;margin-top:4px">HTML turned into a live object tree</div>
+      </div>
+      <div class="card" style="text-align:center">
+        <i class="ti ti-arrow-right" style="font-size:16px;color:#d97706"></i>
+        <div style="font-size:13px;font-weight:800;color:#333;margin-top:2px">JavaScript</div>
+        <div style="font-size:10.5px;color:#888;margin-top:4px">Reads and edits that tree</div>
+      </div>
+      <div class="card" style="text-align:center;border-color:#86efac">
+        <i class="ti ti-arrow-right" style="font-size:16px;color:#d97706"></i>
+        <div style="font-size:13px;font-weight:800;color:#166534;margin-top:2px">Updated HTML</div>
+        <div style="font-size:10.5px;color:#888;margin-top:4px">What the visitor actually sees</div>
+      </div>
+    </div>
+    <div class="info-box">
+      <i class="ti ti-info-circle info-icon"></i>
+      <div class="info-text"><strong>DOM = Document Object Model.</strong> The moment the browser loads your HTML, it builds a "live" tree version of it in memory. JavaScript never edits the HTML file itself — it edits this tree, and the browser instantly redraws the screen to match. That's how a new course card can appear without a page reload.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-3"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Selecting Elements <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 4  SELECTING ELEMENTS ═══ -->
+  <div class="slide" id="slide-4">
+    <div class="slide-header">
+      <span class="badge b-blue">Part 2 · 15 min</span>
+      <div>
+        <div class="slide-title">Selecting Elements</div>
+        <div class="slide-subtitle">Before you can change something on the page, JavaScript has to find it first</div>
+      </div>
+    </div>
+    <div class="grid-3">
+      <div class="card" style="text-align:center">
+        <span class="method-chip" style="background:#dbeafe;color:#1e40af">getElementById()</span>
+        <div style="font-size:11px;color:#666;margin-top:8px">Finds ONE element by its unique <code>id</code>. Fastest, most common selector.</div>
+      </div>
+      <div class="card" style="text-align:center">
+        <span class="method-chip" style="background:#ede9fe;color:#5b21b6">querySelector()</span>
+        <div style="font-size:11px;color:#666;margin-top:8px">Finds the FIRST element matching any CSS selector — <code>#id</code>, <code>.class</code>, <code>tag</code>.</div>
+      </div>
+      <div class="card" style="text-align:center">
+        <span class="method-chip" style="background:#fef3c7;color:#92400e">querySelectorAll()</span>
+        <div style="font-size:11px;color:#666;margin-top:8px">Finds ALL matching elements, returned as a list you can loop through.</div>
+      </div>
+    </div>
+    <div class="activity-box">
+      <div class="activity-title"><i class="ti ti-keyboard"></i> Reference example</div>
+      <div class="editor" style="border-radius:8px">
+        <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">console</span></div>
+        <div class="editor-body">
+          <div class="e-row"><span class="j-kw">const</span> <span class="j-var">courseName</span> <span class="j-op">=</span> <span class="j-dom">document</span><span class="c-punc">.</span><span class="j-fn">getElementById</span><span class="c-punc">(</span><span class="j-str">"courseName"</span><span class="c-punc">);</span></div>
+          <div class="e-row"><span class="j-fn">console</span><span class="c-punc">.</span><span class="j-fn">log</span><span class="c-punc">(</span><span class="j-var">courseName</span><span class="c-punc">);</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="section-label">try it live — this input and these three cards are real elements on this slide</div>
+    <div style="background:#f8f9fa;border:1px solid #e8e8e8;border-radius:12px;padding:14px 16px">
+      <input type="text" id="demo-courseName" class="live-input" placeholder="I am #demo-courseName" style="width:100%;margin-bottom:10px">
+      <div class="cc-grid" style="margin-bottom:12px">
+        <div class="card demo-card" style="text-align:center;padding:10px"><i class="ti ti-square" style="color:#2563eb"></i><div style="font-size:11px;margin-top:4px">.demo-card #1</div></div>
+        <div class="card demo-card" style="text-align:center;padding:10px"><i class="ti ti-square" style="color:#2563eb"></i><div style="font-size:11px;margin-top:4px">.demo-card #2</div></div>
+        <div class="card demo-card" style="text-align:center;padding:10px"><i class="ti ti-square" style="color:#2563eb"></i><div style="font-size:11px;margin-top:4px">.demo-card #3</div></div>
+      </div>
+      <div class="sel-demo-controls">
+        <button class="sel-btn" onclick="selDemoGetById()">document.getElementById("demo-courseName")</button>
+        <button class="sel-btn" onclick="selDemoQuery()">document.querySelector(".demo-card")</button>
+        <button class="sel-btn" onclick="selDemoQueryAll()">document.querySelectorAll(".demo-card")</button>
+      </div>
+      <div class="console-panel">
+        <div class="console-bar"><span class="console-tab active">Console</span></div>
+        <div class="console-body" id="sel-console"><div class="con-prompt-row"><span style="color:#3fb950;font-size:11px">▶</span><span style="color:#6272a4">// click a button above</span></div></div>
+      </div>
+    </div>
+    <div class="warn-box">
+      <i class="ti ti-alert-triangle" style="color:#d97706;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+      <div style="font-size:13px;color:#92400e;line-height:1.6"><strong>querySelector needs a CSS-style prefix:</strong> <code>"#id"</code> for an id, <code>".class"</code> for a class. Forget the <code>.</code> or <code>#</code> and it silently returns <code>null</code> instead of an error — a very common bug.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-4"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Creating the Course Form <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 5  CREATING THE COURSE FORM ═══ -->
+  <div class="slide" id="slide-5">
+    <div class="slide-header">
+      <span class="badge b-purple">Part 3 · 20 min</span>
+      <div>
+        <div class="slide-title">Creating the Course Form</div>
+        <div class="slide-subtitle">Three inputs and a button — the entry point for every course we'll ever add</div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="section-label">html</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">index.html</span></div>
+          <div class="editor-body" style="font-size:11.5px">
+            <div class="e-row"><span class="e-tag">&lt;div</span> <span class="e-att">class</span><span class="c-punc">=</span><span class="e-val">"container mt-5"</span><span class="e-tag">&gt;</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="e-tag">&lt;h2&gt;</span>Add New Course<span class="e-tag">&lt;/h2&gt;</span></div>
+            <div class="e-row"><span class="e-ln"> </span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="e-tag">&lt;input</span> <span class="e-att">type</span><span class="c-punc">=</span><span class="e-val">"text"</span></div>
+            <div class="e-row"><span class="e-ind2"></span><span class="e-att">id</span><span class="c-punc">=</span><span class="e-val">"courseName"</span></div>
+            <div class="e-row"><span class="e-ind2"></span><span class="e-att">class</span><span class="c-punc">=</span><span class="e-val">"form-control mb-3"</span></div>
+            <div class="e-row"><span class="e-ind2"></span><span class="e-att">placeholder</span><span class="c-punc">=</span><span class="e-val">"Course Name"</span><span class="e-tag">&gt;</span></div>
+            <div class="e-row"><span class="e-ln"> </span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="e-tag">&lt;input</span> <span class="e-att">type</span><span class="c-punc">=</span><span class="e-val">"text"</span></div>
+            <div class="e-row"><span class="e-ind2"></span><span class="e-att">id</span><span class="c-punc">=</span><span class="e-val">"trainer"</span></div>
+            <div class="e-row"><span class="e-ind2"></span><span class="e-att">class</span><span class="c-punc">=</span><span class="e-val">"form-control mb-3"</span></div>
+            <div class="e-row"><span class="e-ind2"></span><span class="e-att">placeholder</span><span class="c-punc">=</span><span class="e-val">"Trainer"</span><span class="e-tag">&gt;</span></div>
+            <div class="e-row"><span class="e-ln"> </span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="e-tag">&lt;input</span> <span class="e-att">type</span><span class="c-punc">=</span><span class="e-val">"number"</span></div>
+            <div class="e-row"><span class="e-ind2"></span><span class="e-att">id</span><span class="c-punc">=</span><span class="e-val">"duration"</span></div>
+            <div class="e-row"><span class="e-ind2"></span><span class="e-att">class</span><span class="c-punc">=</span><span class="e-val">"form-control mb-3"</span></div>
+            <div class="e-row"><span class="e-ind2"></span><span class="e-att">placeholder</span><span class="c-punc">=</span><span class="e-val">"Duration"</span><span class="e-tag">&gt;</span></div>
+            <div class="e-row"><span class="e-ln"> </span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="e-tag">&lt;button</span> <span class="e-att">class</span><span class="c-punc">=</span><span class="e-val">"btn btn-primary"</span></div>
+            <div class="e-row"><span class="e-ind2"></span><span class="e-att">id</span><span class="c-punc">=</span><span class="e-val">"addCourseBtn"</span><span class="e-tag">&gt;</span></div>
+            <div class="e-row"><span class="e-ind1"></span>Add Course</div>
+            <div class="e-row"><span class="e-tag">&lt;/button&gt;</span></div>
+            <div class="e-row"><span class="e-tag">&lt;/div&gt;</span></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">rendered preview</div>
+        <div class="card" style="background:#fff">
+          <div style="font-size:16px;font-weight:800;margin-bottom:12px">Add New Course</div>
+          <input type="text" class="live-input" placeholder="Course Name" disabled style="width:100%;margin-bottom:8px">
+          <input type="text" class="live-input" placeholder="Trainer" disabled style="width:100%;margin-bottom:8px">
+          <input type="number" class="live-input" placeholder="Duration" disabled style="width:100%;margin-bottom:12px">
+          <button class="live-add-btn" disabled style="width:100%">Add Course</button>
+        </div>
+        <div class="info-box" style="margin-top:10px">
+          <i class="ti ti-info-circle info-icon"></i>
+          <div class="info-text">Every input has a unique <code>id</code>. That's what lets our JavaScript grab exactly the right value with <code>getElementById()</code> a moment later.</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-5"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Add Course Dynamically <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 6  ADD COURSE DYNAMICALLY ═══ -->
+  <div class="slide" id="slide-6">
+    <div class="slide-header">
+      <span class="badge b-orange">Part 4 · 40 min</span>
+      <div>
+        <div class="slide-title">Add Course Dynamically</div>
+        <div class="slide-subtitle">Read the form → build an object → push it into an array</div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="section-label">step 1 — create the array</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">top of frontend/js/script.js</span></div>
+          <div class="editor-body">
+            <div class="e-row"><span class="j-kw">let</span> <span class="j-var">courses</span> <span class="j-op">=</span> <span class="c-punc">[];</span></div>
+          </div>
+        </div>
+        <div class="section-label" style="margin-top:14px">step 2 — listen for the click</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">frontend/js/script.js</span></div>
+          <div class="editor-body" style="font-size:11.5px">
+            <div class="e-row"><span class="j-dom">document</span><span class="c-punc">.</span><span class="j-fn">getElementById</span><span class="c-punc">(</span><span class="j-str">"addCourseBtn"</span><span class="c-punc">)</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="c-punc">.</span><span class="j-fn">addEventListener</span><span class="c-punc">(</span><span class="j-str">"click"</span><span class="c-punc">, </span><span class="j-var">addCourse</span><span class="c-punc">);</span></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">step 3 — the addCourse() function</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">frontend/js/script.js</span></div>
+          <div class="editor-body" style="font-size:11.5px">
+            <div class="e-row"><span class="j-kw">function</span> <span class="j-fn">addCourse</span><span class="c-punc">() {</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="j-kw">const</span> <span class="j-var">course</span> <span class="j-op">=</span> <span class="c-punc">{</span></div>
+            <div class="e-row"><span class="e-ind2"></span><span class="j-key">name</span><span class="c-punc">: </span><span class="j-dom">document</span><span class="c-punc">.</span><span class="j-fn">getElementById</span><span class="c-punc">(</span><span class="j-str">"courseName"</span><span class="c-punc">).</span><span class="j-key">value</span><span class="c-punc">,</span></div>
+            <div class="e-row"><span class="e-ind2"></span><span class="j-key">trainer</span><span class="c-punc">: </span><span class="j-dom">document</span><span class="c-punc">.</span><span class="j-fn">getElementById</span><span class="c-punc">(</span><span class="j-str">"trainer"</span><span class="c-punc">).</span><span class="j-key">value</span><span class="c-punc">,</span></div>
+            <div class="e-row"><span class="e-ind2"></span><span class="j-key">duration</span><span class="c-punc">: </span><span class="j-dom">document</span><span class="c-punc">.</span><span class="j-fn">getElementById</span><span class="c-punc">(</span><span class="j-str">"duration"</span><span class="c-punc">).</span><span class="j-key">value</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="c-punc">};</span></div>
+            <div class="e-row"><span class="e-ln"> </span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="j-var">courses</span><span class="c-punc">.</span><span class="j-fn">push</span><span class="c-punc">(</span><span class="j-var">course</span><span class="c-punc">);</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="j-fn">displayCourses</span><span class="c-punc">();</span></div>
+            <div class="e-row"><span class="c-punc">}</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-label">the transformation</div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;padding:8px 0;font-size:13px;font-weight:700;color:#444">
+        <span style="padding:6px 12px;background:#dbeafe;border-radius:8px;color:#1e40af">Input (form values)</span>
+        <i class="ti ti-arrow-right" style="color:#d97706"></i>
+        <span style="padding:6px 12px;background:#fef9c3;border-radius:8px;color:#854d0e">Object { name, trainer, duration }</span>
+        <i class="ti ti-arrow-right" style="color:#d97706"></i>
+        <span style="padding:6px 12px;background:#ede9fe;border-radius:8px;color:#5b21b6">Array — courses.push()</span>
+        <i class="ti ti-arrow-right" style="color:#d97706"></i>
+        <span style="padding:6px 12px;background:#dcfce7;border-radius:8px;color:#166534">Display — on screen</span>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-6"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Display Courses <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 7  DISPLAY COURSES ═══ -->
+  <div class="slide" id="slide-7">
+    <div class="slide-header">
+      <span class="badge b-orange">Part 4</span>
+      <div>
+        <div class="slide-title">Display Courses</div>
+        <div class="slide-subtitle">forEach() loops the array and builds one Bootstrap card per course</div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="section-label">the container</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">index.html</span></div>
+          <div class="editor-body" style="font-size:11.5px">
+            <div class="e-row"><span class="e-tag">&lt;div</span> <span class="e-att">class</span><span class="c-punc">=</span><span class="e-val">"row mt-4"</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="e-att">id</span><span class="c-punc">=</span><span class="e-val">"courseContainer"</span><span class="e-tag">&gt;</span></div>
+            <div class="e-row"><span class="e-tag">&lt;/div&gt;</span></div>
+          </div>
+        </div>
+        <div class="section-label" style="margin-top:14px">rendered result</div>
+        <div class="cc-grid" style="grid-template-columns:1fr 1fr">
+          <div class="cc-card"><div class="cc-body">
+            <div class="cc-title">React Basics</div>
+            <div class="cc-meta">Trainer: Manish</div>
+            <div class="cc-meta">Duration: 4 Weeks</div>
+            <button class="cc-del">Delete</button>
+          </div></div>
+          <div class="cc-card"><div class="cc-body">
+            <div class="cc-title">Node.js API</div>
+            <div class="cc-meta">Trainer: Priya</div>
+            <div class="cc-meta">Duration: 6 Weeks</div>
+            <button class="cc-del">Delete</button>
+          </div></div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">displayCourses()</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">frontend/js/script.js</span></div>
+          <div class="editor-body" style="font-size:11px">
+            <div class="e-row"><span class="j-kw">function</span> <span class="j-fn">displayCourses</span><span class="c-punc">() {</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="j-kw">let</span> <span class="j-var">html</span> <span class="j-op">=</span> <span class="j-str">""</span><span class="c-punc">;</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="j-var">courses</span><span class="c-punc">.</span><span class="j-fn">forEach</span><span class="c-punc">((</span><span class="j-var">course</span><span class="c-punc">,</span><span class="j-var">index</span><span class="c-punc">) </span><span class="j-op">=&gt;</span> <span class="c-punc">{</span></div>
+            <div class="e-row"><span class="e-ind2"></span><span class="j-var">html</span> <span class="j-op">+=</span> <span class="j-tpl">`</span></div>
+            <div class="e-row"><span class="e-ind3"></span><span class="e-tag" style="color:#8be9fd">&lt;div class="col-md-4"&gt;</span></div>
+            <div class="e-row"><span class="e-ind3"></span><span class="e-tag" style="color:#8be9fd">&lt;div class="card shadow"&gt;</span></div>
+            <div class="e-row"><span class="e-ind3"></span><span class="e-tag" style="color:#8be9fd">&lt;h4&gt;</span><span class="j-interp">${course.name}</span><span class="e-tag" style="color:#8be9fd">&lt;/h4&gt;</span></div>
+            <div class="e-row"><span class="e-ind3"></span><span class="e-tag" style="color:#8be9fd">&lt;p&gt;</span>Trainer: <span class="j-interp">${course.trainer}</span><span class="e-tag" style="color:#8be9fd">&lt;/p&gt;</span></div>
+            <div class="e-row"><span class="e-ind3"></span><span class="e-tag" style="color:#8be9fd">&lt;button onclick="deleteCourse(</span><span class="j-interp">${index}</span><span class="e-tag" style="color:#8be9fd">)"&gt;</span>Delete<span class="e-tag" style="color:#8be9fd">&lt;/button&gt;</span></div>
+            <div class="e-row"><span class="e-ind3"></span><span class="e-tag" style="color:#8be9fd">&lt;/div&gt;&lt;/div&gt;</span></div>
+            <div class="e-row"><span class="e-ind2"></span><span class="j-tpl">`</span><span class="c-punc">;</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="c-punc">});</span></div>
+            <div class="e-row"><span class="e-ln"> </span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="j-dom">document</span><span class="c-punc">.</span><span class="j-fn">getElementById</span><span class="c-punc">(</span><span class="j-str">"courseContainer"</span><span class="c-punc">).</span><span class="j-key">innerHTML</span> <span class="j-op">=</span> <span class="j-var">html</span><span class="c-punc">;</span></div>
+            <div class="e-row"><span class="c-punc">}</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="success-box">
+      <i class="ti ti-sparkles" style="color:#16a34a;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+      <div style="font-size:13px;color:#166534;line-height:1.65"><strong>Students now have a dynamic course catalog.</strong> Type into the form, click Add Course, and a brand new Bootstrap card appears — built entirely by JavaScript, with zero page reload.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-7"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Explain Every Line <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 8  LINE-BY-LINE EXPLAINER ═══ -->
+  <div class="slide" id="slide-8">
+    <div class="slide-header">
+      <span class="badge b-indigo">Explain</span>
+      <div>
+        <div class="slide-title">Line-by-Line — DOM &amp; Rendering</div>
+        <div class="slide-subtitle">Click any row to expand — every piece of new syntax from the First 90 Minutes</div>
+      </div>
+    </div>
+    <div class="line-explain">
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="j-fn">.getElementById()</span></div>
+        <div class="lex-info">
+          <div class="lex-name">getElementById(id) — find one element</div>
+          <div class="lex-desc">Returns the single element with that exact id, or null if none exists</div>
+          <div class="lex-detail">This is how addCourse() reads what the visitor typed: document.getElementById("courseName").value grabs the current text inside that input box.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="j-fn">.addEventListener()</span></div>
+        <div class="lex-info">
+          <div class="lex-name">addEventListener(event, function) — react to actions</div>
+          <div class="lex-desc">Runs a function automatically whenever a specific event happens on that element</div>
+          <div class="lex-detail">"click" is the event, addCourse is the function to run. Notice we pass addCourse — not addCourse() — we want JavaScript to call it later, not run it immediately.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="j-var">courses</span><span class="c-punc">.</span><span class="j-fn">push</span><span class="c-punc">()</span></div>
+        <div class="lex-info">
+          <div class="lex-name">push(item) — add to the end of an array</div>
+          <div class="lex-desc">Adds the new course object as the last item in the courses array</div>
+          <div class="lex-detail">Exactly the same method you used with the Student Dashboard — arrays of objects always grow this way.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="j-var">courses</span><span class="c-punc">.</span><span class="j-fn">forEach</span><span class="c-punc">()</span></div>
+        <div class="lex-info">
+          <div class="lex-name">forEach((item, index) => {...}) — loop through every item</div>
+          <div class="lex-desc">Runs the given function once per course, giving you both the course object and its position</div>
+          <div class="lex-detail">The index parameter is what lets the Delete button on each card know exactly which course to remove later.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="j-tpl">`...`</span></div>
+        <div class="lex-info">
+          <div class="lex-name">Template Literals — backtick strings</div>
+          <div class="lex-desc">Strings written with backticks (`) instead of quotes — they can span multiple lines and embed variables</div>
+          <div class="lex-detail">This is what makes it possible to write readable, multi-line HTML directly inside JavaScript instead of ugly string concatenation with +.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="j-interp">${ }</span></div>
+        <div class="lex-info">
+          <div class="lex-name">${expression} — interpolation</div>
+          <div class="lex-desc">Inserts the value of a variable or expression directly into a template literal string</div>
+          <div class="lex-detail">${course.name} is replaced with the actual course name at the moment the code runs — this is how one template builds a different card for every course.</div>
+        </div>
+      </div>
+      <div class="lex-row" onclick="toggleLex(this)">
+        <div class="lex-code"><span class="j-key">.innerHTML</span></div>
+        <div class="lex-info">
+          <div class="lex-name">.innerHTML — replace what's inside an element</div>
+          <div class="lex-desc">Sets the HTML content of an element, replacing everything that was there before</div>
+          <div class="lex-detail">Setting courseContainer.innerHTML = html swaps in the entire freshly-built set of cards in one go, rather than adding them one at a time.</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-8"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Delete Course <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 9  DELETE COURSE ═══ -->
+  <div class="slide" id="slide-9">
+    <div class="slide-header">
+      <span class="badge b-rose">2nd 90 Min · Part 1 · 20 min</span>
+      <div>
+        <div class="slide-title">Delete Course</div>
+        <div class="slide-subtitle">splice() removes exactly one item — the one whose index matches the button clicked</div>
+      </div>
+    </div>
+    <div class="activity-box">
+      <div class="activity-title"><i class="ti ti-keyboard"></i> Write deleteCourse(index)</div>
+      <div class="editor" style="border-radius:8px">
+        <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">frontend/js/script.js</span></div>
+        <div class="editor-body">
+          <div class="e-row"><span class="j-kw">function</span> <span class="j-fn">deleteCourse</span><span class="c-punc">(</span><span class="j-var">index</span><span class="c-punc">) {</span></div>
+          <div class="e-row"><span class="e-ind1"></span><span class="j-var">courses</span><span class="c-punc">.</span><span class="j-fn">splice</span><span class="c-punc">(</span><span class="j-var">index</span><span class="c-punc">, </span><span class="j-num">1</span><span class="c-punc">);</span></div>
+          <div class="e-row"><span class="e-ind1"></span><span class="j-fn">displayCourses</span><span class="c-punc">();</span></div>
+          <div class="e-row" style="background:#1a2a1a"><span class="e-ind1"></span><span class="j-fn" style="color:#80ffea">saveCourses</span><span class="c-punc">();</span> <span class="j-com">// coming up in Part 3</span></div>
+          <div class="e-row"><span class="c-punc">}</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="section-label">why splice(index, 1)</div>
+        <div style="font-size:12px;color:#555;line-height:1.7">Remember: the button's onclick already carried the exact <code>index</code> from <code>forEach()</code>. <code>splice(index, 1)</code> means "starting at this position, remove exactly 1 item" — every course after it shifts down automatically.</div>
+      </div>
+      <div class="card">
+        <div class="section-label">explain crud</div>
+        <div class="grid-4" style="gap:6px">
+          <div class="crud-tile crud-done"><div class="crud-letter">C</div><div class="crud-word">Create</div></div>
+          <div class="crud-tile crud-done"><div class="crud-letter">R</div><div class="crud-word">Read</div></div>
+          <div class="crud-tile crud-todo"><div class="crud-letter">U</div><div class="crud-word">Update</div></div>
+          <div class="crud-tile crud-done"><div class="crud-letter">D</div><div class="crud-word">Delete</div></div>
+        </div>
+        <div style="font-size:11px;color:#888;margin-top:8px;text-align:center">Create, Read &amp; Delete — done today. Update comes in a future session.</div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-9"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Search Course <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 10  SEARCH COURSE ═══ -->
+  <div class="slide" id="slide-10">
+    <div class="slide-header">
+      <span class="badge b-teal">2nd 90 Min · Part 2 · 20 min</span>
+      <div>
+        <div class="slide-title">Search Course</div>
+        <div class="slide-subtitle">filter() narrows the array; a reusable displayCourses() renders whichever list you give it</div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="section-label">html — the search box</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">index.html</span></div>
+          <div class="editor-body" style="font-size:11.5px">
+            <div class="e-row"><span class="e-tag">&lt;input</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="e-att">id</span><span class="c-punc">=</span><span class="e-val">"searchCourse"</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="e-att">class</span><span class="c-punc">=</span><span class="e-val">"form-control"</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="e-att">placeholder</span><span class="c-punc">=</span><span class="e-val">"Search Course"</span><span class="e-tag">&gt;</span></div>
+          </div>
+        </div>
+        <div class="section-label" style="margin-top:14px">javascript</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">frontend/js/script.js</span></div>
+          <div class="editor-body" style="font-size:11px">
+            <div class="e-row"><span class="j-dom">document</span><span class="c-punc">.</span><span class="j-fn">getElementById</span><span class="c-punc">(</span><span class="j-str">"searchCourse"</span><span class="c-punc">)</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="c-punc">.</span><span class="j-fn">addEventListener</span><span class="c-punc">(</span><span class="j-str">"keyup"</span><span class="c-punc">, </span><span class="j-kw">function</span><span class="c-punc">() {</span></div>
+            <div class="e-row"><span class="e-ind2"></span><span class="j-kw">const</span> <span class="j-var">keyword</span> <span class="j-op">=</span> <span class="j-dom">this</span><span class="c-punc">.</span><span class="j-key">value</span><span class="c-punc">.</span><span class="j-fn">toLowerCase</span><span class="c-punc">();</span></div>
+            <div class="e-row"><span class="e-ind2"></span><span class="j-kw">const</span> <span class="j-var" style="color:#80ffea">filtered</span> <span class="j-op">=</span> <span class="j-var">courses</span><span class="c-punc">.</span><span class="j-fn" style="color:#80ffea">filter</span><span class="c-punc">(</span><span class="j-var">course</span> <span class="j-op">=&gt;</span></div>
+            <div class="e-row"><span class="e-ind3"></span><span class="j-var">course</span><span class="c-punc">.</span><span class="j-key">name</span><span class="c-punc">.</span><span class="j-fn">toLowerCase</span><span class="c-punc">().</span><span class="j-fn">includes</span><span class="c-punc">(</span><span class="j-var">keyword</span><span class="c-punc">)</span></div>
+            <div class="e-row"><span class="e-ind2"></span><span class="c-punc">);</span></div>
+            <div class="e-row"><span class="e-ind2"></span><span class="j-fn">displayCourses</span><span class="c-punc">(</span><span class="j-var">filtered</span><span class="c-punc">);</span></div>
+            <div class="e-row"><span class="c-punc">});</span></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">update displayCourses() to accept data</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">frontend/js/script.js</span></div>
+          <div class="editor-body" style="font-size:11.5px">
+            <div class="e-row" style="background:#1a2a1a"><span class="j-kw">function</span> <span class="j-fn">displayCourses</span><span class="c-punc">(</span><span class="j-var" style="color:#80ffea">data</span><span class="j-op" style="color:#80ffea">=</span><span class="j-var" style="color:#80ffea">courses</span><span class="c-punc">) {</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="j-kw">let</span> <span class="j-var">html</span> <span class="j-op">=</span> <span class="j-str">""</span><span class="c-punc">;</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="j-var" style="color:#80ffea">data</span><span class="c-punc">.</span><span class="j-fn">forEach</span><span class="c-punc">((</span><span class="j-var">course</span><span class="c-punc">,</span><span class="j-var">index</span><span class="c-punc">) </span><span class="j-op">=&gt;</span> <span class="c-punc">{ </span><span class="j-com">/* ...same as before */</span><span class="c-punc"> });</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="j-dom">document</span><span class="c-punc">.</span><span class="j-fn">getElementById</span><span class="c-punc">(</span><span class="j-str">"courseContainer"</span><span class="c-punc">).</span><span class="j-key">innerHTML</span> <span class="j-op">=</span> <span class="j-var">html</span><span class="c-punc">;</span></div>
+            <div class="e-row"><span class="c-punc">}</span></div>
+          </div>
+        </div>
+        <div class="info-box" style="margin-top:10px">
+          <i class="ti ti-info-circle info-icon"></i>
+          <div class="info-text"><strong>data = courses is a default parameter.</strong> Call <code>displayCourses()</code> with nothing and it renders the FULL list, exactly as before. Call it with a filtered array and it renders only that — one function, two jobs, no duplicate code.</div>
+        </div>
+      </div>
+    </div>
+    <div class="tip-box">
+      <i class="ti ti-bulb tip-icon"></i>
+      <div class="tip-text"><strong>Reusable functions</strong> are what separate "code that works once" from "code that scales." This same displayCourses(data) will also render results after Local Storage loads, and after any future filter you add.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-10"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Try It Live <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 11  TRY IT LIVE ═══ -->
+  <div class="slide" id="slide-11">
+    <div class="slide-header">
+      <span class="badge b-green">Try It Live</span>
+      <div>
+        <div class="slide-title">The Full Catalog — Working, Right Here</div>
+        <div class="slide-subtitle">Add a course, search for one, delete one — this is real Add/Display/Search/Delete logic</div>
+      </div>
+    </div>
+    <div class="live-panel">
+      <div class="live-form-row">
+        <input type="text" class="live-input" id="live-courseName" placeholder="Course Name">
+        <input type="text" class="live-input" id="live-trainer" placeholder="Trainer">
+        <input type="number" class="live-input" id="live-duration" placeholder="Duration (weeks)">
+        <button class="live-add-btn" onclick="liveAddCourse()"><i class="ti ti-plus"></i> Add Course</button>
+      </div>
+      <div class="live-search-row">
+        <i class="ti ti-search live-search-icon"></i>
+        <input type="text" class="live-search-input" id="live-search" placeholder="Search Course…" oninput="liveSearchFilter(this.value)">
+      </div>
+      <div class="live-count-bar">
+        <span id="live-count">3 courses</span>
+        <span class="live-reset-btn" onclick="liveResetDemo()"><i class="ti ti-refresh"></i> Reset Demo</span>
+      </div>
+      <div class="live-cards" id="live-cards"></div>
+    </div>
+    <div class="info-box">
+      <i class="ti ti-info-circle info-icon"></i>
+      <div class="info-text">Every action here runs the exact code from the last three slides: <code>addCourse()</code> pushes into an array, <code>displayCourses()</code> re-renders the cards, <code>filter()</code> narrows them on search, and <code>splice()</code> removes one on delete.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-11"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Why Local Storage? <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 12  WHY LOCAL STORAGE ═══ -->
+  <div class="slide" id="slide-12">
+    <div class="slide-header">
+      <span class="badge b-amber">2nd 90 Min · Part 3 · 25 min</span>
+      <div>
+        <div class="slide-title">Local Storage</div>
+        <div class="slide-subtitle">Students already know arrays. Now — what happens after a refresh?</div>
+      </div>
+    </div>
+    <div class="card card-gray">
+      <div style="font-size:14px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px">
+        <i class="ti ti-message-question" style="color:#d97706;font-size:20px"></i>
+        Add three courses in the demo you just tried. Now press F5. What happens?
+      </div>
+      <button class="reveal-btn" onclick="toggle('ls-why-ans')">Reveal the answer</button>
+      <div class="reveal-content" id="ls-why-ans">
+        <div style="margin-top:10px;padding:14px 16px;background:#fff;border-radius:10px;border:1px solid #fde68a">
+          <div style="font-size:18px;font-weight:800;color:#854d0e;text-align:center;margin-bottom:8px">Everything disappears.</div>
+          <div style="font-size:13px;color:#444;text-align:center;line-height:1.7">The <code>courses</code> array only exists in RAM while the page is open. A refresh restarts JavaScript from the top — <code>let courses = []</code> runs again, empty. We need somewhere the data can survive a reload: <strong>Local Storage</strong>.</div>
+        </div>
+      </div>
+    </div>
+    <div class="grid-3">
+      <div class="card" style="text-align:center">
+        <span class="method-chip" style="background:#dbeafe;color:#1e40af">setItem(key, value)</span>
+        <div style="font-size:11px;color:#666;margin-top:8px">Saves a string under a named key</div>
+      </div>
+      <div class="card" style="text-align:center">
+        <span class="method-chip" style="background:#dcfce7;color:#166534">getItem(key)</span>
+        <div style="font-size:11px;color:#666;margin-top:8px">Reads it back — even after a reload</div>
+      </div>
+      <div class="card" style="text-align:center">
+        <span class="method-chip" style="background:#ede9fe;color:#5b21b6">JSON.stringify / parse</span>
+        <div style="font-size:11px;color:#666;margin-top:8px">Converts our array of course objects to/from text</div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-12"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Save &amp; Load Courses <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 13  SAVE & LOAD COURSES ═══ -->
+  <div class="slide" id="slide-13">
+    <div class="slide-header">
+      <span class="badge b-amber">2nd 90 Min · Part 3</span>
+      <div>
+        <div class="slide-title">Save &amp; Load Courses</div>
+        <div class="slide-subtitle">One function to save, one line to load — called at exactly the right moments</div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="section-label">save — saveCourses()</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">frontend/js/script.js</span></div>
+          <div class="editor-body" style="font-size:11.5px">
+            <div class="e-row"><span class="j-kw">function</span> <span class="j-fn">saveCourses</span><span class="c-punc">() {</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="j-var">localStorage</span><span class="c-punc">.</span><span class="j-fn">setItem</span><span class="c-punc">(</span></div>
+            <div class="e-row"><span class="e-ind2"></span><span class="j-str">"courses"</span><span class="c-punc">,</span></div>
+            <div class="e-row"><span class="e-ind2"></span><span class="j-var" style="color:#80ffea">JSON</span><span class="c-punc">.</span><span class="j-fn" style="color:#80ffea">stringify</span><span class="c-punc">(</span><span class="j-var">courses</span><span class="c-punc">)</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="c-punc">);</span></div>
+            <div class="e-row"><span class="c-punc">}</span></div>
+          </div>
+        </div>
+        <div class="warn-box" style="margin-top:10px">
+          <i class="ti ti-alert-triangle" style="color:#d97706;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+          <div style="font-size:13px;color:#92400e;line-height:1.6"><strong>Call saveCourses() in two places:</strong> right after <code>courses.push()</code> inside <code>addCourse()</code>, and right after <code>courses.splice()</code> inside <code>deleteCourse()</code>. Miss one, and that action won't survive a refresh.</div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">load — at the very top of the file</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">top of frontend/js/script.js</span></div>
+          <div class="editor-body" style="font-size:11.5px">
+            <div class="e-row"><span class="j-kw">let</span> <span class="j-var">courses</span> <span class="j-op">=</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="j-var" style="color:#80ffea">JSON</span><span class="c-punc">.</span><span class="j-fn" style="color:#80ffea">parse</span><span class="c-punc">(</span></div>
+            <div class="e-row"><span class="e-ind2"></span><span class="j-var">localStorage</span><span class="c-punc">.</span><span class="j-fn">getItem</span><span class="c-punc">(</span><span class="j-str">"courses"</span><span class="c-punc">)</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="c-punc">) </span><span class="j-op">||</span> <span class="c-punc">[];</span></div>
+            <div class="e-row"><span class="e-ln"> </span></div>
+            <div class="e-row"><span class="j-fn">displayCourses</span><span class="c-punc">();</span></div>
+          </div>
+        </div>
+        <div style="font-size:11px;color:#888;margin-top:6px"><code>|| []</code> protects the very first visit, when nothing has been saved yet.</div>
+      </div>
+    </div>
+    <div class="section-label">try it live — click the buttons below</div>
+    <div style="background:#f8f9fa;border:1px solid #e8e8e8;border-radius:12px;padding:14px 16px">
+      <div class="ls-demo-controls">
+        <button class="ls-btn" onclick="lsDemoSave()">saveCourses()</button>
+        <button class="ls-btn" onclick="lsDemoLoad()">localStorage.getItem("courses")</button>
+        <button class="ls-btn danger" onclick="lsDemoClear()">localStorage.removeItem("courses")</button>
+      </div>
+      <div class="ls-box" id="ls-visual"><span class="ls-empty-msg">localStorage is empty</span></div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-13"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Prove It — Refresh Test <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 14  REFRESH TEST ═══ -->
+  <div class="slide" id="slide-14">
+    <div class="slide-header">
+      <span class="badge b-cyan">Proof</span>
+      <div>
+        <div class="slide-title">Refresh Browser. Everything Stays.</div>
+        <div class="slide-subtitle">This is the moment students immediately understand persistence</div>
+      </div>
+    </div>
+    <div class="card card-gray">
+      <div class="refresh-demo" style="display:flex;align-items:center;justify-content:center;gap:18px;padding:10px 0">
+        <div style="text-align:center">
+          <div style="width:54px;height:54px;border-radius:50%;background:#fef9c3;display:flex;align-items:center;justify-content:center;color:#d97706;font-size:24px;margin:0 auto"><i class="ti ti-list-details"></i></div>
+          <div style="font-size:11px;color:#888;margin-top:6px">3 courses<br>on screen</div>
+        </div>
+        <i class="ti ti-arrow-right" style="color:#d97706;font-size:22px"></i>
+        <div style="text-align:center">
+          <div style="width:54px;height:54px;border-radius:50%;background:#fef9c3;display:flex;align-items:center;justify-content:center;color:#d97706;font-size:24px;margin:0 auto"><i class="ti ti-refresh"></i></div>
+          <div style="font-size:11px;color:#888;margin-top:6px">Browser<br>refresh (F5)</div>
+        </div>
+        <i class="ti ti-arrow-right" style="color:#d97706;font-size:22px"></i>
+        <div style="text-align:center">
+          <div style="width:54px;height:54px;border-radius:50%;background:#dcfce7;display:flex;align-items:center;justify-content:center;color:#166534;font-size:24px;margin:0 auto"><i class="ti ti-list-details"></i></div>
+          <div style="font-size:11px;color:#888;margin-top:6px">3 courses<br><strong>still there</strong></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-label">what changed vs before local storage</div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#fee2e2;border-radius:8px;font-size:12px;font-weight:700;color:#991b1b">
+          <span>Without saveCourses() / load-on-open</span><span><i class="ti ti-x"></i> data lost on refresh</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#dcfce7;border-radius:8px;font-size:12px;font-weight:700;color:#166534">
+          <span>With saveCourses() / load-on-open</span><span><i class="ti ti-check"></i> data survives refresh, tab close, restart</span>
+        </div>
+      </div>
+    </div>
+    <div class="success-box">
+      <i class="ti ti-sparkles" style="color:#16a34a;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+      <div style="font-size:13px;color:#166534;line-height:1.65">This is the exact same save → stringify → store → refresh → parse → restore cycle you already used with the Student Dashboard — now applied to Courses. The pattern is the reusable skill, not the specific project.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-14"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Dashboard Counter <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 15  DASHBOARD COUNTER ═══ -->
+  <div class="slide" id="slide-15">
+    <div class="slide-header">
+      <span class="badge b-blue">2nd 90 Min · Part 4 · 25 min</span>
+      <div>
+        <div class="slide-title">Mini Frontend LMS — Dashboard Counter</div>
+        <div class="slide-subtitle">One number that's always right, no matter what changes</div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="section-label">html</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">index.html</span></div>
+          <div class="editor-body" style="font-size:11.5px">
+            <div class="e-row"><span class="e-tag">&lt;div</span> <span class="e-att">class</span><span class="c-punc">=</span><span class="e-val">"row text-center mt-5"</span><span class="e-tag">&gt;</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="e-tag">&lt;div</span> <span class="e-att">class</span><span class="c-punc">=</span><span class="e-val">"col"</span><span class="e-tag">&gt;</span></div>
+            <div class="e-row"><span class="e-ind2"></span><span class="e-tag">&lt;h4&gt;</span>Total Courses<span class="e-tag">&lt;/h4&gt;</span></div>
+            <div class="e-row"><span class="e-ind2"></span><span class="e-tag">&lt;h2</span> <span class="e-att">id</span><span class="c-punc">=</span><span class="e-val">"totalCourses"</span><span class="e-tag">&gt;</span>0<span class="e-tag">&lt;/h2&gt;</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="e-tag">&lt;/div&gt;</span></div>
+            <div class="e-row"><span class="e-tag">&lt;/div&gt;</span></div>
+          </div>
+        </div>
+        <div class="section-label" style="margin-top:14px">preview</div>
+        <div class="counter-card">
+          <div class="counter-icon"><i class="ti ti-books"></i></div>
+          <div>
+            <div class="counter-num">3</div>
+            <div class="counter-label">Total Courses</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">javascript</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">frontend/js/script.js</span></div>
+          <div class="editor-body" style="font-size:11.5px">
+            <div class="e-row"><span class="j-kw">function</span> <span class="j-fn">updateDashboard</span><span class="c-punc">() {</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="j-dom">document</span><span class="c-punc">.</span><span class="j-fn">getElementById</span><span class="c-punc">(</span><span class="j-str">"totalCourses"</span><span class="c-punc">)</span></div>
+            <div class="e-row"><span class="e-ind2"></span><span class="c-punc">.</span><span class="j-key">innerHTML</span> <span class="j-op">=</span> <span class="j-var">courses</span><span class="c-punc">.</span><span class="j-prop">length</span><span class="c-punc">;</span></div>
+            <div class="e-row"><span class="c-punc">}</span></div>
+          </div>
+        </div>
+        <div class="section-label" style="margin-top:14px">call it from inside displayCourses()</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">frontend/js/script.js</span></div>
+          <div class="editor-body" style="font-size:11.5px">
+            <div class="e-row"><span class="j-kw">function</span> <span class="j-fn">displayCourses</span><span class="c-punc">(</span><span class="j-var">data</span><span class="j-op">=</span><span class="j-var">courses</span><span class="c-punc">) {</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="j-com">// ...build and set innerHTML as before</span></div>
+            <div class="e-row" style="background:#1a2a1a"><span class="e-ind1"></span><span class="j-fn" style="color:#80ffea">updateDashboard</span><span class="c-punc">();</span></div>
+            <div class="e-row"><span class="c-punc">}</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="info-box">
+      <i class="ti ti-info-circle info-icon"></i>
+      <div class="info-text"><strong>Why inside displayCourses(), not addCourse()?</strong> displayCourses() runs after every add, delete, search, and page load — putting the counter update there means it's automatically correct everywhere, with no risk of forgetting to call it somewhere.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-15"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Bonus Features <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 16  BONUS FEATURES ═══ -->
+  <div class="slide" id="slide-16">
+    <div class="slide-header">
+      <span class="badge b-pink">Bonus</span>
+      <div>
+        <div class="slide-title">Edit, Categories, Status &amp; Difficulty</div>
+        <div class="slide-subtitle">Optional stretch features — implement whichever you have time for</div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="section-label"><i class="ti ti-edit" style="margin-right:4px"></i> edit button / edit course</div>
+        <div style="font-size:12px;color:#555;line-height:1.7">Same pattern as the Student Dashboard's editIndex: clicking Edit fills the form with that course's current values; submitting overwrites <code>courses[editIndex]</code> instead of pushing a new one.</div>
+      </div>
+      <div class="card">
+        <div class="section-label"><i class="ti ti-category" style="margin-right:4px"></i> course categories</div>
+        <div class="cc-badges">
+          <span class="cc-badge cc-cat-web">Web Development</span>
+          <span class="cc-badge cc-cat-prog">Programming</span>
+          <span class="cc-badge cc-cat-ai">AI</span>
+          <span class="cc-badge cc-cat-blockchain">Blockchain</span>
+        </div>
+        <div style="font-size:11px;color:#888;margin-top:10px">Add a <code>category</code> field to the course object and display it as a Bootstrap badge.</div>
+      </div>
+      <div class="card">
+        <div class="section-label"><i class="ti ti-circle-check" style="margin-right:4px"></i> course status</div>
+        <div class="cc-badges">
+          <span class="cc-badge cc-stat-available">Available</span>
+          <span class="cc-badge cc-stat-upcoming">Upcoming</span>
+        </div>
+        <div style="font-size:11px;color:#888;margin-top:10px">A simple two-value field — great first stretch feature.</div>
+      </div>
+      <div class="card">
+        <div class="section-label"><i class="ti ti-stairs-up" style="margin-right:4px"></i> difficulty</div>
+        <div class="cc-badges">
+          <span class="cc-badge cc-diff-beginner">Beginner</span>
+          <span class="cc-badge cc-diff-intermediate">Intermediate</span>
+          <span class="cc-badge cc-diff-advanced">Advanced</span>
+        </div>
+        <div style="font-size:11px;color:#888;margin-top:10px">Color-code by level so the catalog is scannable at a glance.</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-label">a card with all the badges together</div>
+      <div class="cc-card" style="max-width:280px">
+        <div class="cc-body">
+          <div class="cc-title">Solidity Smart Contracts</div>
+          <div class="cc-meta">Trainer: Manish</div>
+          <div class="cc-meta">Duration: 5 Weeks</div>
+          <div class="cc-badges">
+            <span class="cc-badge cc-cat-blockchain">Blockchain</span>
+            <span class="cc-badge cc-stat-available">Available</span>
+            <span class="cc-badge cc-diff-intermediate">Intermediate</span>
+          </div>
+          <button class="cc-del">Delete</button>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-16"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Mini Challenge <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 17  MINI CHALLENGE ═══ -->
+  <div class="slide" id="slide-17">
+    <div class="slide-header">
+      <span class="badge b-rose">Mini Challenge</span>
+      <div>
+        <div class="slide-title">Fee, Image URL &amp; Rating</div>
+        <div class="slide-subtitle">Extend the course object — then display everything inside the Bootstrap card</div>
+      </div>
+    </div>
+    <div class="challenge-box">
+      <div class="challenge-title"><i class="ti ti-trophy"></i> Add three new fields to every course</div>
+      <div class="grid-3" style="margin-top:10px">
+        <div style="text-align:center;padding:10px;background:#fff;border-radius:8px">
+          <i class="ti ti-currency-rupee" style="font-size:18px;color:#d97706"></i>
+          <div style="font-size:12px;font-weight:700;margin-top:6px">Course Fee</div>
+        </div>
+        <div style="text-align:center;padding:10px;background:#fff;border-radius:8px">
+          <i class="ti ti-photo" style="font-size:18px;color:#d97706"></i>
+          <div style="font-size:12px;font-weight:700;margin-top:6px">Course Image URL</div>
+        </div>
+        <div style="text-align:center;padding:10px;background:#fff;border-radius:8px">
+          <i class="ti ti-star" style="font-size:18px;color:#d97706"></i>
+          <div style="font-size:12px;font-weight:700;margin-top:6px">Rating (1–5)</div>
+        </div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="section-label">extended object</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">inside addCourse()</span></div>
+          <div class="editor-body" style="font-size:11.5px">
+            <div class="e-row"><span class="j-kw">const</span> <span class="j-var">course</span> <span class="j-op">=</span> <span class="c-punc">{</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="j-key">name</span><span class="c-punc">, </span><span class="j-key">trainer</span><span class="c-punc">, </span><span class="j-key">duration</span><span class="c-punc">,</span></div>
+            <div class="e-row" style="background:#1a2a1a"><span class="e-ind1"></span><span class="j-key" style="color:#80ffea">fee</span><span class="c-punc">: </span><span class="j-dom">document</span><span class="c-punc">.</span><span class="j-fn">getElementById</span><span class="c-punc">(</span><span class="j-str">"fee"</span><span class="c-punc">).</span><span class="j-key">value</span><span class="c-punc">,</span></div>
+            <div class="e-row" style="background:#1a2a1a"><span class="e-ind1"></span><span class="j-key" style="color:#80ffea">image</span><span class="c-punc">: </span><span class="j-dom">document</span><span class="c-punc">.</span><span class="j-fn">getElementById</span><span class="c-punc">(</span><span class="j-str">"image"</span><span class="c-punc">).</span><span class="j-key">value</span><span class="c-punc">,</span></div>
+            <div class="e-row" style="background:#1a2a1a"><span class="e-ind1"></span><span class="j-key" style="color:#80ffea">rating</span><span class="c-punc">: </span><span class="j-dom">document</span><span class="c-punc">.</span><span class="j-fn">getElementById</span><span class="c-punc">(</span><span class="j-str">"rating"</span><span class="c-punc">).</span><span class="j-key">value</span></div>
+            <div class="e-row"><span class="c-punc">};</span></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">preview card</div>
+        <div class="cc-card" style="max-width:260px">
+          <img src="https://placehold.co/260x110/1e293b/eee?text=Course+Image" style="width:100%;display:block" alt="course preview">
+          <div class="cc-body">
+            <div class="cc-title">DevOps Essentials</div>
+            <div class="cc-meta">Trainer: Aman &nbsp;·&nbsp; 4 Weeks</div>
+            <div class="cc-meta">₹4,999 &nbsp;·&nbsp; <i class="ti ti-star-filled" style="color:#f59e0b;font-size:11px"></i> 4.5</div>
+            <button class="cc-del">Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-17"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Assignment <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 18  ASSIGNMENT ═══ -->
+  <div class="slide" id="slide-18">
+    <div class="slide-header">
+      <span class="badge b-orange">Assignment</span>
+      <div>
+        <div class="slide-title">Complete the Course Catalog</div>
+        <div class="slide-subtitle">Tick each box off as you finish it in your own project</div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="checklist-col" style="display:flex;flex-direction:column;gap:8px">
+        <div class="check-item" onclick="this.classList.toggle('done')">
+          <div class="check-circle"><i class="ti ti-check"></i></div>
+          <div>Add Course — form pushes a new object into the array</div>
+        </div>
+        <div class="check-item" onclick="this.classList.toggle('done')">
+          <div class="check-circle"><i class="ti ti-check"></i></div>
+          <div>Delete Course — splice() removes exactly one card</div>
+        </div>
+        <div class="check-item" onclick="this.classList.toggle('done')">
+          <div class="check-circle"><i class="ti ti-check"></i></div>
+          <div>Search Course — live filter as you type</div>
+        </div>
+        <div class="check-item" onclick="this.classList.toggle('done')">
+          <div class="check-circle"><i class="ti ti-check"></i></div>
+          <div>Save in Local Storage — after every add and delete</div>
+        </div>
+      </div>
+      <div class="checklist-col" style="display:flex;flex-direction:column;gap:8px">
+        <div class="check-item" onclick="this.classList.toggle('done')">
+          <div class="check-circle"><i class="ti ti-check"></i></div>
+          <div>Load on Refresh — courses restored from localStorage on open</div>
+        </div>
+        <div class="check-item" onclick="this.classList.toggle('done')">
+          <div class="check-circle"><i class="ti ti-check"></i></div>
+          <div>Dashboard Counter — Total Courses always accurate</div>
+        </div>
+        <div class="check-item" onclick="this.classList.toggle('done')">
+          <div class="check-circle"><i class="ti ti-check"></i></div>
+          <div>Empty State Message — shown when the catalog is empty</div>
+        </div>
+        <div class="check-item" onclick="this.classList.toggle('done')">
+          <div class="check-circle"><i class="ti ti-check"></i></div>
+          <div>Confirmation Before Delete — confirm() before removing</div>
+        </div>
+      </div>
+    </div>
+    <div class="section-label">two features worth a closer look</div>
+    <div class="grid-2">
+      <div class="card">
+        <div style="font-size:12px;font-weight:700;margin-bottom:6px"><i class="ti ti-mood-empty" style="margin-right:4px;color:#888"></i> Empty State</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">inside displayCourses()</span></div>
+          <div class="editor-body" style="font-size:11px">
+            <div class="e-row"><span class="j-ret">if</span><span class="c-punc"> (</span><span class="j-var">data</span><span class="c-punc">.</span><span class="j-prop">length</span> <span class="j-op">==</span> <span class="j-num">0</span><span class="c-punc">) {</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="j-var">html</span> <span class="j-op">=</span> <span class="j-str">"No Courses Available"</span><span class="c-punc">;</span></div>
+            <div class="e-row"><span class="c-punc">}</span></div>
+          </div>
+        </div>
+        <div class="empty-state" style="margin-top:10px"><i class="ti ti-mood-empty"></i><div class="es-text">No Courses Available</div></div>
+      </div>
+      <div class="card">
+        <div style="font-size:12px;font-weight:700;margin-bottom:6px"><i class="ti ti-shield-check" style="margin-right:4px;color:#888"></i> Confirm Before Delete</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">inside deleteCourse(index)</span></div>
+          <div class="editor-body" style="font-size:11px">
+            <div class="e-row"><span class="j-ret">if</span><span class="c-punc"> (!</span><span class="j-fn">confirm</span><span class="c-punc">(</span></div>
+            <div class="e-row"><span class="e-ind1"></span><span class="j-str">"Are you sure you want to delete this course?"</span></div>
+            <div class="e-row"><span class="c-punc">)) </span><span class="j-ret">return</span><span class="c-punc">;</span></div>
+          </div>
+        </div>
+        <div style="font-size:11px;color:#888;margin-top:8px">Only proceeds to <code>splice()</code> if the user clicks OK.</div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-18"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Final Deliverable <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 19  FINAL DELIVERABLE ═══ -->
+  <div class="slide" id="slide-19">
+    <div class="slide-header">
+      <span class="badge b-slate">Deliverable</span>
+      <div>
+        <div class="slide-title">Final Deliverable — Mini Frontend LMS</div>
+        <div class="slide-subtitle">Everything built today, in one place</div>
+      </div>
+    </div>
+    <div class="grid-3">
+      <div class="card" style="text-align:center">
+        <i class="ti ti-layout-grid" style="font-size:20px;color:#2563eb"></i>
+        <div style="font-size:12px;font-weight:700;margin-top:6px">Dynamic Course Catalog</div>
+      </div>
+      <div class="card" style="text-align:center">
+        <i class="ti ti-brand-bootstrap" style="font-size:20px;color:#7c3aed"></i>
+        <div style="font-size:12px;font-weight:700;margin-top:6px">Bootstrap Cards</div>
+      </div>
+      <div class="card" style="text-align:center">
+        <i class="ti ti-search" style="font-size:20px;color:#0891b2"></i>
+        <div style="font-size:12px;font-weight:700;margin-top:6px">Search</div>
+      </div>
+      <div class="card" style="text-align:center">
+        <i class="ti ti-trash" style="font-size:20px;color:#dc2626"></i>
+        <div style="font-size:12px;font-weight:700;margin-top:6px">Delete</div>
+      </div>
+      <div class="card" style="text-align:center">
+        <i class="ti ti-database" style="font-size:20px;color:#be185d"></i>
+        <div style="font-size:12px;font-weight:700;margin-top:6px">Local Storage</div>
+      </div>
+      <div class="card" style="text-align:center">
+        <i class="ti ti-chart-bar" style="font-size:20px;color:#16a34a"></i>
+        <div style="font-size:12px;font-weight:700;margin-top:6px">Dashboard Statistics</div>
+      </div>
+    </div>
+    <div class="card" style="text-align:center">
+      <i class="ti ti-device-mobile" style="font-size:20px;color:#d97706"></i>
+      <div style="font-size:12px;font-weight:700;margin-top:6px">Responsive Design — works on any screen size</div>
+    </div>
+    <div class="success-box">
+      <i class="ti ti-sparkles" style="color:#16a34a;font-size:18px;flex-shrink:0;margin-top:1px"></i>
+      <div style="font-size:13px;color:#166534;line-height:1.65"><strong>This is a real, working frontend feature</strong> — the same shape as what powers course catalogs on real learning platforms. You built it from a blank form, entirely with vanilla JavaScript and the DOM.</div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-19"></div>
+      <button class="nav-btn primary" onclick="nextSlide()">Quick Check <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 20  QUIZ ═══ -->
+  <div class="slide" id="slide-20">
+    <div class="slide-header">
+      <span class="badge b-green">Quiz</span>
+      <div>
+        <div class="slide-title">Quick Check — Course Catalog</div>
+        <div class="slide-subtitle">7 questions covering the full 3-hour session</div>
+      </div>
+    </div>
+    <div id="quiz-container"></div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevSlide()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-20"></div>
+      <button class="nav-btn" onclick="goSlide(0)"><i class="ti ti-home"></i> Home</button>
+    </div>
+  </div>
+
+</div><!-- /.wrapper -->
+<script>
+  var current = 0, total = 21, quizInit = false;
+
+  /* ── Selecting Elements interactive demo ── */
+  function selConsoleLog(html) {
+    document.getElementById('sel-console').innerHTML = '<div class="con-prompt-row"><span style="color:#3fb950;font-size:11px">▶</span><span>' + html + '</span></div>';
+  }
+  function selDemoGetById() {
+    var el = document.getElementById('demo-courseName');
+    selConsoleLog('<span style="color:#8be9fd">&lt;input id="demo-courseName" ...&gt;</span>  <span style="color:#6272a4">// 1 element found</span>');
+    el.style.outline = '2px solid #d97706';
+    setTimeout(function(){ el.style.outline = ''; }, 700);
+  }
+  function selDemoQuery() {
+    var el = document.querySelector('.demo-card');
+    selConsoleLog('<span style="color:#8be9fd">&lt;div class="card demo-card"&gt;</span>  <span style="color:#6272a4">// only the FIRST match</span>');
+    el.style.outline = '2px solid #d97706';
+    setTimeout(function(){ el.style.outline = ''; }, 700);
+  }
+  function selDemoQueryAll() {
+    var els = document.querySelectorAll('.demo-card');
+    selConsoleLog('NodeList(' + els.length + ') <span style="color:#6272a4">// all 3 matches, loopable</span>');
+    els.forEach(function(el){ el.style.outline = '2px solid #d97706'; });
+    setTimeout(function(){ els.forEach(function(el){ el.style.outline = ''; }); }, 700);
+  }
+
+  /* ── Live Course Catalog demo (Add / Search / Delete) ── */
+  var liveCourses = [
+    { name: 'React Basics', trainer: 'Manish', duration: '4' },
+    { name: 'Node.js API', trainer: 'Priya', duration: '6' },
+    { name: 'Solidity Smart Contracts', trainer: 'Aman', duration: '5' }
+  ];
+  function liveRenderCourses(data) {
+    data = data || liveCourses;
+    var box = document.getElementById('live-cards');
+    var countEl = document.getElementById('live-count');
+    if (!box) return;
+    countEl.textContent = data.length + ' course' + (data.length === 1 ? '' : 's');
+    if (data.length === 0) {
+      box.innerHTML = '<div class="live-empty">No Courses Available</div>';
+      return;
+    }
+    var html = '';
+    data.forEach(function(course) {
+      var realIndex = liveCourses.indexOf(course);
+      html += '<div class="cc-card"><div class="cc-body">' +
+        '<div class="cc-title">' + course.name + '</div>' +
+        '<div class="cc-meta">Trainer: ' + course.trainer + '</div>' +
+        '<div class="cc-meta">Duration: ' + course.duration + ' Weeks</div>' +
+        '<button class="cc-del" onclick="liveDeleteCourse(' + realIndex + ')">Delete</button>' +
+        '</div></div>';
+    });
+    box.innerHTML = html;
+  }
+  function liveAddCourse() {
+    var nameEl = document.getElementById('live-courseName');
+    var trainerEl = document.getElementById('live-trainer');
+    var durEl = document.getElementById('live-duration');
+    var name = nameEl.value.trim();
+    var trainer = trainerEl.value.trim();
+    var duration = durEl.value.trim();
+    if (!name) { nameEl.style.borderColor = '#dc3545'; setTimeout(function(){nameEl.style.borderColor='';}, 800); return; }
+    liveCourses.push({ name: name, trainer: trainer || 'TBA', duration: duration || '—' });
+    nameEl.value = ''; trainerEl.value = ''; durEl.value = '';
+    document.getElementById('live-search').value = '';
+    liveRenderCourses();
+  }
+  function liveDeleteCourse(index) {
+    liveCourses.splice(index, 1);
+    liveRenderCourses();
+  }
+  function liveSearchFilter(text) {
+    text = (text || '').toLowerCase();
+    var filtered = liveCourses.filter(function(c) { return c.name.toLowerCase().includes(text); });
+    liveRenderCourses(filtered);
+  }
+  function liveResetDemo() {
+    liveCourses = [
+      { name: 'React Basics', trainer: 'Manish', duration: '4' },
+      { name: 'Node.js API', trainer: 'Priya', duration: '6' },
+      { name: 'Solidity Smart Contracts', trainer: 'Aman', duration: '5' }
+    ];
+    document.getElementById('live-search').value = '';
+    liveRenderCourses();
+  }
+
+  /* ── Local Storage demo (Save / Load / Clear courses) ── */
+  var lsCourseStore = {};
+  function updateLsVisual() {
+    var box = document.getElementById('ls-visual');
+    if (!box) return;
+    var keys = Object.keys(lsCourseStore);
+    if (keys.length === 0) {
+      box.innerHTML = '<span class="ls-empty-msg">localStorage is empty</span>';
+      return;
+    }
+    var html = '';
+    keys.forEach(function(k) {
+      var val = lsCourseStore[k];
+      var display = val.length > 90 ? val.slice(0, 90) + '…' : val;
+      html += '<div class="ls-row"><span class="ls-key">"' + k + '"</span><span class="ls-arrow">→</span><span class="ls-val">"' + display + '"</span></div>';
+    });
+    box.innerHTML = html;
+  }
+  function lsDemoSave() {
+    lsCourseStore['courses'] = JSON.stringify(liveCourses);
+    updateLsVisual();
+  }
+  function lsDemoLoad() {
+    if (!lsCourseStore['courses']) { updateLsVisual(); return; }
+    updateLsVisual();
+    var box = document.getElementById('ls-visual');
+    box.style.outline = '2px solid #d97706';
+    setTimeout(function(){ box.style.outline = ''; }, 500);
+  }
+  function lsDemoClear() {
+    delete lsCourseStore['courses'];
+    updateLsVisual();
+  }
+
+  /* ── Quiz data ── */
+  var quizData = [
+    {
+      q: "Why can't HTML alone make a new course card appear when the Add Course button is clicked?",
+      opts: [
+        "HTML is static — it can't react to events; JavaScript reads and edits the DOM to update the page",
+        "Bootstrap blocks HTML from creating new elements",
+        "Buttons can only work inside a &lt;form&gt; tag",
+        "HTML can do this, but only after a page refresh"
+      ],
+      ans: 0,
+      exp: "HTML describes the page's starting structure but has no ability to react to events on its own. JavaScript listens for the click, builds the new card, and updates the DOM — the browser's live in-memory version of the page — which is what actually changes what's on screen."
+    },
+    {
+      q: "What's the key difference between document.getElementById(\"courseName\") and document.querySelector(\".courseName\")?",
+      opts: [
+        "They do exactly the same thing with no differences",
+        "getElementById needs no prefix and matches an id; querySelector needs a CSS-style prefix like '.' for a class or '#' for an id",
+        "querySelector only works on Bootstrap elements",
+        "getElementById returns multiple elements, querySelector returns only one"
+      ],
+      ans: 1,
+      exp: "getElementById takes a plain id, no symbol needed. querySelector takes any CSS selector, so a class needs a leading '.' and an id needs a leading '#'. Forgetting the prefix is a very common bug — it doesn't throw an error, it just quietly returns null."
+    },
+    {
+      q: "In addCourseBtn.addEventListener(\"click\", addCourse), why is it addCourse and not addCourse()?",
+      opts: [
+        "Both forms work identically",
+        "addCourse() is required — addCourse alone causes an error",
+        "Passing addCourse gives the browser a reference to call later, on click; addCourse() would call the function immediately, before any click happens",
+        "It's just a stylistic choice with no functional difference"
+      ],
+      ans: 2,
+      exp: "addEventListener needs a function to call later, when the event fires. Passing addCourse hands over the function itself as a reference. Writing addCourse() would call it immediately while the page loads and pass its return value (usually undefined) instead — a classic beginner mistake."
+    },
+    {
+      q: "In courses.forEach((course, index) => {...}), what role does index play in the rendered card's Delete button?",
+      opts: [
+        "It sets the card's CSS class",
+        "It has no real purpose, just a naming convention",
+        "It becomes part of the onclick=\"deleteCourse(${index})\" call, so each button knows exactly which course to remove",
+        "It controls how many cards are shown per row"
+      ],
+      ans: 2,
+      exp: "Every course's position in the array is embedded directly into its own Delete button via template literal interpolation. When clicked, deleteCourse(index) knows precisely which item to splice() out — without index, every Delete button would need some other way to identify its course."
+    },
+    {
+      q: "After running const filtered = courses.filter(...), what happens to the original courses array?",
+      opts: [
+        "It becomes exactly equal to filtered",
+        "It stays completely unchanged — filter() always returns a brand new array",
+        "It gets emptied so filtered can take its place",
+        "It gets sorted alphabetically as a side effect"
+      ],
+      ans: 1,
+      exp: "filter() is non-mutating: it builds and returns a new array containing only the items that passed the test, and never touches the original. That's exactly why displayCourses(data = courses) can safely be called with either the full courses array or a filtered one — the underlying data is never at risk."
+    },
+    {
+      q: "Why must courses be converted with JSON.stringify() before localStorage.setItem(), and converted back with JSON.parse() when read?",
+      opts: [
+        "localStorage can only store plain strings — stringify turns the array into text, parse turns that text back into a real array",
+        "It's optional, just a performance optimization",
+        "JSON.stringify makes the array load faster on refresh",
+        "It's required only for arrays with more than 10 items"
+      ],
+      ans: 0,
+      exp: "localStorage only accepts strings. Passing an array or object directly gets silently converted to the useless text \"[object Object]\". JSON.stringify() safely converts it to real text first, and JSON.parse() converts that text back into a usable array when the page loads again."
+    },
+    {
+      q: "What does `if (!confirm(\"Are you sure you want to delete this course?\")) return;` accomplish inside deleteCourse()?",
+      opts: [
+        "It always deletes the course, the message is just cosmetic",
+        "It stops the function immediately if the user clicks Cancel, so splice() only runs if the user clicked OK",
+        "It saves the course to Local Storage before deleting",
+        "It disables the Delete button permanently"
+      ],
+      ans: 1,
+      exp: "confirm() shows a Yes/Cancel dialog and returns true or false based on the user's choice. The ! flips that: if the user did NOT confirm, the function returns early and splice() never runs — protecting against accidental deletes."
+    }
+  ];
+  var quizAnswered = [];
+
+  function renderQuiz() {
+    var c = document.getElementById('quiz-container'); c.innerHTML = '';
+    quizData.forEach(function(q, i) {
+      var d = document.createElement('div'); d.style.cssText = 'margin-bottom:18px';
+      d.innerHTML = '<div style="font-size:13px;font-weight:600;margin-bottom:6px">'+(i+1)+'. '+q.q+'</div>';
+      q.opts.forEach(function(opt, j) {
+        var btn = document.createElement('button'); btn.className = 'quiz-option';
+        btn.innerHTML = String.fromCharCode(65+j)+'. '+opt;
+        btn.onclick = function() {
+          if (quizAnswered[i]) return; quizAnswered[i] = true;
+          var btns = d.querySelectorAll('.quiz-option');
+          btns.forEach(function(b,k){ b.disabled=true; if(k===q.ans) b.classList.add('correct'); else if(k===j) b.classList.add('wrong'); });
+          var fb = d.querySelector('.quiz-feedback');
+          fb.innerHTML = (j===q.ans?'✅ Correct! ':'❌ Not quite. ')+q.exp;
+          fb.className = 'quiz-feedback '+(j===q.ans?'correct':'wrong');
+        };
+        d.appendChild(btn);
+      });
+      var fb = document.createElement('div'); fb.className = 'quiz-feedback'; d.appendChild(fb);
+      c.appendChild(d);
+    });
+  }
+
+  function toggleLex(row) {
+    var was = row.classList.contains('active');
+    document.querySelectorAll('.lex-row.active').forEach(function(r){ r.classList.remove('active'); });
+    if (!was) row.classList.add('active');
+  }
+
+  function toggle(id) {
+    var el = document.getElementById(id); el.classList.toggle('open');
+    var btn = el.previousElementSibling;
+    if (btn && btn.tagName === 'BUTTON') {
+      btn.textContent = el.classList.contains('open') ? 'Hide the answer' : 'Reveal the answer';
+    }
+  }
+
+  function goSlide(n) {
+    document.getElementById('slide-'+current).classList.remove('active');
+    current = n;
+    document.getElementById('slide-'+current).classList.add('active');
+    updateDots();
+    document.getElementById('slide-counter').textContent = (current+1)+' / '+total;
+    if (n===20 && !quizInit) { renderQuiz(); quizInit=true; }
+    window.scrollTo(0,0);
+  }
+  function nextSlide() { if (current < total-1) goSlide(current+1); }
+  function prevSlide() { if (current > 0) goSlide(current-1); }
+
+  function updateDots() {
+    for (var s=0; s<total; s++) {
+      var el = document.getElementById('dots-'+s); if (!el) continue;
+      el.innerHTML = '';
+      for (var d=0; d<total; d++) {
+        var dot = document.createElement('div');
+        dot.className = 'dot'+(d===current?' active':'');
+        el.appendChild(dot);
+      }
+    }
+  }
+  updateDots();
+  liveRenderCourses();
+  updateLsVisual();
+</script>
+</body>
+</html>
