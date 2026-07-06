@@ -1,319 +1,321 @@
-DAY 14
-Express.js Fundamentals
+🚀 DAY 22
+React Forms & Event Handling
 Duration
 
 3 Hours
 
 Learning Outcomes
 
-Students will understand
+Students will learn
 
-Express.js
-Server
-Routing
-Middleware
-Request
-Response
-JSON
-HTTP Status Codes
+Controlled Components
+Event Handling
+onChange
+onSubmit
+Controlled Forms
+React Validation
+useState with Objects
+Dynamic Form Handling
 Project Goal
 
-Create the first backend server for SkillHub LMS.
+Build the Student Registration Module inside React.
 
+Replace
+
+HTML Registration Form
+
+with
+
+React Registration Form
 Final Deliverable
-SkillHub Backend
+SkillHub LMS
 
-GET /courses
+React Registration Form
 
-POST /courses
+↓
 
-Middleware
+Input Handling
 
-Express Server Running
+↓
+
+Validation
+
+↓
+
+Display Student Details
 First 90 Minutes
-Express.js Basics
+Controlled Components
 Part 1
-Why Express?
+Why React Forms?
 
-Start with Question
+Ask
 
-Yesterday we wrote
+Earlier
 
-Node.js
-
-Can Node create APIs easily?
-
-Yes
-
-But
-
-Too much code.
-
-Need
-
-Express
-Install
-npm install express
-Create Server
-const express=require("express");
-
-const app=express();
-
-const PORT=5000;
-Listen
-app.listen(PORT,()=>{
-
-console.log(`Server Running on Port ${PORT}`);
-
-});
-
-Run
-
-node app.js
-
-Browser
-
-localhost:5000
-
-Nothing happens.
-
-Need Route.
-
-First Route
-app.get("/",(req,res)=>{
-
-res.send("Welcome to SkillHub Backend");
-
-});
-
-Refresh.
-
-Students see response.
-
-Explain
-Request
+HTML Form
 
 ↓
 
-Server
+DOM
 
 ↓
 
-Response
-Request Object
-(req,res)
+getElementById()
 
-Explain
+Now
 
-req
+React
 
 ↓
 
-Incoming Request
+State
 
-res
+Draw
 
-↓
-
-Outgoing Response
-Part 2
-Routing
-
-Create
-
-app.get("/courses",(req,res)=>{
-
-res.send("Course API");
-
-});
-
-Create
-
-app.get("/students",(req,res)=>{
-
-res.send("Student API");
-
-});
-
-Create
-
-app.get("/about",(req,res)=>{
-
-res.send("SkillHub LMS");
-
-});
-
-Open browser.
-
-/courses
-
-/students
-
-/about
-Route Parameters
-app.get("/student/:id",(req,res)=>{
-
-res.send(req.params.id);
-
-});
-
-Visit
-
-localhost:5000/student/101
-
-Output
-
-101
-Second 90 Minutes
-Middleware + Course API
-What is Middleware?
-
-Analogy
-
-Airport Security
-
-Passenger
+Input
 
 ↓
 
-Security Check
+State
 
 ↓
 
-Flight
+UI
+Create Form
+function Register(){
 
-Express
+return(
 
-Request
+<form>
 
-↓
+<input
 
-Middleware
+type="text"
 
-↓
+placeholder="Student Name"
 
-Route
-Built-in Middleware
-app.use(express.json());
+/>
 
-Explain
+</form>
 
-Without this
+);
 
-POST Body
-
-Cannot be read.
-
-Logger Middleware
-app.use((req,res,next)=>{
-
-console.log(req.method);
-
-console.log(req.url);
-
-next();
-
-});
-
-Explain
-
-next()
-
-↓
-
-Continue
-Course API
-
-Create
-
-let courses=[];
-
-GET
-
-app.get("/courses",(req,res)=>{
-
-res.json(courses);
-
-});
-
-POST
-
-app.post("/courses",(req,res)=>{
-
-courses.push(req.body);
-
-res.json({
-
-message:"Course Added"
-
-});
-
-});
-
-Example
-
-Postman
-
-{
-"name":"MERN",
-
-"duration":"12 Weeks"
 }
-HTTP Status Codes
+Problem
+
+How do we access
+
+Input Value?
+
+useState
+const [name,setName]=useState("");
+
+Input
+
+<input
+
+value={name}
+
+onChange={(e)=>setName(e.target.value)}
+
+/>
 
 Explain
 
-res.status(201)
-200
+value
 
-201
+↓
 
-400
+Current State
 
-404
+onChange
 
-500
+↓
+
+Updates State
+
+Display
+
+<h2>
+
+Welcome {name}
+
+</h2>
+
+Students love seeing live updates.
+
+Part 2
+
+Multiple Inputs
+
+Instead of
+
+name
+
+email
+
+course
+
+Three states
+
+Teach
+
+Object State
+
+const [student,setStudent]=useState({
+
+name:"",
+
+email:"",
+
+course:""
+
+});
+
+Change
+
+onChange={(e)=>{
+
+setStudent({
+
+...student,
+
+name:e.target.value
+
+});
+
+}}
+
+Explain
+
+Spread Operator.
+
+Generic Input Handler
+const handleChange=(e)=>{
+
+setStudent({
+
+...student,
+
+[e.target.name]:e.target.value
+
+});
+
+}
+
+Students realize
+
+One function
+
+Handles
+
+Entire Form.
+
+Second 90 Minutes
+Validation + Student Preview
+Form Submit
+<form
+
+onSubmit={handleSubmit}
+
+>
+
+Prevent Refresh
+
+const handleSubmit=(e)=>{
+
+e.preventDefault();
+
+}
+
+Validation
+
+if(student.name===""){
+
+alert("Enter Name");
+
+return;
+
+}
+
+Validate Email
+
+Password
+
+Course
+
+Display Student Card
+
+After Submit
+
+Show
+
+Bootstrap Card
+
+Rahul
+
+MERN Stack
+
+rahul@gmail.com
+
+using
+
+student.name
+
+student.email
+Reset Form
+setStudent({
+
+name:"",
+
+email:"",
+
+course:""
+
+});
 Mini Challenge
 
-Students build
+Students add
 
-GET /trainers
+Phone
 
-GET /dashboard
+City
 
-POST /students
+College
+
+Semester
 Assignment
 
 Create
 
-Course API
+Trainer Registration
 
-Student API
+Name
 
-Trainer API
+Technology
 
-using Express.
+Experience
 
+Photo URL
+
+Preview Card
 End Result
-Express Server
+React Registration Form
 
 ↓
 
-Routing
+Controlled Components
 
 ↓
 
-Middleware
+Validation
 
 ↓
 
-GET
+Student Preview
+🚀 DAY 23
+useEffect + Fetch API Integration
 
-↓
-
-POST
-DAY 15
-REST APIs
 Duration
 
 3 Hours
@@ -322,253 +324,624 @@ Learning Outcomes
 
 Students learn
 
-REST
-CRUD APIs
-GET
-POST
-PUT
-DELETE
-Postman
-Request Body
-URL Params
+useEffect
+API Calls
+Fetch API
+Loading State
+Error Handling
+Dynamic Data
+CRUD Integration
 Project Goal
 
-Complete Course CRUD APIs.
+Connect
 
+React
+
+↓
+
+Express
+
+↓
+
+MongoDB
+
+Finally
+
+React becomes
+
+Full Stack.
+
+Final Deliverable
+React
+
+↓
+
+GET Courses
+
+↓
+
+Display Cards
+
+↓
+
+POST Course
+
+↓
+
+Delete Course
 First 90 Minutes
-REST Concepts
+useEffect
+Start with Question
 
-Draw
+Current
 
-Frontend
+Courses
 
-↓
+Hardcoded
 
-GET
+Need
 
-POST
+Database
 
-PUT
-
-DELETE
-
-↓
-
-Backend
+What is useEffect?
 
 Explain
 
-Method	Meaning
-GET	Read
-POST	Create
-PUT	Update
-DELETE	Delete
-GET
-app.get("/courses",(req,res)=>{
+Component Loads
 
-res.json(courses);
+↓
 
-});
-POST
-app.post("/courses",(req,res)=>{
+Call API
 
-courses.push(req.body);
+↓
 
-res.status(201).json({
+Display Data
 
-message:"Course Created"
+Import
 
-});
+import{
 
-});
-Postman Demo
+useEffect,
 
-Send
+useState
 
-POST
+}from"react";
 
-localhost:5000/courses
+Create State
+
+const [courses,setCourses]=useState([]);
+
+useEffect
+
+useEffect(()=>{
+
+console.log("Component Loaded");
+
+},[]);
+
+Explain
+
+[]
+
+↓
+
+Run Once
+Fetch API
+async function getCourses(){
+
+const response=
+
+await fetch(
+
+"http://localhost:5000/courses"
+
+);
+
+const data=
+
+await response.json();
+
+setCourses(data);
+
+}
+
+Call
+
+useEffect(()=>{
+
+getCourses();
+
+},[]);
+
+Students see
+
+Database
+
+↓
+
+React
+
+Loading State
+const[loading,setLoading]
+
+=useState(true);
+
+Before API
+
+setLoading(true);
+
+After
+
+setLoading(false);
+
+Display
+
+Loading...
 Second 90 Minutes
-PUT
-app.put("/courses/:id",(req,res)=>{
+Complete CRUD Integration
+Display Cards
+courses.map(course=>(
 
-const id=req.params.id;
+<CourseCard
 
-courses[id]=req.body;
+key={course._id}
 
-res.json({
+...
 
-message:"Updated"
+/>
 
-});
+))
+Add Course
 
-});
-DELETE
-app.delete("/courses/:id",(req,res)=>{
+Current
 
-courses.splice(req.params.id,1);
+Local State
 
-res.json({
+Replace
 
-message:"Deleted"
+API
 
-});
+await fetch(
 
-});
-Test Every API
+"/courses",
 
-Students test
+{
 
-GET
+method:"POST",
 
-POST
+headers:{
 
-PUT
+"Content-Type":"application/json"
 
-DELETE
+},
 
-using Postman.
+body:JSON.stringify(course)
 
+}
+
+);
+
+Refresh
+
+getCourses();
+Delete
+await fetch(
+
+`/courses/${id}`,
+
+{
+
+method:"DELETE"
+
+}
+
+);
+
+Refresh
+
+Again
+
+Error Handling
+try{
+
+}
+
+catch(error){
+
+console.log(error);
+
+}
+Empty State
+
+If
+
+No Courses
+
+Display
+
+No Courses Found
+Dashboard
+
+Display
+
+Total Courses
+
+↓
+
+courses.length
+Mini Challenge
+
+Students implement
+
+Search
+
+↓
+
+filter()
+
+↓
+
+React State
 Assignment
 
 Complete
 
-Student CRUD API
+React Course Dashboard
 
-Trainer CRUD API
-End Result
-Complete Course CRUD
+Features
+
+✔ Fetch Courses
+
+✔ Add Course
+
+✔ Delete Course
+
+✔ Loading
+
+✔ Error Handling
+
+✔ Search
+
+✔ Course Count
+Project Progress
+React LMS
 
 ↓
 
-Postman Tested
-DAY 16
-MongoDB Atlas
+Components
+
+↓
+
+Props
+
+↓
+
+State
+
+↓
+
+Forms
+
+↓
+
+Validation
+
+↓
+
+useEffect
+
+↓
+
+Fetch API
+
+↓
+
+MongoDB
+
+↓
+
+Full Stack CRUD
+
+DAY 24
+React Router & Multi-Page Application
 Duration
 
 3 Hours
 
 Learning Outcomes
 
-Students learn
+Students will learn
 
-MongoDB
-Collections
-Documents
-CRUD
-Atlas
-Compass
-MongoDB Driver
+React Router
+BrowserRouter
+Routes
+Route
+Link
+NavLink
+useNavigate
+URL Parameters
+404 Page
 Project Goal
 
-Replace in-memory arrays with MongoDB.
+Convert SkillHub LMS from a Single Component into a Multi-Page Application.
 
+Final Deliverable
+SkillHub LMS
+
+Home
+
+Courses
+
+Students
+
+Dashboard
+
+About
+
+Login
+
+404 Page
 First 90 Minutes
-Introduction
+React Router Fundamentals
+Part 1
+Start with a Question
 
-Current
+Ask
 
-let courses=[];
+Currently
 
-Problem
+Everything is inside
 
-Server Restart
+App.jsx
 
-↓
+What happens if our project has
 
-Everything Lost.
+50 pages?
+
+Impossible to maintain.
 
 Need
 
-Database
-MongoDB Concepts
+Routing
+Install
+npm install react-router-dom
+Wrap Application
+
+main.jsx
+
+import { BrowserRouter } from "react-router-dom";
+
+ReactDOM.createRoot(document.getElementById("root")).render(
+
+<BrowserRouter>
+
+<App/>
+
+</BrowserRouter>
+
+);
 
 Explain
 
-Database
+BrowserRouter controls navigation.
 
-↓
+Create Pages Folder
+src
 
-Collection
+pages
 
-↓
+Home.jsx
 
-Document
+Courses.jsx
 
-Example
+Students.jsx
 
-SkillHub
+Dashboard.jsx
 
-↓
+About.jsx
 
-courses
+Login.jsx
 
-↓
+Explain
 
-{
+Professional Folder Structure
 
-name:"React"
+Create Home
+function Home(){
+
+return(
+
+<h1>
+
+Home Page
+
+</h1>
+
+);
 
 }
-Atlas
 
-Create Account.
+export default Home;
+Configure Routes
+import{
 
-Create Cluster.
+Routes,
 
-Whitelist IP.
+Route
 
-Create Database User.
+}from"react-router-dom";
+<Routes>
 
-Copy Connection String.
+<Route path="/" element={<Home/>}/>
+
+<Route path="/courses" element={<Courses/>}/>
+
+<Route path="/students" element={<Students/>}/>
+
+<Route path="/dashboard" element={<Dashboard/>}/>
+
+</Routes>
+
+Run
+
+Visit
+
+/courses
+
+/dashboard
+
+Students immediately understand routing.
 
 Second 90 Minutes
-Install Driver
-npm install mongodb
-Connect
-const {MongoClient}=require("mongodb");
-Connection
-const client=new MongoClient(uri);
+Navigation & Dynamic Routing
+Link
 
-await client.connect();
-Insert
-db.collection("courses")
+Current
 
-.insertOne({
+<a href="">
 
-name:"React"
+Wrong in React.
 
-});
-Find
-find()
-Update
-updateOne()
-Delete
-deleteOne()
+Use
+
+<Link to="/courses">
+
+Courses
+
+</Link>
+
+Explain
+
+No Page Reload.
+
+Navbar
+
+Create reusable Navbar
+
+<Link to="/">Home</Link>
+
+<Link to="/courses">Courses</Link>
+
+<Link to="/students">Students</Link>
+
+<Link to="/dashboard">Dashboard</Link>
+NavLink
+
+Instead of
+
+<Link>
+
+Teach
+
+<NavLink
+to="/courses"
+className={({isActive})=>
+
+isActive?
+
+"active"
+
+:""
+
+}
+>
+
+Courses
+
+</NavLink>
+
+Students see active navigation.
+
+useNavigate()
+
+Problem
+
+After Login
+
+Need
+
+Dashboard.
+
+const navigate=useNavigate();
+
+After Login
+
+navigate("/dashboard");
+Dynamic Route
+<Route
+
+path="/course/:id"
+
+element={<CourseDetails/>}
+
+/>
+
+Visit
+
+/course/101
+
+Inside
+
+import{
+
+useParams
+
+}
+const{id}=useParams();
+
+Output
+
+101
+404 Page
+<Route
+
+path="*"
+
+element={<NotFound/>}
+
+/>
+Mini Challenge
+
+Students build
+
+Student Profile Page
+
+/student/:id
 Assignment
 
 Create
 
-students
+Home
 
-courses
+Courses
 
-trainers
+Students
 
-Collections.
+Dashboard
+
+About
+
+Login
+
+404
+
+Responsive Navbar
+
+using React Router.
 
 End Result
-Express
+Multi Page React LMS
 
 ↓
 
-MongoDB Atlas
+React Router
 
 ↓
 
-Persistent Database
-DAY 17
-Mongoose ODM
+Professional Navigation
+DAY 25
+Context API & Authentication State Management
+
 Duration
 
 3 Hours
@@ -577,98 +950,973 @@ Learning Outcomes
 
 Students learn
 
-Mongoose
-ODM
-Schemas
-Models
-Validation
-CRUD using Mongoose
+Context API
+createContext
+Provider
+useContext
+Global State
+Login State
+Logout
+Protected Routes
 Project Goal
 
-Build a production-ready backend for SkillHub LMS.
+Implement Authentication State using Context API.
 
+Final Deliverable
+Login
+
+↓
+
+Context
+
+↓
+
+Dashboard
+
+↓
+
+Logout
+
+↓
+
+Protected Routes
 First 90 Minutes
-Install
-npm install mongoose
-Connect
-mongoose.connect(MONGO_URI);
-Course Schema
-const courseSchema=new mongoose.Schema({
+Context API
+Start with Question
 
-name:String,
+Current
 
-duration:String,
+Navbar
 
-fees:Number
+Needs
+
+User Name
+
+Dashboard
+
+Needs
+
+User Name
+
+Profile
+
+Needs
+
+User Name
+
+Passing Props
+
+App
+
+↓
+
+Navbar
+
+↓
+
+Dashboard
+
+↓
+
+Profile
+
+↓
+
+Settings
+
+Problem
+
+Prop Drilling
+Solution
+
+Context API
+
+Draw
+
+Context
+
+↓
+
+Every Component
+
+↓
+
+Access Data
+Create Context
+context
+
+AuthContext.jsx
+import{
+
+createContext
+
+}from"react";
+
+export const AuthContext=
+
+createContext();
+Provider
+<AuthContext.Provider
+
+value={{user}}
+
+>
+
+<App/>
+
+</AuthContext.Provider>
+
+Explain
+
+Every Component
+
+Can Access
+
+User.
+
+useContext
+const{
+
+user
+
+}=useContext(AuthContext);
+
+Display
+
+<h2>
+
+Welcome
+
+{user}
+
+</h2>
+
+Students now understand
+
+Global State.
+
+Second 90 Minutes
+Authentication Flow
+Login
+
+Current
+
+Local State
+
+Replace
+
+Context
+
+Create
+
+const[
+
+user,
+
+setUser
+
+]=useState(null);
+
+Login
+
+setUser({
+
+name:"Rahul"
 
 });
-Model
-const Course=mongoose.model(
 
-"Course",
+Navbar
 
-courseSchema
+Welcome
+
+Rahul
+
+Automatically
+
+Updates.
+
+Students love this.
+
+Logout
+setUser(null);
+
+Navigate
+
+navigate("/login");
+Protected Route
+
+Create
+
+function ProtectedRoute(){
+
+}
+
+Logic
+
+if(!user){
+
+return<Navigate
+
+to="/login"
+
+/>
+
+}
+
+Wrap
+
+Dashboard
+
+<ProtectedRoute>
+
+<Dashboard/>
+
+</ProtectedRoute>
+Session Persistence
+
+Store
+
+localStorage
+
+When
+
+Login
+
+Restore
+
+Using
+
+useEffect()
+
+Students remain logged in after refresh.
+
+Dashboard
+
+Display
+
+Logged In User
+
+Total Courses
+
+Total Students
+
+Logout Button
+Mini Challenge
+
+Students add
+
+Profile
+
+Settings
+
+Notifications
+
+using Context.
+
+Assignment
+
+Complete Authentication Module
+
+✔ Login
+
+✔ Logout
+
+✔ Context API
+
+✔ Protected Dashboard
+
+✔ Session Restore
+
+✔ User Greeting
+
+✔ Protected Routes
+Final Project Progress
+SkillHub LMS
+
+Frontend
+     │
+React Router
+     │
+Context API
+     │
+Authentication
+     │
+Protected Routes
+     │
+Dashboard
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+📅 DAY 26
+JWT Authentication + Axios + Protected APIs
+Duration
+
+3 Hours
+
+Learning Outcomes
+
+Students will learn
+
+JWT (JSON Web Token)
+Authentication vs Authorization
+Token-based Authentication
+Axios
+Axios Instance
+Authorization Headers
+Protected APIs
+Private Routes
+Refreshing Authentication State
+Project Goal
+
+Replace the temporary login system with a real authentication system using JWT.
+
+Final Deliverable
+Login
+
+↓
+
+JWT Token
+
+↓
+
+Axios
+
+↓
+
+Protected Backend APIs
+
+↓
+
+Dashboard
+First 90 Minutes
+JWT Authentication
+Part 1
+Start with Question
+
+Yesterday
+
+User Login
+
+↓
+
+Context API
+
+Question
+
+Can anyone open Postman
+
+and call
+
+GET /courses
+
+Yes.
+
+Need
+
+Authentication
+Authentication vs Authorization
+
+Draw
+
+Authentication
+
+↓
+
+Who are you?
+
+Authorization
+
+↓
+
+What can you access?
+Install JWT
+npm install jsonwebtoken
+Generate Token
+const jwt = require("jsonwebtoken");
+
+const token = jwt.sign(
+
+{ id: user._id },
+
+process.env.JWT_SECRET,
+
+{ expiresIn: "1d" }
 
 );
-Student Schema
-const studentSchema=new mongoose.Schema({
 
-name:String,
+Explain
 
-email:String,
+Token contains
 
-course:String
+User ID
 
-});
-Enrollment Schema
-const enrollmentSchema=new mongoose.Schema({
+Expiry
 
-studentId:String,
+Signature
+Login API
 
-courseId:String,
+After password verification
 
-enrolledAt:Date
+Return
 
-});
-Second 90 Minutes
-CRUD with Mongoose
+{
+
+"token":"eyJhbGciOiJIUzI1Ni..."
+
+}
+Verify Token Middleware
+
 Create
-await Course.create(req.body);
-Read
-await Course.find();
-Update
-await Course.findByIdAndUpdate(id,req.body);
-Delete
-await Course.findByIdAndDelete(id);
-Folder Structure
+
+middleware
+
+authMiddleware.js
+const jwt = require("jsonwebtoken");
+
+function protect(req,res,next){
+
+const token=req.headers.authorization;
+
+...
+
+}
+
+Explain
+
+Request
+
+↓
+
+Token
+
+↓
+
+Verification
+
+↓
+
+Next()
+Protect Routes
+router.get(
+
+"/courses",
+
+protect,
+
+getCourses
+
+);
+
+Students see
+
+Protected APIs.
+
+Second 90 Minutes
+Axios + Frontend Authentication
+Install
+npm install axios
+Why Axios?
+
+Compare
+
+fetch()
+
+vs
+
+axios.get()
+
+Explain advantages:
+
+Cleaner syntax
+Automatic JSON parsing
+Interceptors
+Base URL configuration
+Axios Instance
+import axios from "axios";
+
+const api = axios.create({
+
+baseURL:"http://localhost:5000/api"
+
+});
+Login Request
+const response=
+
+await api.post(
+
+"/login",
+
+loginData
+
+);
+Store Token
+localStorage.setItem(
+
+"token",
+
+response.data.token
+
+);
+Attach Token
+api.defaults.headers.common[
+"Authorization"
+]=
+
+`Bearer ${token}`;
+Access Protected API
+await api.get("/courses");
+Logout
+localStorage.removeItem("token");
+Mini Challenge
+
+Implement
+
+Student Login
+
+Admin Login
+
+Logout
+
+Protected Dashboard
+Assignment
+
+Complete Authentication Module
+
+✔ JWT
+
+✔ Axios
+
+✔ Login
+
+✔ Logout
+
+✔ Protected APIs
+
+✔ Private Dashboard
+Project Status
+React
+
+↓
+
+Axios
+
+↓
+
+JWT
+
+↓
+
+Protected APIs
+
+↓
+
+MongoDB
+📅 DAY 27
+Complete MERN LMS Dashboard
+
+Duration
+
+3 Hours
+
+Learning Outcomes
+
+Students will learn
+
+Dashboard Design
+Admin Panel
+Student Module
+Course Module
+Enrollment Module
+Role-Based Access
+API Integration
+Project Refactoring
+Project Goal
+
+Finish the complete SkillHub LMS.
+
+Final Deliverable
+Admin Dashboard
+
+↓
+
+Student Module
+
+↓
+
+Course Module
+
+↓
+
+Enrollment Module
+
+↓
+
+Analytics
+First 90 Minutes
+Student Management
+Build Student Dashboard
+
+Features
+
+View Students
+
+Search Students
+
+Update Student
+
+Delete Student
+Course Dashboard
+
+Features
+
+Add Course
+
+Edit Course
+
+Delete Course
+
+Search Course
+Enrollment Module
+
+Students
+
+↓
+
+Enroll
+
+↓
+
+Course
+
+↓
+
+Database
+
+Dashboard Cards
+Total Students
+
+Total Courses
+
+Total Enrollments
+
+Active Trainers
+Charts (Optional)
+
+Introduce
+
+Chart.js
+Recharts
+
+Display
+
+Course Enrollment Chart
+
+Student Growth
+
+Course Distribution
+Second 90 Minutes
+Project Refactoring
+Backend Folder Structure
 backend
 
+config/
+
 controllers/
+
+middleware/
 
 models/
 
 routes/
 
-config/
-
-middleware/
+utils/
 
 app.js
 
-Explain why we separate concerns.
+server.js
+Frontend Folder Structure
+src
+
+components/
+
+pages/
+
+context/
+
+services/
+
+hooks/
+
+utils/
+
+assets/
+
+App.jsx
+Error Handling
+
+Create
+
+Error Component
+Loading Component
+Spinner
+Toast Notifications
+
+Replace
+
+alert()
+
+with
+
+Bootstrap Toast or React Toastify.
 
 Mini Challenge
 
-Students create:
+Students build
 
-Trainer schema
-Batch schema
-Validation for required fields
+Profile Page
+
+Settings
+
+Change Password
 Assignment
 
-Refactor the LMS backend so that:
+Complete LMS
 
-All routes use Mongoose models.
-Course, Student, and Enrollment data are stored in MongoDB Atlas.
-Add validation (required fields, email format where applicable).
-Test all CRUD endpoints with Postman.
+✔ CRUD
+
+✔ JWT
+
+✔ Dashboard
+
+✔ Analytics
+
+✔ Search
+
+✔ Error Handling
+End Result
+Professional MERN LMS
+📅 DAY 28
+Deployment & Production
+
+Duration
+
+3 Hours
+
+Learning Outcomes
+
+Students learn
+
+Environment Variables
+Build Process
+Deployment
+GitHub
+Vercel
+Render
+MongoDB Atlas
+Production Best Practices
+Project Goal
+
+Deploy SkillHub LMS online.
+
+Final Deliverable
+Live MERN LMS
+
+Frontend
+
+↓
+
+Vercel
+
+Backend
+
+↓
+
+Render
+
+Database
+
+↓
+
+MongoDB Atlas
+First 90 Minutes
+Production Preparation
+Environment Variables
+
+Frontend
+
+.env
+
+VITE_API_URL=
+
+Backend
+
+.env
+
+PORT
+
+MONGO_URI
+
+JWT_SECRET
+
+Explain
+
+Never hardcode secrets.
+
+Build React
+npm run build
+
+Explain
+
+src
+
+↓
+
+dist
+GitHub Push
+git add .
+
+git commit -m "Final MERN LMS"
+
+git push
+Deploy Backend
+
+Render
+
+Create Web Service
+Connect GitHub repository
+Configure build/start commands
+Add environment variables
+Deploy Frontend
+
+Vercel
+
+Import GitHub repository
+Set VITE_API_URL
+Deploy
+Second 90 Minutes
+Testing & Final Presentation
+End-to-End Testing
+
+Test:
+
+Login
+
+Register
+
+CRUD
+
+Search
+
+Enrollment
+
+Logout
+
+Protected Routes
+Bug Fixing Session
+
+Students identify and fix:
+
+API errors
+Validation issues
+Broken routes
+Deployment configuration
+Project Documentation
+
+Create
+
+README.md
+
+Include:
+
+Project Overview
+Features
+Tech Stack
+Folder Structure
+Installation
+Environment Variables
+API Endpoints
+Screenshots
+Live Demo
+Future Enhancements
+Resume & Portfolio
+
+Teach students how to present the project.
+
+Resume Example:
+
+SkillHub LMS
+
+• Developed a full-stack Learning Management System using MERN Stack.
+
+• Implemented JWT Authentication, Role-Based Access, CRUD Operations, REST APIs, MongoDB Atlas, and React Context API.
+
+• Deployed frontend on Vercel and backend on Render with secure environment configuration.
+Mini Challenge
+
+Students present their LMS in 5-minute demo sessions covering:
+
+Project overview
+Architecture
+Features
+Authentication flow
+CRUD operations
+Deployment
+Final Assignment
+
+Polish the application by adding at least three advanced features, such as:
+
+Email notifications for course enrollment
+Student profile image upload
+Pagination and sorting
+Dark mode
+Course completion progress
+Wishlist/Favorites
+Password reset
+Admin analytics charts
+
+Deploy the updated project and share:
+
+GitHub repository
+Live frontend URL
+Live backend API URL
+README documentation
+🎓 Final Course Outcome
+HTML5
+    │
+CSS3
+    │
+Bootstrap
+    │
+JavaScript (ES6+)
+    │
+Git & GitHub
+    │
+Node.js
+    │
+Express.js
+    │
+REST APIs
+    │
+MongoDB Atlas
+    │
+Mongoose
+    │
+React
+    │
+React Router
+    │
+Context API
+    │
+Axios
+    │
+JWT Authentication
+    │
+Full CRUD
+    │
+Deployment
+    │
+Production MERN Application
+🎯 What Students Achieve

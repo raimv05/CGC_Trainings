@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fetch API &amp; Authentication | SkillHub LMS</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f4f5f7; color: #1a1a1a;
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; padding: 2rem 1rem;
+  }
+  .wrapper { width: 100%; max-width: 920px; background: #fff; border-radius: 16px; box-shadow: 0 2px 20px rgba(0,0,0,0.09); overflow: hidden; }
+  .top-bar { background: linear-gradient(135deg, #0f2027, #203a43, #2c5364); color: #fff; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; }
+  .top-bar-title { font-size: 15px; font-weight: 600; }
+  .top-bar-sub   { font-size: 12px; opacity: .55; margin-top: 2px; }
+  .slide-counter { font-size: 13px; opacity: .6; font-variant-numeric: tabular-nums; }
+  .slide { display: none; padding: 1.75rem 2rem; min-height: 500px; flex-direction: column; gap: 1.2rem; }
+  .slide.active { display: flex; }
+  .slide-header { display: flex; align-items: center; gap: 10px; padding-bottom: 1rem; border-bottom: 1px solid #e8e8e8; }
+  .slide-title    { font-size: 20px; font-weight: 700; color: #111; }
+  .slide-subtitle { font-size: 13px; color: #666; margin-top: 2px; }
+
+  .badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+  .b-blue   { background:#dbeafe; color:#1d4ed8; }
+  .b-teal   { background:#d1fae5; color:#065f46; }
+  .b-purple { background:#ede9fe; color:#5b21b6; }
+  .b-amber  { background:#fef3c7; color:#92400e; }
+  .b-green  { background:#dcfce7; color:#166534; }
+  .b-slate  { background:#e2e8f0; color:#334155; }
+  .b-rose   { background:#ffe4e6; color:#9f1239; }
+  .b-orange { background:#ffedd5; color:#9a3412; }
+  .b-indigo { background:#e0e7ff; color:#3730a3; }
+  .b-cyan   { background:#cffafe; color:#164e63; }
+
+  .section-label { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 8px; }
+  .card { background: #fff; border: 1px solid #e8e8e8; border-radius: 12px; padding: 1rem 1.25rem; }
+  .card-gray { background: #f8f9fa; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+  .editor { background: #1e1e2e; border-radius: 12px; overflow: hidden; font-family: 'SFMono-Regular', Consolas, 'Courier New', monospace; }
+  .editor-bar { background: #13131f; padding: 9px 14px; display: flex; align-items: center; gap: 6px; }
+  .e-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .e-red { background:#ff5f57; } .e-yellow { background:#febc2e; } .e-green { background:#28c840; }
+  .e-label { font-size: 12px; color: #6272a4; margin-left: 4px; font-family: -apple-system, sans-serif; }
+  .editor-body { padding: 14px 18px; font-size: 12.5px; line-height: 1.8; overflow-x:auto; }
+  .j-kw   { color: #ff79c6; font-weight: 700; }
+  .j-fn   { color: #50fa7b; }
+  .j-str  { color: #f1fa8c; }
+  .j-num  { color: #bd93f9; }
+  .j-var  { color: #80ffea; }
+  .j-op   { color: #ff79c6; }
+  .j-prop { color: #50fa7b; }
+  .j-com  { color: #6272a4; font-style: italic; }
+
+  .browser { border-radius: 12px; overflow: hidden; border: 1px solid #e0e0e0; }
+  .browser-bar { background: #f1f3f4; padding: 9px 14px; display: flex; align-items: center; gap: 7px; border-bottom: 1px solid #e0e0e0; }
+  .b-dot2 { width: 10px; height: 10px; border-radius: 50%; }
+  .b-r { background:#ff5f57; } .b-y { background:#febc2e; } .b-g { background:#28c840; }
+  .b-url { flex:1; background:#fff; border:1px solid #dadce0; border-radius:20px; padding:4px 14px; font-size:12px; color:#555; }
+  .browser-body { padding: 18px; font-size: 13px; background:#fff; min-height: 60px; font-family: -apple-system, sans-serif; }
+
+  .tag-table { border-collapse: collapse; width: 100%; }
+  .tag-table th { background: #f1f5f9; font-size: 12px; font-weight: 700; text-align: left; padding: 10px 14px; color: #475569; border-bottom: 2px solid #e2e8f0; }
+  .tag-table td { font-size: 13px; padding: 10px 14px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+  .tag-table tr:last-child td { border-bottom: none; }
+  .tag-table tr:hover td { background: #f8f9fa; }
+
+  .quiz-option { border: 1px solid #dee2e6; border-radius: 8px; padding: 10px 14px; font-size: 13px; cursor: pointer; margin-bottom: 6px; transition: all .15s; background: transparent; width: 100%; text-align: left; color: #1a1a1a; }
+  .quiz-option:hover:not(:disabled) { background: #f8f9fa; }
+  .quiz-option.correct { background: #d1fae5; border-color: #059669; color: #065f46; }
+  .quiz-option.wrong   { background: #fee2e2; border-color: #dc2626; color: #991b1b; }
+  .quiz-feedback { display: none; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-top: 4px; }
+  .quiz-feedback.correct { background: #d1fae5; color: #065f46; display: block; }
+  .quiz-feedback.wrong   { background: #fee2e2; color: #991b1b; display: block; }
+
+  .activity-box { border: 2px dashed #a5b4fc; background: #eef2ff; border-radius: 12px; padding: 14px 18px; }
+  .activity-title { font-size: 13px; font-weight: 700; color: #3730a3; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .challenge-box { border: 2px dashed #f9a8d4; background: #fdf2f8; border-radius: 12px; padding: 14px 18px; }
+  .challenge-title { font-size: 13px; font-weight: 700; color: #9f1239; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+
+  .tip-box   { display:flex; gap:10px; align-items:flex-start; background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:10px 14px; }
+  .tip-icon  { color:#d97706; font-size:18px; flex-shrink:0; margin-top:1px; }
+  .tip-text  { font-size:13px; color:#92400e; line-height:1.6; }
+  .info-box  { display:flex; gap:10px; align-items:flex-start; background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:10px 14px; }
+  .info-icon { color:#2563eb; font-size:18px; flex-shrink:0; margin-top:1px; }
+  .info-text { font-size:13px; color:#1e40af; line-height:1.6; }
+  .warn-box  { display:flex; gap:10px; align-items:flex-start; background:#fef9ee; border:1px solid #fcd34d; border-radius:10px; padding:10px 14px; }
+  .warn-text { font-size:13px; color:#92400e; line-height:1.6; }
+  .success-box { display:flex; gap:10px; align-items:flex-start; background:#f0fdf4; border:1px solid #86efac; border-radius:10px; padding:10px 14px; }
+  .success-text { font-size:13px; color:#166534; line-height:1.6; }
+  .danger-box { display:flex; gap:10px; align-items:flex-start; background:#fef2f2; border:1px solid #fca5a5; border-radius:10px; padding:10px 14px; }
+  .danger-text { font-size:13px; color:#991b1b; line-height:1.6; }
+
+  .nav-row { display:flex; align-items:center; justify-content:space-between; margin-top:auto; padding-top:1rem; border-top:1px solid #f0f0f0; }
+  .nav-btn { display:inline-flex; align-items:center; gap:6px; padding:9px 18px; border:1px solid #dee2e6; border-radius:8px; background:transparent; font-size:13px; cursor:pointer; color:#333; transition:background .15s; }
+  .nav-btn:hover:not(:disabled) { background:#f1f3f5; }
+  .nav-btn:disabled { opacity:.35; cursor:default; }
+  .nav-btn.primary { background:#2563eb; border-color:transparent; color:#fff; }
+  .nav-btn.primary:hover { background:#1d4ed8; }
+  .progress-dots { display:flex; gap:6px; align-items:center; flex-wrap:wrap; max-width:340px; }
+  .dot { width:7px; height:7px; border-radius:50%; background:#dee2e6; transition:all .2s; }
+  .dot.active { width:20px; border-radius:4px; background:#2563eb; }
+
+  .home-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .home-card { background:#fff; border:1px solid #e8e8e8; border-radius:12px; padding:1rem 1.25rem; cursor:pointer; transition:all .15s; }
+  .home-card:hover { border-color:#2563eb; box-shadow:0 2px 8px rgba(37,99,235,.12); }
+  .home-card-title { font-size:15px; font-weight:700; margin:6px 0 2px; }
+  .home-card-sub   { font-size:12px; color:#666; }
+
+  code { font-family:'SFMono-Regular',Consolas,monospace; font-size:12px; background:#f1f3f5; padding:1px 6px; border-radius:4px; border:1px solid #dee2e6; }
+
+  .check-item { display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:10px; border:1px solid #e8e8e8; font-size:13px; cursor:pointer; transition:all .15s; user-select:none; }
+  .check-item:hover { background:#f8f9fa; }
+  .check-item.done { background:#f0fdf4; border-color:#86efac; }
+  .check-circle { width:22px; height:22px; border-radius:50%; border:2px solid #dee2e6; display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0; transition:all .2s; color:transparent; }
+  .check-item.done .check-circle { background:#22c55e; border-color:#22c55e; color:#fff; }
+
+  .flow-step { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; border-bottom: 1px dashed #e2e8f0; transition: opacity .2s; }
+  .flow-step:last-child { border-bottom: none; }
+  .flow-num { width: 28px; height: 28px; border-radius: 50%; background: #2563eb; color: white; font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; transition: all .2s; }
+  .flow-content { flex: 1; font-size: 13px; color: #333; line-height: 1.6; }
+  .flow-label { font-weight: 700; color: #2563eb; margin-bottom: 2px; }
+  .flow-step.dim { opacity: .3; }
+  .flow-step.hit .flow-num { background:#f59e0b; transform:scale(1.15); }
+  .flow-step.hit .flow-label { color:#f59e0b; }
+
+  .terminal { background:#0d1117; border-radius:12px; overflow:hidden; font-family:'SFMono-Regular',Consolas,monospace; }
+  .terminal-bar { background:#161b22; padding:9px 14px; display:flex; align-items:center; gap:6px; border-bottom:1px solid #30363d; }
+  .terminal-body { padding:14px 18px; font-size:12.5px; line-height:2; }
+  .t-prompt { color:#3fb950; }
+  .t-cmd { color:#f0f6fc; }
+  .t-out { color:#8b949e; }
+
+  .course-row { display:grid; grid-template-columns:1fr 1fr auto; gap:10px; align-items:center; padding:8px 12px; border-radius:8px; border:1px solid #e8e8e8; font-size:12.5px; }
+  .course-row:hover { background:#f8f9fa; }
+  .course-name { font-weight:700; color:#1a1a1a; }
+  .course-dur { color:#666; }
+  .course-del { background:#dc3545; color:#fff; border:none; border-radius:6px; padding:5px 10px; font-size:11px; font-weight:700; cursor:pointer; }
+  .course-del:hover { background:#bb2d3b; }
+  .course-empty { text-align:center; color:#aaa; font-size:12px; font-style:italic; padding:16px 0; }
+  .form-input { padding:7px 12px; border:1px solid #ced4da; border-radius:6px; font-size:13px; font-family:-apple-system,sans-serif; flex:1; min-width:0; }
+  .form-btn { background:#2563eb; color:#fff; border:none; border-radius:6px; padding:7px 16px; font-size:12.5px; font-weight:700; cursor:pointer; white-space:nowrap; }
+  .form-btn:hover { background:#1d4ed8; }
+  .form-btn.warn { background:#f59e0b; } .form-btn.warn:hover { background:#d97706; }
+  .form-btn.danger { background:#dc3545; } .form-btn.danger:hover { background:#bb2d3b; }
+
+  .spinner { width:16px; height:16px; border:2px solid #cbd5e1; border-top-color:#2563eb; border-radius:50%; display:inline-block; animation:spin .7s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .loading-row { display:flex; align-items:center; gap:8px; color:#888; font-size:12.5px; padding:10px 0; justify-content:center; }
+
+  .hash-box { font-family:monospace; font-size:12px; background:#1e1e2e; color:#7ee787; padding:10px 14px; border-radius:8px; word-break:break-all; }
+  .session-badge { display:inline-flex; align-items:center; gap:8px; background:#dcfce7; color:#166534; padding:8px 16px; border-radius:20px; font-size:13px; font-weight:700; }
+  .session-badge.out { background:#f1f3f5; color:#888; }
+
+  .pipe-diagram { display:flex; flex-direction:column; align-items:center; gap:2px; font-family:monospace; font-size:12.5px; color:#333; }
+  .pipe-node { background:#eff6ff; border:1px solid #bfdbfe; color:#1e40af; padding:6px 18px; border-radius:8px; font-weight:700; }
+  .pipe-arrow { color:#aaa; font-size:14px; }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <div class="top-bar">
+    <div>
+      <div class="top-bar-title" id="top-bar-title">MERN Stack Training · Day 18 · Fetch API</div>
+      <div class="top-bar-sub">SkillHub LMS connects its frontend to the real backend</div>
+    </div>
+    <div class="slide-counter" id="slide-counter">1 / 19</div>
+  </div>
+
+  <!-- ═══ SLIDE 0 — HOME ═══ -->
+  <div class="slide active" id="slide-0">
+    <div class="slide-header">
+      <div style="width:44px;height:44px;background:#2563eb;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;flex-shrink:0"><i class="ti ti-plug-connected"></i></div>
+      <div>
+        <div class="slide-title">Fetch API &amp; Authentication</div>
+        <div class="slide-subtitle">Days 18–19 · SkillHub LMS becomes a real full-stack, secured application</div>
+      </div>
+    </div>
+
+    <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:12px 16px;display:flex;gap:12px;align-items:flex-start">
+      <i class="ti ti-route" style="color:#2563eb;font-size:22px;flex-shrink:0;margin-top:1px"></i>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#1e40af;margin-bottom:4px">Where we left off (Day 17)</div>
+        <div style="font-size:12.5px;color:#1e40af;line-height:1.6">Express + Mongoose + MongoDB Atlas were wired up with full CRUD, schemas, and validation — but only tested through Postman. The actual SkillHub frontend still doesn't talk to any of it.</div>
+      </div>
+    </div>
+
+    <div style="background:#fef9c3;border:1px solid #fde68a;border-radius:12px;padding:12px 16px;display:flex;gap:12px;align-items:flex-start">
+      <i class="ti ti-target-arrow" style="color:#d97706;font-size:22px;flex-shrink:0;margin-top:1px"></i>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#854d0e;margin-bottom:4px">Where we're going</div>
+        <div style="display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:#92400e">
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Fetch API (GET/POST/DELETE)</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Async/Await &amp; Error Handling</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Register &amp; Login</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Password Hashing (bcrypt)</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="home-grid">
+      <div class="home-card" onclick="goSlide(1)">
+        <span class="badge b-blue">Day 18</span>
+        <div class="home-card-title">Connecting Frontend with Backend</div>
+        <div class="home-card-sub">Fetch API replaces Local Storage entirely</div>
+      </div>
+      <div class="home-card" onclick="goSlide(8)">
+        <span class="badge b-rose">Day 19</span>
+        <div class="home-card-title">Authentication System</div>
+        <div class="home-card-sub">Register, Login, bcrypt &amp; Protected Routes</div>
+      </div>
+    </div>
+
+    <div class="card card-gray" style="text-align:center">
+      <div style="font-size:12.5px;color:#666;margin-bottom:10px">The build-up across these 2 days</div>
+      <div style="font-family:monospace;font-size:12.5px;color:#333;line-height:2.1">
+        Frontend → Fetch API → Express → MongoDB → Authentication → Protected Dashboard
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <div></div>
+      <button class="nav-btn primary" onclick="goSlide(1)">Start Day 18 <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 1 — PROBLEM STATEMENT ═══ -->
+  <div class="slide" id="slide-1">
+    <div class="slide-header">
+      <span class="badge b-blue">Day 18 · Part 1</span>
+      <div><div class="slide-title">Problem Statement</div><div class="slide-subtitle">3 Hours · Fetch API, HTTP Requests, Async/Await, JSON, API Integration</div></div>
+    </div>
+
+    <div class="card"><div class="section-label">Project Goal</div><div style="font-size:14px;font-weight:600">Replace Local Storage with Backend APIs.</div></div>
+
+    <div class="card card-gray">
+      <div class="section-label">Ask the class</div>
+      <div style="font-size:13px;color:#333;line-height:1.8">Yesterday we stored data in MongoDB. <b>Can our frontend access MongoDB directly?</b></div>
+      <div style="font-size:20px;font-weight:800;color:#dc2626;text-align:center;margin-top:8px">NO</div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="section-label">Instead of</div>
+        <div class="pipe-diagram"><div class="pipe-node">Frontend</div><div class="pipe-arrow">↓</div><div class="pipe-node" style="background:#fee2e2;border-color:#fca5a5;color:#991b1b">Local Storage</div></div>
+      </div>
+      <div class="card">
+        <div class="section-label">We will build</div>
+        <div class="pipe-diagram"><div class="pipe-node">Frontend</div><div class="pipe-arrow">↓</div><div class="pipe-node" style="background:#dcfce7;border-color:#86efac;color:#166534">Express API</div><div class="pipe-arrow">↓</div><div class="pipe-node" style="background:#ede9fe;border-color:#c4b5fd;color:#5b21b6">MongoDB</div></div>
+      </div>
+    </div>
+
+    <div class="info-box"><i class="ti ti-bulb info-icon"></i><div class="info-text">The browser can never connect straight to a database — for security, only the backend server holds the database connection. The frontend must always go through an API.</div></div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(0)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-1"></div>
+      <button class="nav-btn primary" onclick="goSlide(2)">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 2 — FETCH API BASICS ═══ -->
+  <div class="slide" id="slide-2">
+    <div class="slide-header">
+      <span class="badge b-blue">Day 18 · Part 2</span>
+      <div><div class="slide-title">The Fetch API</div><div class="slide-subtitle">Fetch is used to communicate with APIs — click Run to try it</div></div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="section-label">.then() style</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div></div>
+          <div class="editor-body" style="font-size:11px"><pre style="margin:0;white-space:pre-wrap"><span class="j-fn">fetch</span>(<span class="j-str">"http://localhost:5000/courses"</span>)
+.<span class="j-fn">then</span>(<span class="j-var">res</span><span class="j-op">=></span><span class="j-var">res</span>.<span class="j-fn">json</span>())
+.<span class="j-fn">then</span>(<span class="j-var">data</span><span class="j-op">=></span>{
+  <span class="j-var">console</span>.<span class="j-fn">log</span>(<span class="j-var">data</span>);
+});</pre></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="section-label">async/await style (cleaner)</div>
+        <div class="editor">
+          <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div></div>
+          <div class="editor-body" style="font-size:11px"><pre style="margin:0;white-space:pre-wrap"><span class="j-kw">async function</span> <span class="j-fn">getCourses</span>(){
+  <span class="j-kw">const</span> <span class="j-var">response</span> <span class="j-op">=</span>
+    <span class="j-kw">await</span> <span class="j-fn">fetch</span>(<span class="j-str">".../courses"</span>);
+  <span class="j-kw">const</span> <span class="j-var">data</span> <span class="j-op">=</span>
+    <span class="j-kw">await</span> <span class="j-var">response</span>.<span class="j-fn">json</span>();
+  <span class="j-var">console</span>.<span class="j-fn">log</span>(<span class="j-var">data</span>);
+}</pre></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card card-gray" style="text-align:center">
+      <div style="font-family:monospace;font-size:13px;color:#333">await <span style="color:#2563eb">↓</span> Wait <span style="color:#2563eb">↓</span> Continue</div>
+    </div>
+
+    <button class="nav-btn" style="align-self:center" onclick="runFetchDemo()"><i class="ti ti-player-play"></i> Run getCourses()</button>
+    <div class="console-mock" style="background:#0d1117;border-radius:10px;padding:12px 16px;font-family:monospace;font-size:12px;color:#8b949e;min-height:40px" id="fetch-console">// console output appears here</div>
+
+    <div class="activity-box"><div class="activity-title"><i class="ti ti-puzzle"></i> Activity</div><div style="font-size:13px;color:#3730a3">Fetch Courses, Students, and Enrollments from the backend.</div></div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(1)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-2"></div>
+      <button class="nav-btn primary" onclick="goSlide(3)">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 3 — RENDER COURSES FROM API ═══ -->
+  <div class="slide" id="slide-3">
+    <div class="slide-header">
+      <span class="badge b-blue">Day 18 · Part 3</span>
+      <div><div class="slide-title">Rendering Real Data from the API</div><div class="slide-subtitle">Hardcoded cards → live database data. Click Fetch to load `courses` from "MongoDB"</div></div>
+    </div>
+
+    <div class="editor">
+      <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">app.js (frontend)</span></div>
+      <div class="editor-body" style="font-size:11.5px"><pre style="margin:0;white-space:pre-wrap"><span class="j-kw">async function</span> <span class="j-fn">displayCourses</span>(){
+  <span class="j-kw">const</span> <span class="j-var">response</span> <span class="j-op">=</span> <span class="j-kw">await</span> <span class="j-fn">fetch</span>(<span class="j-str">".../courses"</span>);
+  <span class="j-kw">const</span> <span class="j-var">courses</span> <span class="j-op">=</span> <span class="j-kw">await</span> <span class="j-var">response</span>.<span class="j-fn">json</span>();
+
+  <span class="j-var">courses</span>.<span class="j-fn">forEach</span>(<span class="j-var">course</span> <span class="j-op">=></span> {
+    <span class="j-com">// generate Bootstrap card</span>
+  });
+}</pre></div>
+    </div>
+
+    <div class="card">
+      <button class="nav-btn primary" style="align-self:flex-start;margin-bottom:10px" onclick="fetchCourses()"><i class="ti ti-refresh"></i> fetch("/courses")</button>
+      <div id="fetch-loading-3" class="loading-row" style="display:none"><span class="spinner"></span> Loading...</div>
+      <div id="course-list-3"><div class="course-empty">Not fetched yet — click the button above.</div></div>
+    </div>
+
+    <div class="card card-gray" style="text-align:center">
+      <div style="font-family:monospace;font-size:12.5px;color:#333">Database <span style="color:#2563eb">↓</span> API <span style="color:#2563eb">↓</span> Browser</div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(2)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-3"></div>
+      <button class="nav-btn primary" onclick="goSlide(4)">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 4 — ADD COURSE (POST) ═══ -->
+  <div class="slide" id="slide-4">
+    <div class="slide-header">
+      <span class="badge b-blue">Day 18 · Part 4</span>
+      <div><div class="slide-title">Add Course Using the API</div><div class="slide-subtitle">courses.push() is gone — this now sends a real POST request</div></div>
+    </div>
+
+    <div class="editor">
+      <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">app.js (frontend)</span></div>
+      <div class="editor-body" style="font-size:11.5px"><pre style="margin:0;white-space:pre-wrap"><span class="j-kw">await</span> <span class="j-fn">fetch</span>(<span class="j-str">".../courses"</span>, {
+  <span class="j-prop">method</span>: <span class="j-str">"POST"</span>,
+  <span class="j-prop">headers</span>: { <span class="j-str">"Content-Type"</span>: <span class="j-str">"application/json"</span> },
+  <span class="j-prop">body</span>: <span class="j-var">JSON</span>.<span class="j-fn">stringify</span>(<span class="j-var">course</span>)
+});
+<span class="j-fn">displayCourses</span>(); <span class="j-com">// refresh UI after POST</span></pre></div>
+    </div>
+
+    <div class="card">
+      <div class="section-label">Add Course — sends a real POST</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+        <input class="form-input" id="c-name-4" placeholder="name (e.g. Python)">
+        <input class="form-input" id="c-dur-4" placeholder="duration (e.g. 8 Weeks)">
+        <button class="form-btn" onclick="postCourse()">POST /courses</button>
+      </div>
+      <div id="fetch-loading-4" class="loading-row" style="display:none"><span class="spinner"></span> Saving to MongoDB...</div>
+      <div id="course-list-4"></div>
+    </div>
+
+    <div class="success-box"><i class="ti ti-circle-check" style="color:#16a34a;font-size:18px"></i><div class="success-text">The course is added instantly on screen, and it's also now sitting in MongoDB — refresh the page and it would still be there.</div></div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(3)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-4"></div>
+      <button class="nav-btn primary" onclick="goSlide(5)">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 5 — DELETE COURSE ═══ -->
+  <div class="slide" id="slide-5">
+    <div class="slide-header">
+      <span class="badge b-blue">Day 18 · Part 4</span>
+      <div><div class="slide-title">Delete Course Using the API</div><div class="slide-subtitle">The backend already has a DELETE API from Day 15 — now the frontend calls it</div></div>
+    </div>
+
+    <div class="editor">
+      <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">app.js (frontend)</span></div>
+      <div class="editor-body" style="font-size:11.5px"><pre style="margin:0;white-space:pre-wrap"><span class="j-kw">await</span> <span class="j-fn">fetch</span>(<span class="j-str">`.../courses/${id}`</span>, {
+  <span class="j-prop">method</span>: <span class="j-str">"DELETE"</span>
+});
+<span class="j-fn">displayCourses</span>(); <span class="j-com">// refresh UI</span></pre></div>
+    </div>
+
+    <div class="card">
+      <div class="section-label">Current Course List — click DELETE to remove via API</div>
+      <div id="fetch-loading-5" class="loading-row" style="display:none"><span class="spinner"></span> Deleting...</div>
+      <div id="course-list-5"></div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(4)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-5"></div>
+      <button class="nav-btn primary" onclick="goSlide(6)">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 6 — LOADING & ERROR HANDLING ═══ -->
+  <div class="slide" id="slide-6">
+    <div class="slide-header">
+      <span class="badge b-blue">Day 18 · Part 4</span>
+      <div><div class="slide-title">Loading Spinner &amp; Error Handling</div><div class="slide-subtitle">Never trust the internet — networks fail</div></div>
+    </div>
+
+    <div class="editor">
+      <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div></div>
+      <div class="editor-body" style="font-size:11.5px"><pre style="margin:0;white-space:pre-wrap"><span class="j-kw">try</span>{
+  <span class="j-kw">const</span> <span class="j-var">res</span> <span class="j-op">=</span> <span class="j-kw">await</span> <span class="j-fn">fetch</span>(<span class="j-str">".../courses"</span>);
+  <span class="j-kw">const</span> <span class="j-var">data</span> <span class="j-op">=</span> <span class="j-kw">await</span> <span class="j-var">res</span>.<span class="j-fn">json</span>();
+}
+<span class="j-kw">catch</span>(<span class="j-var">error</span>){
+  <span class="j-var">console</span>.<span class="j-fn">log</span>(<span class="j-var">error</span>);
+}</pre></div>
+    </div>
+
+    <div class="card">
+      <div class="section-label">Simulate a Request</div>
+      <div style="display:flex;gap:10px;margin-bottom:10px">
+        <button class="form-btn" onclick="simulateFetch(true)">Simulate Success</button>
+        <button class="form-btn danger" onclick="simulateFetch(false)">Simulate Server Down</button>
+      </div>
+      <div id="sim-loading" class="loading-row" style="display:none"><span class="spinner"></span> Loading...</div>
+      <div id="sim-result" style="font-size:13px"></div>
+    </div>
+
+    <div class="warn-box"><i class="ti ti-alert-triangle tip-icon" style="color:#d97706"></i><div class="warn-text">Without a <code>try/catch</code>, a failed fetch (server down, no internet) would crash the calling function silently — the user just sees a frozen page.</div></div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(5)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-6"></div>
+      <button class="nav-btn primary" onclick="goSlide(7)">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 7 — DAY 18 RECAP ═══ -->
+  <div class="slide" id="slide-7">
+    <div class="slide-header">
+      <span class="badge b-blue">Day 18 · Recap</span>
+      <div><div class="slide-title">Day 18 Complete ✅</div><div class="slide-subtitle">First real Full Stack feature</div></div>
+    </div>
+
+    <div class="activity-box"><div class="activity-title"><i class="ti ti-puzzle"></i> Mini Challenge</div><div style="font-size:13px;color:#3730a3">Integrate the Student Dashboard with the API instead of Local Storage.</div></div>
+    <div class="challenge-box">
+      <div class="challenge-title"><i class="ti ti-flag"></i> Assignment — Replace every Local Storage operation with Backend APIs</div>
+      <ul style="font-size:13px;color:#9f1239;line-height:1.9;padding-left:18px">
+        <li>Get Courses</li><li>Add Course</li><li>Delete Course</li><li>Refresh Automatically</li><li>Error Handling</li><li>Loading Indicator</li>
+      </ul>
+    </div>
+    <div class="card"><div class="section-label">End Result — Day 18</div><div style="text-align:center;font-family:monospace;font-size:12.5px;color:#333">Frontend → Fetch API → Express → MongoDB</div></div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(6)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-7"></div>
+      <button class="nav-btn primary" onclick="goSlide(8)">Start Day 19 <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 8 — WHY AUTH + SCHEMA ═══ -->
+  <div class="slide" id="slide-8">
+    <div class="slide-header">
+      <span class="badge b-rose">Day 19 · Part 1</span>
+      <div><div class="slide-title">Why Authentication?</div><div class="slide-subtitle">3 Hours · Authentication, bcrypt, Login Flow, JWT Introduction, Protected Routes</div></div>
+    </div>
+
+    <div class="card"><div class="section-label">Project Goal</div><div style="font-size:14px;font-weight:600">Implement Login &amp; Registration for SkillHub LMS.</div></div>
+
+    <div class="card card-gray">
+      <div class="section-label">Ask the class</div>
+      <div style="font-size:13px;color:#333">Can anyone become Admin? <b>"No"</b> — we need <b>Authentication</b>.</div>
+    </div>
+
+    <div class="terminal">
+      <div class="terminal-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div></div>
+      <div class="terminal-body"><span class="t-prompt">$</span> <span class="t-cmd">npm install bcrypt</span></div>
+    </div>
+
+    <div class="editor">
+      <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">models/User.js</span></div>
+      <div class="editor-body" style="font-size:11.5px"><pre style="margin:0;white-space:pre-wrap"><span class="j-kw">const</span> <span class="j-var">userSchema</span> <span class="j-op">=</span> <span class="j-kw">new</span> <span class="j-fn">mongoose</span>.<span class="j-fn">Schema</span>({
+  <span class="j-prop">name</span>: <span class="j-var">String</span>,
+  <span class="j-prop">email</span>: <span class="j-var">String</span>,
+  <span class="j-prop">password</span>: <span class="j-var">String</span>,
+  <span class="j-prop">role</span>: <span class="j-var">String</span>
+});</pre></div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(7)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-8"></div>
+      <button class="nav-btn primary" onclick="goSlide(9)">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 9 — REGISTER + HASH ═══ -->
+  <div class="slide" id="slide-9">
+    <div class="slide-header">
+      <span class="badge b-rose">Day 19 · Part 1</span>
+      <div><div class="slide-title">Registration &amp; Password Hashing</div><div class="slide-subtitle">Never store a plain-text password — type one below and hash it</div></div>
+    </div>
+
+    <div class="editor">
+      <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">routes/auth.js</span></div>
+      <div class="editor-body" style="font-size:11.5px"><pre style="margin:0;white-space:pre-wrap"><span class="j-var">app</span>.<span class="j-fn">post</span>(<span class="j-str">"/register"</span>, <span class="j-kw">async</span>(<span class="j-var">req</span>,<span class="j-var">res</span>)<span class="j-op">=></span>{
+  <span class="j-kw">const</span> <span class="j-var">bcrypt</span> <span class="j-op">=</span> <span class="j-fn">require</span>(<span class="j-str">"bcrypt"</span>);
+  <span class="j-kw">const</span> <span class="j-var">hashedPassword</span> <span class="j-op">=</span>
+    <span class="j-kw">await</span> <span class="j-var">bcrypt</span>.<span class="j-fn">hash</span>(<span class="j-var">req</span>.<span class="j-prop">body</span>.<span class="j-prop">password</span>, <span class="j-num">10</span>);
+  <span class="j-com">// save hashedPassword to MongoDB</span>
+});</pre></div>
+    </div>
+
+    <div class="card">
+      <div class="section-label">Try It — hash a password</div>
+      <div style="display:flex;gap:8px;margin-bottom:10px">
+        <input class="form-input" id="reg-pass" placeholder="e.g. 123456">
+        <button class="form-btn" onclick="hashDemo()">bcrypt.hash()</button>
+      </div>
+      <div class="grid-2">
+        <div><div class="section-label">Never store</div><div class="hash-box" style="color:#f87171" id="plain-pass">123456</div></div>
+        <div><div class="section-label">Store instead</div><div class="hash-box" id="hashed-pass">$2b$10$..........................</div></div>
+      </div>
+    </div>
+
+    <div class="danger-box"><i class="ti ti-shield-x" style="color:#dc2626;font-size:18px"></i><div class="danger-text">If a database leaks and passwords were stored in plain text, every user account is instantly compromised. Hashing makes the stored value practically irreversible.</div></div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(8)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-9"></div>
+      <button class="nav-btn primary" onclick="goSlide(10)">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 10 — TEST IN POSTMAN ═══ -->
+  <div class="slide" id="slide-10">
+    <div class="slide-header">
+      <span class="badge b-rose">Day 19</span>
+      <div><div class="slide-title">Testing Registration in Postman</div><div class="slide-subtitle">Send the request, then check what's actually stored in the database</div></div>
+    </div>
+
+    <div class="card">
+      <div class="section-label">POST /register — Body (raw JSON)</div>
+      <div class="editor">
+        <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div></div>
+        <div class="editor-body" style="font-size:11.5px"><pre style="margin:0;white-space:pre-wrap">{
+  <span class="j-prop">"name"</span>: <span class="j-str">"Rahul"</span>,
+  <span class="j-prop">"email"</span>: <span class="j-str">"rahul@gmail.com"</span>,
+  <span class="j-prop">"password"</span>: <span class="j-str">"123456"</span>
+}</pre></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-label">What's actually saved in MongoDB</div>
+      <table class="tag-table">
+        <thead><tr><th>Field</th><th>Value</th></tr></thead>
+        <tbody>
+          <tr><td>name</td><td>Rahul</td></tr>
+          <tr><td>email</td><td>rahul@gmail.com</td></tr>
+          <tr><td>password</td><td><span class="hash-box" style="display:inline-block;padding:3px 8px">$2b$10$KIx9f...encrypted</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(9)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-10"></div>
+      <button class="nav-btn primary" onclick="goSlide(11)">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 11 — LOGIN SYSTEM (interactive) ═══ -->
+  <div class="slide" id="slide-11">
+    <div class="slide-header">
+      <span class="badge b-rose">Day 19 · Part 2</span>
+      <div><div class="slide-title">Login System</div><div class="slide-subtitle">Try logging in — a registered user is preloaded below</div></div>
+    </div>
+
+    <div class="editor">
+      <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">routes/auth.js</span></div>
+      <div class="editor-body" style="font-size:11.5px"><pre style="margin:0;white-space:pre-wrap"><span class="j-var">app</span>.<span class="j-fn">post</span>(<span class="j-str">"/login"</span>, <span class="j-kw">async</span>(<span class="j-var">req</span>,<span class="j-var">res</span>)<span class="j-op">=></span>{
+  <span class="j-kw">const</span> <span class="j-var">user</span> <span class="j-op">=</span> <span class="j-kw">await</span> <span class="j-var">User</span>.<span class="j-fn">findOne</span>({ <span class="j-prop">email</span>: <span class="j-var">req</span>.<span class="j-prop">body</span>.<span class="j-prop">email</span> });
+  <span class="j-kw">const</span> <span class="j-var">valid</span> <span class="j-op">=</span> <span class="j-kw">await</span> <span class="j-var">bcrypt</span>.<span class="j-fn">compare</span>(<span class="j-var">req</span>.<span class="j-prop">body</span>.<span class="j-prop">password</span>, <span class="j-var">user</span>.<span class="j-prop">password</span>);
+  <span class="j-kw">if</span>(<span class="j-var">valid</span>) <span class="j-var">res</span>.<span class="j-fn">json</span>({ <span class="j-prop">message</span>: <span class="j-str">"Login Successful"</span> });
+  <span class="j-kw">else</span> <span class="j-var">res</span>.<span class="j-fn">json</span>({ <span class="j-prop">message</span>: <span class="j-str">"Invalid Credentials"</span> });
+});</pre></div>
+    </div>
+
+    <div class="info-box"><i class="ti ti-info-circle info-icon"></i><div class="info-text">Registered test user in "MongoDB": <code>rahul@gmail.com</code> / password <code>123456</code></div></div>
+
+    <div class="card">
+      <div class="section-label">Try Logging In</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+        <input class="form-input" id="login-email" placeholder="email" value="rahul@gmail.com">
+        <input class="form-input" id="login-pass" placeholder="password" type="text">
+        <button class="form-btn" onclick="tryLogin()">POST /login</button>
+      </div>
+      <div id="login-result" style="font-size:13px"></div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(10)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-11"></div>
+      <button class="nav-btn primary" onclick="goSlide(12)">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 12 — FRONTEND LOGIN + SESSION ═══ -->
+  <div class="slide" id="slide-12">
+    <div class="slide-header">
+      <span class="badge b-rose">Day 19 · Part 2</span>
+      <div><div class="slide-title">Frontend Login &amp; sessionStorage</div><div class="slide-subtitle">Static form → fetch("/login") → remember the user</div></div>
+    </div>
+
+    <div class="editor">
+      <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div></div>
+      <div class="editor-body" style="font-size:11.5px"><pre style="margin:0;white-space:pre-wrap"><span class="j-var">sessionStorage</span>.<span class="j-fn">setItem</span>(<span class="j-str">"user"</span>, <span class="j-var">email</span>);
+<span class="j-com">// temporary — Day 20 replaces this with JWT</span></pre></div>
+    </div>
+
+    <div class="card" style="text-align:center">
+      <div class="section-label">Current Session</div>
+      <div id="session-status"><span class="session-badge out"><i class="ti ti-user-off"></i> Not Logged In</span></div>
+      <div style="margin-top:12px;display:flex;gap:8px;justify-content:center">
+        <button class="form-btn" onclick="simulateLoginSuccess()">Simulate Successful Login</button>
+      </div>
+    </div>
+
+    <div class="tip-box"><i class="ti ti-clock tip-icon"></i><div class="tip-text"><code>sessionStorage</code> is only a temporary stand-in — it's not secure or expiry-aware. Day 20 replaces it with proper JWT tokens.</div></div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(11)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-12"></div>
+      <button class="nav-btn primary" onclick="goSlide(13)">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 13 — LOGOUT + PROTECTED PAGE ═══ -->
+  <div class="slide" id="slide-13">
+    <div class="slide-header">
+      <span class="badge b-rose">Day 19 · Part 2</span>
+      <div><div class="slide-title">Logout &amp; Protected Pages</div><div class="slide-subtitle">The same session state — now guarding a dashboard</div></div>
+    </div>
+
+    <div class="editor">
+      <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div></div>
+      <div class="editor-body" style="font-size:11.5px"><pre style="margin:0;white-space:pre-wrap"><span class="j-kw">if</span>(<span class="j-op">!</span><span class="j-var">sessionStorage</span>.<span class="j-fn">getItem</span>(<span class="j-str">"user"</span>)){
+  <span class="j-var">window</span>.<span class="j-prop">location</span> <span class="j-op">=</span> <span class="j-str">"login.html"</span>;
+}</pre></div>
+    </div>
+
+    <div class="card" style="text-align:center">
+      <div class="section-label">Protected Dashboard</div>
+      <div id="dashboard-view"></div>
+      <div style="margin-top:12px;display:flex;gap:8px;justify-content:center">
+        <button class="form-btn" onclick="simulateLoginSuccess()">Log In</button>
+        <button class="form-btn danger" onclick="simulateLogout()">Logout</button>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(12)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-13"></div>
+      <button class="nav-btn primary" onclick="goSlide(14)">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 14 — DAY 19 MINI CHALLENGE + ASSIGNMENT ═══ -->
+  <div class="slide" id="slide-14">
+    <div class="slide-header">
+      <span class="badge b-rose">Day 19 · Recap</span>
+      <div><div class="slide-title">Mini Challenge &amp; Assignment</div><div class="slide-subtitle">Day 19 wrap-up</div></div>
+    </div>
+
+    <div class="activity-box"><div class="activity-title"><i class="ti ti-puzzle"></i> Mini Challenge</div><div style="font-size:13px;color:#3730a3">Add a <code>role</code> field (Admin / Student). After login, display a different dashboard based on role.</div></div>
+
+    <div class="challenge-box">
+      <div class="challenge-title"><i class="ti ti-flag"></i> Assignment — Complete Authentication System</div>
+      <ul style="font-size:13px;color:#9f1239;line-height:1.9;padding-left:18px">
+        <li>Register</li><li>Login</li><li>Logout</li><li>Password Hashing</li><li>Protected Dashboard</li><li>Session Storage</li><li>Role-Based Welcome Message</li>
+      </ul>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(13)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-14"></div>
+      <button class="nav-btn primary" onclick="goSlide(15)">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 15 — PROJECT STATUS AFTER DAY 19 ═══ -->
+  <div class="slide" id="slide-15">
+    <div class="slide-header">
+      <span class="badge b-green">Milestone</span>
+      <div><div class="slide-title">🎯 Project Status After Day 19</div><div class="slide-subtitle">SkillHub LMS — full stack, secured</div></div>
+    </div>
+    <div class="card" style="display:flex;justify-content:center">
+      <div class="pipe-diagram">
+        <div class="pipe-node">Frontend</div><div class="pipe-arrow">↓</div>
+        <div class="pipe-node">Bootstrap UI</div><div class="pipe-arrow">↓</div>
+        <div class="pipe-node" style="background:#dcfce7;border-color:#86efac;color:#166534">Fetch API</div><div class="pipe-arrow">↓</div>
+        <div class="pipe-node" style="background:#dcfce7;border-color:#86efac;color:#166534">Express Backend</div><div class="pipe-arrow">↓</div>
+        <div class="pipe-node" style="background:#ede9fe;border-color:#c4b5fd;color:#5b21b6">MongoDB Atlas</div><div class="pipe-arrow">↓</div>
+        <div class="pipe-node" style="background:#ffe4e6;border-color:#fda4af;color:#9f1239">Authentication</div><div class="pipe-arrow">↓</div>
+        <div class="pipe-node" style="background:#ffe4e6;border-color:#fda4af;color:#9f1239">Login System</div><div class="pipe-arrow">↓</div>
+        <div class="pipe-node" style="background:#ffe4e6;border-color:#fda4af;color:#9f1239">Protected Dashboard</div>
+      </div>
+    </div>
+    <div class="success-box"><i class="ti ti-trophy" style="color:#16a34a;font-size:18px"></i><div class="success-text">SkillHub LMS is now a real, secured, database-backed full stack application.</div></div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(14)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-15"></div>
+      <button class="nav-btn primary" onclick="goSlide(16)">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 16 — ROADMAP ═══ -->
+  <div class="slide" id="slide-16">
+    <div class="slide-header">
+      <span class="badge b-indigo">What's Next</span>
+      <div><div class="slide-title">📅 Updated Roadmap</div><div class="slide-subtitle">Day 20 onward — securing APIs and moving to React</div></div>
+    </div>
+    <table class="tag-table">
+      <thead><tr><th>Day</th><th>Module</th><th>Deliverable</th></tr></thead>
+      <tbody>
+        <tr><td>18</td><td>Fetch API</td><td>Full Stack Integration</td></tr>
+        <tr><td>19</td><td>Authentication</td><td>Login &amp; Registration</td></tr>
+        <tr style="background:#eff6ff"><td><b>20</b></td><td><b>JWT Authentication</b></td><td><b>Secure APIs</b></td></tr>
+        <tr><td>21</td><td>React Introduction</td><td>SPA Concepts</td></tr>
+        <tr><td>22</td><td>React Components &amp; JSX</td><td>LMS React UI</td></tr>
+        <tr><td>23</td><td>Props &amp; State</td><td>Dynamic Components</td></tr>
+        <tr><td>24</td><td>Hooks</td><td>Interactive React App</td></tr>
+        <tr><td>25</td><td>React Router</td><td>Multi-page LMS</td></tr>
+        <tr><td>26</td><td>Context API</td><td>Global State Management</td></tr>
+        <tr><td>27</td><td>Axios + API Integration</td><td>React ↔ Express</td></tr>
+        <tr><td>28</td><td>Complete MERN LMS</td><td>Capstone Project</td></tr>
+      </tbody>
+    </table>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(15)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-16"></div>
+      <button class="nav-btn primary" onclick="goSlide(17)">Take the Quiz <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 17 — QUIZ ═══ -->
+  <div class="slide" id="slide-17">
+    <div class="slide-header">
+      <span class="badge b-indigo">Check Your Understanding</span>
+      <div><div class="slide-title">Days 18–19 Quiz</div><div class="slide-subtitle">Answer each question — feedback appears instantly</div></div>
+    </div>
+    <div id="quiz-container"></div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(16)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-17"></div>
+      <button class="nav-btn primary" onclick="goSlide(18)">Finish <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 18 — WRAP UP ═══ -->
+  <div class="slide" id="slide-18">
+    <div class="slide-header">
+      <span class="badge b-green">Wrap-Up</span>
+      <div><div class="slide-title">Full Stack &amp; Secured</div><div class="slide-subtitle">SkillHub LMS is now a real, database-backed, authenticated application</div></div>
+    </div>
+    <div class="success-box"><i class="ti ti-trophy" style="color:#16a34a;font-size:18px"></i><div class="success-text">You replaced Local Storage with real API calls and added a working Register/Login system with hashed passwords. Next stop: JWT and then React.</div></div>
+    <div class="grid-2">
+      <div class="home-card" onclick="goSlide(1)"><span class="badge b-blue">Day 18</span><div class="home-card-title">Fetch API</div></div>
+      <div class="home-card" onclick="goSlide(8)"><span class="badge b-rose">Day 19</span><div class="home-card-title">Authentication</div></div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(17)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-18"></div>
+      <button class="nav-btn primary" onclick="goSlide(0)"><i class="ti ti-home"></i> Back to Home</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  var current = 0, total = 19, quizInit = false;
+  var dayTitles = {0:"Overview",1:"Day 18 · Fetch API",2:"Day 18 · Fetch API",3:"Day 18 · Fetch API",4:"Day 18 · Fetch API",5:"Day 18 · Fetch API",6:"Day 18 · Fetch API",7:"Day 18 · Fetch API",8:"Day 19 · Authentication",9:"Day 19 · Authentication",10:"Day 19 · Authentication",11:"Day 19 · Authentication",12:"Day 19 · Authentication",13:"Day 19 · Authentication",14:"Day 19 · Authentication",15:"Milestone",16:"Roadmap",17:"Quiz",18:"Wrap-Up"};
+
+  function escapeHtml(str) { return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  // ── Simulated "MongoDB" already holding data from Day 17 ──
+  var dbCourses = [ { name: 'React', duration: '12 Weeks' }, { name: 'Node.js', duration: '10 Weeks' } ];
+  var fetchedOnce = false;
+
+  function renderCourseLists() {
+    ['3','4','5'].forEach(function(sfx) {
+      var el = document.getElementById('course-list-'+sfx);
+      if (!el) return;
+      if (sfx === '3' && !fetchedOnce) return;
+      if (dbCourses.length === 0) { el.innerHTML = '<div class="course-empty">No courses in the database.</div>'; return; }
+      var html = '';
+      dbCourses.forEach(function(c, i) {
+        html += '<div class="course-row" style="margin-bottom:6px">' +
+          '<span class="course-name">'+escapeHtml(c.name)+'</span>' +
+          '<span class="course-dur">'+escapeHtml(c.duration)+'</span>' +
+          (sfx==='5' ? '<button class="course-del" onclick="deleteCourse('+i+')">DELETE</button>' : '<span></span>') +
+          '</div>';
+      });
+      el.innerHTML = html;
+    });
+  }
+  renderCourseLists();
+  // seed slide 4 & 5 lists immediately (already-fetched context)
+  (function(){ fetchedOnce = true; renderCourseLists(); fetchedOnce = false; })();
+
+  function fetchCourses() {
+    document.getElementById('fetch-loading-3').style.display = 'flex';
+    document.getElementById('course-list-3').innerHTML = '';
+    setTimeout(function() {
+      fetchedOnce = true;
+      document.getElementById('fetch-loading-3').style.display = 'none';
+      renderCourseLists();
+    }, 700);
+  }
+  function postCourse() {
+    var name = document.getElementById('c-name-4').value.trim() || 'Python';
+    var dur = document.getElementById('c-dur-4').value.trim() || '8 Weeks';
+    document.getElementById('fetch-loading-4').style.display = 'flex';
+    setTimeout(function() {
+      dbCourses.push({ name: name, duration: dur });
+      document.getElementById('c-name-4').value = '';
+      document.getElementById('c-dur-4').value = '';
+      document.getElementById('fetch-loading-4').style.display = 'none';
+      fetchedOnce = true;
+      renderCourseLists();
+    }, 600);
+  }
+  function deleteCourse(i) {
+    document.getElementById('fetch-loading-5').style.display = 'flex';
+    setTimeout(function() {
+      dbCourses.splice(i, 1);
+      document.getElementById('fetch-loading-5').style.display = 'none';
+      fetchedOnce = true;
+      renderCourseLists();
+    }, 500);
+  }
+
+  // ── Fetch console demo (slide 2) ──
+  function runFetchDemo() {
+    var c = document.getElementById('fetch-console');
+    c.textContent = 'awaiting response...';
+    setTimeout(function() {
+      c.innerHTML = '[\n  { name: "React", duration: "12 Weeks" },\n  { name: "Node.js", duration: "10 Weeks" }\n]';
+    }, 700);
+  }
+
+  // ── Error handling simulation (slide 6) ──
+  function simulateFetch(success) {
+    document.getElementById('sim-loading').style.display = 'flex';
+    document.getElementById('sim-result').innerHTML = '';
+    setTimeout(function() {
+      document.getElementById('sim-loading').style.display = 'none';
+      if (success) {
+        document.getElementById('sim-result').innerHTML = '<div class="success-box"><i class="ti ti-circle-check" style="color:#16a34a"></i><div class="success-text">200 OK — data loaded successfully.</div></div>';
+      } else {
+        document.getElementById('sim-result').innerHTML = '<div class="danger-box"><i class="ti ti-alert-triangle" style="color:#dc2626"></i><div class="danger-text">catch(error) → "Failed to fetch". The try/catch caught it gracefully instead of crashing the page.</div></div>';
+      }
+    }, 700);
+  }
+
+  // ── bcrypt hash demo (slide 9) ──
+  function hashDemo() {
+    var pass = document.getElementById('reg-pass').value.trim() || '123456';
+    document.getElementById('plain-pass').textContent = pass;
+    document.getElementById('hashed-pass').textContent = 'generating...';
+    setTimeout(function() {
+      var fake = '$2b$10$' + btoa(pass).replace(/[^a-zA-Z0-9]/g,'').slice(0,22) + 'K7xQ9m';
+      document.getElementById('hashed-pass').textContent = fake;
+    }, 500);
+  }
+
+  // ── Login simulation (slide 11) ──
+  var registeredUser = { email: 'rahul@gmail.com', password: '123456' };
+  function tryLogin() {
+    var email = document.getElementById('login-email').value.trim();
+    var pass = document.getElementById('login-pass').value.trim();
+    var el = document.getElementById('login-result');
+    el.innerHTML = '<div class="loading-row" style="justify-content:flex-start"><span class="spinner"></span> Checking credentials...</div>';
+    setTimeout(function() {
+      if (email === registeredUser.email && pass === registeredUser.password) {
+        el.innerHTML = '<div class="success-box"><i class="ti ti-circle-check" style="color:#16a34a"></i><div class="success-text">{ "message": "Login Successful" }</div></div>';
+      } else {
+        el.innerHTML = '<div class="danger-box"><i class="ti ti-alert-triangle" style="color:#dc2626"></i><div class="danger-text">{ "message": "Invalid Credentials" }</div></div>';
+      }
+    }, 600);
+  }
+
+  // ── Session simulation (slides 12 & 13) ──
+  function simulateLoginSuccess() {
+    var el1 = document.getElementById('session-status');
+    if (el1) el1.innerHTML = '<span class="session-badge"><i class="ti ti-user-check"></i> Logged in as rahul@gmail.com</span>';
+    var dash = document.getElementById('dashboard-view');
+    if (dash) dash.innerHTML = '<div class="success-box"><i class="ti ti-layout-dashboard" style="color:#16a34a"></i><div class="success-text">Welcome back, Rahul! Here is your dashboard.</div></div>';
+  }
+  function simulateLogout() {
+    var dash = document.getElementById('dashboard-view');
+    if (dash) dash.innerHTML = '<div class="warn-box"><i class="ti ti-lock" style="color:#d97706"></i><div class="warn-text">sessionStorage cleared → redirecting to login.html</div></div>';
+    var el1 = document.getElementById('session-status');
+    if (el1) el1.innerHTML = '<span class="session-badge out"><i class="ti ti-user-off"></i> Not Logged In</span>';
+  }
+  simulateLogout();
+
+  // ── Quiz ──
+  var quizData = [
+    { q: "Why can't the SkillHub frontend connect straight to MongoDB?", opts: ["MongoDB doesn't support JavaScript", "For security, only the backend server should hold database credentials — the browser must always go through an API", "Browsers can't run fetch()", "MongoDB only accepts Postman requests"], ans: 1, exp: "Exposing database credentials to the browser would let anyone read them from the page source. The backend acts as a controlled gatekeeper between frontend and database." },
+    { q: "In async function getCourses(){ const response = await fetch(url); const data = await response.json(); }, what does the first await actually pause for?", opts: ["It pauses for exactly 1 second", "It pauses the function until the network request resolves with a response, without blocking the rest of the page", "It pauses forever until the page is refreshed", "await has no effect on fetch()"], ans: 1, exp: "await pauses just that async function at that line until the Promise (the network request) settles, then continues — without freezing the rest of the browser." },
+    { q: "After a successful POST to /courses, why does the code immediately call displayCourses() again?", opts: ["To delete the course that was just added", "To re-fetch the updated list from the backend so the UI reflects what's now actually in the database", "displayCourses() is required to send the POST request itself", "It has no real purpose, it's optional decoration"], ans: 1, exp: "The POST only tells the server to save data — the UI still needs to re-fetch (or otherwise refresh) to show the newly updated list from the source of truth." },
+    { q: "What is the purpose of wrapping a fetch call in try { } catch(error) { }?", opts: ["It makes the request faster", "It lets the app handle network failures gracefully instead of crashing silently", "It automatically retries failed requests", "It converts the response to JSON"], ans: 1, exp: "Networks fail — servers go down, connections drop. try/catch lets you catch that failure and show the user something useful instead of the app breaking silently." },
+    { q: "Why is bcrypt used on a password before saving a new user to MongoDB?", opts: ["To make the password shorter", "To hash the password into a practically irreversible string, so a database leak doesn't expose real passwords", "To make login faster", "bcrypt encrypts the whole database, not just passwords"], ans: 1, exp: "bcrypt.hash() turns a plain password into a one-way hashed value. Even if the database is compromised, attackers can't easily recover the original password." },
+    { q: "During login, why does the server use bcrypt.compare(req.body.password, user.password) instead of checking password === user.password?", opts: ["Because the stored password is hashed, not plain text — you can't directly compare a plain password to a hash with ===", "compare() is faster than ===", "=== doesn't work on strings in JavaScript", "bcrypt.compare() is only used for emails"], ans: 0, exp: "Since the stored password is a one-way hash, there's no way to 'un-hash' it to compare directly. bcrypt.compare() re-hashes the input and checks if the results match." },
+    { q: "What is the main limitation of using sessionStorage.setItem('user', email) to track a logged-in user?", opts: ["It's a permanent, unbreakable solution", "It's a temporary, insecure stand-in with no real verification or expiry — which is exactly why Day 20 introduces JWT", "sessionStorage can store databases directly", "It automatically hashes the stored value"], ans: 1, exp: "sessionStorage just stores a plain value in the browser — it isn't cryptographically signed or verified by the server on each request. JWTs (Day 20) solve this properly." },
+    { q: "What does the check `if(!sessionStorage.getItem('user')){ window.location = 'login.html'; }` accomplish on a dashboard page?", opts: ["It logs the user in automatically", "It redirects anyone without a stored 'user' value away from the protected page, back to login", "It deletes the user's account", "It has no effect on page access"], ans: 1, exp: "This is a simple client-side protected-route check — if there's no session value present, the page immediately redirects to the login screen instead of showing protected content." }
+  ];
+  function renderQuiz() {
+    var c = document.getElementById('quiz-container'); c.innerHTML = '';
+    quizData.forEach(function(q, i) {
+      var d = document.createElement('div'); d.style.cssText = 'margin-bottom:18px';
+      d.innerHTML = '<div style="font-size:13px;font-weight:600;margin-bottom:6px">'+(i+1)+'. '+q.q+'</div>';
+      q.opts.forEach(function(opt, j) {
+        var btn = document.createElement('button'); btn.className = 'quiz-option';
+        btn.innerHTML = String.fromCharCode(65+j)+'. '+opt;
+        btn.onclick = function() {
+          var btns = d.querySelectorAll('.quiz-option');
+          if (btns[0].disabled) return;
+          btns.forEach(function(b,k){ b.disabled=true; if(k===q.ans) b.classList.add('correct'); else if(k===j) b.classList.add('wrong'); });
+          var fb = d.querySelector('.quiz-feedback');
+          fb.innerHTML = (j===q.ans?'✅ Correct! ':'❌ Not quite. ')+q.exp;
+          fb.className = 'quiz-feedback '+(j===q.ans?'correct':'wrong');
+        };
+        d.appendChild(btn);
+      });
+      var fb = document.createElement('div'); fb.className = 'quiz-feedback'; d.appendChild(fb);
+      c.appendChild(d);
+    });
+  }
+
+  function goSlide(n) {
+    document.getElementById('slide-'+current).classList.remove('active');
+    current = n;
+    document.getElementById('slide-'+current).classList.add('active');
+    updateDots();
+    document.getElementById('slide-counter').textContent = (current+1)+' / '+total;
+    document.getElementById('top-bar-title').textContent = 'MERN Stack Training · ' + dayTitles[current];
+    if (n===17 && !quizInit) { renderQuiz(); quizInit=true; }
+    window.scrollTo(0,0);
+  }
+  function updateDots() {
+    for (var s=0; s<total; s++) {
+      var el = document.getElementById('dots-'+s); if (!el) continue;
+      el.innerHTML = '';
+      for (var d=0; d<total; d++) {
+        var dot = document.createElement('div');
+        dot.className = 'dot'+(d===current?' active':'');
+        el.appendChild(dot);
+      }
+    }
+  }
+  updateDots();
+</script>
+</body>
+</html>
