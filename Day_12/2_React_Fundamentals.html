@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>React Fundamentals, Components, Props &amp; State | SkillHub LMS</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f4f5f7; color: #1a1a1a;
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; padding: 2rem 1rem;
+  }
+  .wrapper { width: 100%; max-width: 920px; background: #fff; border-radius: 16px; box-shadow: 0 2px 20px rgba(0,0,0,0.09); overflow: hidden; }
+  .top-bar { background: linear-gradient(135deg, #0f2027, #203a43, #2c5364); color: #fff; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; }
+  .top-bar-title { font-size: 15px; font-weight: 600; }
+  .top-bar-sub   { font-size: 12px; opacity: .55; margin-top: 2px; }
+  .slide-counter { font-size: 13px; opacity: .6; font-variant-numeric: tabular-nums; }
+  .slide { display: none; padding: 1.75rem 2rem; min-height: 500px; flex-direction: column; gap: 1.2rem; }
+  .slide.active { display: flex; }
+  .slide-header { display: flex; align-items: center; gap: 10px; padding-bottom: 1rem; border-bottom: 1px solid #e8e8e8; }
+  .slide-title    { font-size: 20px; font-weight: 700; color: #111; }
+  .slide-subtitle { font-size: 13px; color: #666; margin-top: 2px; }
+
+  .badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+  .b-blue   { background:#dbeafe; color:#1d4ed8; }
+  .b-teal   { background:#d1fae5; color:#065f46; }
+  .b-purple { background:#ede9fe; color:#5b21b6; }
+  .b-amber  { background:#fef3c7; color:#92400e; }
+  .b-green  { background:#dcfce7; color:#166534; }
+  .b-slate  { background:#e2e8f0; color:#334155; }
+  .b-rose   { background:#ffe4e6; color:#9f1239; }
+  .b-orange { background:#ffedd5; color:#9a3412; }
+  .b-indigo { background:#e0e7ff; color:#3730a3; }
+  .b-cyan   { background:#cffafe; color:#164e63; }
+  .b-sky    { background:#e0f2fe; color:#075985; }
+
+  .section-label { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 8px; }
+  .card { background: #fff; border: 1px solid #e8e8e8; border-radius: 12px; padding: 1rem 1.25rem; }
+  .card-gray { background: #f8f9fa; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; }
+
+  .editor { background: #1e1e2e; border-radius: 12px; overflow: hidden; font-family: 'SFMono-Regular', Consolas, 'Courier New', monospace; }
+  .editor-bar { background: #13131f; padding: 9px 14px; display: flex; align-items: center; gap: 6px; }
+  .e-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .e-red { background:#ff5f57; } .e-yellow { background:#febc2e; } .e-green { background:#28c840; }
+  .e-label { font-size: 12px; color: #6272a4; margin-left: 4px; font-family: -apple-system, sans-serif; }
+  .editor-body { padding: 14px 18px; font-size: 12.5px; line-height: 1.8; overflow-x:auto; }
+  .j-kw   { color: #ff79c6; font-weight: 700; }
+  .j-fn   { color: #50fa7b; }
+  .j-str  { color: #f1fa8c; }
+  .j-num  { color: #bd93f9; }
+  .j-var  { color: #80ffea; }
+  .j-op   { color: #ff79c6; }
+  .j-prop { color: #50fa7b; }
+  .j-com  { color: #6272a4; font-style: italic; }
+  .j-tag  { color: #ff5555; font-weight: 700; }
+  .j-attr { color: #50fa7b; }
+
+  .browser { border-radius: 12px; overflow: hidden; border: 1px solid #e0e0e0; }
+  .browser-bar { background: #f1f3f4; padding: 9px 14px; display: flex; align-items: center; gap: 7px; border-bottom: 1px solid #e0e0e0; }
+  .b-dot2 { width: 10px; height: 10px; border-radius: 50%; }
+  .b-r { background:#ff5f57; } .b-y { background:#febc2e; } .b-g { background:#28c840; }
+  .b-url { flex:1; background:#fff; border:1px solid #dadce0; border-radius:20px; padding:4px 14px; font-size:12px; color:#555; }
+  .browser-body { padding: 18px; font-size: 13px; background:#fff; min-height: 60px; font-family: -apple-system, sans-serif; }
+
+  .tag-table { border-collapse: collapse; width: 100%; }
+  .tag-table th { background: #f1f5f9; font-size: 12px; font-weight: 700; text-align: left; padding: 10px 14px; color: #475569; border-bottom: 2px solid #e2e8f0; }
+  .tag-table td { font-size: 13px; padding: 10px 14px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+  .tag-table tr:last-child td { border-bottom: none; }
+  .tag-table tr:hover td { background: #f8f9fa; }
+
+  .quiz-option { border: 1px solid #dee2e6; border-radius: 8px; padding: 10px 14px; font-size: 13px; cursor: pointer; margin-bottom: 6px; transition: all .15s; background: transparent; width: 100%; text-align: left; color: #1a1a1a; }
+  .quiz-option:hover:not(:disabled) { background: #f8f9fa; }
+  .quiz-option.correct { background: #d1fae5; border-color: #059669; color: #065f46; }
+  .quiz-option.wrong   { background: #fee2e2; border-color: #dc2626; color: #991b1b; }
+  .quiz-feedback { display: none; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-top: 4px; }
+  .quiz-feedback.correct { background: #d1fae5; color: #065f46; display: block; }
+  .quiz-feedback.wrong   { background: #fee2e2; color: #991b1b; display: block; }
+
+  .activity-box { border: 2px dashed #a5b4fc; background: #eef2ff; border-radius: 12px; padding: 14px 18px; }
+  .activity-title { font-size: 13px; font-weight: 700; color: #3730a3; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .challenge-box { border: 2px dashed #f9a8d4; background: #fdf2f8; border-radius: 12px; padding: 14px 18px; }
+  .challenge-title { font-size: 13px; font-weight: 700; color: #9f1239; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+
+  .tip-box   { display:flex; gap:10px; align-items:flex-start; background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:10px 14px; }
+  .tip-icon  { color:#d97706; font-size:18px; flex-shrink:0; margin-top:1px; }
+  .tip-text  { font-size:13px; color:#92400e; line-height:1.6; }
+  .info-box  { display:flex; gap:10px; align-items:flex-start; background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:10px 14px; }
+  .info-icon { color:#2563eb; font-size:18px; flex-shrink:0; margin-top:1px; }
+  .info-text { font-size:13px; color:#1e40af; line-height:1.6; }
+  .warn-box  { display:flex; gap:10px; align-items:flex-start; background:#fef9ee; border:1px solid #fcd34d; border-radius:10px; padding:10px 14px; }
+  .warn-text { font-size:13px; color:#92400e; line-height:1.6; }
+  .success-box { display:flex; gap:10px; align-items:flex-start; background:#f0fdf4; border:1px solid #86efac; border-radius:10px; padding:10px 14px; }
+  .success-text { font-size:13px; color:#166534; line-height:1.6; }
+
+  .nav-row { display:flex; align-items:center; justify-content:space-between; margin-top:auto; padding-top:1rem; border-top:1px solid #f0f0f0; }
+  .nav-btn { display:inline-flex; align-items:center; gap:6px; padding:9px 18px; border:1px solid #dee2e6; border-radius:8px; background:transparent; font-size:13px; cursor:pointer; color:#333; transition:background .15s; }
+  .nav-btn:hover:not(:disabled) { background:#f1f3f5; }
+  .nav-btn:disabled { opacity:.35; cursor:default; }
+  .nav-btn.primary { background:#2563eb; border-color:transparent; color:#fff; }
+  .nav-btn.primary:hover { background:#1d4ed8; }
+  .progress-dots { display:flex; gap:6px; align-items:center; flex-wrap:wrap; max-width:340px; }
+  .dot { width:7px; height:7px; border-radius:50%; background:#dee2e6; transition:all .2s; }
+  .dot.active { width:20px; border-radius:4px; background:#2563eb; }
+
+  .home-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .home-card { background:#fff; border:1px solid #e8e8e8; border-radius:12px; padding:1rem 1.25rem; cursor:pointer; transition:all .15s; }
+  .home-card:hover { border-color:#2563eb; box-shadow:0 2px 8px rgba(37,99,235,.12); }
+  .home-card-title { font-size:15px; font-weight:700; margin:6px 0 2px; }
+  .home-card-sub   { font-size:12px; color:#666; }
+
+  code { font-family:'SFMono-Regular',Consolas,monospace; font-size:12px; background:#f1f3f5; padding:1px 6px; border-radius:4px; border:1px solid #dee2e6; }
+
+  .check-item { display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:10px; border:1px solid #e8e8e8; font-size:13px; cursor:pointer; transition:all .15s; user-select:none; }
+  .check-item:hover { background:#f8f9fa; }
+  .check-item.done { background:#f0fdf4; border-color:#86efac; }
+  .check-circle { width:22px; height:22px; border-radius:50%; border:2px solid #dee2e6; display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0; transition:all .2s; color:transparent; }
+  .check-item.done .check-circle { background:#22c55e; border-color:#22c55e; color:#fff; }
+
+  .terminal { background:#0d1117; border-radius:12px; overflow:hidden; font-family:'SFMono-Regular',Consolas,monospace; }
+  .terminal-bar { background:#161b22; padding:9px 14px; display:flex; align-items:center; gap:6px; border-bottom:1px solid #30363d; }
+  .terminal-body { padding:14px 18px; font-size:12.5px; line-height:2; }
+  .t-prompt { color:#3fb950; }
+  .t-cmd { color:#f0f6fc; }
+  .t-out { color:#8b949e; }
+
+  .file-tree { font-family:monospace; font-size:12.5px; color:#333; line-height:2; }
+  .file-tree .fld { color:#2563eb; font-weight:700; }
+  .file-tree .fl  { color:#555; }
+
+  .form-input { padding:7px 12px; border:1px solid #ced4da; border-radius:6px; font-size:13px; font-family:-apple-system,sans-serif; flex:1; min-width:0; }
+  .form-btn { background:#2563eb; color:#fff; border:none; border-radius:6px; padding:7px 16px; font-size:12.5px; font-weight:700; cursor:pointer; white-space:nowrap; }
+  .form-btn:hover { background:#1d4ed8; }
+  .form-btn.warn { background:#f59e0b; } .form-btn.warn:hover { background:#d97706; }
+  .form-btn.danger { background:#dc3545; } .form-btn.danger:hover { background:#bb2d3b; }
+
+  .pipe-diagram { display:flex; flex-direction:column; align-items:center; gap:2px; font-family:monospace; font-size:12.5px; color:#333; }
+  .pipe-node { background:#eff6ff; border:1px solid #bfdbfe; color:#1e40af; padding:6px 18px; border-radius:8px; font-weight:700; }
+  .pipe-arrow { color:#aaa; font-size:14px; }
+
+  .mpa-flow, .spa-flow { display:flex; align-items:center; gap:6px; flex-wrap:wrap; font-family:monospace; font-size:11.5px; }
+  .mpa-page { background:#fee2e2; border:1px solid #fca5a5; color:#991b1b; padding:5px 10px; border-radius:6px; }
+  .spa-page { background:#dcfce7; border:1px solid #86efac; color:#166534; padding:5px 10px; border-radius:6px; }
+  .flow-arrow { color:#aaa; }
+
+  .course-card { border:1px solid #e8e8e8; border-radius:12px; padding:14px 16px; background:#fff; transition:all .15s; }
+  .course-card:hover { box-shadow:0 2px 10px rgba(0,0,0,.06); transform:translateY(-2px); }
+  .course-card h4 { font-size:14px; font-weight:700; margin-bottom:4px; color:#1a1a1a; }
+  .course-card p { font-size:12px; color:#666; margin:2px 0; }
+  .course-empty { text-align:center; color:#aaa; font-size:12px; font-style:italic; padding:16px 0; }
+  .course-del { background:#dc3545; color:#fff; border:none; border-radius:6px; padding:4px 9px; font-size:10.5px; font-weight:700; cursor:pointer; margin-top:8px; }
+  .course-del:hover { background:#bb2d3b; }
+
+  .stat-card { background:#fff; border:1px solid #e8e8e8; border-radius:12px; padding:14px 16px; text-align:center; }
+  .stat-num { font-size:26px; font-weight:800; color:#2563eb; }
+  .stat-label { font-size:11.5px; color:#666; margin-top:2px; text-transform:uppercase; letter-spacing:.04em; }
+
+  .vdom-box { border:2px solid #dee2e6; border-radius:10px; padding:10px; display:flex; flex-wrap:wrap; gap:6px; justify-content:center; }
+  .vdom-cell { width:34px; height:34px; border-radius:6px; background:#e9ecef; display:flex; align-items:center; justify-content:center; font-size:10px; color:#999; transition:all .3s; }
+  .vdom-cell.hit { background:#2563eb; color:#fff; transform:scale(1.1); }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <div class="top-bar">
+    <div>
+      <div class="top-bar-title" id="top-bar-title">MERN Stack Training · Day 20 · React Fundamentals</div>
+      <div class="top-bar-sub">SkillHub LMS is rebuilt as a React application</div>
+    </div>
+    <div class="slide-counter" id="slide-counter">1 / 16</div>
+  </div>
+
+  <!-- ═══ SLIDE 0 — HOME ═══ -->
+  <div class="slide active" id="slide-0">
+    <div class="slide-header">
+      <div style="width:44px;height:44px;background:#2563eb;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;flex-shrink:0"><i class="ti ti-brand-react"></i></div>
+      <div>
+        <div class="slide-title">React Fundamentals, Components, Props &amp; State</div>
+        <div class="slide-subtitle">Days 20–21 · SkillHub LMS begins its move into React</div>
+      </div>
+    </div>
+
+    <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:12px 16px;display:flex;gap:12px;align-items:flex-start">
+      <i class="ti ti-route" style="color:#2563eb;font-size:22px;flex-shrink:0;margin-top:1px"></i>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#1e40af;margin-bottom:4px">Where we left off (Day 19)</div>
+        <div style="font-size:12.5px;color:#1e40af;line-height:1.6">SkillHub LMS became a real full-stack app — Fetch API replaced Local Storage, and Register/Login with hashed passwords was working with sessionStorage. But the frontend is still plain HTML/JS with pages that fully reload.</div>
+      </div>
+    </div>
+
+    <div style="background:#fef9c3;border:1px solid #fde68a;border-radius:12px;padding:12px 16px;display:flex;gap:12px;align-items:flex-start">
+      <i class="ti ti-target-arrow" style="color:#d97706;font-size:22px;flex-shrink:0;margin-top:1px"></i>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#854d0e;margin-bottom:4px">Where we're going</div>
+        <div style="display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:#92400e">
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>React Project Setup &amp; JSX</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Reusable Components</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Props</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>State with useState</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="home-grid">
+      <div class="home-card" onclick="goSlide(1)">
+        <span class="badge b-sky">Day 20</span>
+        <div class="home-card-title">React Fundamentals &amp; Setup</div>
+        <div class="home-card-sub">SPA vs MPA, Virtual DOM, JSX, first components</div>
+      </div>
+      <div class="home-card" onclick="goSlide(7)">
+        <span class="badge b-cyan">Day 21</span>
+        <div class="home-card-title">Components, Props &amp; State</div>
+        <div class="home-card-sub">Reusable CourseCards, useState, rendering lists</div>
+      </div>
+    </div>
+
+    <div class="card card-gray" style="text-align:center">
+      <div style="font-size:12.5px;color:#666;margin-bottom:10px">The build-up across these 2 days</div>
+      <div style="font-family:monospace;font-size:12.5px;color:#333;line-height:2.1">
+        React Setup → JSX → Components → Props → State → Dynamic Dashboard
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <div></div>
+      <button class="nav-btn primary" onclick="goSlide(1)">Start Day 20 <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 1 — WHY REACT ═══ -->
+  <div class="slide" id="slide-1">
+    <div class="slide-header">
+      <span class="badge b-sky">Day 20 · Part 1</span>
+      <div><div class="slide-title">Why React?</div><div class="slide-subtitle">3 Hours · Why React, SPA vs MPA, React Architecture, Virtual DOM</div></div>
+    </div>
+
+    <div class="card"><div class="section-label">Project Goal</div><div style="font-size:14px;font-weight:600">Create the React version of the SkillHub LMS.</div></div>
+
+    <div class="card card-gray">
+      <div class="section-label">Open the current HTML project — how many pages?</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0">
+        <span class="badge b-slate">index.html</span><span class="badge b-slate">login.html</span><span class="badge b-slate">dashboard.html</span><span class="badge b-slate">courses.html</span><span class="badge b-slate">register.html</span>
+      </div>
+      <div style="font-size:13px;color:#333">If we change the Navbar, we'd need to update <b>every single page</b>. That's the problem.</div>
+    </div>
+
+    <div class="info-box"><i class="ti ti-puzzle info-icon"></i><div class="info-text">React's answer: build the Navbar once as a <b>Component</b> and reuse it everywhere. Change it once — every page updates.</div></div>
+
+    <div class="card card-gray" style="text-align:center">
+      <div style="font-family:monospace;font-size:13px;color:#333">Component <span style="color:#2563eb">↓</span> Reuse <span style="color:#2563eb">↓</span> Anywhere</div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(0)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-1"></div>
+      <button class="nav-btn primary" onclick="goSlide(2)">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 2 — SPA vs MPA + VIRTUAL DOM ═══ -->
+  <div class="slide" id="slide-2">
+    <div class="slide-header">
+      <span class="badge b-sky">Day 20 · Part 1</span>
+      <div><div class="slide-title">SPA vs MPA &amp; the Virtual DOM</div><div class="slide-subtitle">Click "Simulate Update" to see the Virtual DOM in action</div></div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="section-label">Traditional Website (MPA)</div>
+        <div class="mpa-flow"><span class="mpa-page">Home</span><span class="flow-arrow">↓ reload</span><span class="mpa-page">About</span><span class="flow-arrow">↓ reload</span><span class="mpa-page">Contact</span></div>
+      </div>
+      <div class="card">
+        <div class="section-label">React (SPA)</div>
+        <div class="spa-flow"><span class="spa-page">Home</span><span class="flow-arrow">↓ component changes</span><span class="spa-page">No Reload</span></div>
+      </div>
+    </div>
+
+    <div class="tip-box"><i class="ti ti-bulb tip-icon"></i><div class="tip-text">Analogy: editing one word in a Word document — you wouldn't reprint the entire document. React updates only the part of the page that changed, not the whole thing.</div></div>
+
+    <div class="card">
+      <div class="section-label">Virtual DOM — click to simulate a state change</div>
+      <div class="vdom-box" id="vdom-grid"></div>
+      <div style="text-align:center;margin-top:10px"><button class="nav-btn" onclick="runVdomDemo()"><i class="ti ti-player-play"></i> Simulate Update</button></div>
+      <div style="text-align:center;font-size:11.5px;color:#888;margin-top:6px" id="vdom-caption">Real DOM would redraw everything. Virtual DOM only touches the highlighted cell.</div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(1)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-2"></div>
+      <button class="nav-btn primary" onclick="goSlide(3)">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 3 — REACT SETUP ═══ -->
+  <div class="slide" id="slide-3">
+    <div class="slide-header">
+      <span class="badge b-sky">Day 20 · Part 2</span>
+      <div><div class="slide-title">Setting Up the React Project</div><div class="slide-subtitle">Vite gives us a fast, modern React starter</div></div>
+    </div>
+
+    <div class="terminal">
+      <div class="terminal-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div></div>
+      <div class="terminal-body">
+        <span class="t-prompt">$</span> <span class="t-cmd">npm create vite@latest</span><br>
+        <span class="t-out">✔ Project name: skillhub-react</span><br>
+        <span class="t-out">✔ Select a framework: React</span><br>
+        <span class="t-out">✔ Select a variant: JavaScript</span><br>
+        <span class="t-prompt">$</span> <span class="t-cmd">npm install</span><br>
+        <span class="t-prompt">$</span> <span class="t-cmd">npm run dev</span><br>
+        <span class="t-out">Local: http://localhost:5173</span>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="section-label">Folder Structure</div>
+        <div class="file-tree">
+          <div><span class="fld">src/</span></div>
+          <div style="padding-left:14px"><span class="fl">App.jsx</span></div>
+          <div style="padding-left:14px"><span class="fl">main.jsx</span></div>
+          <div style="padding-left:14px"><span class="fld">assets/</span></div>
+          <div style="padding-left:14px"><span class="fld">components/</span></div>
+        </div>
+      </div>
+      <div class="browser">
+        <div class="browser-bar"><div class="b-dot2 b-r"></div><div class="b-dot2 b-y"></div><div class="b-dot2 b-g"></div><div class="b-url">localhost:5173</div></div>
+        <div class="browser-body" style="text-align:center;color:#333">
+          <div style="font-size:28px">⚛️</div>
+          <div style="font-weight:600;margin-top:6px">Vite + React</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tip-box"><i class="ti ti-scissors tip-icon"></i><div class="tip-text">First step after setup: clean out the default boilerplate code inside <code>App.jsx</code> before building anything.</div></div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(2)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-3"></div>
+      <button class="nav-btn primary" onclick="goSlide(4)">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 4 — JSX BASICS ═══ -->
+  <div class="slide" id="slide-4">
+    <div class="slide-header">
+      <span class="badge b-sky">Day 20 · Part 2</span>
+      <div><div class="slide-title">What is JSX?</div><div class="slide-subtitle">HTML + JavaScript = JSX — it looks like HTML but is actually JavaScript</div></div>
+    </div>
+
+    <div class="editor">
+      <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">App.jsx</span></div>
+      <div class="editor-body"><pre style="margin:0;white-space:pre-wrap"><span class="j-kw">function</span> <span class="j-fn">App</span>(){
+  <span class="j-kw">return</span>(
+    <span class="j-tag">&lt;h1&gt;</span>Welcome to SkillHub LMS<span class="j-tag">&lt;/h1&gt;</span>
+  );
+}
+<span class="j-kw">export default</span> <span class="j-var">App</span>;</pre></div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="section-label">Rule: Single Parent Element</div>
+        <div style="font-size:11.5px;color:#166534;font-family:monospace">✔ &lt;div&gt;&lt;h1/&gt;&lt;p/&gt;&lt;/div&gt;</div>
+        <div style="font-size:11.5px;color:#991b1b;font-family:monospace;margin-top:4px">✘ &lt;h1/&gt;&lt;p/&gt; <span style="font-family:-apple-system,sans-serif">(no wrapper)</span></div>
+      </div>
+      <div class="card">
+        <div class="section-label">Curly Braces = JS Expressions</div>
+        <div class="editor" style="margin-top:0">
+          <div class="editor-body" style="font-size:11px;padding:8px 12px"><pre style="margin:0;white-space:pre-wrap"><span class="j-kw">const</span> <span class="j-var">trainer</span><span class="j-op">=</span><span class="j-str">"Manish"</span>;
+<span class="j-tag">&lt;h1&gt;</span>Welcome {<span class="j-var">trainer</span>}<span class="j-tag">&lt;/h1&gt;</span></pre></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(3)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-4"></div>
+      <button class="nav-btn primary" onclick="goSlide(5)">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 5 — FIRST COMPONENT (Navbar) ═══ -->
+  <div class="slide" id="slide-5">
+    <div class="slide-header">
+      <span class="badge b-sky">Day 20 · Part 2</span>
+      <div><div class="slide-title">Your First Reusable Component</div><div class="slide-subtitle">One Navbar component, used on every page — click a page tab below</div></div>
+    </div>
+
+    <div class="editor">
+      <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">components/Navbar.jsx</span></div>
+      <div class="editor-body" style="font-size:11.5px"><pre style="margin:0;white-space:pre-wrap"><span class="j-kw">function</span> <span class="j-fn">Navbar</span>(){
+  <span class="j-kw">return</span>( <span class="j-tag">&lt;nav&gt;</span>SkillHub LMS<span class="j-tag">&lt;/nav&gt;</span> );
+}
+<span class="j-kw">export default</span> <span class="j-var">Navbar</span>;
+
+<span class="j-com">// App.jsx</span>
+<span class="j-kw">import</span> <span class="j-var">Navbar</span> <span class="j-kw">from</span> <span class="j-str">"./components/Navbar"</span>;
+<span class="j-tag">&lt;Navbar/&gt;</span></pre></div>
+    </div>
+
+    <div class="card">
+      <div class="section-label">Same &lt;Navbar/&gt; — every page</div>
+      <div style="display:flex;gap:8px;margin-bottom:10px">
+        <button class="form-btn" onclick="showPage('Home')">Home</button>
+        <button class="form-btn" onclick="showPage('Courses')">Courses</button>
+        <button class="form-btn" onclick="showPage('Dashboard')">Dashboard</button>
+      </div>
+      <div class="browser">
+        <div class="browser-bar"><div class="b-dot2 b-r"></div><div class="b-dot2 b-y"></div><div class="b-dot2 b-g"></div><div class="b-url" id="navbar-url">localhost:5173/</div></div>
+        <div class="browser-body">
+          <div style="background:#1e293b;color:#fff;padding:8px 14px;border-radius:8px;font-weight:700;font-size:13px;margin-bottom:10px">SkillHub LMS</div>
+          <div id="navbar-page-content" style="color:#333;font-weight:600">Home Page</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="success-box"><i class="ti ti-circle-check" style="color:#16a34a;font-size:18px"></i><div class="success-text">Notice the dark navbar never changes or re-renders from scratch — only the content below it swaps. That's component reuse.</div></div>
+
+    <div class="activity-box"><div class="activity-title"><i class="ti ti-puzzle"></i> Mini Challenge</div><div style="font-size:13px;color:#3730a3">Create <code>Hero</code>, <code>About</code>, and <code>Footer</code> components.</div></div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(4)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-5"></div>
+      <button class="nav-btn primary" onclick="goSlide(6)">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 6 — DAY 20 RECAP ═══ -->
+  <div class="slide" id="slide-6">
+    <div class="slide-header">
+      <span class="badge b-sky">Day 20 · Recap</span>
+      <div><div class="slide-title">Day 20 Complete ✅</div><div class="slide-subtitle">React Fundamentals &amp; Setup</div></div>
+    </div>
+
+    <div class="challenge-box">
+      <div class="challenge-title"><i class="ti ti-flag"></i> Assignment</div>
+      <div style="font-size:13px;color:#9f1239">Convert the HTML Landing Page into React Components — Navbar, Hero, About, Courses, Footer — each in its own file under <code>components/</code>.</div>
+    </div>
+
+    <div class="grid-2">
+      <div class="check-item done"><div class="check-circle"><i class="ti ti-check"></i></div>npm create vite@latest</div>
+      <div class="check-item done"><div class="check-circle"><i class="ti ti-check"></i></div>SPA vs MPA</div>
+      <div class="check-item done"><div class="check-circle"><i class="ti ti-check"></i></div>Virtual DOM concept</div>
+      <div class="check-item done"><div class="check-circle"><i class="ti ti-check"></i></div>JSX rules</div>
+      <div class="check-item done"><div class="check-circle"><i class="ti ti-check"></i></div>First component: Navbar</div>
+    </div>
+
+    <div class="card"><div class="section-label">End Result — Day 20</div><div style="text-align:center;font-family:monospace;font-size:12.5px;color:#333">React LMS → Navbar → Hero → About → Footer</div></div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(5)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-6"></div>
+      <button class="nav-btn primary" onclick="goSlide(7)">Start Day 21 <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 7 — PROPS (CourseCard) ═══ -->
+  <div class="slide" id="slide-7">
+    <div class="slide-header">
+      <span class="badge b-cyan">Day 21 · Part 1</span>
+      <div><div class="slide-title">Components &amp; Props</div><div class="slide-subtitle">3 Hours · Functional Components, Props, Reusable Components, State</div></div>
+    </div>
+
+    <div class="card"><div class="section-label">Project Goal</div><div style="font-size:14px;font-weight:600">Build a dynamic React LMS homepage.</div></div>
+
+    <div class="editor">
+      <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">components/CourseCard.jsx</span></div>
+      <div class="editor-body" style="font-size:11.5px"><pre style="margin:0;white-space:pre-wrap"><span class="j-kw">function</span> <span class="j-fn">CourseCard</span>(<span class="j-var">props</span>){
+  <span class="j-kw">return</span>(
+    <span class="j-tag">&lt;div</span> <span class="j-attr">className</span>=<span class="j-str">"card"</span><span class="j-tag">&gt;</span>
+      <span class="j-tag">&lt;h3&gt;</span>{<span class="j-var">props</span>.<span class="j-prop">name</span>}<span class="j-tag">&lt;/h3&gt;</span>
+      <span class="j-tag">&lt;p&gt;</span>{<span class="j-var">props</span>.<span class="j-prop">trainer</span>}<span class="j-tag">&lt;/p&gt;</span>
+      <span class="j-tag">&lt;p&gt;</span>{<span class="j-var">props</span>.<span class="j-prop">duration</span>}<span class="j-tag">&lt;/p&gt;</span>
+    <span class="j-tag">&lt;/div&gt;</span>
+  );
+}</pre></div>
+    </div>
+
+    <div class="card">
+      <div class="section-label">Same Component, Different Props</div>
+      <div class="grid-3" id="props-demo">
+        <div class="course-card"><h4>React</h4><p>Trainer: Manish</p><p>8 Weeks</p></div>
+        <div class="course-card"><h4>Node</h4><p>Trainer: Rahul</p><p>6 Weeks</p></div>
+      </div>
+      <div style="text-align:center;margin-top:10px"><button class="nav-btn" onclick="addPropsCard()"><i class="ti ti-plus"></i> Add &lt;CourseCard/&gt; with new props</button></div>
+    </div>
+
+    <div class="info-box"><i class="ti ti-arrow-big-down-lines info-icon"></i><div class="info-text">Props flow one direction: <b>Parent → Child</b>. The same <code>CourseCard</code> component renders differently just by receiving different props.</div></div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(6)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-7"></div>
+      <button class="nav-btn primary" onclick="goSlide(8)">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 8 — DESTRUCTURING PROPS ═══ -->
+  <div class="slide" id="slide-8">
+    <div class="slide-header">
+      <span class="badge b-cyan">Day 21 · Part 1</span>
+      <div><div class="slide-title">Destructuring Props</div><div class="slide-subtitle">A cleaner way to read props, without repeating `props.` everywhere</div></div>
+    </div>
+
+    <div class="grid-2">
+      <div class="editor">
+        <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">Before</span></div>
+        <div class="editor-body" style="font-size:11px"><pre style="margin:0;white-space:pre-wrap"><span class="j-kw">function</span> <span class="j-fn">CourseCard</span>(<span class="j-var">props</span>){
+  <span class="j-kw">return</span> <span class="j-tag">&lt;h3&gt;</span>{<span class="j-var">props</span>.<span class="j-prop">name</span>}<span class="j-tag">&lt;/h3&gt;</span>;
+}</pre></div>
+      </div>
+      <div class="editor">
+        <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">After</span></div>
+        <div class="editor-body" style="font-size:11px"><pre style="margin:0;white-space:pre-wrap"><span class="j-kw">function</span> <span class="j-fn">CourseCard</span>({
+  <span class="j-var">name</span>, <span class="j-var">trainer</span>, <span class="j-var">duration</span>
+}){
+  <span class="j-kw">return</span> <span class="j-tag">&lt;h3&gt;</span>{<span class="j-var">name</span>}<span class="j-tag">&lt;/h3&gt;</span>;
+}</pre></div>
+      </div>
+    </div>
+
+    <div class="activity-box"><div class="activity-title"><i class="ti ti-puzzle"></i> Mini Challenge</div><div style="font-size:13px;color:#3730a3">Build a <code>TrainerCard</code> component using Props.</div></div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(7)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-8"></div>
+      <button class="nav-btn primary" onclick="goSlide(9)">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 9 — useState INTRO ═══ -->
+  <div class="slide" id="slide-9">
+    <div class="slide-header">
+      <span class="badge b-cyan">Day 21 · Part 2</span>
+      <div><div class="slide-title">State with useState</div><div class="slide-subtitle">Props can't change over time by themselves — state can</div></div>
+    </div>
+
+    <div class="card card-gray">
+      <div class="section-label">The Problem</div>
+      <div style="font-size:13px;color:#333">Course count is currently static. We need it to be <b>dynamic</b> — updating live as the user interacts.</div>
+    </div>
+
+    <div class="editor">
+      <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">App.jsx</span></div>
+      <div class="editor-body" style="font-size:11.5px"><pre style="margin:0;white-space:pre-wrap"><span class="j-kw">import</span> {<span class="j-var">useState</span>} <span class="j-kw">from</span> <span class="j-str">"react"</span>;
+
+<span class="j-kw">const</span> [<span class="j-var">count</span>, <span class="j-var">setCount</span>] <span class="j-op">=</span> <span class="j-fn">useState</span>(<span class="j-num">0</span>);</pre></div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card"><div class="section-label">count</div><div style="font-size:13px;color:#333">The current value — read it directly in JSX.</div></div>
+      <div class="card"><div class="section-label">setCount</div><div style="font-size:13px;color:#333">The only correct way to update it and trigger a re-render.</div></div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(8)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-9"></div>
+      <button class="nav-btn primary" onclick="goSlide(10)">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 10 — LIVE COUNTER ═══ -->
+  <div class="slide" id="slide-10">
+    <div class="slide-header">
+      <span class="badge b-cyan">Day 21 · Part 2</span>
+      <div><div class="slide-title">The Counter — Live</div><div class="slide-subtitle">Click the button below — this is exactly what setCount(count+1) does</div></div>
+    </div>
+
+    <div class="editor">
+      <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">App.jsx</span></div>
+      <div class="editor-body" style="font-size:11.5px"><pre style="margin:0;white-space:pre-wrap"><span class="j-tag">&lt;button</span> <span class="j-attr">onClick</span>={<span class="j-op">()</span><span class="j-op">=></span><span class="j-fn">setCount</span>(<span class="j-var">count</span><span class="j-op">+</span><span class="j-num">1</span>)}<span class="j-tag">&gt;</span>
+  Add Course
+<span class="j-tag">&lt;/button&gt;</span>
+<span class="j-tag">&lt;h2&gt;</span>Total Courses : {<span class="j-var">count</span>}<span class="j-tag">&lt;/h2&gt;</span></pre></div>
+    </div>
+
+    <div class="card" style="text-align:center">
+      <div style="font-size:32px;font-weight:800;color:#2563eb" id="counter-display">Total Courses : 0</div>
+      <div style="margin-top:12px;display:flex;gap:8px;justify-content:center">
+        <button class="form-btn" onclick="changeCounter(1)">+ Add Course</button>
+        <button class="form-btn warn" onclick="changeCounter(-1)">- Remove</button>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(9)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-10"></div>
+      <button class="nav-btn primary" onclick="goSlide(11)">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 11 — RENDERING LISTS WITH map() ═══ -->
+  <div class="slide" id="slide-11">
+    <div class="slide-header">
+      <span class="badge b-cyan">Day 21 · Part 2</span>
+      <div><div class="slide-title">Rendering Lists with map()</div><div class="slide-subtitle">Add a course below — it renders as a &lt;CourseCard/&gt; via .map()</div></div>
+    </div>
+
+    <div class="editor">
+      <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">App.jsx</span></div>
+      <div class="editor-body" style="font-size:11.5px"><pre style="margin:0;white-space:pre-wrap"><span class="j-kw">const</span> <span class="j-var">courses</span> <span class="j-op">=</span> [{ <span class="j-prop">name</span>:<span class="j-str">"HTML"</span> }, { <span class="j-prop">name</span>:<span class="j-str">"React"</span> }];
+
+{<span class="j-var">courses</span>.<span class="j-fn">map</span>(<span class="j-var">course</span> <span class="j-op">=></span>
+  <span class="j-tag">&lt;CourseCard</span> <span class="j-attr">name</span>={<span class="j-var">course</span>.<span class="j-prop">name</span>} <span class="j-tag">/&gt;</span>
+)}</pre></div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;gap:8px;margin-bottom:10px">
+        <input class="form-input" id="list-course-name" placeholder="Course name (e.g. Python)">
+        <button class="form-btn" onclick="addListCourse()">Add to courses[]</button>
+      </div>
+      <div class="grid-3" id="course-list-map"></div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(10)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-11"></div>
+      <button class="nav-btn primary" onclick="goSlide(12)">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 12 — DYNAMIC DASHBOARD ═══ -->
+  <div class="slide" id="slide-12">
+    <div class="slide-header">
+      <span class="badge b-cyan">Day 21 · Part 2</span>
+      <div><div class="slide-title">Dynamic Course Dashboard</div><div class="slide-subtitle">Counter + Add Button + Cards, all driven by state</div></div>
+    </div>
+
+    <div class="grid-3">
+      <div class="stat-card"><div class="stat-num" id="stat-courses">0</div><div class="stat-label">Total Courses</div></div>
+      <div class="stat-card"><div class="stat-num" id="stat-students">0</div><div class="stat-label">Enrolled Students</div></div>
+      <div class="stat-card"><div class="stat-num" id="stat-trainers">0</div><div class="stat-label">Trainers</div></div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:center">
+      <button class="form-btn" onclick="bumpStat('courses')">+ Course</button>
+      <button class="form-btn" onclick="bumpStat('students')">+ Student</button>
+      <button class="form-btn" onclick="bumpStat('trainers')">+ Trainer</button>
+    </div>
+
+    <div class="activity-box"><div class="activity-title"><i class="ti ti-puzzle"></i> Mini Challenge</div><div style="font-size:13px;color:#3730a3">Build an Add-Student counter, Total-Courses counter, and Enrolled-Students counter using <code>useState</code> — exactly like the demo above.</div></div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(11)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-12"></div>
+      <button class="nav-btn primary" onclick="goSlide(13)">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 13 — DAY 21 ASSIGNMENT / PROJECT PROGRESS ═══ -->
+  <div class="slide" id="slide-13">
+    <div class="slide-header">
+      <span class="badge b-cyan">Day 21 · Recap</span>
+      <div><div class="slide-title">Assignment &amp; Project Progress</div><div class="slide-subtitle">Day 21 wrap-up</div></div>
+    </div>
+
+    <div class="challenge-box">
+      <div class="challenge-title"><i class="ti ti-flag"></i> Assignment — Build a React Dashboard including:</div>
+      <ul style="font-size:13px;color:#9f1239;line-height:1.9;padding-left:18px">
+        <li>Navbar Component</li><li>Hero Component</li><li>Four Dashboard Statistic Cards</li>
+        <li>Course List rendered using <code>map()</code></li><li>Add Course Counter using <code>useState</code></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="section-label">Project Progress — SkillHub MERN LMS</div>
+      <div class="pipe-diagram">
+        <div class="pipe-node">Backend</div><div class="pipe-arrow">↓</div>
+        <div class="pipe-node">REST API</div><div class="pipe-arrow">↓</div>
+        <div class="pipe-node" style="background:#ede9fe;border-color:#c4b5fd;color:#5b21b6">MongoDB</div><div class="pipe-arrow">↓</div>
+        <div class="pipe-node" style="background:#e0f2fe;border-color:#7dd3fc;color:#075985">React Frontend</div><div class="pipe-arrow">↓</div>
+        <div class="pipe-node" style="background:#e0f2fe;border-color:#7dd3fc;color:#075985">Components</div><div class="pipe-arrow">↓</div>
+        <div class="pipe-node" style="background:#e0f2fe;border-color:#7dd3fc;color:#075985">Props</div><div class="pipe-arrow">↓</div>
+        <div class="pipe-node" style="background:#e0f2fe;border-color:#7dd3fc;color:#075985">State</div><div class="pipe-arrow">↓</div>
+        <div class="pipe-node" style="background:#dcfce7;border-color:#86efac;color:#166534">Dynamic Dashboard</div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(12)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-13"></div>
+      <button class="nav-btn primary" onclick="goSlide(14)">Take the Quiz <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 14 — QUIZ ═══ -->
+  <div class="slide" id="slide-14">
+    <div class="slide-header">
+      <span class="badge b-indigo">Check Your Understanding</span>
+      <div><div class="slide-title">Days 20–21 Quiz</div><div class="slide-subtitle">Answer each question — feedback appears instantly</div></div>
+    </div>
+    <div id="quiz-container"></div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(13)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-14"></div>
+      <button class="nav-btn primary" onclick="goSlide(15)">Finish <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 15 — WRAP UP ═══ -->
+  <div class="slide" id="slide-15">
+    <div class="slide-header">
+      <span class="badge b-green">Wrap-Up</span>
+      <div><div class="slide-title">React Foundations Are In Place</div><div class="slide-subtitle">SkillHub LMS now has reusable components, props, and reactive state</div></div>
+    </div>
+    <div class="success-box"><i class="ti ti-trophy" style="color:#16a34a;font-size:18px"></i><div class="success-text">You went from plain HTML pages to a component-driven React app with dynamic, stateful UI. Next up: connecting this to the real backend with useEffect and Fetch.</div></div>
+    <div class="grid-2">
+      <div class="home-card" onclick="goSlide(1)"><span class="badge b-sky">Day 20</span><div class="home-card-title">React Fundamentals</div></div>
+      <div class="home-card" onclick="goSlide(7)"><span class="badge b-cyan">Day 21</span><div class="home-card-title">Components, Props &amp; State</div></div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(14)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-15"></div>
+      <button class="nav-btn primary" onclick="goSlide(0)"><i class="ti ti-home"></i> Back to Home</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  var current = 0, total = 16, quizInit = false;
+  var dayTitles = {0:"Overview",1:"Day 20 · React Fundamentals",2:"Day 20 · React Fundamentals",3:"Day 20 · React Fundamentals",4:"Day 20 · React Fundamentals",5:"Day 20 · React Fundamentals",6:"Day 20 · React Fundamentals",7:"Day 21 · Components, Props & State",8:"Day 21 · Components, Props & State",9:"Day 21 · Components, Props & State",10:"Day 21 · Components, Props & State",11:"Day 21 · Components, Props & State",12:"Day 21 · Components, Props & State",13:"Day 21 · Components, Props & State",14:"Quiz",15:"Wrap-Up"};
+
+  function escapeHtml(str) { return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  // ── Virtual DOM demo (slide 2) ──
+  var vdomGrid = document.getElementById('vdom-grid');
+  for (var i=0;i<12;i++) { var c=document.createElement('div'); c.className='vdom-cell'; c.id='vc-'+i; vdomGrid.appendChild(c); }
+  function runVdomDemo() {
+    document.querySelectorAll('.vdom-cell').forEach(function(c){ c.classList.remove('hit'); });
+    var idx = Math.floor(Math.random()*12);
+    document.getElementById('vc-'+idx).classList.add('hit');
+    document.getElementById('vdom-caption').textContent = 'Only cell #'+(idx+1)+' re-rendered — everything else stayed untouched, just like React\'s Virtual DOM diffing.';
+  }
+
+  // ── Navbar page demo (slide 5) ──
+  var pageContent = { Home: 'Home Page', Courses: 'Courses Page — React, Node, MongoDB', Dashboard: 'Dashboard Page — Welcome back, Trainer!' };
+  function showPage(name) {
+    document.getElementById('navbar-page-content').textContent = pageContent[name];
+    document.getElementById('navbar-url').textContent = 'localhost:5173/' + (name==='Home' ? '' : name.toLowerCase());
+  }
+
+  // ── Props demo (slide 7) ──
+  var extraTrainers = ['Priya','Aman','Sneha','Vikram','Neha'];
+  var extraCourses = ['MongoDB','Express','JavaScript','Python','UI/UX'];
+  var extraDurations = ['4 Weeks','6 Weeks','10 Weeks','5 Weeks'];
+  var propsCount = 0;
+  function addPropsCard() {
+    var name = extraCourses[propsCount % extraCourses.length];
+    var trainer = extraTrainers[propsCount % extraTrainers.length];
+    var dur = extraDurations[propsCount % extraDurations.length];
+    propsCount++;
+    var div = document.createElement('div');
+    div.className = 'course-card';
+    div.innerHTML = '<h4>'+escapeHtml(name)+'</h4><p>Trainer: '+escapeHtml(trainer)+'</p><p>'+escapeHtml(dur)+'</p>';
+    document.getElementById('props-demo').appendChild(div);
+  }
+
+  // ── Counter demo (slide 10) ──
+  var counter = 0;
+  function changeCounter(delta) {
+    counter = Math.max(0, counter + delta);
+    document.getElementById('counter-display').textContent = 'Total Courses : ' + counter;
+  }
+
+  // ── map() list demo (slide 11) ──
+  var mapCourses = ['HTML', 'React'];
+  function renderMapCourses() {
+    var el = document.getElementById('course-list-map');
+    if (mapCourses.length === 0) { el.innerHTML = '<div class="course-empty">No courses yet.</div>'; return; }
+    el.innerHTML = mapCourses.map(function(name, i) {
+      return '<div class="course-card"><h4>'+escapeHtml(name)+'</h4><p>&lt;CourseCard/&gt;</p><button class="course-del" onclick="removeMapCourse('+i+')">Remove</button></div>';
+    }).join('');
+  }
+  function addListCourse() {
+    var input = document.getElementById('list-course-name');
+    var name = input.value.trim();
+    if (!name) return;
+    mapCourses.push(name);
+    input.value = '';
+    renderMapCourses();
+  }
+  function removeMapCourse(i) { mapCourses.splice(i,1); renderMapCourses(); }
+  renderMapCourses();
+
+  // ── Dynamic dashboard stats (slide 12) ──
+  var stats = { courses: 0, students: 0, trainers: 0 };
+  function bumpStat(key) {
+    stats[key]++;
+    document.getElementById('stat-'+key).textContent = stats[key];
+  }
+
+  // ── Quiz ──
+  var quizData = [
+    { q: "Why does React use components like Navbar instead of copying the same HTML into every page?", opts: ["Components run faster than HTML", "A component is defined once and reused everywhere — changing it once updates every page that uses it", "HTML doesn't support navigation bars", "Components are required by the browser"], ans: 1, exp: "This solves the exact maintenance problem shown at the start of Day 20 — one Navbar component, reused, means one place to update instead of five separate HTML files." },
+    { q: "What is the core difference between a Single Page Application (SPA) and a Multi Page Application (MPA)?", opts: ["SPAs only work on mobile devices", "In an SPA, navigating between views swaps components without a full page reload; an MPA reloads the entire page for every navigation", "MPAs are always faster than SPAs", "SPAs cannot use JavaScript"], ans: 1, exp: "React apps are typically SPAs — the browser loads once, and React swaps out components in place as the user navigates, avoiding full page reloads." },
+    { q: "Using the Word-document analogy, why does the Virtual DOM only update the changed part of the page instead of everything?", opts: ["Because re-rendering everything is technically impossible in a browser", "Just like you wouldn't reprint an entire document to fix one word, React calculates what actually changed and updates only that part of the real DOM", "Because the Virtual DOM is a copy of the server, not the browser", "It's a security requirement of JSX"], ans: 1, exp: "React diffs the previous Virtual DOM against the new one and applies only the minimal necessary changes to the real DOM — much more efficient than a full redraw." },
+    { q: "Why must JSX have a single parent (wrapping) element, as in <div><h1/><p/></div>?", opts: ["JSX is not real JavaScript, so this rule doesn't matter", "Under the hood, JSX compiles to a function call that can only return one value/element, so multiple top-level siblings aren't valid", "It's just a style preference with no real reason", "Because <div> is the only tag React recognizes"], ans: 1, exp: "JSX transpiles to something like React.createElement(...), which returns a single element tree — you can't return two sibling elements without one common wrapper." },
+    { q: "In <CourseCard name=\"React\" trainer=\"Manish\" duration=\"8 Weeks\" />, what are name, trainer, and duration?", opts: ["State variables local to CourseCard", "Props — data passed from the parent component down into the CourseCard child component", "Global variables shared across the whole app", "CSS class names"], ans: 1, exp: "Props are how data flows from a parent component into a child. The same CourseCard component renders different content purely based on what props it receives." },
+    { q: "Why do we destructure props as function CourseCard({ name, trainer, duration }) instead of using props.name each time?", opts: ["Destructuring makes the component run faster", "It's a cleaner syntax that lets you reference name, trainer, and duration directly instead of repeating props. every time", "It changes props into state", "It's required for React to accept the component"], ans: 1, exp: "This is purely a readability/convenience pattern — destructuring pulls the needed values out of the props object up front so the rest of the function reads more cleanly." },
+    { q: "In const [count, setCount] = useState(0), why is calling setCount(count + 1) the correct way to update the counter, rather than count = count + 1?", opts: ["Both approaches work identically in React", "Directly reassigning count doesn't tell React to re-render the component; setCount() is the only way to update state and trigger a UI update", "count = count + 1 throws a syntax error in JavaScript", "setCount() is only needed for arrays, not numbers"], ans: 1, exp: "React needs to know state changed so it can re-render. Only the setter function returned by useState (here, setCount) triggers that — a plain reassignment does nothing visible." },
+    { q: "When rendering a list with courses.map(course => <CourseCard name={course.name} />), what does .map() accomplish?", opts: ["It permanently changes the original courses array", "It transforms each item in the courses array into a CourseCard element, producing an array of components React can render", "It deletes courses one at a time", "It only works with numbers, not objects"], ans: 1, exp: ".map() returns a new array — here, an array of JSX elements — which React renders as a list. The original courses array itself is left unchanged." }
+  ];
+  function renderQuiz() {
+    var c = document.getElementById('quiz-container'); c.innerHTML = '';
+    quizData.forEach(function(q, i) {
+      var d = document.createElement('div'); d.style.cssText = 'margin-bottom:18px';
+      d.innerHTML = '<div style="font-size:13px;font-weight:600;margin-bottom:6px">'+(i+1)+'. '+q.q+'</div>';
+      q.opts.forEach(function(opt, j) {
+        var btn = document.createElement('button'); btn.className = 'quiz-option';
+        btn.innerHTML = String.fromCharCode(65+j)+'. '+opt;
+        btn.onclick = function() {
+          var btns = d.querySelectorAll('.quiz-option');
+          if (btns[0].disabled) return;
+          btns.forEach(function(b,k){ b.disabled=true; if(k===q.ans) b.classList.add('correct'); else if(k===j) b.classList.add('wrong'); });
+          var fb = d.querySelector('.quiz-feedback');
+          fb.innerHTML = (j===q.ans?'✅ Correct! ':'❌ Not quite. ')+q.exp;
+          fb.className = 'quiz-feedback '+(j===q.ans?'correct':'wrong');
+        };
+        d.appendChild(btn);
+      });
+      var fb = document.createElement('div'); fb.className = 'quiz-feedback'; d.appendChild(fb);
+      c.appendChild(d);
+    });
+  }
+
+  function goSlide(n) {
+    document.getElementById('slide-'+current).classList.remove('active');
+    current = n;
+    document.getElementById('slide-'+current).classList.add('active');
+    updateDots();
+    document.getElementById('slide-counter').textContent = (current+1)+' / '+total;
+    document.getElementById('top-bar-title').textContent = 'MERN Stack Training · ' + dayTitles[current];
+    if (n===14 && !quizInit) { renderQuiz(); quizInit=true; }
+    window.scrollTo(0,0);
+  }
+  function updateDots() {
+    for (var s=0; s<total; s++) {
+      var el = document.getElementById('dots-'+s); if (!el) continue;
+      el.innerHTML = '';
+      for (var d=0; d<total; d++) {
+        var dot = document.createElement('div');
+        dot.className = 'dot'+(d===current?' active':'');
+        el.appendChild(dot);
+      }
+    }
+  }
+  updateDots();
+</script>
+</body>
+</html>

@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>React Router &amp; Context API Authentication | SkillHub LMS</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f4f5f7; color: #1a1a1a;
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; padding: 2rem 1rem;
+  }
+  .wrapper { width: 100%; max-width: 920px; background: #fff; border-radius: 16px; box-shadow: 0 2px 20px rgba(0,0,0,0.09); overflow: hidden; }
+  .top-bar { background: linear-gradient(135deg, #0f2027, #203a43, #2c5364); color: #fff; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; }
+  .top-bar-title { font-size: 15px; font-weight: 600; }
+  .top-bar-sub   { font-size: 12px; opacity: .55; margin-top: 2px; }
+  .slide-counter { font-size: 13px; opacity: .6; font-variant-numeric: tabular-nums; }
+  .slide { display: none; padding: 1.75rem 2rem; min-height: 500px; flex-direction: column; gap: 1.2rem; }
+  .slide.active { display: flex; }
+  .slide-header { display: flex; align-items: center; gap: 10px; padding-bottom: 1rem; border-bottom: 1px solid #e8e8e8; }
+  .slide-title    { font-size: 20px; font-weight: 700; color: #111; }
+  .slide-subtitle { font-size: 13px; color: #666; margin-top: 2px; }
+
+  .badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+  .b-blue   { background:#dbeafe; color:#1d4ed8; }
+  .b-teal   { background:#d1fae5; color:#065f46; }
+  .b-purple { background:#ede9fe; color:#5b21b6; }
+  .b-amber  { background:#fef3c7; color:#92400e; }
+  .b-green  { background:#dcfce7; color:#166534; }
+  .b-slate  { background:#e2e8f0; color:#334155; }
+  .b-rose   { background:#ffe4e6; color:#9f1239; }
+  .b-orange { background:#ffedd5; color:#9a3412; }
+  .b-indigo { background:#e0e7ff; color:#3730a3; }
+  .b-cyan   { background:#cffafe; color:#164e63; }
+  .b-sky    { background:#e0f2fe; color:#075985; }
+
+  .section-label { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 8px; }
+  .card { background: #fff; border: 1px solid #e8e8e8; border-radius: 12px; padding: 1rem 1.25rem; }
+  .card-gray { background: #f8f9fa; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; }
+
+  .editor { background: #1e1e2e; border-radius: 12px; overflow: hidden; font-family: 'SFMono-Regular', Consolas, 'Courier New', monospace; }
+  .editor-bar { background: #13131f; padding: 9px 14px; display: flex; align-items: center; gap: 6px; }
+  .e-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .e-red { background:#ff5f57; } .e-yellow { background:#febc2e; } .e-green { background:#28c840; }
+  .e-label { font-size: 12px; color: #6272a4; margin-left: 4px; font-family: -apple-system, sans-serif; }
+  .editor-body { padding: 14px 18px; font-size: 12.5px; line-height: 1.8; overflow-x:auto; }
+  .j-kw   { color: #ff79c6; font-weight: 700; }
+  .j-fn   { color: #50fa7b; }
+  .j-str  { color: #f1fa8c; }
+  .j-num  { color: #bd93f9; }
+  .j-var  { color: #80ffea; }
+  .j-op   { color: #ff79c6; }
+  .j-prop { color: #50fa7b; }
+  .j-com  { color: #6272a4; font-style: italic; }
+  .j-tag  { color: #ff5555; font-weight: 700; }
+  .j-attr { color: #50fa7b; }
+
+  .browser { border-radius: 12px; overflow: hidden; border: 1px solid #e0e0e0; }
+  .browser-bar { background: #f1f3f4; padding: 9px 14px; display: flex; align-items: center; gap: 7px; border-bottom: 1px solid #e0e0e0; }
+  .b-dot2 { width: 10px; height: 10px; border-radius: 50%; }
+  .b-r { background:#ff5f57; } .b-y { background:#febc2e; } .b-g { background:#28c840; }
+  .b-url { flex:1; background:#fff; border:1px solid #dadce0; border-radius:20px; padding:4px 14px; font-size:12px; color:#555; }
+  .browser-body { padding: 18px; font-size: 13px; background:#fff; min-height: 60px; font-family: -apple-system, sans-serif; }
+
+  .tag-table { border-collapse: collapse; width: 100%; }
+  .tag-table th { background: #f1f5f9; font-size: 12px; font-weight: 700; text-align: left; padding: 10px 14px; color: #475569; border-bottom: 2px solid #e2e8f0; }
+  .tag-table td { font-size: 13px; padding: 10px 14px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+  .tag-table tr:last-child td { border-bottom: none; }
+  .tag-table tr:hover td { background: #f8f9fa; }
+
+  .quiz-option { border: 1px solid #dee2e6; border-radius: 8px; padding: 10px 14px; font-size: 13px; cursor: pointer; margin-bottom: 6px; transition: all .15s; background: transparent; width: 100%; text-align: left; color: #1a1a1a; }
+  .quiz-option:hover:not(:disabled) { background: #f8f9fa; }
+  .quiz-option.correct { background: #d1fae5; border-color: #059669; color: #065f46; }
+  .quiz-option.wrong   { background: #fee2e2; border-color: #dc2626; color: #991b1b; }
+  .quiz-feedback { display: none; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-top: 4px; }
+  .quiz-feedback.correct { background: #d1fae5; color: #065f46; display: block; }
+  .quiz-feedback.wrong   { background: #fee2e2; color: #991b1b; display: block; }
+
+  .activity-box { border: 2px dashed #a5b4fc; background: #eef2ff; border-radius: 12px; padding: 14px 18px; }
+  .activity-title { font-size: 13px; font-weight: 700; color: #3730a3; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .challenge-box { border: 2px dashed #f9a8d4; background: #fdf2f8; border-radius: 12px; padding: 14px 18px; }
+  .challenge-title { font-size: 13px; font-weight: 700; color: #9f1239; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+
+  .tip-box   { display:flex; gap:10px; align-items:flex-start; background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:10px 14px; }
+  .tip-icon  { color:#d97706; font-size:18px; flex-shrink:0; margin-top:1px; }
+  .tip-text  { font-size:13px; color:#92400e; line-height:1.6; }
+  .info-box  { display:flex; gap:10px; align-items:flex-start; background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:10px 14px; }
+  .info-icon { color:#2563eb; font-size:18px; flex-shrink:0; margin-top:1px; }
+  .info-text { font-size:13px; color:#1e40af; line-height:1.6; }
+  .warn-box  { display:flex; gap:10px; align-items:flex-start; background:#fef9ee; border:1px solid #fcd34d; border-radius:10px; padding:10px 14px; }
+  .warn-text { font-size:13px; color:#92400e; line-height:1.6; }
+  .success-box { display:flex; gap:10px; align-items:flex-start; background:#f0fdf4; border:1px solid #86efac; border-radius:10px; padding:10px 14px; }
+  .success-text { font-size:13px; color:#166534; line-height:1.6; }
+
+  .nav-row { display:flex; align-items:center; justify-content:space-between; margin-top:auto; padding-top:1rem; border-top:1px solid #f0f0f0; }
+  .nav-btn { display:inline-flex; align-items:center; gap:6px; padding:9px 18px; border:1px solid #dee2e6; border-radius:8px; background:transparent; font-size:13px; cursor:pointer; color:#333; transition:background .15s; }
+  .nav-btn:hover:not(:disabled) { background:#f1f3f5; }
+  .nav-btn:disabled { opacity:.35; cursor:default; }
+  .nav-btn.primary { background:#2563eb; border-color:transparent; color:#fff; }
+  .nav-btn.primary:hover { background:#1d4ed8; }
+  .progress-dots { display:flex; gap:6px; align-items:center; flex-wrap:wrap; max-width:340px; }
+  .dot { width:7px; height:7px; border-radius:50%; background:#dee2e6; transition:all .2s; }
+  .dot.active { width:20px; border-radius:4px; background:#2563eb; }
+
+  .home-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .home-card { background:#fff; border:1px solid #e8e8e8; border-radius:12px; padding:1rem 1.25rem; cursor:pointer; transition:all .15s; }
+  .home-card:hover { border-color:#2563eb; box-shadow:0 2px 8px rgba(37,99,235,.12); }
+  .home-card-title { font-size:15px; font-weight:700; margin:6px 0 2px; }
+  .home-card-sub   { font-size:12px; color:#666; }
+
+  code { font-family:'SFMono-Regular',Consolas,monospace; font-size:12px; background:#f1f3f5; padding:1px 6px; border-radius:4px; border:1px solid #dee2e6; }
+
+  .check-item { display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:10px; border:1px solid #e8e8e8; font-size:13px; cursor:pointer; transition:all .15s; user-select:none; }
+  .check-item:hover { background:#f8f9fa; }
+  .check-item.done { background:#f0fdf4; border-color:#86efac; }
+  .check-circle { width:22px; height:22px; border-radius:50%; border:2px solid #dee2e6; display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0; transition:all .2s; color:transparent; }
+  .check-item.done .check-circle { background:#22c55e; border-color:#22c55e; color:#fff; }
+
+  .terminal { background:#0d1117; border-radius:12px; overflow:hidden; font-family:'SFMono-Regular',Consolas,monospace; }
+  .terminal-bar { background:#161b22; padding:9px 14px; display:flex; align-items:center; gap:6px; border-bottom:1px solid #30363d; }
+  .terminal-body { padding:14px 18px; font-size:12.5px; line-height:2; }
+  .t-prompt { color:#3fb950; }
+  .t-cmd { color:#f0f6fc; }
+  .t-out { color:#8b949e; }
+
+  .file-tree { font-family:monospace; font-size:12.5px; color:#333; line-height:2; }
+  .file-tree .fld { color:#2563eb; font-weight:700; }
+  .file-tree .fl  { color:#555; }
+
+  .form-input { padding:7px 12px; border:1px solid #ced4da; border-radius:6px; font-size:13px; font-family:-apple-system,sans-serif; flex:1; min-width:0; }
+  .form-btn { background:#2563eb; color:#fff; border:none; border-radius:6px; padding:7px 16px; font-size:12.5px; font-weight:700; cursor:pointer; white-space:nowrap; }
+  .form-btn:hover { background:#1d4ed8; }
+  .form-btn.warn { background:#f59e0b; } .form-btn.warn:hover { background:#d97706; }
+  .form-btn.danger { background:#dc3545; } .form-btn.danger:hover { background:#bb2d3b; }
+
+  .pipe-diagram { display:flex; flex-direction:column; align-items:center; gap:2px; font-family:monospace; font-size:12.5px; color:#333; }
+  .pipe-node { background:#eff6ff; border:1px solid #bfdbfe; color:#1e40af; padding:6px 18px; border-radius:8px; font-weight:700; }
+  .pipe-arrow { color:#aaa; font-size:14px; }
+
+  .mpa-flow, .spa-flow { display:flex; align-items:center; gap:6px; flex-wrap:wrap; font-family:monospace; font-size:11.5px; }
+  .mpa-page { background:#fee2e2; border:1px solid #fca5a5; color:#991b1b; padding:5px 10px; border-radius:6px; }
+  .spa-page { background:#dcfce7; border:1px solid #86efac; color:#166534; padding:5px 10px; border-radius:6px; }
+  .flow-arrow { color:#aaa; }
+
+  .course-card { border:1px solid #e8e8e8; border-radius:12px; padding:14px 16px; background:#fff; transition:all .15s; }
+  .course-card:hover { box-shadow:0 2px 10px rgba(0,0,0,.06); transform:translateY(-2px); }
+  .course-card h4 { font-size:14px; font-weight:700; margin-bottom:4px; color:#1a1a1a; }
+  .course-card p { font-size:12px; color:#666; margin:2px 0; }
+  .course-empty { text-align:center; color:#aaa; font-size:12px; font-style:italic; padding:16px 0; }
+  .course-del { background:#dc3545; color:#fff; border:none; border-radius:6px; padding:4px 9px; font-size:10.5px; font-weight:700; cursor:pointer; margin-top:8px; }
+  .course-del:hover { background:#bb2d3b; }
+
+  .stat-card { background:#fff; border:1px solid #e8e8e8; border-radius:12px; padding:14px 16px; text-align:center; }
+  .stat-num { font-size:26px; font-weight:800; color:#2563eb; }
+  .stat-label { font-size:11.5px; color:#666; margin-top:2px; text-transform:uppercase; letter-spacing:.04em; }
+
+  .vdom-box { border:2px solid #dee2e6; border-radius:10px; padding:10px; display:flex; flex-wrap:wrap; gap:6px; justify-content:center; }
+  .vdom-cell { width:34px; height:34px; border-radius:6px; background:#e9ecef; display:flex; align-items:center; justify-content:center; font-size:10px; color:#999; transition:all .3s; }
+  .vdom-cell.hit { background:#2563eb; color:#fff; transform:scale(1.1); }
+
+  /* ══ DAYS 22-23 — FORMS & FETCH SPECIFIC ══ */
+  .obj-preview { background:#1e1e2e; border-radius:10px; padding:14px 18px; font-family:monospace; font-size:12.5px; color:#f8f8f2; line-height:1.8; }
+  .obj-preview .k { color:#ff79c6; } .obj-preview .v { color:#f1fa8c; }
+  .preview-card { border:1px solid #e8e8e8; border-radius:12px; padding:16px 18px; background:#fff; box-shadow:0 2px 10px rgba(0,0,0,.05); }
+  .preview-card .pc-name { font-size:16px; font-weight:800; color:#1a1a1a; }
+  .preview-card .pc-row { font-size:12.5px; color:#555; margin-top:4px; display:flex; align-items:center; gap:6px; }
+  .field-error { border:1px solid #fca5a5 !important; background:#fef2f2; }
+  .error-msg { font-size:11.5px; color:#dc2626; margin-top:-6px; }
+  .loading-spinner { display:inline-block; width:14px; height:14px; border:2px solid #dbeafe; border-top-color:#2563eb; border-radius:50%; animation:spin .7s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+
+  /* ══ DAYS 24-25 — ROUTER & CONTEXT SPECIFIC ══ */
+  .route-bar { display:flex; align-items:center; gap:8px; background:#f8f9fa; border:1px solid #e8e8e8; border-radius:8px; padding:8px 14px; font-family:monospace; font-size:12.5px; }
+  .navbar-mock { display:flex; gap:18px; background:#0f2027; padding:12px 18px; border-radius:10px; }
+  .navbar-mock a { color:#cbd5e1; font-size:12.5px; font-weight:600; text-decoration:none; padding:4px 2px; border-bottom:2px solid transparent; cursor:pointer; }
+  .navbar-mock a.active { color:#fff; border-bottom-color:#2563eb; }
+  .page-mock { border:1px solid #e0e0e0; border-radius:10px; padding:20px; text-align:center; background:#fff; min-height:70px; display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:700; color:#333; }
+  .ctx-tree { display:flex; flex-direction:column; align-items:center; gap:4px; font-family:monospace; font-size:12.5px; }
+  .ctx-node { background:#fff; border:1px solid #e8e8e8; border-radius:8px; padding:6px 16px; }
+  .ctx-node.provider { background:#ede9fe; border-color:#c4b5fd; color:#5b21b6; font-weight:700; }
+  .ctx-arrow { color:#aaa; font-size:12px; }
+  .auth-badge { display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border-radius:20px; font-size:12.5px; font-weight:700; }
+  .auth-in { background:#dcfce7; color:#166534; }
+  .auth-out { background:#fee2e2; color:#991b1b; }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <div class="top-bar">
+    <div>
+      <div class="top-bar-title" id="top-bar-title">MERN Stack Training · Day 24 · React Router &amp; Multi-Page Application</div>
+      <div class="top-bar-sub">SkillHub LMS becomes a real multi-page app with authentication</div>
+    </div>
+    <div class="slide-counter" id="slide-counter">1 / 16</div>
+  </div>
+
+  <!-- ═══ SLIDE 0 — HOME ═══ -->
+  <div class="slide active" id="slide-0">
+    <div class="slide-header">
+      <div style="width:44px;height:44px;background:#2563eb;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;flex-shrink:0"><i class="ti ti-route"></i></div>
+      <div>
+        <div class="slide-title">React Router &amp; Context API Authentication</div>
+        <div class="slide-subtitle">Days 24–25 · SkillHub LMS becomes a real, protected multi-page application</div>
+      </div>
+    </div>
+
+    <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:12px 16px;display:flex;gap:12px;align-items:flex-start">
+      <i class="ti ti-route" style="color:#2563eb;font-size:22px;flex-shrink:0;margin-top:1px"></i>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#1e40af;margin-bottom:4px">Where we left off (Day 23)</div>
+        <div style="font-size:12.5px;color:#1e40af;line-height:1.6">React became full stack — useEffect and Fetch API connected the LMS to Express &amp; MongoDB, with full CRUD, loading states, and error handling. But everything still lives inside one component, and there's no login yet.</div>
+      </div>
+    </div>
+
+    <div style="background:#fef9c3;border:1px solid #fde68a;border-radius:12px;padding:12px 16px;display:flex;gap:12px;align-items:flex-start">
+      <i class="ti ti-target-arrow" style="color:#d97706;font-size:22px;flex-shrink:0;margin-top:1px"></i>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#854d0e;margin-bottom:4px">Where we're going</div>
+        <div style="display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:#92400e">
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>React Router</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Multi-Page Navigation</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Context API</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Login / Logout</span>
+          <span><i class="ti ti-check" style="font-size:12px;margin-right:3px"></i>Protected Routes</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="home-grid">
+      <div class="home-card" onclick="goSlide(1)">
+        <span class="badge b-sky">Day 24</span>
+        <div class="home-card-title">React Router &amp; Multi-Page Application</div>
+        <div class="home-card-sub">BrowserRouter, Routes, Link, NavLink, dynamic routes, 404</div>
+      </div>
+      <div class="home-card" onclick="goSlide(7)">
+        <span class="badge b-cyan">Day 25</span>
+        <div class="home-card-title">Context API &amp; Authentication State</div>
+        <div class="home-card-sub">Global login state, protected routes, session persistence</div>
+      </div>
+    </div>
+
+    <div class="card card-gray" style="text-align:center">
+      <div style="font-size:12.5px;color:#666;margin-bottom:10px">The build-up across these 2 days</div>
+      <div style="font-family:monospace;font-size:12.5px;color:#333;line-height:2.1">
+        Single Component → React Router → Multi-Page LMS → Context API → Authentication → Protected Routes
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <div></div>
+      <button class="nav-btn primary" onclick="goSlide(1)">Start Day 24 <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 1 — WHY ROUTER? ═══ -->
+  <div class="slide" id="slide-1">
+    <div class="slide-header">
+      <span class="badge b-sky">Day 24 · Part 1</span>
+      <div><div class="slide-title">Why React Router?</div><div class="slide-subtitle">3 Hours · React Router Fundamentals</div></div>
+    </div>
+
+    <div class="card"><div class="section-label">Project Goal</div><div style="font-size:14px;font-weight:600">Convert SkillHub LMS from a Single Component into a Multi-Page Application.</div></div>
+
+    <div class="card card-gray">
+      <div class="section-label">start with a question</div>
+      <div style="font-size:13px;color:#333">Currently, everything is inside <code>App.jsx</code>. What happens if our project has 50 pages? <strong>Impossible to maintain.</strong> We need routing.</div>
+    </div>
+
+    <div class="section-label">install</div>
+    <div class="terminal">
+      <div class="terminal-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">terminal</span></div>
+      <div class="terminal-body">
+        <div><span class="t-prompt">$</span> <span class="t-cmd">npm install react-router-dom</span></div>
+      </div>
+    </div>
+
+    <div class="section-label">wrap the application — main.jsx</div>
+    <div class="editor">
+      <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">main.jsx</span></div>
+      <div class="editor-body" style="font-size:11.5px"><pre style="margin:0;white-space:pre-wrap"><span class="j-kw">import</span> { <span class="j-var">BrowserRouter</span> } <span class="j-kw">from</span> <span class="j-str">"react-router-dom"</span>;
+
+<span class="j-var">ReactDOM</span>.<span class="j-fn">createRoot</span>(<span class="j-var">document</span>.<span class="j-fn">getElementById</span>(<span class="j-str">"root"</span>)).<span class="j-fn">render</span>(
+  <span class="j-tag">&lt;BrowserRouter&gt;</span>
+    <span class="j-tag">&lt;App/&gt;</span>
+  <span class="j-tag">&lt;/BrowserRouter&gt;</span>
+);</pre></div>
+    </div>
+    <div class="info-box"><i class="ti ti-info-circle info-icon"></i><div class="info-text">BrowserRouter controls navigation — it listens to the URL and decides what to render, without ever asking the browser for a fresh page.</div></div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(0)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-1"></div>
+      <button class="nav-btn primary" onclick="goSlide(2)">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 2 — PAGES FOLDER & CONFIGURE ROUTES ═══ -->
+  <div class="slide" id="slide-2">
+    <div class="slide-header">
+      <span class="badge b-sky">Day 24 · Part 1</span>
+      <div><div class="slide-title">Pages Folder &amp; Configure Routes</div><div class="slide-subtitle">A professional folder structure, then wiring up the routes</div></div>
+    </div>
+
+    <div class="section-label">create pages folder</div>
+    <div class="card">
+      <div class="file-tree">
+        <div><span class="fld">src</span></div>
+        <div>└── <span class="fld">pages</span></div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;├── <span class="fl">Home.jsx</span></div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;├── <span class="fl">Courses.jsx</span></div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;├── <span class="fl">Students.jsx</span></div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;├── <span class="fl">Dashboard.jsx</span></div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;├── <span class="fl">About.jsx</span></div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;└── <span class="fl">Login.jsx</span></div>
+      </div>
+    </div>
+
+    <div class="section-label">configure routes</div>
+    <div class="editor">
+      <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">App.jsx</span></div>
+      <div class="editor-body" style="font-size:11.5px"><pre style="margin:0;white-space:pre-wrap"><span class="j-kw">import</span> { <span class="j-var">Routes</span>, <span class="j-var">Route</span> } <span class="j-kw">from</span> <span class="j-str">"react-router-dom"</span>;
+
+<span class="j-tag">&lt;Routes&gt;</span>
+  <span class="j-tag">&lt;Route</span> <span class="j-attr">path</span>=<span class="j-str">"/"</span> <span class="j-attr">element</span>={<span class="j-tag">&lt;Home/&gt;</span>} <span class="j-tag">/&gt;</span>
+  <span class="j-tag">&lt;Route</span> <span class="j-attr">path</span>=<span class="j-str">"/courses"</span> <span class="j-attr">element</span>={<span class="j-tag">&lt;Courses/&gt;</span>} <span class="j-tag">/&gt;</span>
+  <span class="j-tag">&lt;Route</span> <span class="j-attr">path</span>=<span class="j-str">"/students"</span> <span class="j-attr">element</span>={<span class="j-tag">&lt;Students/&gt;</span>} <span class="j-tag">/&gt;</span>
+  <span class="j-tag">&lt;Route</span> <span class="j-attr">path</span>=<span class="j-str">"/dashboard"</span> <span class="j-attr">element</span>={<span class="j-tag">&lt;Dashboard/&gt;</span>} <span class="j-tag">/&gt;</span>
+<span class="j-tag">&lt;/Routes&gt;</span></pre></div>
+    </div>
+    <div class="tip-box"><i class="ti ti-bulb tip-icon"></i><div class="tip-text">Visit /courses, then /dashboard in the browser's address bar — students immediately understand routing.</div></div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(1)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-2"></div>
+      <button class="nav-btn primary" onclick="goSlide(3)">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 3 — LINK: NO PAGE RELOAD (LIVE) ═══ -->
+  <div class="slide" id="slide-3">
+    <div class="slide-header">
+      <span class="badge b-sky">Day 24 · Part 2</span>
+      <div><div class="slide-title">Link — Navigation Without Reload</div><div class="slide-subtitle">Click the nav links below — the page swaps instantly, no reload</div></div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card card-gray">
+        <div class="section-label">wrong in react</div>
+        <div style="font-family:monospace;font-size:12.5px;color:#991b1b">&lt;a href=""&gt;Courses&lt;/a&gt;</div>
+      </div>
+      <div class="card" style="background:#eff6ff;border-color:#bfdbfe">
+        <div class="section-label">use this instead</div>
+        <div style="font-family:monospace;font-size:12.5px;color:#1e40af">&lt;Link to="/courses"&gt;Courses&lt;/Link&gt;</div>
+      </div>
+    </div>
+
+    <div class="section-label">try it live — a reusable Navbar</div>
+    <div class="navbar-mock" id="live-navbar">
+      <a onclick="goRoute('/')" data-path="/">Home</a>
+      <a onclick="goRoute('/courses')" data-path="/courses">Courses</a>
+      <a onclick="goRoute('/students')" data-path="/students">Students</a>
+      <a onclick="goRoute('/dashboard')" data-path="/dashboard">Dashboard</a>
+    </div>
+    <div class="page-mock" id="live-page-mock">Home Page</div>
+    <div class="route-bar"><i class="ti ti-link" style="color:#888"></i> <span id="live-url">localhost:5173/</span></div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(2)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-3"></div>
+      <button class="nav-btn primary" onclick="goSlide(4)">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 4 — NAVLINK & useNavigate ═══ -->
+  <div class="slide" id="slide-4">
+    <div class="slide-header">
+      <span class="badge b-sky">Day 24 · Part 2</span>
+      <div><div class="slide-title">NavLink &amp; useNavigate()</div><div class="slide-subtitle">Highlight the active page, and redirect from code</div></div>
+    </div>
+
+    <div class="editor">
+      <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">Navbar.jsx</span></div>
+      <div class="editor-body" style="font-size:11.5px"><pre style="margin:0;white-space:pre-wrap"><span class="j-tag">&lt;NavLink</span>
+  <span class="j-attr">to</span>=<span class="j-str">"/courses"</span>
+  <span class="j-attr">className</span>={({<span class="j-var">isActive</span>}) <span class="j-op">=></span> <span class="j-var">isActive</span> <span class="j-op">?</span> <span class="j-str">"active"</span> <span class="j-op">:</span> <span class="j-str">""</span>}
+<span class="j-tag">&gt;</span>
+  Courses
+<span class="j-tag">&lt;/NavLink&gt;</span></pre></div>
+    </div>
+    <div class="tip-box"><i class="ti ti-bulb tip-icon"></i><div class="tip-text">Click a link on the previous slide's Navbar again — that's exactly the active state NavLink gives you automatically.</div></div>
+
+    <div class="section-label">useNavigate() — redirecting from code</div>
+    <div class="editor">
+      <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">Login.jsx</span></div>
+      <div class="editor-body" style="font-size:11.5px"><pre style="margin:0;white-space:pre-wrap"><span class="j-kw">const</span> <span class="j-var">navigate</span> <span class="j-op">=</span> <span class="j-fn">useNavigate</span>();
+
+<span class="j-com">// after a successful login</span>
+<span class="j-fn">navigate</span>(<span class="j-str">"/dashboard"</span>);</pre></div>
+    </div>
+    <div class="card" style="text-align:center">
+      <button class="form-btn" onclick="simulateNavigate()">Simulate Login</button>
+      <div style="margin-top:10px;font-size:13px;color:#333" id="navigate-demo-result"></div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(3)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-4"></div>
+      <button class="nav-btn primary" onclick="goSlide(5)">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 5 — DYNAMIC ROUTES & 404 ═══ -->
+  <div class="slide" id="slide-5">
+    <div class="slide-header">
+      <span class="badge b-sky">Day 24 · Part 2</span>
+      <div><div class="slide-title">Dynamic Routes &amp; the 404 Page</div><div class="slide-subtitle">One route template, many URLs — plus a catch-all for the rest</div></div>
+    </div>
+
+    <div class="editor">
+      <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">App.jsx</span></div>
+      <div class="editor-body" style="font-size:11.5px"><pre style="margin:0;white-space:pre-wrap"><span class="j-tag">&lt;Route</span> <span class="j-attr">path</span>=<span class="j-str">"/course/:id"</span> <span class="j-attr">element</span>={<span class="j-tag">&lt;CourseDetails/&gt;</span>} <span class="j-tag">/&gt;</span>
+
+<span class="j-com">// visit /course/101</span>
+<span class="j-kw">import</span> { <span class="j-var">useParams</span> } <span class="j-kw">from</span> <span class="j-str">"react-router-dom"</span>;
+<span class="j-kw">const</span> {<span class="j-var">id</span>} <span class="j-op">=</span> <span class="j-fn">useParams</span>();
+<span class="j-com">// id === "101"</span></pre></div>
+    </div>
+
+    <div class="section-label">try it live</div>
+    <div class="card">
+      <div class="route-bar" style="margin-bottom:10px"><i class="ti ti-link" style="color:#888"></i> localhost:5173/course/<input id="course-id-input" value="101" style="width:60px;border:1px solid #ced4da;border-radius:4px;padding:2px 6px;font-family:monospace" oninput="updateParamDemo()"></div>
+      <div class="page-mock" id="param-demo-output">useParams() → id = "101"</div>
+    </div>
+
+    <div class="section-label">the 404 catch-all</div>
+    <div class="editor">
+      <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">App.jsx</span></div>
+      <div class="editor-body" style="font-size:11.5px"><pre style="margin:0;white-space:pre-wrap"><span class="j-tag">&lt;Route</span> <span class="j-attr">path</span>=<span class="j-str">"*"</span> <span class="j-attr">element</span>={<span class="j-tag">&lt;NotFound/&gt;</span>} <span class="j-tag">/&gt;</span></pre></div>
+    </div>
+    <div class="info-box"><i class="ti ti-info-circle info-icon"></i><div class="info-text">The "*" path matches any URL that didn't match an earlier route — always place it last, so it acts as a true catch-all.</div></div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(4)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-5"></div>
+      <button class="nav-btn primary" onclick="goSlide(6)">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 6 — MINI CHALLENGE, ASSIGNMENT & RECAP ═══ -->
+  <div class="slide" id="slide-6">
+    <div class="slide-header">
+      <span class="badge b-sky">Day 24 · Recap</span>
+      <div><div class="slide-title">Mini Challenge, Assignment &amp; Day 24 Recap</div><div class="slide-subtitle">End Result — Professional Navigation</div></div>
+    </div>
+
+    <div class="activity-box"><div class="activity-title"><i class="ti ti-puzzle"></i> Mini Challenge</div><div style="font-size:13px;color:#3730a3">Students build a Student Profile Page at <code>/student/:id</code>.</div></div>
+    <div class="challenge-box">
+      <div class="challenge-title"><i class="ti ti-flag"></i> Assignment</div>
+      <div style="font-size:13px;color:#9f1239">Create Home, Courses, Students, Dashboard, About, Login and a 404 page, wired together with a Responsive Navbar using React Router.</div>
+    </div>
+
+    <div class="card" style="text-align:center">
+      <div style="font-family:monospace;font-size:13px;color:#333">Multi-Page React LMS <span style="color:#0891b2">↓</span> React Router <span style="color:#0891b2">↓</span> Professional Navigation</div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(5)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-6"></div>
+      <button class="nav-btn primary" onclick="goSlide(7)">Start Day 25 <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 7 — THE PROP DRILLING PROBLEM ═══ -->
+  <div class="slide" id="slide-7">
+    <div class="slide-header">
+      <span class="badge b-cyan">Day 25 · Part 1</span>
+      <div><div class="slide-title">The Prop Drilling Problem</div><div class="slide-subtitle">3 Hours · Context API &amp; Authentication State Management</div></div>
+    </div>
+
+    <div class="card"><div class="section-label">Project Goal</div><div style="font-size:14px;font-weight:600">Implement Authentication State using Context API.</div></div>
+
+    <div class="card card-gray">
+      <div class="section-label">the current problem</div>
+      <div style="font-size:13px;color:#333;line-height:1.8">Navbar needs the user's name. Dashboard needs it. Profile needs it too. Passing it down manually means threading one prop through every layer in between:</div>
+    </div>
+
+    <div class="card" style="text-align:center">
+      <div style="font-family:monospace;font-size:12.5px;color:#333;line-height:2">App <span style="color:#aaa">↓</span> Navbar <span style="color:#aaa">↓</span> Dashboard <span style="color:#aaa">↓</span> Profile <span style="color:#aaa">↓</span> Settings</div>
+    </div>
+    <div class="warn-box"><i class="ti ti-alert-triangle" style="color:#d97706;font-size:18px;flex-shrink:0;margin-top:1px"></i><div class="warn-text"><strong>Prop Drilling:</strong> components in the middle (Dashboard, Profile) have to accept and pass along a prop they never actually use themselves, just so it reaches the bottom.</div></div>
+
+    <div class="success-box"><i class="ti ti-bulb" style="color:#16a34a;font-size:18px;flex-shrink:0;margin-top:1px"></i><div class="success-text"><strong>Solution — Context API:</strong> put the data in one shared place that every component can reach directly, no matter how deep it is.</div></div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(6)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-7"></div>
+      <button class="nav-btn primary" onclick="goSlide(8)">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 8 — CONTEXT API SOLUTION ═══ -->
+  <div class="slide" id="slide-8">
+    <div class="slide-header">
+      <span class="badge b-cyan">Day 25 · Part 1</span>
+      <div><div class="slide-title">Context API — createContext, Provider &amp; useContext</div><div class="slide-subtitle">One shared value, reachable from anywhere</div></div>
+    </div>
+
+    <div class="card">
+      <div class="ctx-tree">
+        <div class="ctx-node provider">AuthContext.Provider (value = user)</div>
+        <div class="ctx-arrow">↓</div>
+        <div class="ctx-node">Navbar</div>
+        <div class="ctx-arrow">↓</div>
+        <div class="ctx-node">Dashboard</div>
+        <div class="ctx-arrow">↓</div>
+        <div class="ctx-node">Profile — useContext(AuthContext)</div>
+      </div>
+    </div>
+
+    <div class="section-label">create context — context/AuthContext.jsx</div>
+    <div class="editor">
+      <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">AuthContext.jsx</span></div>
+      <div class="editor-body" style="font-size:11.5px"><pre style="margin:0;white-space:pre-wrap"><span class="j-kw">import</span> { <span class="j-var">createContext</span> } <span class="j-kw">from</span> <span class="j-str">"react"</span>;
+<span class="j-kw">export const</span> <span class="j-var">AuthContext</span> <span class="j-op">=</span> <span class="j-fn">createContext</span>();
+
+<span class="j-com">// wrap the app</span>
+<span class="j-tag">&lt;AuthContext.Provider</span> <span class="j-attr">value</span>={{<span class="j-var">user</span>}}<span class="j-tag">&gt;</span>
+  <span class="j-tag">&lt;App/&gt;</span>
+<span class="j-tag">&lt;/AuthContext.Provider&gt;</span>
+
+<span class="j-com">// read it, anywhere</span>
+<span class="j-kw">const</span> {<span class="j-var">user</span>} <span class="j-op">=</span> <span class="j-fn">useContext</span>(<span class="j-var">AuthContext</span>);
+<span class="j-tag">&lt;h2&gt;</span>Welcome {<span class="j-var">user</span>}<span class="j-tag">&lt;/h2&gt;</span></pre></div>
+    </div>
+    <div class="tip-box"><i class="ti ti-bulb tip-icon"></i><div class="tip-text">Students now understand Global State — one Provider at the top, useContext anywhere below it, no manual prop passing required.</div></div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(7)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-8"></div>
+      <button class="nav-btn primary" onclick="goSlide(9)">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 9 — AUTHENTICATION FLOW (LIVE) ═══ -->
+  <div class="slide" id="slide-9">
+    <div class="slide-header">
+      <span class="badge b-cyan">Day 25 · Part 2</span>
+      <div><div class="slide-title">Authentication Flow</div><div class="slide-subtitle">Log in below — watch the Navbar update automatically, everywhere</div></div>
+    </div>
+
+    <div class="editor">
+      <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">App.jsx</span></div>
+      <div class="editor-body" style="font-size:11.5px"><pre style="margin:0;white-space:pre-wrap"><span class="j-kw">const</span> [<span class="j-var">user</span>, <span class="j-var">setUser</span>] <span class="j-op">=</span> <span class="j-fn">useState</span>(<span class="j-kw">null</span>);
+
+<span class="j-com">// on login</span>
+<span class="j-fn">setUser</span>({ <span class="j-prop">name</span>: <span class="j-str">"Rahul"</span> });
+
+<span class="j-com">// on logout</span>
+<span class="j-fn">setUser</span>(<span class="j-kw">null</span>);</pre></div>
+    </div>
+
+    <div class="section-label">try it live</div>
+    <div class="card">
+      <div class="navbar-mock" style="margin-bottom:12px">
+        <a>Home</a><a>Courses</a><a>Dashboard</a>
+        <span id="auth-navbar-greeting" style="margin-left:auto;color:#cbd5e1;font-size:12.5px">Not Logged In</span>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:center">
+        <button class="form-btn" onclick="authLogin()">Login as Rahul</button>
+        <button class="form-btn danger" onclick="authLogout()">Logout</button>
+      </div>
+    </div>
+    <div class="tip-box"><i class="ti ti-bulb tip-icon"></i><div class="tip-text">Students love this: no props were passed to the Navbar directly — it read user straight from Context, and updated the instant setUser ran.</div></div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(8)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-9"></div>
+      <button class="nav-btn primary" onclick="goSlide(10)">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 10 — PROTECTED ROUTE (LIVE) ═══ -->
+  <div class="slide" id="slide-10">
+    <div class="slide-header">
+      <span class="badge b-cyan">Day 25 · Part 2</span>
+      <div><div class="slide-title">Protected Route</div><div class="slide-subtitle">Dashboard should be unreachable without logging in first</div></div>
+    </div>
+
+    <div class="editor">
+      <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">ProtectedRoute.jsx</span></div>
+      <div class="editor-body" style="font-size:11.5px"><pre style="margin:0;white-space:pre-wrap"><span class="j-kw">function</span> <span class="j-fn">ProtectedRoute</span>({<span class="j-var">children</span>}){
+  <span class="j-kw">if</span>(<span class="j-op">!</span><span class="j-var">user</span>){
+    <span class="j-kw">return</span> <span class="j-tag">&lt;Navigate</span> <span class="j-attr">to</span>=<span class="j-str">"/login"</span> <span class="j-tag">/&gt;</span>
+  }
+  <span class="j-kw">return</span> <span class="j-var">children</span>;
+}
+
+<span class="j-com">// wrap Dashboard</span>
+<span class="j-tag">&lt;ProtectedRoute&gt;</span>
+  <span class="j-tag">&lt;Dashboard/&gt;</span>
+<span class="j-tag">&lt;/ProtectedRoute&gt;</span></pre></div>
+    </div>
+
+    <div class="section-label">try it live — same login state as the previous slide</div>
+    <div class="card" style="text-align:center">
+      <div style="margin-bottom:10px" id="protected-auth-status"><span class="auth-badge auth-out">Not Logged In</span></div>
+      <button class="form-btn" onclick="goSlide(9)">Go log in first</button>
+      <div style="margin-top:14px" id="protected-route-result"></div>
+      <button class="form-btn" style="margin-top:10px" onclick="tryVisitDashboard()">Visit /dashboard</button>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(9)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-10"></div>
+      <button class="nav-btn primary" onclick="goSlide(11)">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 11 — SESSION PERSISTENCE ═══ -->
+  <div class="slide" id="slide-11">
+    <div class="slide-header">
+      <span class="badge b-cyan">Day 25 · Part 2</span>
+      <div><div class="slide-title">Session Persistence</div><div class="slide-subtitle">Stay logged in even after refreshing the browser</div></div>
+    </div>
+
+    <div class="editor">
+      <div class="editor-bar"><div class="e-dot e-red"></div><div class="e-dot e-yellow"></div><div class="e-dot e-green"></div><span class="e-label">App.jsx</span></div>
+      <div class="editor-body" style="font-size:11.5px"><pre style="margin:0;white-space:pre-wrap"><span class="j-com">// on login</span>
+<span class="j-var">localStorage</span>.<span class="j-fn">setItem</span>(<span class="j-str">"user"</span>, <span class="j-var">JSON</span>.<span class="j-fn">stringify</span>(<span class="j-var">userData</span>));
+
+<span class="j-com">// restore on load</span>
+<span class="j-fn">useEffect</span>(() <span class="j-op">=></span> {
+  <span class="j-kw">const</span> <span class="j-var">saved</span> <span class="j-op">=</span> <span class="j-var">localStorage</span>.<span class="j-fn">getItem</span>(<span class="j-str">"user"</span>);
+  <span class="j-kw">if</span>(<span class="j-var">saved</span>) <span class="j-fn">setUser</span>(<span class="j-var">JSON</span>.<span class="j-fn">parse</span>(<span class="j-var">saved</span>));
+}, []);</pre></div>
+    </div>
+
+    <div class="section-label">try it live</div>
+    <div class="card" style="text-align:center">
+      <div style="display:flex;gap:8px;justify-content:center;margin-bottom:10px">
+        <button class="form-btn" onclick="sessionLogin()">Login &amp; Save to localStorage</button>
+        <button class="form-btn warn" onclick="sessionRefresh()">Simulate Refresh</button>
+      </div>
+      <div class="ls-box" id="session-ls-box"><div class="ls-empty-msg">localStorage is empty</div></div>
+    </div>
+    <div class="success-box"><i class="ti ti-sparkles" style="color:#16a34a;font-size:18px;flex-shrink:0;margin-top:1px"></i><div class="success-text">Students remain logged in after refresh — exactly the same "save it → load it" pattern used for Local Storage and students.json earlier in the course.</div></div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(10)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-11"></div>
+      <button class="nav-btn primary" onclick="goSlide(12)">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 12 — DASHBOARD ═══ -->
+  <div class="slide" id="slide-12">
+    <div class="slide-header">
+      <span class="badge b-cyan">Day 25 · Part 2</span>
+      <div><div class="slide-title">Dashboard</div><div class="slide-subtitle">Logged-in user, totals, and a logout button — all in one place</div></div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div style="font-size:15px;font-weight:700" id="dash-user-greeting">Welcome, Guest</div>
+        <button class="form-btn danger" onclick="dashLogout()">Logout</button>
+      </div>
+      <div class="grid-2">
+        <div class="stat-card"><div class="stat-num">42</div><div class="stat-label">Total Courses</div></div>
+        <div class="stat-card"><div class="stat-num">128</div><div class="stat-label">Total Students</div></div>
+      </div>
+      <div style="margin-top:12px;text-align:center">
+        <button class="form-btn" onclick="dashLogin()">Login as Rahul</button>
+      </div>
+    </div>
+
+    <div class="activity-box"><div class="activity-title"><i class="ti ti-puzzle"></i> Mini Challenge</div><div style="font-size:13px;color:#3730a3">Students add Profile, Settings and Notifications, all reading data from the same Context.</div></div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(11)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-12"></div>
+      <button class="nav-btn primary" onclick="goSlide(13)">Next <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 13 — ASSIGNMENT & FINAL PROJECT PROGRESS ═══ -->
+  <div class="slide" id="slide-13">
+    <div class="slide-header">
+      <span class="badge b-cyan">Day 25 · Recap</span>
+      <div><div class="slide-title">Assignment &amp; Final Project Progress</div><div class="slide-subtitle">Complete Authentication Module</div></div>
+    </div>
+
+    <div class="challenge-box">
+      <div class="challenge-title"><i class="ti ti-flag"></i> Assignment — Complete Authentication Module</div>
+      <div style="font-size:13px;color:#9f1239;line-height:1.9">
+        ✔ Login &nbsp;&nbsp; ✔ Logout &nbsp;&nbsp; ✔ Context API<br>
+        ✔ Protected Dashboard &nbsp;&nbsp; ✔ Session Restore<br>
+        ✔ User Greeting &nbsp;&nbsp; ✔ Protected Routes
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-label">Final Project Progress — SkillHub LMS</div>
+      <div class="pipe-diagram">
+        <div class="pipe-node">Frontend</div><div class="pipe-arrow">↓</div>
+        <div class="pipe-node" style="background:#e0f2fe;border-color:#7dd3fc;color:#075985">React Router</div><div class="pipe-arrow">↓</div>
+        <div class="pipe-node" style="background:#ede9fe;border-color:#c4b5fd;color:#5b21b6">Context API</div><div class="pipe-arrow">↓</div>
+        <div class="pipe-node" style="background:#ede9fe;border-color:#c4b5fd;color:#5b21b6">Authentication</div><div class="pipe-arrow">↓</div>
+        <div class="pipe-node" style="background:#ede9fe;border-color:#c4b5fd;color:#5b21b6">Protected Routes</div><div class="pipe-arrow">↓</div>
+        <div class="pipe-node" style="background:#dcfce7;border-color:#86efac;color:#166534">Dashboard</div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(12)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-13"></div>
+      <button class="nav-btn primary" onclick="goSlide(14)">Take the Quiz <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 14 — QUIZ ═══ -->
+  <div class="slide" id="slide-14">
+    <div class="slide-header">
+      <span class="badge b-indigo">Check Your Understanding</span>
+      <div><div class="slide-title">Days 24–25 Quiz</div><div class="slide-subtitle">Answer each question — feedback appears instantly</div></div>
+    </div>
+    <div id="quiz-container"></div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(13)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-14"></div>
+      <button class="nav-btn primary" onclick="goSlide(15)">Finish <i class="ti ti-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 15 — WRAP UP ═══ -->
+  <div class="slide" id="slide-15">
+    <div class="slide-header">
+      <span class="badge b-green">Wrap-Up</span>
+      <div><div class="slide-title">SkillHub LMS Is Now a Real, Protected App</div><div class="slide-subtitle">Multiple pages, global auth state, and routes that respect login status</div></div>
+    </div>
+    <div class="success-box"><i class="ti ti-trophy" style="color:#16a34a;font-size:18px"></i><div class="success-text">You went from one giant component to a fully routed multi-page application with Context-powered authentication, protected routes, and a session that survives a refresh. This is the shape of a real production frontend.</div></div>
+    <div class="grid-2">
+      <div class="home-card" onclick="goSlide(1)"><span class="badge b-sky">Day 24</span><div class="home-card-title">React Router &amp; Multi-Page Application</div></div>
+      <div class="home-card" onclick="goSlide(7)"><span class="badge b-cyan">Day 25</span><div class="home-card-title">Context API &amp; Authentication</div></div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="goSlide(14)"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="progress-dots" id="dots-15"></div>
+      <button class="nav-btn primary" onclick="goSlide(0)"><i class="ti ti-home"></i> Back to Home</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  var current = 0, total = 16, quizInit = false;
+  var dayTitles = {0:"Overview",1:"Day 24 · React Router & Multi-Page Application",2:"Day 24 · React Router & Multi-Page Application",3:"Day 24 · React Router & Multi-Page Application",4:"Day 24 · React Router & Multi-Page Application",5:"Day 24 · React Router & Multi-Page Application",6:"Day 24 · React Router & Multi-Page Application",7:"Day 25 · Context API & Authentication State Management",8:"Day 25 · Context API & Authentication State Management",9:"Day 25 · Context API & Authentication State Management",10:"Day 25 · Context API & Authentication State Management",11:"Day 25 · Context API & Authentication State Management",12:"Day 25 · Context API & Authentication State Management",13:"Day 25 · Context API & Authentication State Management",14:"Quiz",15:"Wrap-Up"};
+
+  // ── Slide 3 — Link / route demo ──
+  var pageContent = { '/': 'Home Page', '/courses': 'Courses Page', '/students': 'Students Page', '/dashboard': 'Dashboard Page' };
+  function goRoute(path) {
+    document.getElementById('live-page-mock').textContent = pageContent[path];
+    document.getElementById('live-url').textContent = 'localhost:5173' + path;
+    document.querySelectorAll('#live-navbar a').forEach(function(a) {
+      a.classList.toggle('active', a.getAttribute('data-path') === path);
+    });
+  }
+  goRoute('/');
+
+  // ── Slide 4 — useNavigate demo ──
+  function simulateNavigate() {
+    document.getElementById('navigate-demo-result').innerHTML =
+      '<span style="color:#16a34a;font-weight:700"><i class="ti ti-check"></i> navigate("/dashboard") called — redirected to the Dashboard page, no manual link click needed.</span>';
+  }
+
+  // ── Slide 5 — useParams demo ──
+  function updateParamDemo() {
+    var id = document.getElementById('course-id-input').value || '';
+    document.getElementById('param-demo-output').textContent = 'useParams() → id = "' + id + '"';
+  }
+
+  // ── Slide 9 — Auth login/logout (also drives slides 10, 12 via shared state) ──
+  var authUser = null;
+  function renderAuthState() {
+    var greet = document.getElementById('auth-navbar-greeting');
+    if (greet) greet.textContent = authUser ? ('Welcome, ' + authUser.name) : 'Not Logged In';
+
+    var status = document.getElementById('protected-auth-status');
+    if (status) status.innerHTML = authUser
+      ? '<span class="auth-badge auth-in"><i class="ti ti-lock-open"></i> Logged In as ' + authUser.name + '</span>'
+      : '<span class="auth-badge auth-out"><i class="ti ti-lock"></i> Not Logged In</span>';
+
+    var dashGreeting = document.getElementById('dash-user-greeting');
+    if (dashGreeting) dashGreeting.textContent = authUser ? ('Welcome, ' + authUser.name) : 'Welcome, Guest';
+  }
+  function authLogin() { authUser = { name: 'Rahul' }; renderAuthState(); }
+  function authLogout() { authUser = null; renderAuthState(); document.getElementById('protected-route-result').innerHTML = ''; }
+  function dashLogin() { authUser = { name: 'Rahul' }; renderAuthState(); }
+  function dashLogout() { authUser = null; renderAuthState(); }
+  renderAuthState();
+
+  // ── Slide 10 — protected route ──
+  function tryVisitDashboard() {
+    var result = document.getElementById('protected-route-result');
+    if (authUser) {
+      result.innerHTML = '<div class="success-box"><i class="ti ti-check" style="color:#16a34a;font-size:18px"></i><div class="success-text">user exists — Dashboard renders normally.</div></div>';
+    } else {
+      result.innerHTML = '<div class="warn-box"><i class="ti ti-alert-triangle" style="color:#d97706;font-size:18px"></i><div class="warn-text">!user is true — &lt;Navigate to="/login"/&gt; redirected you away before Dashboard ever rendered.</div></div>';
+    }
+  }
+
+  // ── Slide 11 — session persistence demo ──
+  var sessionSaved = null;
+  function sessionLogin() {
+    sessionSaved = { name: 'Rahul' };
+    document.getElementById('session-ls-box').innerHTML =
+      '<div class="ls-row"><span class="ls-key">user</span><span class="ls-arrow">→</span><span class="ls-val">' + JSON.stringify(sessionSaved) + '</span></div>';
+  }
+  function sessionRefresh() {
+    var box = document.getElementById('session-ls-box');
+    if (!sessionSaved) {
+      box.innerHTML = '<div class="ls-empty-msg">localStorage is empty — nothing to restore</div>';
+      return;
+    }
+    box.innerHTML =
+      '<div class="ls-row"><span class="ls-key">user</span><span class="ls-arrow">→</span><span class="ls-val">' + JSON.stringify(sessionSaved) + '</span></div>' +
+      '<div style="color:#3fb950;font-size:11.5px;margin-top:6px">✓ useEffect ran on load, found this in localStorage, and called setUser() — still logged in after "refresh".</div>';
+  }
+
+  // ── Quiz ──
+  var quizData = [
+    { q: "What problem does wrapping the app in <BrowserRouter> solve?", opts: ["It styles the navbar automatically", "It lets React listen to and control the browser's URL, so navigation can swap components without a full page reload", "It connects the app to a database", "It replaces the need for components entirely"], ans: 1, exp: "BrowserRouter is what makes client-side routing possible — it watches the URL and tells Routes/Route what to render, without asking the server for a new page." },
+    { q: "In <Route path=\"/courses\" element={<Courses/>} />, what determines whether <Courses/> gets rendered?", opts: ["Whether the user is logged in", "Whether the current browser URL matches the path exactly", "Whether Courses.jsx was imported first", "It always renders regardless of the URL"], ans: 1, exp: "Route compares its path prop against the current URL. When they match, its element is rendered; when they don't, nothing from that Route shows up." },
+    { q: "Why does React Router recommend <Link to=\"/courses\"> instead of <a href=\"/courses\">?", opts: ["Link only works with numbers", "<a> triggers a full browser page reload, wiping out React's state; Link intercepts the click and swaps the view without reloading", "There's no real difference, it's just a naming convention", "Link automatically validates the destination page"], ans: 1, exp: "A plain <a> tag asks the browser for an entirely fresh page load. Link uses React Router's internal navigation instead, keeping the SPA experience intact." },
+    { q: "In <Route path=\"/course/:id\" element={<CourseDetails/>} />, what does the leading colon in :id signify?", opts: ["A typo that should be removed", "It marks id as a dynamic URL segment — visiting /course/101 makes id equal to \"101\", retrievable with useParams()", "It means the route requires authentication", "It's a comment and has no effect"], ans: 1, exp: "The colon marks a route parameter. Whatever value appears in that position of the URL becomes accessible inside the component via useParams()." },
+    { q: "What specific problem does the Context API solve that plain props don't?", opts: ["It makes components render faster", "It avoids prop drilling — passing a value manually through several layers of components that don't actually need it themselves, just to reach a deeply nested one", "It replaces useState entirely for every use case", "It's required for any component with more than one prop"], ans: 1, exp: "Context lets any component below a Provider read a shared value directly via useContext, without every component in between having to accept and re-pass that prop." },
+    { q: "Inside function ProtectedRoute({children}) { if(!user){ return <Navigate to=\"/login\"/> } return children; }, what happens when user is null?", opts: ["The component still renders its children normally", "The check !user is true, so the function returns a redirect to /login instead of rendering the protected children at all", "It throws an error and crashes the app", "It logs the user in automatically"], ans: 1, exp: "!user is true when there's no logged-in user, so the function short-circuits and returns a redirect — the protected content (e.g. Dashboard) never gets a chance to render." },
+    { q: "Why does session persistence require both localStorage.setItem() on login AND a useEffect that runs on page load?", opts: ["setItem alone is enough — useEffect is optional decoration", "setItem saves the data so it survives a refresh, but only the useEffect that runs on load actually reads it back out and calls setUser() to restore the logged-in state", "useEffect is what saves the data; setItem only deletes it", "Neither is actually necessary for staying logged in"], ans: 1, exp: "Saving alone doesn't restore anything automatically — without the useEffect reading localStorage and calling setUser() on load, the app would still start with user as null every refresh, regardless of what was saved." }
+  ];
+  function renderQuiz() {
+    var c = document.getElementById('quiz-container'); c.innerHTML = '';
+    quizData.forEach(function(q, i) {
+      var d = document.createElement('div'); d.style.cssText = 'margin-bottom:18px';
+      d.innerHTML = '<div style="font-size:13px;font-weight:600;margin-bottom:6px">'+(i+1)+'. '+q.q+'</div>';
+      q.opts.forEach(function(opt, j) {
+        var btn = document.createElement('button'); btn.className = 'quiz-option';
+        btn.innerHTML = String.fromCharCode(65+j)+'. '+opt;
+        btn.onclick = function() {
+          var btns = d.querySelectorAll('.quiz-option');
+          if (btns[0].disabled) return;
+          btns.forEach(function(b,k){ b.disabled=true; if(k===q.ans) b.classList.add('correct'); else if(k===j) b.classList.add('wrong'); });
+          var fb = d.querySelector('.quiz-feedback');
+          fb.innerHTML = (j===q.ans?'✅ Correct! ':'❌ Not quite. ')+q.exp;
+          fb.className = 'quiz-feedback '+(j===q.ans?'correct':'wrong');
+        };
+        d.appendChild(btn);
+      });
+      var fb = document.createElement('div'); fb.className = 'quiz-feedback'; d.appendChild(fb);
+      c.appendChild(d);
+    });
+  }
+
+  function goSlide(n) {
+    document.getElementById('slide-'+current).classList.remove('active');
+    current = n;
+    document.getElementById('slide-'+current).classList.add('active');
+    updateDots();
+    document.getElementById('slide-counter').textContent = (current+1)+' / '+total;
+    document.getElementById('top-bar-title').textContent = 'MERN Stack Training · ' + dayTitles[current];
+    if (n===14 && !quizInit) { renderQuiz(); quizInit=true; }
+    window.scrollTo(0,0);
+  }
+  function updateDots() {
+    for (var s=0; s<total; s++) {
+      var el = document.getElementById('dots-'+s); if (!el) continue;
+      el.innerHTML = '';
+      for (var d=0; d<total; d++) {
+        var dot = document.createElement('div');
+        dot.className = 'dot'+(d===current?' active':'');
+        el.appendChild(dot);
+      }
+    }
+  }
+  updateDots();
+</script>
+</body>
+</html>
